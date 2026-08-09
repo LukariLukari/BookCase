@@ -183,7 +183,7 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
                   </div>
                   
                   <div className="flex-grow mt-6">
-                    <h3 className="text-sm font-bold mb-2 text-black border-b border-gray-100 pb-2">Summary (AI Extracted)</h3>
+                    <h3 className="text-sm font-bold mb-2 text-black border-b border-gray-100 pb-2">Summary</h3>
                     <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-wrap">
                       {selectedBook.summary || "No summary available for this book."}
                     </p>
