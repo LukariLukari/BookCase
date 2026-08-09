@@ -246,30 +246,46 @@ export default function AdminPage() {
       {/* Edit Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-           <div className="bg-white rounded-3xl w-full max-w-lg p-8 shadow-2xl relative">
-              <button onClick={() => setIsEditModalOpen(false)} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-500 hover:text-black"><X size={16}/></button>
-              <h3 className="text-xl font-bold mb-6 text-black">Edit Book</h3>
-              <div className="space-y-4">
-                <div><label className="text-title text-sm block mb-1">Title</label><input type="text" className="input-primary" value={editForm.title} onChange={e=>setEditForm({...editForm, title: e.target.value})} /></div>
-                <div><label className="text-title text-sm block mb-1">Author</label><input type="text" className="input-primary" value={editForm.author} onChange={e=>setEditForm({...editForm, author: e.target.value})} /></div>
-                <div><label className="text-title text-sm block mb-1">Genre</label><input type="text" className="input-primary" value={editForm.genre} onChange={e=>setEditForm({...editForm, genre: e.target.value})} /></div>
-                <div><label className="text-title text-sm block mb-1 text-orange-500">Google Drive Source Link</label><input type="text" className="input-primary border-orange-200" placeholder="Optional. If provided, file downloads from this link" value={editForm.external_url} onChange={e=>setEditForm({...editForm, external_url: e.target.value})} /></div>
-                <div>
-                  <label className="text-title text-sm block mb-1">Cover Image</label>
-                  <div className="flex gap-2">
+           <div className="bg-white rounded-3xl w-full max-w-4xl p-8 shadow-2xl relative">
+              <button onClick={() => setIsEditModalOpen(false)} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-500 hover:text-black transition-colors"><X size={16}/></button>
+              <h3 className="text-2xl font-extrabold mb-8 text-black">Edit Book</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left Column - Details */}
+                <div className="space-y-5">
+                  <div><label className="text-title text-sm block mb-1.5">Title</label><input type="text" className="input-primary" value={editForm.title} onChange={e=>setEditForm({...editForm, title: e.target.value})} /></div>
+                  <div><label className="text-title text-sm block mb-1.5">Author</label><input type="text" className="input-primary" value={editForm.author} onChange={e=>setEditForm({...editForm, author: e.target.value})} /></div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div><label className="text-title text-sm block mb-1.5">Genre</label><input type="text" className="input-primary" value={editForm.genre} onChange={e=>setEditForm({...editForm, genre: e.target.value})} /></div>
+                    <div><label className="text-title text-sm block mb-1.5 text-orange-500">Google Drive Link</label><input type="text" className="input-primary border-orange-200" placeholder="Optional URL" value={editForm.external_url} onChange={e=>setEditForm({...editForm, external_url: e.target.value})} /></div>
+                  </div>
+                  <div><label className="text-title text-sm block mb-1.5">Summary</label><textarea className="input-primary h-36 resize-none" value={editForm.summary} onChange={e=>setEditForm({...editForm, summary: e.target.value})} /></div>
+                </div>
+
+                {/* Right Column - Cover */}
+                <div className="flex flex-col">
+                  <label className="text-title text-sm block mb-1.5">Cover Image</label>
+                  <div className="flex gap-2 mb-4">
                     <input type="text" className="input-primary flex-1 text-xs" value={editForm.cover_url} placeholder="Paste Link OR Upload Image ->" onChange={e=>setEditForm({...editForm, cover_url: e.target.value})} />
                     <label className="btn-secondary !py-2 !px-4 text-xs cursor-pointer whitespace-nowrap">
                       Upload
                       <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
                     </label>
                   </div>
-                  {editForm.cover_url && (
-                    <img src={editForm.cover_url} className="h-24 mt-3 rounded-lg object-cover border border-gray-200 shadow-sm" alt="cover preview" 
-                         onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=Broken+Link'; }} />
-                  )}
+                  <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center flex-1 min-h-[280px] p-4">
+                    {editForm.cover_url ? (
+                      <img src={editForm.cover_url} className="max-h-[260px] rounded-lg object-contain shadow-sm" alt="cover preview" 
+                           onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=Broken+Link'; }} />
+                    ) : (
+                      <span className="text-gray-400 text-sm font-medium">No Cover Provided</span>
+                    )}
+                  </div>
                 </div>
-                <div><label className="text-title text-sm block mb-1">Summary</label><textarea className="input-primary h-24 resize-none" value={editForm.summary} onChange={e=>setEditForm({...editForm, summary: e.target.value})} /></div>
-                <button onClick={handleEditSubmit} className="btn-primary w-full mt-4">Save Changes</button>
+              </div>
+
+              <div className="mt-10 pt-6 border-t border-gray-100 flex justify-end gap-3">
+                 <button onClick={() => setIsEditModalOpen(false)} className="btn-outline !py-3 !px-6 text-sm">Cancel</button>
+                 <button onClick={handleEditSubmit} className="btn-primary !py-3 !px-8 text-sm">Save Changes</button>
               </div>
            </div>
         </div>
