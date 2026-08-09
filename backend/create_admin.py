@@ -4,11 +4,14 @@ import sys
 # Add the backend directory to python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from database import SessionLocal
+from database import SessionLocal, engine
 import models
 from auth import get_password_hash
 
 def create_default_admin():
+    # Ensure tables are created
+    models.Base.metadata.create_all(bind=engine)
+    
     db = SessionLocal()
     try:
         # Check if admin already exists
