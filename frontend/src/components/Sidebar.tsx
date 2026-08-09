@@ -16,7 +16,7 @@ export default function Sidebar() {
     <div className="w-full h-16 fixed left-0 top-0 flex flex-row items-center justify-between bg-[#f8f7f4]/90 backdrop-blur-md border-b border-gray-200 px-4 z-50 md:w-64 md:h-screen md:flex-col md:justify-start md:border-r md:border-b-0 md:p-6 md:bg-[#f8f7f4]">
       {/* Logo */}
       <div className="flex items-center md:mb-10 flex-shrink-0">
-        <h1 className="text-xl md:text-3xl font-extrabold text-black">
+        <h1 className="text-2xl md:text-3xl font-extrabold text-black">
           Kindle<span className="text-orange-500">.</span>
         </h1>
       </div>
@@ -39,14 +39,14 @@ export default function Sidebar() {
               <li key={index} className="flex-shrink-0">
                 <a 
                   href={item.href} 
-                  className={`flex items-center justify-center md:justify-start gap-4 p-2.5 md:px-4 md:py-3 rounded-xl transition-colors font-medium text-sm ${
+                  className={`flex items-center justify-center md:justify-start gap-4 p-2 md:px-4 md:py-3 rounded-xl transition-colors font-medium text-sm ${
                     isActive 
                       ? 'bg-white text-orange-500 shadow-sm' 
                       : 'text-gray-500 hover:text-black hover:bg-white/50'
                   }`}
                   title={item.label}
                 >
-                  {item.icon}
+                  <span className="scale-110 md:scale-100">{item.icon}</span>
                   <span className="hidden md:block">{item.label}</span>
                 </a>
               </li>
@@ -54,8 +54,8 @@ export default function Sidebar() {
           })}
           {/* Logout on Mobile */}
           <li className="flex-shrink-0 md:hidden ml-1">
-             <a href="#" className="flex items-center justify-center p-2.5 text-gray-400 hover:text-red-500 rounded-xl hover:bg-white/50 transition-colors">
-               <LogOut size={20} />
+             <a href="#" className="flex items-center justify-center p-2 text-gray-400 hover:text-red-500 rounded-xl hover:bg-white/50 transition-colors">
+               <LogOut size={22} />
              </a>
           </li>
         </ul>

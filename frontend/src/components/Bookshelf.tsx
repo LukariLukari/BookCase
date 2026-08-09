@@ -45,36 +45,36 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
         <h2 className="text-lg font-bold text-black mb-4">Books you read last</h2>
         <motion.div 
           layoutId={`book-container-${heroBook.id}`}
-          className="relative bg-gradient-to-r from-[#9d8373] to-[#80695b] rounded-[2rem] p-6 pr-12 flex items-center gap-6 cursor-pointer shadow-lg w-full md:w-3/4 lg:w-2/3"
+          className="relative bg-gradient-to-r from-[#9d8373] to-[#80695b] rounded-[2rem] p-6 md:pr-12 flex flex-row items-center md:items-center gap-4 md:gap-6 cursor-pointer shadow-lg w-full md:w-3/4 lg:w-2/3"
           onClick={() => setSelectedBook(heroBook)}
           whileHover={{ scale: 1.02 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
           {/* Cover */}
-          <motion.div layoutId={`book-cover-${heroBook.id}`} className="w-28 flex-shrink-0 -mt-10 mb-2">
+          <motion.div layoutId={`book-cover-${heroBook.id}`} className="w-24 md:w-28 flex-shrink-0 -mt-8 md:-mt-10 mb-0 md:mb-2 shadow-2xl">
             {heroBook.cover_url ? (
               <img 
                 src={heroBook.cover_url} 
                 alt={heroBook.title}
-                className="w-full aspect-[2/3] object-cover rounded-xl shadow-xl border border-white/10"
+                className="w-full aspect-[2/3] object-cover rounded-xl shadow-xl border border-white/20"
               />
             ) : (
-              <div className="w-full aspect-[2/3] bg-slate-800 rounded-xl shadow-xl flex items-center justify-center p-2 text-center">
+              <div className="w-full aspect-[2/3] bg-slate-800 rounded-xl shadow-xl flex items-center justify-center p-2 text-center border border-white/20">
                  <span className="font-bold text-gray-400 text-xs">{heroBook.title}</span>
               </div>
             )}
           </motion.div>
           
           {/* Info */}
-          <div className="text-white flex-1 min-w-0">
-            <h3 className="text-2xl font-bold mb-1 truncate">{heroBook.title}</h3>
-            <p className="text-white/80 text-sm mb-4 truncate">{heroBook.author || "Unknown Author"}</p>
+          <div className="text-white flex-1 min-w-0 py-2">
+            <h3 className="text-xl md:text-2xl font-bold mb-1 truncate">{heroBook.title}</h3>
+            <p className="text-white/80 text-xs md:text-sm mb-3 md:mb-4 truncate">{heroBook.author || "Unknown Author"}</p>
             
             {/* Progress Bar */}
             <div className="w-full bg-white/20 rounded-full h-1.5 mb-1.5">
               <div className="bg-white h-1.5 rounded-full" style={{ width: `${heroBook.progress || 5}%` }}></div>
             </div>
-            <p className="text-white/60 text-xs">{heroBook.progress || 0}% Completed</p>
+            <p className="text-white/60 text-[10px] md:text-xs">{heroBook.progress || 0}% Completed</p>
           </div>
         </motion.div>
       </div>
@@ -113,9 +113,9 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
                 </motion.div>
                 
                 {/* Thông tin Text */}
-                <div className="px-1">
-                  <h3 className="text-sm font-bold text-black leading-tight line-clamp-2 mb-1">{book.title}</h3>
-                  <p className="text-xs text-gray-500 truncate mb-2">{book.author || "Unknown Author"}</p>
+                <div className="px-1 mt-1">
+                  <h3 className="text-base md:text-sm font-bold text-black leading-tight line-clamp-2 mb-1">{book.title}</h3>
+                  <p className="text-sm md:text-xs text-gray-500 truncate mb-2">{book.author || "Unknown Author"}</p>
                   
                   {/* Progress Line */}
                   <div className="w-full bg-gray-200 rounded-full h-1">

@@ -160,12 +160,12 @@ export default function AdminPage() {
                 placeholder="Search books..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white rounded-full py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/50 shadow-sm transition-all text-black placeholder-gray-400"
+                className="w-full bg-white rounded-full py-3.5 md:py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/50 shadow-sm transition-all text-black placeholder-gray-400"
               />
             </div>
             <button 
               onClick={() => setIsAddModalOpen(true)}
-              className="btn-primary !rounded-full !py-2.5 !px-5 text-sm whitespace-nowrap"
+              className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-6 md:!px-5 text-sm whitespace-nowrap"
             >
               <Plus size={16} /> <span className="hidden sm:inline">Add Books</span>
             </button>
