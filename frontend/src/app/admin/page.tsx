@@ -207,12 +207,12 @@ export default function AdminPage() {
                      )}
                    </div>
 
-                   {/* Overlay Actions (Edit/Delete) - Hiện trên Mobile luôn, ẩn trên Desktop cho đến khi hover */}
-                   <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 md:gap-4 z-20 backdrop-blur-[2px]">
-                       <button onClick={() => openEditModal(book)} className="p-2.5 md:p-3 bg-white text-black hover:text-orange-500 rounded-full shadow-lg transition-transform hover:scale-110">
+                   {/* Actions (Edit/Delete) - No overlay, Floating Buttons */}
+                   <div className="absolute top-3 right-3 flex flex-col gap-2 z-20 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-0 md:translate-x-4 group-hover:translate-x-0">
+                       <button onClick={() => openEditModal(book)} className="p-2.5 bg-white text-gray-700 hover:text-orange-500 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.2)] transition-transform hover:scale-110 border border-gray-100 flex items-center justify-center">
                          <Edit2 size={16} />
                        </button>
-                       <button onClick={() => handleDelete(book.id)} className="p-2.5 md:p-3 bg-white text-black hover:text-red-500 rounded-full shadow-lg transition-transform hover:scale-110">
+                       <button onClick={() => handleDelete(book.id)} className="p-2.5 bg-white text-gray-700 hover:text-red-500 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.2)] transition-transform hover:scale-110 border border-gray-100 flex items-center justify-center">
                          <Trash2 size={16} />
                        </button>
                    </div>
