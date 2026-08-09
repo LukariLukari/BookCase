@@ -164,7 +164,7 @@ export default function AdminPage() {
             </div>
             <button 
               onClick={() => setIsAddModalOpen(true)}
-              className="px-4 py-2.5 bg-black text-white rounded-full hover:bg-gray-800 transition-all shadow-md flex items-center justify-center gap-2 text-sm font-bold"
+              className="btn-primary !rounded-full !py-2.5 !px-5 text-sm"
             >
               <Plus size={16} /> Add Books
             </button>

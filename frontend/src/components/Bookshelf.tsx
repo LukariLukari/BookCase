@@ -192,7 +192,7 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
                   <div className="mt-8 pt-4">
                     <button 
                       onClick={() => handleDownload(selectedBook.id, selectedBook.title)}
-                      className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+                      className="btn-primary w-full shadow-md"
                     >
                       <Download size={18} />
                       <span>Download File</span>
