@@ -147,32 +147,32 @@ export default function AdminPage() {
   return (
     <div className="flex bg-[#f8f7f4] min-h-screen font-sans selection:bg-orange-200">
       <Sidebar />
-      <div className="flex-1 ml-64 flex flex-col min-h-screen">
-        <header className="sticky top-0 z-30 bg-[#f8f7f4]/80 backdrop-blur-md px-10 py-6 flex justify-between items-center border-b border-gray-200">
+      <div className="flex-1 ml-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen">
+        <header className="sticky top-16 md:top-0 z-30 bg-[#f8f7f4]/80 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-200 gap-4 md:gap-0">
           <div className="flex items-center gap-8 text-sm font-bold text-gray-400">
-             <span className="text-black border-b-2 border-black pb-1 text-xl">Admin Dashboard</span>
+             <span className="text-black border-b-2 border-black pb-1 text-xl whitespace-nowrap">Admin Dashboard</span>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="relative">
+          <div className="flex items-center w-full md:w-auto gap-4">
+            <div className="relative flex-1 md:w-72">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
               <input 
                 type="text" 
                 placeholder="Search books..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-72 bg-white rounded-full py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/50 shadow-sm transition-all text-black placeholder-gray-400"
+                className="w-full bg-white rounded-full py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/50 shadow-sm transition-all text-black placeholder-gray-400"
               />
             </div>
             <button 
               onClick={() => setIsAddModalOpen(true)}
-              className="btn-primary !rounded-full !py-2.5 !px-5 text-sm"
+              className="btn-primary !rounded-full !py-2.5 !px-5 text-sm whitespace-nowrap"
             >
-              <Plus size={16} /> Add Books
+              <Plus size={16} /> <span className="hidden sm:inline">Add Books</span>
             </button>
           </div>
         </header>
 
-        <main className="flex-1 p-10">
+        <main className="flex-1 px-4 md:px-10 pt-8 pb-12">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
