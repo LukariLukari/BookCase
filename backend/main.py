@@ -54,8 +54,10 @@ async def upload_book(
         final_summary = extracted.get('summary') or ""
         cover_b64 = extracted.get('cover_b64')
             
-        file_stream = io.BytesIO(contents)
-        drive_file_id = drive_service.upload_file(file_stream, file.filename, mime_type)
+        drive_file_id = None
+        if not external_url or not external_url.strip():
+            file_stream = io.BytesIO(contents)
+            drive_file_id = drive_service.upload_file(file_stream, file.filename, mime_type)
         
         db_book = models.Book(
             title=final_title,
