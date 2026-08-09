@@ -13,13 +13,13 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
   );
 
   return (
-    <div className="flex bg-[#f8f7f4] min-h-screen font-sans selection:bg-orange-200">
+    <div className="flex bg-[#f8f7f4] min-h-screen font-sans selection:bg-orange-200 overflow-x-hidden">
       
       {/* Sidebar - Fixed Left */}
       <Sidebar />
 
       {/* Main Content Area - Shifted Right */}
-      <div className="flex-1 ml-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen">
+      <div className="flex-1 ml-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen w-full max-w-full">
         
         {/* Topbar */}
         <header className="sticky top-16 md:top-0 z-30 bg-[#f8f7f4]/80 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
