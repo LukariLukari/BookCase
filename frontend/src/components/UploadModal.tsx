@@ -33,8 +33,10 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
     const title = file.name.replace(/\.[^/.]+$/, "");
     formData.append('title', title);
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
     try {
-      await axios.post('http://localhost:8000/api/books/upload', formData, {
+      await axios.post(`${API_URL}/api/books/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },

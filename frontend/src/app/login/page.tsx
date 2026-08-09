@@ -37,7 +37,7 @@ export default function LoginPage() {
       login(token, userRes.data);
     } catch (err: any) {
       if (!err.response) {
-        setError('Không thể kết nối tới Backend API (http://localhost:8000). Vui lòng kiểm tra xem server Backend đã được khởi động chưa!');
+        setError(`Không thể kết nối tới Backend API (${API_URL}). Vui lòng kiểm tra địa chỉ Backend API hoặc kiểm tra server đã được khởi động chưa!`);
       } else {
         setError(err.response?.data?.detail || 'Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản & mật khẩu.');
       }
