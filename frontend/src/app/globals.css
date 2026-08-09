@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8f7f4;
+  --foreground: #111111;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-montserrat);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
+}
+
+/* =========================================
+   DESIGN SYSTEM TEMPLATE (HIGH CONTRAST)
+   ========================================= */
+
+@layer components {
+  /* Buttons */
+  .btn-primary {
+    @apply bg-[#111111] border-2 border-[#111111] font-bold py-3 px-6 rounded-xl hover:bg-[#333333] transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+    color: #ffffff !important; 
+  }
+  
+  .btn-secondary {
+    @apply bg-[#f97316] border-2 border-[#f97316] font-bold py-3 px-6 rounded-xl hover:bg-[#ea580c] transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+    color: #ffffff !important;
+  }
+
+  .btn-outline {
+    @apply bg-[#ffffff] border-2 border-[#e5e5e5] font-bold py-2.5 px-5 rounded-xl hover:border-[#111111] transition-colors flex items-center justify-center gap-2 cursor-pointer;
+    color: #111111 !important;
+  }
+
+  /* Inputs */
+  .input-primary {
+    @apply w-full bg-[#ffffff] border-2 border-[#e5e5e5] rounded-xl px-4 py-3 focus:outline-none focus:border-[#111111] focus:ring-0 transition-all;
+    color: #111111 !important;
+  }
+  
+  .input-primary::placeholder {
+    color: #999999 !important;
+  }
+
+  /* Typography */
+  .text-title {
+    @apply font-extrabold;
+    color: #111111 !important;
+  }
+  
+  .text-body {
+    @apply font-medium;
+    color: #444444 !important;
+  }
+  
+  .text-muted {
+    @apply font-medium text-sm;
+    color: #888888 !important;
+  }
+
+  /* Cards */
+  .card-container {
+    @apply bg-[#ffffff] rounded-3xl p-8 shadow-xl border border-[#eeeeee];
+  }
+}
