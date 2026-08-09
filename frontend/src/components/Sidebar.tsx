@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Library, LayoutDashboard, Bookmark, User, LogOut, Settings, Menu, X } from 'lucide-react';
 
@@ -19,9 +20,11 @@ export default function Sidebar() {
       <div className="w-full h-16 fixed left-0 top-0 flex flex-row items-center justify-between bg-[#f8f7f4]/90 backdrop-blur-md border-b border-gray-200 px-4 z-50 md:w-64 md:h-screen md:flex-col md:justify-start md:border-r md:border-b-0 md:p-6 md:bg-[#f8f7f4]">
         {/* Logo */}
         <div className="flex items-center md:mb-10 flex-shrink-0 z-50">
-          <h1 className="text-2xl md:text-3xl font-extrabold text-black">
-            BookCase<span className="text-orange-500">.</span>
-          </h1>
+          <Link href="/">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-black cursor-pointer hover:opacity-80 transition-opacity">
+              BookCase<span className="text-orange-500">.</span>
+            </h1>
+          </Link>
         </div>
 
         {/* User Profile Card - Hide on Mobile */}
