@@ -235,20 +235,20 @@ export default function AdminPage() {
       {/* Edit Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-           <div className="bg-white rounded-3xl w-full max-w-4xl p-8 shadow-2xl relative">
-              <button onClick={() => setIsEditModalOpen(false)} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-500 hover:text-black transition-colors"><X size={16}/></button>
-              <h3 className="text-2xl font-extrabold mb-8 text-black">Edit Book</h3>
+           <div className="bg-white rounded-3xl w-full max-w-4xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] flex flex-col">
+              <button onClick={() => setIsEditModalOpen(false)} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 bg-gray-100 rounded-full text-gray-500 hover:text-black transition-colors"><X size={16}/></button>
+              <h3 className="text-xl md:text-2xl font-extrabold mb-4 md:mb-8 text-black shrink-0">Edit Book</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 overflow-y-auto flex-1 pr-2">
                 {/* Left Column - Details */}
-                <div className="space-y-5">
+                <div className="space-y-4 md:space-y-5">
                   <div><label className="text-title text-sm block mb-1.5">Title</label><input type="text" className="input-primary" value={editForm.title} onChange={e=>setEditForm({...editForm, title: e.target.value})} /></div>
                   <div><label className="text-title text-sm block mb-1.5">Author</label><input type="text" className="input-primary" value={editForm.author} onChange={e=>setEditForm({...editForm, author: e.target.value})} /></div>
                   <div className="grid grid-cols-2 gap-4">
                     <div><label className="text-title text-sm block mb-1.5">Genre</label><input type="text" className="input-primary" value={editForm.genre} onChange={e=>setEditForm({...editForm, genre: e.target.value})} /></div>
                     <div><label className="text-title text-sm block mb-1.5 text-orange-500">Google Drive Link</label><input type="text" className="input-primary border-orange-200" placeholder="Optional URL" value={editForm.external_url} onChange={e=>setEditForm({...editForm, external_url: e.target.value})} /></div>
                   </div>
-                  <div><label className="text-title text-sm block mb-1.5">Summary</label><textarea className="input-primary h-36 resize-none" value={editForm.summary} onChange={e=>setEditForm({...editForm, summary: e.target.value})} /></div>
+                  <div><label className="text-title text-sm block mb-1.5">Summary</label><textarea className="input-primary h-32 md:h-36 resize-none" value={editForm.summary} onChange={e=>setEditForm({...editForm, summary: e.target.value})} /></div>
                 </div>
 
                 {/* Right Column - Cover */}
@@ -261,9 +261,9 @@ export default function AdminPage() {
                       <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
                     </label>
                   </div>
-                  <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center flex-1 min-h-[280px] p-4">
+                  <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center flex-1 min-h-[200px] md:min-h-[280px] p-4">
                     {editForm.cover_url ? (
-                      <img src={editForm.cover_url} className="max-h-[260px] rounded-lg object-contain shadow-sm" alt="cover preview" 
+                      <img src={editForm.cover_url} className="max-h-[200px] md:max-h-[260px] rounded-lg object-contain shadow-sm" alt="cover preview" 
                            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=Broken+Link'; }} />
                     ) : (
                       <span className="text-gray-400 text-sm font-medium">No Cover Provided</span>
@@ -272,7 +272,7 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="mt-10 pt-6 border-t border-gray-100 flex justify-end gap-3">
+              <div className="mt-6 md:mt-10 pt-4 md:pt-6 border-t border-gray-100 flex justify-end gap-3 shrink-0">
                  <button onClick={() => setIsEditModalOpen(false)} className="btn-outline !py-3 !px-6 text-sm">Cancel</button>
                  <button onClick={handleEditSubmit} className="btn-primary !py-3 !px-8 text-sm">Save Changes</button>
               </div>
