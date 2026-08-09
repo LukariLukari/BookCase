@@ -15,23 +15,23 @@ def create_default_admin():
     db = SessionLocal()
     try:
         # Check if admin already exists
-        existing_admin = db.query(models.User).filter(models.User.username == "admin").first()
+        existing_admin = db.query(models.User).filter(models.User.username == "lukari").first()
         if existing_admin:
-            print("Admin user already exists.")
+            print("Admin user 'lukari' already exists.")
             return
 
         # Create admin user
-        hashed_password = get_password_hash("admin123")
+        hashed_password = get_password_hash("12345678")
         admin_user = models.User(
-            username="admin",
+            username="lukari",
             password_hash=hashed_password,
             role="admin"
         )
         db.add(admin_user)
         db.commit()
         print("Default admin user created successfully!")
-        print("Username: admin")
-        print("Password: admin123")
+        print("Username: lukari")
+        print("Password: 12345678")
     except Exception as e:
         print(f"Error creating admin user: {e}")
     finally:

@@ -20,6 +20,12 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Virtual Bookshelf API")
 
+from create_admin import create_default_admin
+
+@app.on_event("startup")
+def startup_event():
+    create_default_admin()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

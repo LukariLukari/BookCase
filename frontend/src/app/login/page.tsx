@@ -36,7 +36,11 @@ export default function LoginPage() {
       
       login(token, userRes.data);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
+      if (!err.response) {
+        setError('Không thể kết nối tới Backend API (http://localhost:8000). Vui lòng kiểm tra xem server Backend đã được khởi động chưa!');
+      } else {
+        setError(err.response?.data?.detail || 'Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản & mật khẩu.');
+      }
     }
   };
 
