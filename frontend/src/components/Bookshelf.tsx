@@ -12,7 +12,7 @@ interface Book {
   genre: string;
   summary: string;
   cover_url: string;
-  progress: number;
+  created_at?: string;
 }
 
 export default function Bookshelf({ books, refresh }: { books: Book[], refresh: () => void }) {
@@ -21,9 +21,15 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
 
   if (books.length === 0) return null;
 
-  // Sách có progress cao nhất làm Hero, nếu không có thì lấy cuốn đầu tiên
-  const heroBook = [...books].sort((a, b) => (b.progress || 0) - (a.progress || 0))[0];
-  const gridBooks = books.filter(b => b.id !== heroBook.id);
+  // Sách mới nhất làm Hero
+  const heroBook = [...books].sort((a, b) => {
+    if (a.created_at && b.created_at) {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+    return 0;
+  })[0];
+  // Vẫn hiển thị đầy đủ sách đó bên dưới
+  const gridBooks = books;
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -40,9 +46,9 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
   return (
     <div className="w-full pb-10">
       
-      {/* Books you read last (Hero Section) */}
+      {/* Recently Added (Hero Section) */}
       <div className="mb-12">
-        <h2 className="text-lg font-bold text-black mb-4">Books you read last</h2>
+        <h2 className="text-lg font-bold text-black mb-4">Recently Added</h2>
         <motion.div 
           layoutId={`book-container-${heroBook.id}`}
           className="relative bg-gradient-to-r from-[#9d8373] to-[#80695b] rounded-[2rem] p-6 md:pr-12 flex flex-row items-center md:items-center gap-4 md:gap-6 cursor-pointer shadow-lg w-full md:w-3/4 lg:w-2/3"
@@ -70,11 +76,9 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
             <h3 className="text-xl md:text-2xl font-bold mb-1 truncate">{heroBook.title}</h3>
             <p className="text-white/80 text-xs md:text-sm mb-3 md:mb-4 truncate">{heroBook.author || "Unknown Author"}</p>
             
-            {/* Progress Bar */}
-            <div className="w-full bg-white/20 rounded-full h-1.5 mb-1.5">
-              <div className="bg-white h-1.5 rounded-full" style={{ width: `${heroBook.progress || 5}%` }}></div>
-            </div>
-            <p className="text-white/60 text-[10px] md:text-xs">{heroBook.progress || 0}% Completed</p>
+            <p className="text-white/80 text-[10px] md:text-xs mt-2">
+              Added: {heroBook.created_at ? new Date(heroBook.created_at).toLocaleDateString() : 'Just added'}
+            </p>
           </div>
         </motion.div>
       </div>
@@ -117,10 +121,6 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
                   <h3 className="text-base md:text-sm font-bold text-black leading-tight line-clamp-2 mb-1">{book.title}</h3>
                   <p className="text-sm md:text-xs text-gray-500 truncate mb-2">{book.author || "Unknown Author"}</p>
                   
-                  {/* Progress Line */}
-                  <div className="w-full bg-gray-200 rounded-full h-1">
-                    <div className="bg-orange-500 h-1 rounded-full" style={{ width: `${book.progress || 0}%` }}></div>
-                  </div>
                 </div>
               </motion.div>
             ))}
