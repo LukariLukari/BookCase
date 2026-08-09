@@ -8,7 +8,7 @@ export default function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const menuItems = [
-    { icon: <LayoutDashboard size={20} />, label: 'My Kindle Board', href: '/' },
+    { icon: <LayoutDashboard size={20} />, label: 'My BookCase Board', href: '/' },
     { icon: <Library size={20} />, label: 'Collections', href: '#' },
     { icon: <Bookmark size={20} />, label: 'Saved', href: '#' },
     { icon: <Settings size={20} />, label: 'Admin Dashboard', href: '/admin' },
@@ -20,7 +20,7 @@ export default function Sidebar() {
         {/* Logo */}
         <div className="flex items-center md:mb-10 flex-shrink-0 z-50">
           <h1 className="text-2xl md:text-3xl font-extrabold text-black">
-            Kindle<span className="text-orange-500">.</span>
+            BookCase<span className="text-orange-500">.</span>
           </h1>
         </div>
 
