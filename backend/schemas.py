@@ -20,6 +20,7 @@ class BookUpdate(BaseModel):
     genre: Optional[str] = None
     summary: Optional[str] = None
     cover_url: Optional[str] = None
+    external_url: Optional[str] = None
 
 class BookLinkCreate(BaseModel):
     title: str

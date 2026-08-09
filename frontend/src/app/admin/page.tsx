@@ -30,7 +30,7 @@ export default function AdminPage() {
   
   // Edit State
   const [editingBook, setEditingBook] = useState<Book | null>(null);
-  const [editForm, setEditForm] = useState({ title: '', author: '', genre: '', summary: '', cover_url: '' });
+  const [editForm, setEditForm] = useState({ title: '', author: '', genre: '', summary: '', cover_url: '', external_url: '' });
   
   // Add State (Bulk Upload)
   const [uploadItems, setUploadItems] = useState<UploadItem[]>([]);
@@ -68,7 +68,8 @@ export default function AdminPage() {
       author: book.author || '', 
       genre: book.genre || '', 
       summary: book.summary || '',
-      cover_url: book.cover_url || ''
+      cover_url: book.cover_url || '',
+      external_url: book.external_url || ''
     });
     setIsEditModalOpen(true);
   };
@@ -252,6 +253,7 @@ export default function AdminPage() {
                 <div><label className="text-title text-sm block mb-1">Title</label><input type="text" className="input-primary" value={editForm.title} onChange={e=>setEditForm({...editForm, title: e.target.value})} /></div>
                 <div><label className="text-title text-sm block mb-1">Author</label><input type="text" className="input-primary" value={editForm.author} onChange={e=>setEditForm({...editForm, author: e.target.value})} /></div>
                 <div><label className="text-title text-sm block mb-1">Genre</label><input type="text" className="input-primary" value={editForm.genre} onChange={e=>setEditForm({...editForm, genre: e.target.value})} /></div>
+                <div><label className="text-title text-sm block mb-1 text-orange-500">Google Drive Source Link</label><input type="text" className="input-primary border-orange-200" placeholder="Optional. If provided, file downloads from this link" value={editForm.external_url} onChange={e=>setEditForm({...editForm, external_url: e.target.value})} /></div>
                 <div>
                   <label className="text-title text-sm block mb-1">Cover Image</label>
                   <div className="flex gap-2">
