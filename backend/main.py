@@ -12,6 +12,7 @@ import uvicorn
 import models
 import schemas
 from database import engine, get_db
+import auth
 from drive_service import drive_service
 from extract_service import extract_pdf_info, extract_epub_info
 
@@ -37,7 +38,8 @@ async def upload_book(
     file: UploadFile = File(...),
     title: str = Form(""),
     external_url: str = Form(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
 ):
     try:
         contents = await file.read()
@@ -79,7 +81,7 @@ async def upload_book(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/books/link", response_model=schemas.BookResponse)
-def create_book_from_link(book_in: schemas.BookLinkCreate, db: Session = Depends(get_db)):
+def create_book_from_link(book_in: schemas.BookLinkCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
     db_book = models.Book(
         title=book_in.title,
         author=book_in.author,
@@ -94,7 +96,7 @@ def create_book_from_link(book_in: schemas.BookLinkCreate, db: Session = Depends
     return db_book
 
 @app.put("/api/books/{book_id}", response_model=schemas.BookResponse)
-def update_book(book_id: str, book_in: schemas.BookUpdate, db: Session = Depends(get_db)):
+def update_book(book_id: str, book_in: schemas.BookUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
     book = db.query(models.Book).filter(models.Book.id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
@@ -144,7 +146,7 @@ def download_book(book_id: str, db: Session = Depends(get_db)):
     return drive_service.stream_download(book.drive_file_id, filename, book.mime_type)
 
 @app.delete("/api/books/{book_id}")
-def delete_book(book_id: str, db: Session = Depends(get_db)):
+def delete_book(book_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
     book = db.query(models.Book).filter(models.Book.id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
@@ -152,6 +154,41 @@ def delete_book(book_id: str, db: Session = Depends(get_db)):
     db.delete(book)
     db.commit()
     return {"message": "Deleted successfully"}
+
+from fastapi.security import OAuth2PasswordRequestForm
+from datetime import timedelta
+
+@app.post("/api/auth/register", response_model=schemas.UserResponse)
+def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.username == user.username).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    
+    hashed_password = auth.get_password_hash(user.password)
+    new_user = models.User(username=user.username, password_hash=hashed_password, role=user.role)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+@app.post("/api/auth/login", response_model=schemas.Token)
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.username == form_data.username).first()
+    if not user or not auth.verify_password(form_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth.create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/api/auth/me", response_model=schemas.UserResponse)
+def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
+    return current_user
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
 import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X } from 'lucide-react';
 
@@ -23,6 +25,15 @@ interface UploadItem {
 export default function AdminPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const { user, token, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && (!user || user.role !== 'admin')) {
+      router.push('/');
+    }
+  }, [user, isLoading, router]);
   
   // Modals state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -54,7 +65,9 @@ export default function AdminPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa cuốn sách này?')) return;
     try {
-      await axios.delete(`${API_URL}/api/books/${id}`);
+      await axios.delete(`${API_URL}/api/books/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       fetchBooks();
     } catch (err) {
       alert('Lỗi khi xóa sách!');
@@ -77,7 +90,9 @@ export default function AdminPage() {
   const handleEditSubmit = async () => {
     if (!editingBook) return;
     try {
-      await axios.put(`${API_URL}/api/books/${editingBook.id}`, editForm);
+      await axios.put(`${API_URL}/api/books/${editingBook.id}`, editForm, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setIsEditModalOpen(false);
       fetchBooks();
     } catch (err) {
@@ -128,7 +143,10 @@ export default function AdminPage() {
       }
       try {
         await axios.post(`${API_URL}/api/books/upload`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+          headers: { 
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`
+          }
         });
       } catch (err) {
         console.error('Lỗi khi tải file lên:', err);
@@ -143,6 +161,10 @@ export default function AdminPage() {
   const filteredBooks = books.filter((book) => 
     book.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (isLoading || !user || user.role !== 'admin') {
+    return <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center font-bold text-gray-500">Loading...</div>;
+  }
 
   return (
     <div className="flex bg-[#f8f7f4] min-h-screen font-sans selection:bg-orange-200 overflow-x-hidden">

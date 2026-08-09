@@ -2,18 +2,23 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Library, LayoutDashboard, Bookmark, User, LogOut, Settings, Menu, X } from 'lucide-react';
+import { Library, LayoutDashboard, Bookmark, User, LogOut, Settings, Menu, X, LogIn } from 'lucide-react';
+import { useAuth } from '@/app/contexts/AuthContext';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const menuItems = [
     { icon: <LayoutDashboard size={20} />, label: 'My BookCase Board', href: '/' },
     { icon: <Library size={20} />, label: 'Collections', href: '#' },
     { icon: <Bookmark size={20} />, label: 'Saved', href: '#' },
-    { icon: <Settings size={20} />, label: 'Admin Dashboard', href: '/admin' },
   ];
+
+  if (user?.role === 'admin') {
+    menuItems.push({ icon: <Settings size={20} />, label: 'Admin Dashboard', href: '/admin' });
+  }
 
   return (
     <>
@@ -28,13 +33,22 @@ export default function Sidebar() {
         </div>
 
         {/* User Profile Card - Hide on Mobile */}
-        <div className="hidden md:block bg-gradient-to-br from-[#e8e4db] to-[#dcd8ce] p-5 rounded-2xl mb-10 shadow-sm w-full">
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-3 shadow-sm overflow-hidden">
-             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" alt="Avatar" className="w-full h-full object-cover" />
+        {user ? (
+          <div className="hidden md:block bg-gradient-to-br from-[#e8e4db] to-[#dcd8ce] p-5 rounded-2xl mb-10 shadow-sm w-full">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-3 shadow-sm overflow-hidden">
+               <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} alt="Avatar" className="w-full h-full object-cover" />
+            </div>
+            <p className="text-xs text-gray-500 font-medium mb-1">Welcome Back</p>
+            <p className="text-lg font-bold text-black truncate">{user.username}</p>
           </div>
-          <p className="text-xs text-gray-500 font-medium mb-1">Welcome Back</p>
-          <p className="text-lg font-bold text-black">Sarah</p>
-        </div>
+        ) : (
+          <div className="hidden md:block mb-10 w-full">
+            <Link href="/login" className="btn-primary w-full flex items-center justify-center gap-2">
+              <LogIn size={18} />
+              <span>Login</span>
+            </Link>
+          </div>
+        )}
 
         {/* Mobile Hamburger Button */}
         <button 
@@ -68,32 +82,43 @@ export default function Sidebar() {
               );
             })}
             
-            {/* Mobile User Info & Logout (inside menu) */}
+            {/* Mobile User Info & Logout/Login (inside menu) */}
             <li className="md:hidden mt-4 pt-4 border-t border-gray-200 w-full">
-               <div className="flex items-center gap-3 mb-4 px-2">
-                 <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm overflow-hidden">
-                   <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" alt="Avatar" className="w-full h-full object-cover" />
-                 </div>
-                 <div>
-                   <p className="text-xs text-gray-500 font-medium leading-tight">Welcome Back</p>
-                   <p className="text-sm font-bold text-black leading-tight">Sarah</p>
-                 </div>
-               </div>
-               <a href="#" className="flex items-center gap-4 p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium text-sm w-full">
-                 <LogOut size={20} />
-                 <span>Logout</span>
-               </a>
+               {user ? (
+                 <>
+                   <div className="flex items-center gap-3 mb-4 px-2">
+                     <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm overflow-hidden">
+                       <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} alt="Avatar" className="w-full h-full object-cover" />
+                     </div>
+                     <div>
+                       <p className="text-xs text-gray-500 font-medium leading-tight">Welcome Back</p>
+                       <p className="text-sm font-bold text-black leading-tight truncate max-w-[200px]">{user.username}</p>
+                     </div>
+                   </div>
+                   <button onClick={logout} className="flex items-center gap-4 p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium text-sm w-full">
+                     <LogOut size={20} />
+                     <span>Logout</span>
+                   </button>
+                 </>
+               ) : (
+                 <Link href="/login" className="flex items-center gap-4 p-3 text-orange-500 hover:bg-orange-50 rounded-xl transition-colors font-medium text-sm w-full">
+                   <LogIn size={20} />
+                   <span>Login</span>
+                 </Link>
+               )}
             </li>
           </ul>
         </nav>
 
         {/* Logout - Desktop */}
-        <div className="hidden md:flex mt-auto pt-6 border-t border-gray-200 w-full">
-          <a href="#" className="flex items-center gap-4 px-4 py-2 text-gray-500 hover:text-red-500 transition-colors font-medium text-sm w-full">
-            <LogOut size={20} />
-            <span>Logout</span>
-          </a>
-        </div>
+        {user && (
+          <div className="hidden md:flex mt-auto pt-6 border-t border-gray-200 w-full">
+            <button onClick={logout} className="flex items-center gap-4 px-4 py-2 text-gray-500 hover:text-red-500 transition-colors font-medium text-sm w-full">
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
+          </div>
+        )}
       </div>
       
       {/* Mobile Overlay (to close menu when clicking outside) */}

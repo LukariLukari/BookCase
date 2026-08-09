@@ -19,6 +19,8 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+import { AuthProvider } from "./contexts/AuthContext";
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -27,7 +29,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-[#f8f7f4] text-black flex flex-col" suppressHydrationWarning>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

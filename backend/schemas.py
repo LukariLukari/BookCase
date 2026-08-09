@@ -40,3 +40,22 @@ class BookResponse(BookBase):
     class Config:
         orm_mode = True
         from_attributes = True
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+    role: Optional[str] = "user"
+
+class UserResponse(BaseModel):
+    id: str
+    username: str
+    role: str
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
