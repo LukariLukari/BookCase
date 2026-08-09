@@ -36,10 +36,10 @@ export default function Sidebar() {
           {menuItems.map((item, index) => {
             const isActive = item.href === pathname || (item.href !== '/' && item.href !== '#' && pathname.startsWith(item.href));
             return (
-              <li key={index} className="flex-shrink-0">
+              <li key={index} className="flex-shrink-0 w-full">
                 <a 
                   href={item.href} 
-                  className={`flex items-center justify-center md:justify-start gap-4 p-2 md:px-4 md:py-3 rounded-xl transition-colors font-medium text-sm ${
+                  className={`flex items-center justify-center md:justify-start gap-4 p-2 md:px-4 md:py-3 rounded-xl transition-colors font-medium text-sm w-full ${
                     isActive 
                       ? 'bg-white text-orange-500 shadow-sm' 
                       : 'text-gray-500 hover:text-black hover:bg-white/50'

@@ -173,73 +173,62 @@ export default function AdminPage() {
         </header>
 
         <main className="flex-1 px-4 md:px-10 pt-8 pb-12">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto w-full">
-            <table className="w-full text-left border-collapse min-w-[700px]">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Book</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Author</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Genre</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Source</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredBooks.map((book) => (
-                  <tr key={book.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-14 bg-gray-200 rounded overflow-hidden flex-shrink-0">
-                           {book.cover_url ? (
-                             <img 
-                               src={book.cover_url} 
-                               className="w-full h-full object-cover" 
-                               alt="cover"
-                               onError={(e) => {
-                                 e.currentTarget.onerror = null;
-                                 e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover';
-                               }}
-                             />
-                           ) : (
-                             <div className="w-full h-full flex items-center justify-center bg-gray-300 text-[8px] text-gray-500 text-center p-1 font-bold">{book.title}</div>
-                           )}
-                        </div>
-                        <span className="font-bold text-sm text-black max-w-[200px] truncate">{book.title}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{book.author || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {book.genre ? <span className="bg-gray-100 px-2 py-1 rounded text-xs">{book.genre}</span> : '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                       {book.external_url ? (
-                         <span className="flex items-center gap-1 text-orange-600 font-medium bg-orange-50 px-2 py-1 rounded text-xs w-max" title={book.external_url}>
-                           <LinkIcon size={12} /> Drive Link
-                         </span>
-                       ) : (
-                         <span className="flex items-center gap-1 text-gray-600 font-medium bg-gray-100 px-2 py-1 rounded text-xs w-max">
-                           <Upload size={12} /> Local File
-                         </span>
-                       )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                       <button onClick={() => openEditModal(book)} className="p-2 text-gray-400 hover:text-orange-500 transition-colors">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10">
+            {filteredBooks.map((book) => (
+              <div key={book.id} className="flex flex-col group relative">
+                {/* Ảnh bìa */}
+                <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-gray-100 group-hover:shadow-xl transition-all duration-300">
+                   {book.cover_url ? (
+                     <img 
+                        src={book.cover_url} 
+                        className="w-full h-full object-cover" 
+                        alt={book.title} 
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover';
+                        }}
+                      />
+                   ) : (
+                     <div className="w-full h-full bg-slate-100 flex items-center justify-center p-4 text-center">
+                        <span className="font-bold text-gray-400 text-xs">{book.title}</span>
+                     </div>
+                   )}
+                   
+                   {/* Tag Nguồn (Source) */}
+                   <div className="absolute top-2 left-2 z-20">
+                     {book.external_url ? (
+                       <span className="flex items-center gap-1 text-orange-600 font-bold bg-orange-50/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-100" title={book.external_url}>
+                         <LinkIcon size={12} /> Drive
+                       </span>
+                     ) : (
+                       <span className="flex items-center gap-1 text-gray-700 font-bold bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-gray-100">
+                         <Upload size={12} /> Local
+                       </span>
+                     )}
+                   </div>
+
+                   {/* Overlay Actions (Edit/Delete) - Hiện trên Mobile luôn, ẩn trên Desktop cho đến khi hover */}
+                   <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 md:gap-4 z-20 backdrop-blur-[2px]">
+                       <button onClick={() => openEditModal(book)} className="p-2.5 md:p-3 bg-white text-black hover:text-orange-500 rounded-full shadow-lg transition-transform hover:scale-110">
                          <Edit2 size={16} />
                        </button>
-                       <button onClick={() => handleDelete(book.id)} className="p-2 text-gray-400 hover:text-red-500 transition-colors ml-2">
+                       <button onClick={() => handleDelete(book.id)} className="p-2.5 md:p-3 bg-white text-black hover:text-red-500 rounded-full shadow-lg transition-transform hover:scale-110">
                          <Trash2 size={16} />
                        </button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredBooks.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500 text-sm">No books found.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                   </div>
+                </div>
+                
+                {/* Thông tin Text */}
+                <div className="px-1">
+                  <h3 className="text-sm font-bold text-black leading-tight line-clamp-2">{book.title}</h3>
+                </div>
+              </div>
+            ))}
           </div>
+
+          {filteredBooks.length === 0 && (
+            <div className="text-center text-gray-500 text-sm mt-10">No books found.</div>
+          )}
         </main>
       </div>
 
