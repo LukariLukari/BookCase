@@ -25,10 +25,10 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
   const heroBook = [...books].sort((a, b) => (b.progress || 0) - (a.progress || 0))[0];
   const gridBooks = books.filter(b => b.id !== heroBook.id);
 
-  // (Deleted handleDelete function)
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   const handleDownload = (id: string, title: string) => {
-    const url = `http://localhost:8000/api/books/${id}/download`;
+    const url = `${API_URL}/api/books/${id}/download`;
     const a = document.createElement('a');
     a.href = url;
     a.download = `${title}.pdf`; // Hoặc xử lý linh hoạt phần mở rộng

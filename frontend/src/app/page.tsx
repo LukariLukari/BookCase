@@ -9,9 +9,11 @@ export default function Home() {
   const [books, setBooks] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
   const fetchBooks = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/books');
+      const response = await axios.get(`${API_URL}/api/books`);
       setBooks(response.data);
     } catch (error) {
       console.error('Lỗi lấy dữ liệu sách:', error);

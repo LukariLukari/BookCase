@@ -36,9 +36,11 @@ export default function AdminPage() {
   const [uploadItems, setUploadItems] = useState<UploadItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
   const fetchBooks = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/books');
+      const response = await axios.get(`${API_URL}/api/books`);
       setBooks(response.data);
     } catch (error) {
       console.error('Lỗi lấy dữ liệu sách:', error);
@@ -52,7 +54,7 @@ export default function AdminPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa cuốn sách này?')) return;
     try {
-      await axios.delete(`http://localhost:8000/api/books/${id}`);
+      await axios.delete(`${API_URL}/api/books/${id}`);
       fetchBooks();
     } catch (err) {
       alert('Lỗi khi xóa sách!');
@@ -74,7 +76,7 @@ export default function AdminPage() {
   const handleEditSubmit = async () => {
     if (!editingBook) return;
     try {
-      await axios.put(`http://localhost:8000/api/books/${editingBook.id}`, editForm);
+      await axios.put(`${API_URL}/api/books/${editingBook.id}`, editForm);
       setIsEditModalOpen(false);
       fetchBooks();
     } catch (err) {
@@ -124,7 +126,7 @@ export default function AdminPage() {
         formData.append('external_url', item.external_url);
       }
       try {
-        await axios.post('http://localhost:8000/api/books/upload', formData, {
+        await axios.post(`${API_URL}/api/books/upload`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       } catch (err) {
