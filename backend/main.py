@@ -28,6 +28,17 @@ from create_admin import create_default_admin
 
 @app.on_event("startup")
 def startup_event():
+    # Auto-migrate database to add email column if it's missing
+    from database import SessionLocal
+    db = SessionLocal()
+    try:
+        db.execute("ALTER TABLE users ADD COLUMN email VARCHAR;")
+        db.commit()
+    except Exception:
+        db.rollback() # Column already exists or error
+    finally:
+        db.close()
+        
     create_default_admin()
 
 app.add_middleware(
