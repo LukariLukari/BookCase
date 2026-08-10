@@ -372,24 +372,41 @@ export default function AdminPage() {
                   <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl mt-4">
                     <h4 className="text-sm font-bold text-orange-600 mb-2">Smart Auto-Link</h4>
                     <p className="text-xs text-orange-500/80 mb-3">Copy tất cả các link Google Drive của bạn (dù là một danh sách lộn xộn) và dán vào đây. Hệ thống sẽ tự động bóc tách và gắn link vào từng sách trống phía dưới.</p>
-                    <div className="flex gap-2">
-                      <input 
-                        type="text" 
-                        placeholder="Dán hỗn hợp link vào đây..." 
-                        className="input-primary flex-1 !text-xs !bg-white"
+                    <div className="flex flex-col gap-2">
+                      <textarea 
+                        placeholder="Dán liên tục các link vào đây..." 
+                        className="input-primary w-full !text-xs !bg-white min-h-[100px] resize-y leading-relaxed"
                         value={smartPasteText}
                         onChange={(e) => setSmartPasteText(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleSmartPaste();
+                        onPaste={(e) => {
+                          // Tự động thêm dấu xuống dòng sau khi dán
+                          setTimeout(() => {
+                            setSmartPasteText(prev => prev.endsWith('\n') ? prev : prev + '\n');
+                          }, 10);
                         }}
                       />
-                      <button 
-                        onClick={handleSmartPaste}
-                        disabled={!smartPasteText}
-                        className="btn-primary !py-2 !px-4 text-xs disabled:opacity-50 whitespace-nowrap"
-                      >
-                        Auto Fill Links
-                      </button>
+                      <div className="flex gap-2 justify-end">
+                        <button 
+                          onClick={async () => {
+                            try {
+                              const text = await navigator.clipboard.readText();
+                              setSmartPasteText(prev => prev + (prev && !prev.endsWith('\n') ? '\n' : '') + text + '\n');
+                            } catch(err) {
+                              alert("Trình duyệt chặn quyền Clipboard. Vui lòng dán thủ công bằng Ctrl+V");
+                            }
+                          }}
+                          className="btn-secondary !py-2 !px-4 text-xs whitespace-nowrap bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center gap-1"
+                        >
+                          Dán (Paste)
+                        </button>
+                        <button 
+                          onClick={handleSmartPaste}
+                          disabled={!smartPasteText}
+                          className="btn-primary !py-2 !px-4 text-xs disabled:opacity-50 whitespace-nowrap"
+                        >
+                          Auto Fill Links
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
