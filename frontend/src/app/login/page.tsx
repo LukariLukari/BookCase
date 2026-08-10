@@ -12,6 +12,7 @@ export default function LoginPage() {
   const { login } = useAuth();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,14 +24,14 @@ export default function LoginPage() {
       formData.append('password', password);
 
       // Login to get token
-      const res = await axios.post(`${API_URL}/api/auth/login`, formData, {
+      const res = await axios.post(`${baseUrl}/api/auth/login`, formData, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
       
       const token = res.data.access_token;
       
       // Fetch user profile
-      const userRes = await axios.get(`${API_URL}/api/auth/me`, {
+      const userRes = await axios.get(`${baseUrl}/api/auth/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
