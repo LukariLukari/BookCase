@@ -51,8 +51,9 @@ export default function AdminPage() {
   const handleSmartPaste = () => {
     if (!smartPasteText) return;
     
-    // Tìm tất cả các link Google Drive trong đoạn text (hỗ trợ cả view link và open?id link)
-    const driveRegex = /(?:https?:\/\/)?drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)(?:\/view.*)?/g;
+    // Tìm tất cả các link Google Drive trong đoạn text
+    // Bỏ phần xử lý đuôi tham lam (greedy) /view.* để tránh nuốt mất các link phía sau
+    const driveRegex = /(?:https?:\/\/)?drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)/g;
     const links: string[] = [];
     let match;
     while ((match = driveRegex.exec(smartPasteText)) !== null) {
