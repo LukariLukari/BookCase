@@ -30,9 +30,10 @@ from create_admin import create_default_admin
 def startup_event():
     # Auto-migrate database to add email column if it's missing
     from database import SessionLocal
+    from sqlalchemy import text
     db = SessionLocal()
     try:
-        db.execute("ALTER TABLE users ADD COLUMN email VARCHAR;")
+        db.execute(text("ALTER TABLE users ADD COLUMN email VARCHAR;"))
         db.commit()
     except Exception:
         db.rollback() # Column already exists or error
