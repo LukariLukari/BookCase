@@ -191,8 +191,7 @@ export default function AdminPage() {
     }
   };
 
-  const updateItemLink = (index: number, url: string) => {
-  
+
   const handleBulkUploadSubmit = async () => {
     setIsUploading(true);
     let uploadedCount = 0;
