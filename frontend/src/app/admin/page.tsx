@@ -46,6 +46,44 @@ export default function AdminPage() {
   // Add State (Bulk Upload)
   const [uploadItems, setUploadItems] = useState<UploadItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [smartPasteText, setSmartPasteText] = useState('');
+
+  const handleSmartPaste = () => {
+    if (!smartPasteText) return;
+    
+    // Tìm tất cả các link Google Drive trong đoạn text (hỗ trợ cả view link và open?id link)
+    const driveRegex = /(?:https?:\/\/)?drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)(?:\/view.*)?/g;
+    const links: string[] = [];
+    let match;
+    while ((match = driveRegex.exec(smartPasteText)) !== null) {
+      links.push(`https://drive.google.com/file/d/${match[1]}/view`);
+    }
+    
+    if (links.length === 0) {
+      alert('Không tìm thấy link Google Drive hợp lệ trong đoạn text.');
+      return;
+    }
+
+    setUploadItems(prev => {
+      const newItems = [...prev];
+      let linkIndex = 0;
+      let filledCount = 0;
+      
+      // Điền tuần tự link vào các file chưa có link
+      for (let i = 0; i < newItems.length; i++) {
+        if (!newItems[i].external_url && linkIndex < links.length) {
+          newItems[i].external_url = links[linkIndex];
+          linkIndex++;
+          filledCount++;
+        }
+      }
+      
+      setTimeout(() => alert(`Đã trích xuất và tự động ghép nối thành công ${filledCount} links!`), 100);
+      return newItems;
+    });
+    
+    setSmartPasteText('');
+  };
 
   const [error, setError] = useState<string | null>(null);
 
@@ -327,6 +365,33 @@ export default function AdminPage() {
                   <Upload size={32} className="mx-auto text-gray-400 mb-2" />
                   <p className="text-sm font-bold text-black">Click or Drag to Select Multiple PDF/EPUB Files</p>
                 </div>
+
+                {/* Smart Paste Block */}
+                {uploadItems.length > 0 && uploadItems.some(item => !item.external_url) && (
+                  <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl mt-4">
+                    <h4 className="text-sm font-bold text-orange-600 mb-2">Smart Auto-Link</h4>
+                    <p className="text-xs text-orange-500/80 mb-3">Copy tất cả các link Google Drive của bạn (dù là một danh sách lộn xộn) và dán vào đây. Hệ thống sẽ tự động bóc tách và gắn link vào từng sách trống phía dưới.</p>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        placeholder="Dán hỗn hợp link vào đây..." 
+                        className="input-primary flex-1 !text-xs !bg-white"
+                        value={smartPasteText}
+                        onChange={(e) => setSmartPasteText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSmartPaste();
+                        }}
+                      />
+                      <button 
+                        onClick={handleSmartPaste}
+                        disabled={!smartPasteText}
+                        className="btn-primary !py-2 !px-4 text-xs disabled:opacity-50 whitespace-nowrap"
+                      >
+                        Auto Fill Links
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Danh sách file đã chọn */}
                 {uploadItems.length > 0 && (
