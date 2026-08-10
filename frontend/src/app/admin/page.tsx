@@ -47,14 +47,19 @@ export default function AdminPage() {
   const [uploadItems, setUploadItems] = useState<UploadItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
+  const [error, setError] = useState<string | null>(null);
+
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
 
   const fetchBooks = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/books`);
+      const response = await axios.get(`${baseUrl}/api/books`);
       setBooks(response.data);
-    } catch (error) {
-      console.error('Lỗi lấy dữ liệu sách:', error);
+      setError(null);
+    } catch (err: any) {
+      console.error('Lỗi lấy dữ liệu sách:', err);
+      setError(err.message || 'Lỗi kết nối API');
     }
   };
 
@@ -248,7 +253,13 @@ export default function AdminPage() {
             ))}
           </div>
 
-          {filteredBooks.length === 0 && (
+          {error && (
+            <div className="text-center bg-red-50 text-red-500 p-4 rounded-xl text-sm font-bold mt-10">
+              {error}
+            </div>
+          )}
+
+          {filteredBooks.length === 0 && !error && (
             <div className="text-center text-gray-500 text-sm mt-10">No books found.</div>
           )}
         </main>
