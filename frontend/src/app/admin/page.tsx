@@ -51,35 +51,59 @@ export default function AdminPage() {
   const handleSmartPaste = () => {
     if (!smartPasteText) return;
     
-    // Tìm tất cả các link Google Drive trong đoạn text
-    // Bỏ phần xử lý đuôi tham lam (greedy) /view.* để tránh nuốt mất các link phía sau
-    const driveRegex = /(?:https?:\/\/)?drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)/g;
-    const links: string[] = [];
-    let match;
-    while ((match = driveRegex.exec(smartPasteText)) !== null) {
-      links.push(`https://drive.google.com/file/d/${match[1]}/view`);
+    const lines = smartPasteText.split('\n');
+    const extractedLinks: {name: string, url: string}[] = [];
+    
+    for (const line of lines) {
+      const driveRegex = /(?:https?:\/\/)?drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)/;
+      const match = driveRegex.exec(line);
+      if (match) {
+         const beforeLink = line.substring(0, match.index).trim();
+         const cleanName = beforeLink.replace(/^[-:.*]+|[-:.*]+$/g, '').trim();
+         
+         extractedLinks.push({
+           name: cleanName,
+           url: `https://drive.google.com/file/d/${match[1]}/view`
+         });
+      }
     }
     
-    if (links.length === 0) {
+    if (extractedLinks.length === 0) {
       alert('Không tìm thấy link Google Drive hợp lệ trong đoạn text.');
       return;
     }
 
     setUploadItems(prev => {
       const newItems = [...prev];
-      let linkIndex = 0;
       let filledCount = 0;
+      const unassignedLinks: string[] = [];
       
-      // Điền tuần tự link vào các file chưa có link
+      // Bước 1: Thử match theo tên file (nếu có tên đi kèm link)
+      for (const link of extractedLinks) {
+         if (link.name) {
+            const targetIndex = newItems.findIndex(item => !item.external_url && item.file.name.toLowerCase().includes(link.name.toLowerCase()));
+            if (targetIndex !== -1) {
+               newItems[targetIndex].external_url = link.url;
+               filledCount++;
+            } else {
+               unassignedLinks.push(link.url);
+            }
+         } else {
+            unassignedLinks.push(link.url);
+         }
+      }
+      
+      // Bước 2: Điền tuần tự các link chưa được assign vào các file còn trống
+      let linkIndex = 0;
       for (let i = 0; i < newItems.length; i++) {
-        if (!newItems[i].external_url && linkIndex < links.length) {
-          newItems[i].external_url = links[linkIndex];
+        if (!newItems[i].external_url && linkIndex < unassignedLinks.length) {
+          newItems[i].external_url = unassignedLinks[linkIndex];
           linkIndex++;
           filledCount++;
         }
       }
       
-      setTimeout(() => alert(`Đã trích xuất và tự động ghép nối thành công ${filledCount} links!`), 100);
+      setTimeout(() => alert(`Đã tự động ghép nối thành công ${filledCount} links!`), 100);
       return newItems;
     });
     
