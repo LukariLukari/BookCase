@@ -91,6 +91,20 @@ export default function LoginPage() {
             Login
           </button>
         </form>
+
+        <div className="mt-6 text-center space-y-2 text-sm">
+          <p className="text-gray-500">
+            Chưa có tài khoản?{' '}
+            <Link href="/register" className="text-orange-500 font-bold hover:underline">
+              Đăng ký ngay
+            </Link>
+          </p>
+          <p>
+            <Link href="/forgot-password" className="text-gray-400 font-medium hover:text-orange-500 hover:underline">
+              Quên mật khẩu?
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

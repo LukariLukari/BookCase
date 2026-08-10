@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, Integer, DateTime
 from sqlalchemy.sql import func
 import uuid
 from database import Base
+from sqlalchemy import Column, String, Integer, DateTime, Boolean
 
 def generate_uuid():
     return str(uuid.uuid4())
@@ -28,6 +29,18 @@ class User(Base):
 
     id = Column(String, primary_key=True, default=generate_uuid, index=True)
     username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=True)
     password_hash = Column(String)
     role = Column(String, default="user") # "admin" or "user"
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class OTP(Base):
+    __tablename__ = "otps"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    email = Column(String, index=True)
+    otp_code = Column(String)
+    purpose = Column(String) # "register" or "reset_password"
+    expires_at = Column(DateTime(timezone=True))
+    is_used = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -15,6 +15,10 @@ from database import engine, get_db
 import auth
 from drive_service import drive_service
 from extract_service import extract_pdf_info, extract_epub_info
+from email_service import send_otp_email
+from datetime import datetime, timezone
+import random
+import string
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -164,18 +168,111 @@ def delete_book(book_id: str, db: Session = Depends(get_db), current_user: model
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 
-@app.post("/api/auth/register", response_model=schemas.UserResponse)
+@app.post("/api/auth/send-otp")
+def send_otp(otp_request: schemas.OTPRequest, db: Session = Depends(get_db)):
+    # Check if email exists
+    existing_user = db.query(models.User).filter(models.User.email == otp_request.email).first()
+    
+    if otp_request.purpose == "register" and existing_user:
+        raise HTTPException(status_code=400, detail="Email này đã được đăng ký.")
+        
+    if otp_request.purpose == "reset_password" and not existing_user:
+        raise HTTPException(status_code=404, detail="Email này chưa được đăng ký.")
+
+    # Generate 6-digit OTP
+    otp_code = ''.join(random.choices(string.digits, k=6))
+    
+    # Save to DB
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
+    db_otp = models.OTP(
+        email=otp_request.email,
+        otp_code=otp_code,
+        purpose=otp_request.purpose,
+        expires_at=expires_at
+    )
+    db.add(db_otp)
+    db.commit()
+    
+    # Send email
+    success = send_otp_email(otp_request.email, otp_code, otp_request.purpose)
+    if not success:
+        raise HTTPException(status_code=500, detail="Không thể gửi email OTP. Vui lòng thử lại sau.")
+        
+    return {"message": "Mã OTP đã được gửi đến email của bạn."}
+
+@app.post("/api/auth/register")
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.username == user.username).first()
-    if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
+    # Check username
+    db_user_by_username = db.query(models.User).filter(models.User.username == user.username).first()
+    if db_user_by_username:
+        raise HTTPException(status_code=400, detail="Tên đăng nhập đã tồn tại.")
+        
+    db_user_by_email = db.query(models.User).filter(models.User.email == user.email).first()
+    if db_user_by_email:
+        raise HTTPException(status_code=400, detail="Email này đã được đăng ký.")
+        
+    # Verify OTP
+    otp_record = db.query(models.OTP).filter(
+        models.OTP.email == user.email,
+        models.OTP.otp_code == user.otp_code,
+        models.OTP.purpose == "register",
+        models.OTP.is_used == False,
+        models.OTP.expires_at > datetime.now(timezone.utc)
+    ).first()
+    
+    if not otp_record:
+        raise HTTPException(status_code=400, detail="Mã OTP không hợp lệ hoặc đã hết hạn.")
+        
+    otp_record.is_used = True
     
     hashed_password = auth.get_password_hash(user.password)
-    new_user = models.User(username=user.username, password_hash=hashed_password, role=user.role)
+    new_user = models.User(username=user.username, email=user.email, password_hash=hashed_password, role=user.role)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return new_user
+    
+    # Auto-login: Create access token
+    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth.create_access_token(
+        data={"sub": new_user.username}, expires_delta=access_token_expires
+    )
+    
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user": {
+            "id": new_user.id,
+            "username": new_user.username,
+            "email": new_user.email,
+            "role": new_user.role,
+            "created_at": new_user.created_at
+        }
+    }
+
+@app.post("/api/auth/reset-password")
+def reset_password(reset_data: schemas.PasswordReset, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == reset_data.email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Email này chưa được đăng ký.")
+        
+    # Verify OTP
+    otp_record = db.query(models.OTP).filter(
+        models.OTP.email == reset_data.email,
+        models.OTP.otp_code == reset_data.otp_code,
+        models.OTP.purpose == "reset_password",
+        models.OTP.is_used == False,
+        models.OTP.expires_at > datetime.now(timezone.utc)
+    ).first()
+    
+    if not otp_record:
+        raise HTTPException(status_code=400, detail="Mã OTP không hợp lệ hoặc đã hết hạn.")
+        
+    otp_record.is_used = True
+    
+    user.password_hash = auth.get_password_hash(reset_data.new_password)
+    db.commit()
+    
+    return {"message": "Mật khẩu đã được cập nhật thành công."}
 
 @app.post("/api/auth/login", response_model=schemas.Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

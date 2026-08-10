@@ -43,12 +43,15 @@ class BookResponse(BookBase):
 
 class UserCreate(BaseModel):
     username: str
+    email: str
     password: str
+    otp_code: str
     role: Optional[str] = "user"
 
 class UserResponse(BaseModel):
     id: str
     username: str
+    email: Optional[str] = None
     role: str
     created_at: datetime
 
@@ -59,3 +62,12 @@ class UserResponse(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class OTPRequest(BaseModel):
+    email: str
+    purpose: str # "register" or "reset_password"
+
+class PasswordReset(BaseModel):
+    email: str
+    otp_code: str
+    new_password: str
