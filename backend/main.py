@@ -7,7 +7,9 @@ from typing import List
 from fastapi.responses import RedirectResponse
 import uvicorn
 import re
-import uvicorn
+import urllib.request
+import urllib.parse
+import json
 
 import models
 import schemas
@@ -77,6 +79,22 @@ async def upload_book(
         final_author = extracted.get('author') or "Unknown Author"
         final_summary = extracted.get('summary') or ""
         cover_b64 = extracted.get('cover_b64')
+        
+        # Tối ưu hóa Database: Upload Base64 lên ImgBB để lấy URL ngắn (Nếu có API Key)
+        imgbb_key = os.getenv("IMGBB_API_KEY")
+        if imgbb_key and cover_b64 and cover_b64.startswith("data:image"):
+            try:
+                b64_data = cover_b64.split(",")[1]
+                url = "https://api.imgbb.com/1/upload"
+                data = urllib.parse.urlencode({'key': imgbb_key, 'image': b64_data}).encode('utf-8')
+                req = urllib.request.Request(url, data=data)
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    res = json.loads(response.read().decode('utf-8'))
+                    img_url = res.get("data", {}).get("url")
+                    if img_url:
+                        cover_b64 = img_url
+            except Exception as e:
+                print(f"ImgBB Upload Failed: {e}")
             
         drive_file_id = None
         if not external_url or not external_url.strip():

@@ -44,9 +44,13 @@ export default function AdminPage() {
   const [editForm, setEditForm] = useState({ title: '', author: '', genre: '', summary: '', cover_url: '', external_url: '' });
   
   // Add State (Bulk Upload)
+  const [addMode, setAddMode] = useState<'upload' | 'link'>('upload');
   const [uploadItems, setUploadItems] = useState<UploadItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [smartPasteText, setSmartPasteText] = useState('');
+  
+  // Add State (Direct Link)
+  const [linkForm, setLinkForm] = useState({ title: '', author: '', genre: '', cover_url: '', external_url: '' });
 
   const handleSmartPaste = () => {
     if (!smartPasteText) return;
@@ -188,42 +192,60 @@ export default function AdminPage() {
   };
 
   const updateItemLink = (index: number, url: string) => {
-    const newItems = [...uploadItems];
-    newItems[index].external_url = url;
-    setUploadItems(newItems);
-  };
   
-  const removeItem = (index: number) => {
-    const newItems = [...uploadItems];
-    newItems.splice(index, 1);
-    setUploadItems(newItems);
-  };
-
   const handleBulkUploadSubmit = async () => {
-    if (uploadItems.length === 0) return;
     setIsUploading(true);
+    let uploadedCount = 0;
+    
     for (const item of uploadItems) {
-      const formData = new FormData();
-      formData.append('file', item.file);
-      formData.append('title', item.file.name.replace(/\.[^/.]+$/, ""));
-      if (item.external_url) {
-        formData.append('external_url', item.external_url);
-      }
       try {
+        const formData = new FormData();
+        formData.append('file', item.file);
+        // Lấy tên sách từ tên file (bỏ đuôi .pdf, .epub)
+        const title = item.file.name.replace(/\.[^/.]+$/, "");
+        formData.append('title', title);
+        if (item.external_url) {
+          formData.append('external_url', item.external_url);
+        }
+        
         await axios.post(`${API_URL}/api/books/upload`, formData, {
           headers: { 
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`
           }
         });
+        uploadedCount++;
       } catch (err) {
-        console.error('Lỗi khi tải file lên:', err);
+        console.error(`Lỗi tải lên file ${item.file.name}:`, err);
       }
     }
+    
     setIsUploading(false);
     setIsAddModalOpen(false);
     setUploadItems([]);
     fetchBooks();
+    if (uploadedCount > 0) alert(`Đã tải lên thành công ${uploadedCount} sách!`);
+  };
+
+  const handleAddByLinkSubmit = async () => {
+    if (!linkForm.title || !linkForm.external_url) {
+       alert("Vui lòng nhập tối thiểu Tên sách và Link Drive!");
+       return;
+    }
+    setIsUploading(true);
+    try {
+       await axios.post(`${API_URL}/api/books/link`, linkForm, {
+         headers: { Authorization: `Bearer ${token}` }
+       });
+       setIsUploading(false);
+       setIsAddModalOpen(false);
+       setLinkForm({ title: '', author: '', genre: '', cover_url: '', external_url: '' });
+       fetchBooks();
+       alert("Đã thêm sách thành công!");
+    } catch(err) {
+       setIsUploading(false);
+       alert("Lỗi khi thêm sách bằng Link!");
+    }
   };
 
   const filteredBooks = books.filter((book) => 
@@ -380,101 +402,138 @@ export default function AdminPage() {
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
            <div className="bg-white rounded-3xl w-full max-w-2xl p-8 shadow-2xl relative max-h-[90vh] flex flex-col">
-              <button onClick={() => {setIsAddModalOpen(false); setUploadItems([]);}} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-500 hover:text-black"><X size={16}/></button>
-              <h3 className="text-xl font-bold mb-6 text-black">Upload Books</h3>
+              <button onClick={() => {setIsAddModalOpen(false); setUploadItems([]); setAddMode('upload');}} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-500 hover:text-black"><X size={16}/></button>
+              
+              <div className="flex gap-4 mb-6 border-b">
+                 <button 
+                    className={`pb-3 text-lg font-bold px-2 ${addMode === 'upload' ? 'text-black border-b-2 border-black' : 'text-gray-400'}`}
+                    onClick={() => setAddMode('upload')}
+                 >
+                    Upload Sách (PDF/EPUB)
+                 </button>
+                 <button 
+                    className={`pb-3 text-lg font-bold px-2 ${addMode === 'link' ? 'text-black border-b-2 border-black' : 'text-gray-400'}`}
+                    onClick={() => setAddMode('link')}
+                 >
+                    Thêm Nhanh (Bằng Link)
+                 </button>
+              </div>
               
               <div className="flex-1 overflow-y-auto pr-2 space-y-4 min-h-[200px]">
-                {/* Khu vực chọn file */}
-                <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:bg-gray-50 transition-colors relative">
-                  <input type="file" multiple accept=".pdf,.epub" className="absolute opacity-0 cursor-pointer inset-0 z-10" onChange={handleFileSelect} />
-                  <Upload size={32} className="mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm font-bold text-black">Click or Drag to Select Multiple PDF/EPUB Files</p>
-                </div>
-
-                {/* Smart Paste Block */}
-                {uploadItems.length > 0 && uploadItems.some(item => !item.external_url) && (
-                  <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl mt-4">
-                    <h4 className="text-sm font-bold text-orange-600 mb-2">Smart Auto-Link</h4>
-                    <p className="text-xs text-orange-500/80 mb-3">Copy tất cả các link Google Drive của bạn (dù là một danh sách lộn xộn) và dán vào đây. Hệ thống sẽ tự động bóc tách và gắn link vào từng sách trống phía dưới.</p>
-                    <div className="flex flex-col gap-2">
-                      <textarea 
-                        placeholder="Dán liên tục các link vào đây..." 
-                        className="input-primary w-full !text-xs !bg-white min-h-[100px] resize-y leading-relaxed"
-                        value={smartPasteText}
-                        onChange={(e) => setSmartPasteText(e.target.value)}
-                        onPaste={(e) => {
-                          // Tự động thêm dấu xuống dòng sau khi dán
-                          setTimeout(() => {
-                            setSmartPasteText(prev => prev.endsWith('\n') ? prev : prev + '\n');
-                          }, 10);
-                        }}
-                      />
-                      <div className="flex gap-2 justify-end">
-                        <button 
-                          onClick={async () => {
-                            try {
-                              const text = await navigator.clipboard.readText();
-                              setSmartPasteText(prev => prev + (prev && !prev.endsWith('\n') ? '\n' : '') + text + '\n');
-                            } catch(err) {
-                              alert("Trình duyệt chặn quyền Clipboard. Vui lòng dán thủ công bằng Ctrl+V");
-                            }
-                          }}
-                          className="btn-secondary !py-2 !px-4 text-xs whitespace-nowrap bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center gap-1"
-                        >
-                          Dán (Paste)
-                        </button>
-                        <button 
-                          onClick={handleSmartPaste}
-                          disabled={!smartPasteText}
-                          className="btn-primary !py-2 !px-4 text-xs disabled:opacity-50 whitespace-nowrap"
-                        >
-                          Auto Fill Links
-                        </button>
-                      </div>
+                {addMode === 'upload' ? (
+                  <>
+                    {/* Khu vực chọn file */}
+                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:bg-gray-50 transition-colors relative">
+                      <input type="file" multiple accept=".pdf,.epub" className="absolute opacity-0 cursor-pointer inset-0 z-10" onChange={handleFileSelect} />
+                      <Upload size={32} className="mx-auto text-gray-400 mb-2" />
+                      <p className="text-sm font-bold text-black">Click or Drag to Select Multiple PDF/EPUB Files</p>
                     </div>
-                  </div>
-                )}
 
-                {/* Danh sách file đã chọn */}
-                {uploadItems.length > 0 && (
-                  <div className="mt-6 space-y-3">
-                    <h4 className="text-sm font-bold text-black border-b pb-2">Selected Files ({uploadItems.length})</h4>
-                    {uploadItems.map((item, index) => (
-                      <div key={index} className="flex flex-col gap-2 p-4 bg-gray-50 rounded-xl border border-gray-100 relative group">
-                         <button onClick={() => removeItem(index)} className="absolute top-2 right-2 p-1.5 bg-white text-gray-400 hover:text-red-500 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                           <X size={14} />
-                         </button>
-                         <div className="flex items-center gap-2 text-black font-bold text-sm pr-8 truncate">
-                           <Upload size={16} className="text-orange-500 flex-shrink-0" />
-                           <span className="truncate">{item.file.name}</span>
-                         </div>
-                         <div className="flex items-center gap-2 mt-1">
-                           <LinkIcon size={14} className="text-gray-400 flex-shrink-0" />
-                           <input 
-                             type="text" 
-                             placeholder="Paste Google Drive Link (Optional)" 
-                             className="input-primary !py-2 !px-3 !text-xs"
-                             value={item.external_url}
-                             onChange={(e) => updateItemLink(index, e.target.value)}
-                           />
-                         </div>
+                    {/* Smart Paste Block */}
+                    {uploadItems.length > 0 && uploadItems.some(item => !item.external_url) && (
+                      <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl mt-4">
+                        <h4 className="text-sm font-bold text-orange-600 mb-2">Smart Auto-Match</h4>
+                        <p className="text-xs text-orange-500/80 mb-3">Dán danh sách theo định dạng <b>Tên Sách - Link Drive</b>, hệ thống sẽ tự động ghép đúng link vào đúng sách bất chấp thứ tự!</p>
+                        <div className="flex flex-col gap-2">
+                          <textarea 
+                            placeholder="Tên Sách 1 - https://drive...&#10;Tên Sách 2 - https://drive..." 
+                            className="input-primary w-full !text-xs !bg-white min-h-[100px] resize-y leading-relaxed"
+                            value={smartPasteText}
+                            onChange={(e) => setSmartPasteText(e.target.value)}
+                            onPaste={(e) => {
+                              setTimeout(() => {
+                                setSmartPasteText(prev => prev.endsWith('\n') ? prev : prev + '\n');
+                              }, 10);
+                            }}
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <button 
+                              onClick={async () => {
+                                try {
+                                  const text = await navigator.clipboard.readText();
+                                  setSmartPasteText(prev => prev + (prev && !prev.endsWith('\n') ? '\n' : '') + text + '\n');
+                                } catch(err) {
+                                  alert("Trình duyệt chặn quyền Clipboard. Vui lòng dán thủ công bằng Ctrl+V");
+                                }
+                              }}
+                              className="btn-secondary !py-2 !px-4 text-xs whitespace-nowrap bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center gap-1"
+                            >
+                              Dán (Paste)
+                            </button>
+                            <button 
+                              onClick={handleSmartPaste}
+                              disabled={!smartPasteText}
+                              className="btn-primary !py-2 !px-4 text-xs disabled:opacity-50 whitespace-nowrap"
+                            >
+                              Auto Match Links
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    ))}
+                    )}
+
+                    {/* Danh sách file đã chọn */}
+                    {uploadItems.length > 0 && (
+                      <div className="mt-6 space-y-3">
+                        <h4 className="text-sm font-bold text-black border-b pb-2">Selected Files ({uploadItems.length})</h4>
+                        {uploadItems.map((item, index) => (
+                          <div key={index} className="flex flex-col gap-2 p-4 bg-gray-50 rounded-xl border border-gray-100 relative group">
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold text-sm text-black truncate pr-4">{item.file.name}</span>
+                              <button onClick={() => setUploadItems(items => items.filter((_, i) => i !== index))} className="text-gray-400 hover:text-red-500"><Trash2 size={16}/></button>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <LinkIcon size={14} className="text-gray-400 shrink-0"/>
+                              <input 
+                                type="text" 
+                                placeholder="Paste Google Drive Link here..." 
+                                className="input-primary flex-1 !text-xs !py-1.5"
+                                value={item.external_url}
+                                onChange={(e) => {
+                                  const newItems = [...uploadItems];
+                                  newItems[index].external_url = e.target.value;
+                                  setUploadItems(newItems);
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-xs text-gray-500 mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100 text-blue-800">
+                      Thêm sách nhanh chóng không cần Upload file EPUB/PDF. Giúp tiết kiệm 100% băng thông tải lên và tự động lấy ảnh bìa từ đường link bạn cung cấp!
+                    </p>
+                    <div><label className="text-title text-sm block mb-1.5">Tên Sách <span className="text-red-500">*</span></label><input type="text" className="input-primary" value={linkForm.title} onChange={e=>setLinkForm({...linkForm, title: e.target.value})} /></div>
+                    <div><label className="text-title text-sm block mb-1.5">Tác Giả</label><input type="text" className="input-primary" value={linkForm.author} onChange={e=>setLinkForm({...linkForm, author: e.target.value})} /></div>
+                    <div><label className="text-title text-sm block mb-1.5">Thể Loại</label><input type="text" className="input-primary" value={linkForm.genre} onChange={e=>setLinkForm({...linkForm, genre: e.target.value})} /></div>
+                    <div><label className="text-title text-sm block mb-1.5">Link Google Drive <span className="text-red-500">*</span></label><input type="text" className="input-primary border-orange-200" placeholder="https://drive.google.com/..." value={linkForm.external_url} onChange={e=>setLinkForm({...linkForm, external_url: e.target.value})} /></div>
+                    <div><label className="text-title text-sm block mb-1.5">Link Ảnh Bìa (Cover URL)</label><input type="text" className="input-primary" placeholder="https://..." value={linkForm.cover_url} onChange={e=>setLinkForm({...linkForm, cover_url: e.target.value})} /></div>
                   </div>
                 )}
               </div>
-
-              {uploadItems.length > 0 && (
-                <div className="pt-6 mt-2 border-t border-gray-100">
-                  <button 
-                    onClick={handleBulkUploadSubmit} 
-                    disabled={isUploading}
-                    className="btn-primary w-full"
-                  >
-                    {isUploading ? 'Uploading...' : `Upload All ${uploadItems.length} Books`}
-                  </button>
-                </div>
-              )}
+              
+              <div className="mt-6 pt-4 border-t border-gray-100 shrink-0">
+                 {addMode === 'upload' ? (
+                   <button 
+                     onClick={handleBulkUploadSubmit} 
+                     disabled={isUploading || uploadItems.length === 0}
+                     className="btn-primary w-full !py-3"
+                   >
+                     {isUploading ? 'Uploading...' : `Upload All ${uploadItems.length} Books`}
+                   </button>
+                 ) : (
+                   <button 
+                     onClick={handleAddByLinkSubmit} 
+                     disabled={isUploading || !linkForm.title || !linkForm.external_url}
+                     className="btn-primary w-full !py-3"
+                   >
+                     {isUploading ? 'Đang thêm...' : 'Thêm Sách Nhanh'}
+                   </button>
+                 )}
+              </div>
            </div>
         </div>
       )}
