@@ -30,7 +30,7 @@ export default function AdminPage() {
   const [isFetchingBooks, setIsFetchingBooks] = useState(true);
   const [downloadProgress, setDownloadProgress] = useState(0);
   
-  const { user, token, isLoading } = useAuth();
+  const { user, token, logout, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -153,7 +153,11 @@ export default function AdminPage() {
       setError(null);
     } catch (err: any) {
       console.error('Lỗi lấy dữ liệu sách:', err);
-      setError(err.message || 'Lỗi kết nối API');
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        setError(err.message || 'Lỗi kết nối API');
+      }
       setIsFetchingBooks(false);
     }
   };

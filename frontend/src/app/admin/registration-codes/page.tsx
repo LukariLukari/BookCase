@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
-import { KeyRound, Plus, Copy, Check, Trash2, ShieldCheck, ShieldAlert, Loader2 } from 'lucide-react';
+import { KeyRound, Plus, Copy, Check, Trash2, ShieldCheck, ShieldAlert, Loader2, RefreshCw } from 'lucide-react';
 
 interface RegistrationCode {
   id: string;
@@ -16,7 +16,7 @@ interface RegistrationCode {
 }
 
 export default function AdminRegistrationCodesPage() {
-  const { user, token, isLoading: isAuthLoading } = useAuth();
+  const { user, token, logout, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
 
   const [codes, setCodes] = useState<RegistrationCode[]>([]);
@@ -24,6 +24,7 @@ export default function AdminRegistrationCodesPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [successNotice, setSuccessNotice] = useState<string | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
@@ -40,17 +41,25 @@ export default function AdminRegistrationCodesPage() {
     }
   }, [isAuthLoading, user]);
 
+  const getHeaders = () => {
+    const authToken = token || localStorage.getItem('access_token') || localStorage.getItem('token');
+    return { Authorization: `Bearer ${authToken}` };
+  };
+
   const fetchCodes = async () => {
     try {
       setLoading(true);
-      const authToken = localStorage.getItem('access_token');
       const res = await axios.get(`${baseUrl}/api/admin/registration-codes`, {
-        headers: { Authorization: `Bearer ${authToken}` }
+        headers: getHeaders()
       });
       setCodes(res.data);
     } catch (err: any) {
       console.error(err);
-      setError('Không thể tải danh sách mã đăng ký.');
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        setError(err.response?.data?.detail || 'Không thể tải danh sách mã đăng ký.');
+      }
     } finally {
       setLoading(false);
     }
@@ -60,15 +69,42 @@ export default function AdminRegistrationCodesPage() {
     try {
       setIsCreating(true);
       setError(null);
-      const authToken = localStorage.getItem('access_token');
-      await axios.post(`${baseUrl}/api/admin/registration-codes`, {}, {
-        headers: { Authorization: `Bearer ${authToken}` }
+      const res = await axios.post(`${baseUrl}/api/admin/registration-codes`, {}, {
+        headers: getHeaders()
       });
+      const newCode = res.data.code;
+      navigator.clipboard.writeText(newCode);
+      setSuccessNotice(`Đã tạo thành công và tự động sao chép mã: ${newCode}`);
+      setTimeout(() => setSuccessNotice(null), 5000);
       await fetchCodes();
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Lỗi khi tạo mã đăng ký.');
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        setError(err.response?.data?.detail || 'Lỗi khi tạo mã đăng ký.');
+      }
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleRegenerateCode = async (id: string) => {
+    try {
+      setError(null);
+      const res = await axios.put(`${baseUrl}/api/admin/registration-codes/${id}/regenerate`, {}, {
+        headers: getHeaders()
+      });
+      const newCode = res.data.code;
+      navigator.clipboard.writeText(newCode);
+      setSuccessNotice(`Đã tạo lại thành công & tự động sao chép mã mới: ${newCode}`);
+      setTimeout(() => setSuccessNotice(null), 5000);
+      setCodes(prev => prev.map(c => c.id === id ? res.data : c));
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        setError(err.response?.data?.detail || 'Lỗi khi đổi mã mới.');
+      }
     }
   };
 
@@ -76,13 +112,16 @@ export default function AdminRegistrationCodesPage() {
     if (!confirm('Bạn có chắc chắn muốn xóa mã đăng ký này?')) return;
     try {
       setError(null);
-      const authToken = localStorage.getItem('access_token');
       await axios.delete(`${baseUrl}/api/admin/registration-codes/${id}`, {
-        headers: { Authorization: `Bearer ${authToken}` }
+        headers: getHeaders()
       });
       setCodes(prev => prev.filter(c => c.id !== id));
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Lỗi khi xóa mã.');
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        setError(err.response?.data?.detail || 'Lỗi khi xóa mã.');
+      }
     }
   };
 
@@ -122,6 +161,13 @@ export default function AdminRegistrationCodesPage() {
           {error && (
             <div className="bg-red-50 text-red-500 p-4 rounded-2xl text-sm font-bold mb-6 text-center border border-red-100">
               {error}
+            </div>
+          )}
+
+          {successNotice && (
+            <div className="bg-green-50 text-green-700 p-4 rounded-2xl text-sm font-bold mb-6 text-center border border-green-200 flex items-center justify-center gap-2 animate-in fade-in">
+              <Check size={18} className="text-green-600" />
+              <span>{successNotice}</span>
             </div>
           )}
 
@@ -216,13 +262,22 @@ export default function AdminRegistrationCodesPage() {
                               </button>
 
                               {!item.is_used && (
-                                <button 
-                                  onClick={() => handleDeleteCode(item.id)}
-                                  className="p-2 rounded-xl text-red-500 hover:bg-red-50 transition-colors"
-                                  title="Xóa mã"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
+                                <>
+                                  <button 
+                                    onClick={() => handleRegenerateCode(item.id)}
+                                    className="p-2 rounded-xl text-orange-600 hover:bg-orange-50 transition-colors"
+                                    title="Tạo lại mã ngẫu nhiên mới"
+                                  >
+                                    <RefreshCw size={16} />
+                                  </button>
+                                  <button 
+                                    onClick={() => handleDeleteCode(item.id)}
+                                    className="p-2 rounded-xl text-red-500 hover:bg-red-50 transition-colors"
+                                    title="Xóa mã"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                </>
                               )}
                             </div>
                           </td>

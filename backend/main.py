@@ -349,6 +349,25 @@ def delete_registration_code(code_id: str, db: Session = Depends(get_db), curren
     db.commit()
     return {"message": "Đã xóa mã đăng ký thành công."}
 
+@app.put("/api/admin/registration-codes/{code_id}/regenerate", response_model=schemas.RegistrationCodeResponse)
+def regenerate_registration_code(code_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    code_obj = db.query(models.RegistrationCode).filter(models.RegistrationCode.id == code_id).first()
+    if not code_obj:
+        raise HTTPException(status_code=404, detail="Mã đăng ký không tồn tại.")
+    if code_obj.is_used:
+        raise HTTPException(status_code=400, detail="Không thể đổi mã đã được sử dụng.")
+        
+    while True:
+        code_str = "BC-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        exists = db.query(models.RegistrationCode).filter(models.RegistrationCode.code == code_str).first()
+        if not exists:
+            break
+
+    code_obj.code = code_str
+    db.commit()
+    db.refresh(code_obj)
+    return code_obj
+
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 
@@ -415,19 +434,20 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db_user_by_email:
         raise HTTPException(status_code=400, detail="Email này đã được đăng ký.")
         
-    # Verify OTP
-    otp_record = db.query(models.OTP).filter(
-        models.OTP.email == user.email,
-        models.OTP.otp_code == user.otp_code,
-        models.OTP.purpose == "register",
-        models.OTP.is_used == False,
-        models.OTP.expires_at > datetime.now(timezone.utc)
-    ).first()
-    
-    if not otp_record:
-        raise HTTPException(status_code=400, detail="Mã OTP không hợp lệ hoặc đã hết hạn.")
+    # Verify OTP (if provided)
+    if user.otp_code:
+        otp_record = db.query(models.OTP).filter(
+            models.OTP.email == user.email,
+            models.OTP.otp_code == user.otp_code,
+            models.OTP.purpose == "register",
+            models.OTP.is_used == False,
+            models.OTP.expires_at > datetime.now(timezone.utc)
+        ).first()
         
-    otp_record.is_used = True
+        if not otp_record:
+            raise HTTPException(status_code=400, detail="Mã OTP không hợp lệ hoặc đã hết hạn.")
+            
+        otp_record.is_used = True
     
     # Mark registration code as used
     reg_code.is_used = True

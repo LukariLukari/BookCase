@@ -45,7 +45,7 @@ class UserCreate(BaseModel):
     username: str
     email: str
     password: str
-    otp_code: str
+    otp_code: Optional[str] = None
     registration_code: str
     role: Optional[str] = "user"
 

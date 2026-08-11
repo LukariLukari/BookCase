@@ -28,15 +28,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
+    const storedToken = localStorage.getItem('access_token') || localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
-      
-      // Optionally verify token with backend here
-      // axios.get(..., { headers: { Authorization: `Bearer ${storedToken}` } })
     }
     setIsLoading(false);
   }, []);
@@ -45,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(newToken);
     setUser(userData);
     localStorage.setItem('token', newToken);
+    localStorage.setItem('access_token', newToken);
     localStorage.setItem('user', JSON.stringify(userData));
     router.push('/');
   };
@@ -53,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('access_token');
     localStorage.removeItem('user');
     router.push('/login');
   };

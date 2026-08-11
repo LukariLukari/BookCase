@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 export default function AdminCollectionsPage() {
-  const { user, token: authToken, isLoading: isAuthLoading } = useAuth();
+  const { user, token: authToken, logout, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -51,16 +51,23 @@ export default function AdminCollectionsPage() {
     }
   }, [isAuthLoading, user]);
 
+  const getHeaders = () => {
+    const token = authToken || localStorage.getItem('access_token') || localStorage.getItem('token');
+    return { Authorization: `Bearer ${token}` };
+  };
+
   const fetchCollections = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('access_token');
       const res = await axios.get(`${baseUrl}/api/collections`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getHeaders()
       });
       setCollections(res.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      if (error.response?.status === 401) {
+        logout();
+      }
     } finally {
       setLoading(false);
     }
