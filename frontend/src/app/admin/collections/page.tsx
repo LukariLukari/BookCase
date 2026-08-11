@@ -3,13 +3,14 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '@/components/Sidebar';
 import { Plus, Edit2, Trash2, Library, FolderOpen, Link as LinkIcon, X, Check } from 'lucide-react';
+import { getCoverUrl } from '@/utils/image';
 
 interface Collection {
   id: string;
   name: string;
   description: string;
   created_at: string;
-  book_count: int;
+  book_count: number;
 }
 
 export default function AdminCollectionsPage() {
@@ -263,7 +264,7 @@ export default function AdminCollectionsPage() {
                       >
                          <div className="w-full aspect-[2/3] relative">
                            {book.cover_url ? (
-                             <img src={book.cover_url} className={`w-full h-full object-cover transition-all ${isAdded ? 'brightness-110' : 'brightness-90 group-hover:brightness-100'}`} alt={book.title} />
+                             <img src={getCoverUrl(book.cover_url)} className={`w-full h-full object-cover transition-all ${isAdded ? 'brightness-110' : 'brightness-90 group-hover:brightness-100'}`} alt={book.title} />
                            ) : (
                              <div className="w-full h-full bg-slate-100 flex items-center justify-center p-2 text-center text-xs text-gray-400 font-bold">{book.title}</div>
                            )}

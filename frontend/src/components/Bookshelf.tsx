@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Download, X, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { getCoverUrl } from '@/utils/image';
 
 interface Book {
   id: string;
@@ -60,7 +61,7 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
           <motion.div layoutId={`book-cover-${heroBook.id}`} className="w-24 md:w-28 flex-shrink-0 -mt-8 md:-mt-10 mb-0 md:mb-2 shadow-2xl">
             {heroBook.cover_url ? (
               <img 
-                src={heroBook.cover_url} 
+                src={getCoverUrl(heroBook.cover_url)} 
                 alt={heroBook.title}
                 className="w-full aspect-[2/3] object-cover rounded-xl shadow-xl border border-white/20"
               />
@@ -101,7 +102,7 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
                 <motion.div layoutId={`book-cover-${book.id}`} className="w-full aspect-[2/3] relative z-10 mb-4">
                    {book.cover_url ? (
                      <img 
-                        src={book.cover_url} 
+                        src={getCoverUrl(book.cover_url)} 
                         className="w-full h-full object-cover rounded-2xl shadow-md group-hover:shadow-xl transition-shadow duration-300" 
                         alt={book.title} 
                         onError={(e) => {
@@ -155,7 +156,7 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
                   <motion.div layoutId={`book-cover-${selectedBook.id}`} className="w-full max-w-[200px] aspect-[2/3]">
                     {selectedBook.cover_url ? (
                       <img 
-                        src={selectedBook.cover_url} 
+                        src={getCoverUrl(selectedBook.cover_url)} 
                         className="w-full h-full object-cover rounded-2xl shadow-xl"
                       />
                     ) : (

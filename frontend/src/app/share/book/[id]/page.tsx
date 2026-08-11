@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Download, AlertCircle, BookOpen } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import { getCoverUrl } from '@/utils/image';
 
 export default function ShareBookPage() {
   const { id } = useParams();
@@ -70,7 +71,7 @@ export default function ShareBookPage() {
         <div className="w-full md:w-5/12 bg-gray-100 relative min-h-[300px] md:min-h-[500px]">
           {book.cover_url ? (
             <img 
-              src={book.cover_url} 
+              src={getCoverUrl(book.cover_url)} 
               className="absolute inset-0 w-full h-full object-cover" 
               alt={book.title} 
               onError={(e) => {

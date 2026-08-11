@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Download, AlertCircle, Library, Link as LinkIcon, Upload } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import { getCoverUrl } from '@/utils/image';
 
 export default function ShareCollectionPage() {
   const { id } = useParams();
@@ -96,7 +97,7 @@ export default function ShareCollectionPage() {
                 <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-gray-100 group-hover:shadow-xl transition-all duration-300">
                    {book.cover_url ? (
                      <img 
-                        src={book.cover_url} 
+                        src={getCoverUrl(book.cover_url)} 
                         className="w-full h-full object-cover" 
                         alt={book.title} 
                         onError={(e) => {
