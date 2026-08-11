@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [registrationCode, setRegistrationCode] = useState('');
   const [otpCode, setOtpCode] = useState('');
   
   const [error, setError] = useState('');
@@ -28,7 +29,8 @@ export default function RegisterPage() {
     try {
       const res = await axios.post(`${baseUrl}/api/auth/send-otp`, {
         email: email,
-        purpose: 'register'
+        purpose: 'register',
+        registration_code: registrationCode
       });
       setSuccessMsg(res.data.message || 'Mã OTP đã được gửi đến email của bạn.');
       setStep(2);
@@ -50,6 +52,7 @@ export default function RegisterPage() {
         email,
         password,
         otp_code: otpCode,
+        registration_code: registrationCode,
         role: 'user'
       });
       
@@ -107,6 +110,18 @@ export default function RegisterPage() {
         {step === 1 ? (
           <form onSubmit={handleSendOTP} className="space-y-4">
             <div>
+              <label className="block text-sm font-medium mb-1">Mã đăng ký <span className="text-red-500">*</span></label>
+              <input 
+                type="text" 
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm uppercase font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                value={registrationCode}
+                onChange={(e) => setRegistrationCode(e.target.value.toUpperCase())}
+                required
+                placeholder="Nhập mã đăng ký do Admin cấp"
+              />
+            </div>
+
+            <div>
               <label className="block text-sm font-medium mb-1">Username</label>
               <input 
                 type="text" 
@@ -115,7 +130,7 @@ export default function RegisterPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 required
                 minLength={3}
-                placeholder="Ví dụ: lukari"
+                placeholder="Nhập tên đăng nhập"
               />
             </div>
 

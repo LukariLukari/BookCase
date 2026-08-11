@@ -313,6 +313,42 @@ def remove_book_from_collection(collection_id: str, book_id: str, db: Session = 
     db.commit()
     return {"message": "Book removed from collection"}
 
+# --- REGISTRATION CODES API ---
+
+@app.post("/api/admin/registration-codes", response_model=schemas.RegistrationCodeResponse)
+def create_registration_code(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    while True:
+        code_str = "BC-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        exists = db.query(models.RegistrationCode).filter(models.RegistrationCode.code == code_str).first()
+        if not exists:
+            break
+            
+    reg_code = models.RegistrationCode(
+        code=code_str,
+        created_by=current_user.username
+    )
+    db.add(reg_code)
+    db.commit()
+    db.refresh(reg_code)
+    return reg_code
+
+@app.get("/api/admin/registration-codes", response_model=List[schemas.RegistrationCodeResponse])
+def get_registration_codes(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    codes = db.query(models.RegistrationCode).order_by(models.RegistrationCode.created_at.desc()).all()
+    return codes
+
+@app.delete("/api/admin/registration-codes/{code_id}")
+def delete_registration_code(code_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    code_obj = db.query(models.RegistrationCode).filter(models.RegistrationCode.id == code_id).first()
+    if not code_obj:
+        raise HTTPException(status_code=404, detail="Mã đăng ký không tồn tại.")
+    if code_obj.is_used:
+        raise HTTPException(status_code=400, detail="Không thể xóa mã đã được sử dụng.")
+        
+    db.delete(code_obj)
+    db.commit()
+    return {"message": "Đã xóa mã đăng ký thành công."}
+
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 
@@ -321,8 +357,17 @@ def send_otp(otp_request: schemas.OTPRequest, db: Session = Depends(get_db)):
     # Check if email exists
     existing_user = db.query(models.User).filter(models.User.email == otp_request.email).first()
     
-    if otp_request.purpose == "register" and existing_user:
-        raise HTTPException(status_code=400, detail="Email này đã được đăng ký.")
+    if otp_request.purpose == "register":
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email này đã được đăng ký.")
+        if not otp_request.registration_code:
+            raise HTTPException(status_code=400, detail="Vui lòng cung cấp mã đăng ký do Admin cấp.")
+        reg_code = db.query(models.RegistrationCode).filter(
+            models.RegistrationCode.code == otp_request.registration_code.strip().upper(),
+            models.RegistrationCode.is_used == False
+        ).first()
+        if not reg_code:
+            raise HTTPException(status_code=400, detail="Mã đăng ký không hợp lệ hoặc đã được sử dụng.")
         
     if otp_request.purpose == "reset_password" and not existing_user:
         raise HTTPException(status_code=404, detail="Email này chưa được đăng ký.")
@@ -350,6 +395,17 @@ def send_otp(otp_request: schemas.OTPRequest, db: Session = Depends(get_db)):
 
 @app.post("/api/auth/register")
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    # Check registration code
+    if not user.registration_code:
+        raise HTTPException(status_code=400, detail="Vui lòng cung cấp mã đăng ký do Admin cấp.")
+        
+    reg_code = db.query(models.RegistrationCode).filter(
+        models.RegistrationCode.code == user.registration_code.strip().upper(),
+        models.RegistrationCode.is_used == False
+    ).first()
+    if not reg_code:
+        raise HTTPException(status_code=400, detail="Mã đăng ký không hợp lệ hoặc đã được sử dụng.")
+
     # Check username
     db_user_by_username = db.query(models.User).filter(models.User.username == user.username).first()
     if db_user_by_username:
@@ -372,6 +428,10 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Mã OTP không hợp lệ hoặc đã hết hạn.")
         
     otp_record.is_used = True
+    
+    # Mark registration code as used
+    reg_code.is_used = True
+    reg_code.used_by_username = user.username
     
     hashed_password = auth.get_password_hash(user.password)
     new_user = models.User(username=user.username, email=user.email, password_hash=hashed_password, role=user.role)

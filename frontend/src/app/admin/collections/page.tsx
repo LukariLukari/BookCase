@@ -42,29 +42,33 @@ export default function AdminCollectionsPage() {
   const [allBooks, setAllBooks] = useState<any[]>([]);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
 
   useEffect(() => {
-    fetchCollections();
-    fetchAllBooks();
-  }, []);
+    if (!isAuthLoading && user?.role === 'admin') {
+      fetchCollections();
+      fetchAllBooks();
+    }
+  }, [isAuthLoading, user]);
 
   const fetchCollections = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('access_token');
-      const res = await axios.get(`${API_URL}/api/collections`, {
+      const res = await axios.get(`${baseUrl}/api/collections`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCollections(res.data);
-      setLoading(false);
     } catch (error) {
       console.error(error);
+    } finally {
       setLoading(false);
     }
   };
 
   const fetchAllBooks = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/books`);
+      const res = await axios.get(`${baseUrl}/api/books`);
       setAllBooks(res.data);
     } catch (error) {
       console.error(error);
@@ -93,9 +97,9 @@ export default function AdminCollectionsPage() {
       const payload = { name, description };
       
       if (editingCollection) {
-        await axios.put(`${API_URL}/api/collections/${editingCollection.id}`, payload, { headers });
+        await axios.put(`${baseUrl}/api/collections/${editingCollection.id}`, payload, { headers });
       } else {
-        await axios.post(`${API_URL}/api/collections`, payload, { headers });
+        await axios.post(`${baseUrl}/api/collections`, payload, { headers });
       }
       setIsModalOpen(false);
       fetchCollections();
@@ -111,7 +115,7 @@ export default function AdminCollectionsPage() {
     if (!confirm('Bạn có chắc chắn muốn xóa Tệp Sách này?')) return;
     try {
       const token = localStorage.getItem('access_token');
-      await axios.delete(`${API_URL}/api/collections/${id}`, {
+      await axios.delete(`${baseUrl}/api/collections/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchCollections();
@@ -131,7 +135,7 @@ export default function AdminCollectionsPage() {
   const openManageModal = async (collectionId: string) => {
     try {
       const token = localStorage.getItem('access_token');
-      const res = await axios.get(`${API_URL}/api/collections/${collectionId}`, {
+      const res = await axios.get(`${baseUrl}/api/collections/${collectionId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setActiveCollection(res.data);
@@ -151,13 +155,13 @@ export default function AdminCollectionsPage() {
       const headers = { Authorization: `Bearer ${token}` };
       
       if (isAdded) {
-        await axios.delete(`${API_URL}/api/collections/${activeCollection.id}/books/${bookId}`, { headers });
+        await axios.delete(`${baseUrl}/api/collections/${activeCollection.id}/books/${bookId}`, { headers });
         setActiveCollection({
           ...activeCollection,
           books: activeCollection.books.filter((b: any) => b.id !== bookId)
         });
       } else {
-        await axios.post(`${API_URL}/api/collections/${activeCollection.id}/books/${bookId}`, {}, { headers });
+        await axios.post(`${baseUrl}/api/collections/${activeCollection.id}/books/${bookId}`, {}, { headers });
         const bookObj = allBooks.find(b => b.id === bookId);
         setActiveCollection({
           ...activeCollection,

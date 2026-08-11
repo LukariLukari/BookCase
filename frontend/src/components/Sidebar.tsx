@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Library, LayoutDashboard, Bookmark, User, LogOut, Settings, Menu, X, LogIn, Loader2 } from 'lucide-react';
+import { Library, LayoutDashboard, Bookmark, User, LogOut, Settings, Menu, X, LogIn, Loader2, KeyRound } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 export default function Sidebar() {
@@ -23,6 +23,7 @@ export default function Sidebar() {
 
   if (user?.role === 'admin') {
     menuItems.splice(1, 1, { icon: <Library size={20} />, label: 'Collections', href: '/admin/collections' });
+    menuItems.push({ icon: <KeyRound size={20} />, label: 'Mã Đăng Ký', href: '/admin/registration-codes' });
     menuItems.push({ icon: <Settings size={20} />, label: 'Admin Dashboard', href: '/admin' });
   }
 

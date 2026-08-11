@@ -67,3 +67,15 @@ class CollectionBook(Base):
 
     collection = relationship("Collection", back_populates="books")
     book = relationship("Book", back_populates="collections")
+
+
+class RegistrationCode(Base):
+    __tablename__ = "registration_codes"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    code = Column(String, unique=True, index=True)
+    is_used = Column(Boolean, default=False)
+    used_by_username = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String, nullable=True)
+

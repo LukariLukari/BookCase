@@ -46,6 +46,7 @@ class UserCreate(BaseModel):
     email: str
     password: str
     otp_code: str
+    registration_code: str
     role: Optional[str] = "user"
 
 class UserResponse(BaseModel):
@@ -66,6 +67,19 @@ class Token(BaseModel):
 class OTPRequest(BaseModel):
     email: str
     purpose: str # "register" or "reset_password"
+    registration_code: Optional[str] = None
+
+class RegistrationCodeResponse(BaseModel):
+    id: str
+    code: str
+    is_used: bool
+    used_by_username: Optional[str] = None
+    created_at: datetime
+    created_by: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
 
 class PasswordReset(BaseModel):
     email: str
