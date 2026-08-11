@@ -42,16 +42,16 @@ export default function ShareBookPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent"></div>
+      <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center" suppressHydrationWarning>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent" suppressHydrationWarning></div>
       </div>
     );
   }
 
   if (error || !book) {
     return (
-      <div className="min-h-screen bg-[#f8f7f4] flex flex-col items-center justify-center p-4 text-center">
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 max-w-md w-full">
+      <div className="min-h-screen bg-[#f8f7f4] flex flex-col items-center justify-center p-4 text-center" suppressHydrationWarning>
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 max-w-md w-full" suppressHydrationWarning>
           <AlertCircle size={48} className="text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-black mb-2">Oops!</h1>
           <p className="text-gray-500">{error}</p>
@@ -61,37 +61,37 @@ export default function ShareBookPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f7f4] font-sans flex flex-col items-center justify-center p-4 py-12 md:py-24">
+    <div className="min-h-screen bg-[#f8f7f4] font-sans flex flex-col items-center justify-center p-4 py-12 md:py-24" suppressHydrationWarning>
       {/* Brand Header */}
       <div className="absolute top-6 left-6 md:top-10 md:left-10 flex items-center">
          <h1 className="text-2xl font-extrabold text-black tracking-tight">
-          Kindle<span className="text-orange-500">.</span>
+          BookCase<span className="text-orange-500">.</span>
         </h1>
       </div>
 
       {/* Book Card */}
-      <div className="w-full max-w-4xl bg-white rounded-[2rem] shadow-xl overflow-hidden flex flex-col md:flex-row border border-gray-100">
+      <div className="w-full max-w-5xl bg-white rounded-[2rem] shadow-xl overflow-hidden flex flex-col md:flex-row border border-gray-100">
         
         {/* Left Side: Cover Image */}
-        <div className="w-full md:w-5/12 bg-gray-100 relative min-h-[300px] md:min-h-[500px]">
-          {book.cover_url ? (
-            <img 
-              src={getCoverUrl(book.cover_url)} 
-              className="absolute inset-0 w-full h-full object-cover" 
-              alt={book.title} 
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover';
-              }}
-            />
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-gray-100 to-gray-200">
-              <BookOpen size={48} className="text-gray-300 mb-4" />
-              <span className="font-bold text-gray-400 text-lg">{book.title}</span>
-            </div>
-          )}
-          {/* Overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+        <div className="w-full md:w-5/12 bg-gray-50 p-8 md:p-12 flex items-center justify-center border-b md:border-b-0 md:border-r border-gray-100">
+          <div className="w-full max-w-[320px] aspect-[2/3] relative">
+            {book.cover_url ? (
+              <img 
+                src={getCoverUrl(book.cover_url)} 
+                className="absolute inset-0 w-full h-full object-cover rounded-2xl shadow-2xl" 
+                alt={book.title} 
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover';
+                }}
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-white rounded-2xl shadow-2xl border border-gray-100">
+                <BookOpen size={48} className="text-gray-300 mb-4" />
+                <span className="font-bold text-gray-400 text-lg">{book.title}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right Side: Info & Actions */}
@@ -129,13 +129,13 @@ export default function ShareBookPage() {
              <button 
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className="w-full sm:w-auto flex items-center justify-center gap-3 bg-black hover:bg-gray-800 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-70 disabled:hover:-translate-y-0"
+                className="w-full sm:w-auto btn-secondary flex items-center justify-center gap-3 py-4 px-8 shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-70 disabled:hover:-translate-y-0"
              >
                 {isDownloading ? <Loader2 size={20} className="animate-spin" /> : <Download size={20} />}
                 <span>{isDownloading ? 'Đang Tải...' : 'Tải Sách Xuống'}</span>
              </button>
              <p className="text-xs text-gray-400 mt-4 text-center sm:text-left">
-               Được chia sẻ thông qua nền tảng Kindle.
+               Được chia sẻ thông qua nền tảng BookCase.
              </p>
           </div>
         </div>

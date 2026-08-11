@@ -27,6 +27,8 @@ export default function AdminPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isFetchingBooks, setIsFetchingBooks] = useState(true);
+  const [downloadProgress, setDownloadProgress] = useState(0);
   
   const { user, token, isLoading } = useAuth();
   const router = useRouter();
@@ -132,12 +134,27 @@ export default function AdminPage() {
 
   const fetchBooks = async () => {
     try {
-      const response = await axios.get(`${baseUrl}/api/books`);
+      setIsFetchingBooks(true);
+      setDownloadProgress(0);
+      const response = await axios.get(`${baseUrl}/api/books`, {
+        onDownloadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setDownloadProgress(percentCompleted);
+          } else {
+            // Fake progress if total is unknown (e.g. gzip without content-length)
+            setDownloadProgress(prev => Math.min(prev + 10, 90));
+          }
+        }
+      });
       setBooks(response.data);
+      setDownloadProgress(100);
+      setTimeout(() => setIsFetchingBooks(false), 300);
       setError(null);
     } catch (err: any) {
       console.error('Lỗi lấy dữ liệu sách:', err);
       setError(err.message || 'Lỗi kết nối API');
+      setIsFetchingBooks(false);
     }
   };
 
@@ -310,61 +327,70 @@ export default function AdminPage() {
         </header>
 
         <main className="flex-1 px-4 md:px-10 pt-8 pb-12">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10">
-            {filteredBooks.map((book) => (
-              <div key={book.id} className="flex flex-col group relative">
-                {/* Ảnh bìa */}
-                <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-gray-100 group-hover:shadow-xl transition-all duration-300">
-                   {book.cover_url ? (
-                     <img 
-                        src={getCoverUrl(book.cover_url)} 
-                        className="w-full h-full object-cover" 
-                        alt={book.title} 
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover';
-                        }}
-                      />
-                   ) : (
-                     <div className="w-full h-full bg-slate-100 flex items-center justify-center p-4 text-center">
-                        <span className="font-bold text-gray-400 text-xs">{book.title}</span>
-                     </div>
-                   )}
-                   
-                   {/* Tag Nguồn (Source) */}
-                   <div className="absolute top-2 left-2 z-20">
-                     {book.external_url ? (
-                       <span className="flex items-center gap-1 text-orange-600 font-bold bg-orange-50/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-100" title={book.external_url}>
-                         <LinkIcon size={12} /> Drive
-                       </span>
+          {isFetchingBooks ? (
+            <div className="flex flex-col items-center justify-center mt-32 max-w-md mx-auto w-full px-4">
+               <div className="w-full bg-gray-200 rounded-full h-3 mb-3 shadow-inner overflow-hidden">
+                 <div className="bg-gradient-to-r from-orange-400 to-orange-600 h-full rounded-full transition-all duration-300" style={{ width: `${downloadProgress}%` }}></div>
+               </div>
+               <span className="text-sm font-bold text-gray-500 animate-pulse">Đang tải danh sách sách... {downloadProgress}%</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10">
+              {filteredBooks.map((book) => (
+                <div key={book.id} className="flex flex-col group relative">
+                  {/* Ảnh bìa */}
+                  <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-gray-100 group-hover:shadow-xl transition-all duration-300">
+                     {book.cover_url ? (
+                       <img 
+                          src={getCoverUrl(book.cover_url)} 
+                          className="w-full h-full object-cover" 
+                          alt={book.title} 
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover';
+                          }}
+                        />
                      ) : (
-                       <span className="flex items-center gap-1 text-gray-700 font-bold bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-gray-100">
-                         <Upload size={12} /> Local
-                       </span>
+                       <div className="w-full h-full bg-slate-100 flex items-center justify-center p-4 text-center">
+                          <span className="font-bold text-gray-400 text-xs">{book.title}</span>
+                       </div>
                      )}
-                   </div>
+                     
+                     {/* Tag Nguồn (Source) */}
+                     <div className="absolute top-2 left-2 z-20">
+                       {book.external_url ? (
+                         <span className="flex items-center gap-1 text-orange-600 font-bold bg-orange-50/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-100" title={book.external_url}>
+                           <LinkIcon size={12} /> Drive
+                         </span>
+                       ) : (
+                         <span className="flex items-center gap-1 text-gray-700 font-bold bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-gray-100">
+                           <Upload size={12} /> Local
+                         </span>
+                       )}
+                     </div>
 
-                   {/* Overlay Actions (Edit/Delete/Share) - Hiện trên Mobile luôn, ẩn trên Desktop cho đến khi hover */}
-                   <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 md:gap-3 z-20 backdrop-blur-[2px] p-2">
-                       <button onClick={() => copyShareLink(book.id)} className="p-2 md:p-2.5 bg-white text-black hover:text-green-500 rounded-full shadow-lg transition-transform hover:scale-110" title="Copy Share Link">
-                         {copiedId === book.id ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
-                       </button>
-                       <button onClick={() => openEditModal(book)} className="p-2 md:p-2.5 bg-white text-black hover:text-orange-500 rounded-full shadow-lg transition-transform hover:scale-110">
-                         <Edit2 size={16} />
-                       </button>
-                       <button onClick={() => handleDelete(book.id)} className="p-2 md:p-2.5 bg-white text-black hover:text-red-500 rounded-full shadow-lg transition-transform hover:scale-110">
-                         <Trash2 size={16} />
-                       </button>
-                   </div>
+                     {/* Overlay Actions (Edit/Delete/Share) - Hiện trên Mobile luôn, ẩn trên Desktop cho đến khi hover */}
+                     <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 md:gap-3 z-20 backdrop-blur-[2px] p-2">
+                         <button onClick={() => copyShareLink(book.id)} className="p-2 md:p-2.5 bg-white text-black hover:text-green-500 rounded-full shadow-lg transition-transform hover:scale-110" title="Copy Share Link">
+                           {copiedId === book.id ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
+                         </button>
+                         <button onClick={() => openEditModal(book)} className="p-2 md:p-2.5 bg-white text-black hover:text-orange-500 rounded-full shadow-lg transition-transform hover:scale-110">
+                           <Edit2 size={16} />
+                         </button>
+                         <button onClick={() => handleDelete(book.id)} className="p-2 md:p-2.5 bg-white text-black hover:text-red-500 rounded-full shadow-lg transition-transform hover:scale-110">
+                           <Trash2 size={16} />
+                         </button>
+                     </div>
+                  </div>
+                  
+                  {/* Thông tin Text */}
+                  <div className="px-1">
+                    <h3 className="text-sm font-bold text-black leading-tight line-clamp-2">{book.title}</h3>
+                  </div>
                 </div>
-                
-                {/* Thông tin Text */}
-                <div className="px-1">
-                  <h3 className="text-sm font-bold text-black leading-tight line-clamp-2">{book.title}</h3>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {error && (
             <div className="text-center bg-red-50 text-red-500 p-4 rounded-xl text-sm font-bold mt-10">
@@ -372,7 +398,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          {filteredBooks.length === 0 && !error && (
+          {!isFetchingBooks && filteredBooks.length === 0 && !error && (
             <div className="text-center text-gray-500 text-sm mt-10">No books found.</div>
           )}
         </main>

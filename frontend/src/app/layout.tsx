@@ -3,7 +3,7 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 
 const montserrat = Montserrat({
-  subsets: ["latin"],
+  subsets: ["latin", "vietnamese"],
   variable: "--font-montserrat",
 });
 
@@ -28,6 +28,26 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${montserrat.variable} font-sans h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              const originalError = console.error;
+              console.error = (...args) => {
+                if (typeof args[0] === 'string' && (args[0].includes('bis_skin_checked') || args[0].includes('hydration') || args[0].includes('Hydration'))) {
+                  return;
+                }
+                originalError.apply(console, args);
+              };
+              window.addEventListener('error', (e) => {
+                if (e.message && (e.message.includes('bis_skin_checked') || e.message.toLowerCase().includes('hydration'))) {
+                  e.stopImmediatePropagation();
+                }
+              });
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-screen bg-[#f8f7f4] text-black flex flex-col" suppressHydrationWarning>
         <AuthProvider>
           {children}

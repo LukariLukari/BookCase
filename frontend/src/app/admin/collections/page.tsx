@@ -13,7 +13,18 @@ interface Collection {
   book_count: number;
 }
 
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/contexts/AuthContext';
+
 export default function AdminCollectionsPage() {
+  const { user, token: authToken, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthLoading && (!user || user.role !== 'admin')) {
+      router.push('/');
+    }
+  }, [user, isAuthLoading, router]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,8 +99,10 @@ export default function AdminCollectionsPage() {
       }
       setIsModalOpen(false);
       fetchCollections();
-    } catch (err) {
-      setError("Đã có lỗi xảy ra khi lưu");
+    } catch (err: any) {
+      console.error(err);
+      const msg = err.response?.data?.detail || "Đã có lỗi xảy ra khi lưu";
+      setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
       setTimeout(() => setError(null), 3000);
     }
   };
@@ -158,6 +171,10 @@ export default function AdminCollectionsPage() {
     }
   };
 
+  if (isAuthLoading || !user || user.role !== 'admin') {
+    return <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center font-bold text-gray-500">Loading...</div>;
+  }
+
   return (
     <div className="flex bg-[#f8f7f4] min-h-screen font-sans selection:bg-orange-200 overflow-x-hidden">
       <Sidebar />
@@ -171,7 +188,7 @@ export default function AdminCollectionsPage() {
           </div>
           <button 
             onClick={openCreateModal}
-            className="bg-black hover:bg-gray-800 text-white p-2.5 md:px-6 md:py-3 md:rounded-full rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+            className="btn-primary !rounded-full !p-2.5 md:!py-3 md:!px-6 shadow-md hover:shadow-lg"
           >
             <Plus size={16} /> <span className="hidden sm:inline">Tạo Tệp Mới</span>
           </button>
@@ -250,7 +267,7 @@ export default function AdminCollectionsPage() {
                    <label className="block text-sm font-bold text-gray-700 mb-2">Mô tả (Tùy chọn)</label>
                    <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full bg-gray-50 border border-gray-200 text-black text-sm rounded-2xl focus:ring-orange-500 focus:border-orange-500 block p-4 outline-none transition-all h-24" placeholder="Nhập mô tả..." />
                  </div>
-                 <button type="submit" className="w-full text-white bg-black hover:bg-gray-800 font-bold rounded-2xl text-sm px-5 py-4 text-center shadow-lg transition-all mt-2">
+                 <button type="submit" className="w-full !text-white bg-black hover:bg-gray-800 font-bold rounded-2xl text-sm px-5 py-4 text-center shadow-lg transition-all mt-2">
                    {editingCollection ? 'Lưu Thay Đổi' : 'Tạo Tệp Sách'}
                  </button>
               </form>

@@ -1,11 +1,26 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Bookshelf from '@/components/Bookshelf';
 import Sidebar from '@/components/Sidebar';
 import { Search } from 'lucide-react';
+import { useAuth } from '@/app/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || !user) {
+    return <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center font-bold text-gray-500">Đang tải...</div>;
+  }
 
   const filteredBooks = initialBooks.filter((book: any) => 
     book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

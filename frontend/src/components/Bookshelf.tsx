@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, X, Trash2, Loader2 } from 'lucide-react';
+import { Download, X, Trash2, Loader2, Share2, Check } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { getCoverUrl } from '@/utils/image';
@@ -19,6 +19,7 @@ interface Book {
 export default function Bookshelf({ books, refresh }: { books: Book[], refresh: () => void }) {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const router = useRouter();
 
   if (books.length === 0) return null;
@@ -45,6 +46,14 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
     a.click();
     a.remove();
     setTimeout(() => setDownloadingId(null), 1500);
+  };
+
+  const copyShareLink = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/share/book/${id}`;
+    navigator.clipboard.writeText(url);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   return (
@@ -84,6 +93,14 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
               Added: {heroBook.created_at ? new Date(heroBook.created_at).toLocaleDateString() : 'Just added'}
             </p>
           </div>
+          
+          <button 
+            onClick={(e) => copyShareLink(e, heroBook.id)} 
+            className="absolute top-4 right-4 md:top-6 md:right-6 p-2.5 bg-white/10 hover:bg-white text-white hover:text-green-500 rounded-full shadow-lg transition-all hover:scale-110 backdrop-blur-md z-20"
+            title="Share Book"
+          >
+            {copiedId === heroBook.id ? <Check size={18} className="text-green-500" /> : <Share2 size={18} />}
+          </button>
         </motion.div>
       </div>
 
@@ -120,11 +137,19 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
                    )}
                 </motion.div>
                 
-                {/* Thông tin Text */}
-                <div className="px-1 mt-1">
-                  <h3 className="text-base md:text-sm font-bold text-black leading-tight line-clamp-2 mb-1">{book.title}</h3>
-                  <p className="text-sm md:text-xs text-gray-500 truncate mb-2">{book.author || "Unknown Author"}</p>
-                  
+                {/* Thông tin Text và Nút Share */}
+                <div className="px-1 mt-1 flex justify-between items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base md:text-sm font-bold text-black leading-tight line-clamp-2 mb-1">{book.title}</h3>
+                    <p className="text-sm md:text-xs text-gray-500 truncate mb-2">{book.author || "Unknown Author"}</p>
+                  </div>
+                  <button 
+                    onClick={(e) => copyShareLink(e, book.id)} 
+                    className="p-1.5 md:p-2 text-gray-400 hover:bg-green-50 hover:text-green-500 rounded-full transition-colors flex-shrink-0"
+                    title="Share Book"
+                  >
+                    {copiedId === book.id ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
+                  </button>
                 </div>
               </motion.div>
             ))}

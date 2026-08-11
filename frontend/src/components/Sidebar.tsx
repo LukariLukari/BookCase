@@ -68,7 +68,9 @@ export default function Sidebar() {
         <nav className={`absolute md:static top-16 left-0 w-full md:w-full bg-[#f8f7f4] md:bg-transparent border-b md:border-0 border-gray-200 shadow-lg md:shadow-none transition-all duration-300 origin-top flex-1 md:flex justify-start ${isMobileMenuOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 md:scale-y-100 md:opacity-100'} overflow-hidden md:overflow-visible`}>
           <ul className="flex flex-col p-4 md:p-0 md:space-y-2 md:w-full w-full gap-2 md:gap-0">
             {menuItems.map((item, index) => {
-              const isActive = item.href === pathname || (item.href !== '/' && item.href !== '#' && pathname.startsWith(item.href));
+              const isActive = item.href === '/admin' 
+                ? pathname === '/admin' 
+                : (item.href === pathname || (item.href !== '/' && item.href !== '#' && pathname.startsWith(item.href)));
               return (
                 <li key={index} className="w-full">
                   <Link 
