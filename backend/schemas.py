@@ -71,3 +71,25 @@ class PasswordReset(BaseModel):
     email: str
     otp_code: str
     new_password: str
+
+class CollectionCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+class CollectionUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+class CollectionResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    created_at: datetime
+    book_count: int = 0
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+class CollectionDetailResponse(CollectionResponse):
+    books: list[BookResponse] = []

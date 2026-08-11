@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
-import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2 } from 'lucide-react';
 
 interface Book {
   id: string;
@@ -247,7 +247,13 @@ export default function AdminPage() {
     }
   };
 
-  const filteredBooks = books.filter((book) => 
+  const copyShareLink = (id: string) => {
+    const url = `${window.location.origin}/share/book/${id}`;
+    navigator.clipboard.writeText(url);
+    alert('Đã copy link chia sẻ sách vào Clipboard!');
+  };
+
+  const filteredBooks = books.filter(book => 
     book.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -318,12 +324,15 @@ export default function AdminPage() {
                      )}
                    </div>
 
-                   {/* Actions (Edit/Delete) - No overlay, Floating Buttons */}
-                   <div className="absolute top-3 right-3 flex flex-col gap-2 z-20 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-0 md:translate-x-4 group-hover:translate-x-0">
-                       <button onClick={() => openEditModal(book)} className="p-2.5 bg-white text-gray-700 hover:text-orange-500 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.2)] transition-transform hover:scale-110 border border-gray-100 flex items-center justify-center">
+                   {/* Overlay Actions (Edit/Delete/Share) - Hiện trên Mobile luôn, ẩn trên Desktop cho đến khi hover */}
+                   <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 md:gap-3 z-20 backdrop-blur-[2px] p-2">
+                       <button onClick={() => copyShareLink(book.id)} className="p-2 md:p-2.5 bg-white text-black hover:text-green-500 rounded-full shadow-lg transition-transform hover:scale-110" title="Copy Share Link">
+                         <Share2 size={16} />
+                       </button>
+                       <button onClick={() => openEditModal(book)} className="p-2 md:p-2.5 bg-white text-black hover:text-orange-500 rounded-full shadow-lg transition-transform hover:scale-110">
                          <Edit2 size={16} />
                        </button>
-                       <button onClick={() => handleDelete(book.id)} className="p-2.5 bg-white text-gray-700 hover:text-red-500 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.2)] transition-transform hover:scale-110 border border-gray-100 flex items-center justify-center">
+                       <button onClick={() => handleDelete(book.id)} className="p-2 md:p-2.5 bg-white text-black hover:text-red-500 rounded-full shadow-lg transition-transform hover:scale-110">
                          <Trash2 size={16} />
                        </button>
                    </div>

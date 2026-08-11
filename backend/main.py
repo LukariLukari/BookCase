@@ -57,6 +57,13 @@ def get_books(db: Session = Depends(get_db)):
     books = db.query(models.Book).order_by(models.Book.created_at.desc()).all()
     return books
 
+@app.get("/api/books/{book_id}", response_model=schemas.BookResponse)
+def get_book(book_id: str, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return book
+
 @app.post("/api/books/upload", response_model=schemas.BookResponse)
 async def upload_book(
     file: UploadFile = File(...),
@@ -194,6 +201,94 @@ def delete_book(book_id: str, db: Session = Depends(get_db), current_user: model
     db.delete(book)
     db.commit()
     return {"message": "Deleted successfully"}
+
+# --- COLLECTIONS API ---
+
+@app.get("/api/collections", response_model=List[schemas.CollectionResponse])
+def get_collections(db: Session = Depends(get_db)):
+    collections = db.query(models.Collection).order_by(models.Collection.created_at.desc()).all()
+    for c in collections:
+        c.book_count = db.query(models.CollectionBook).filter(models.CollectionBook.collection_id == c.id).count()
+    return collections
+
+@app.get("/api/collections/{collection_id}", response_model=schemas.CollectionDetailResponse)
+def get_collection(collection_id: str, db: Session = Depends(get_db)):
+    collection = db.query(models.Collection).filter(models.Collection.id == collection_id).first()
+    if not collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    collection_books = db.query(models.CollectionBook).filter(models.CollectionBook.collection_id == collection_id).all()
+    books = []
+    for cb in collection_books:
+        if cb.book: books.append(cb.book)
+        
+    response = schemas.CollectionDetailResponse.from_orm(collection)
+    response.books = books
+    response.book_count = len(books)
+    return response
+
+@app.post("/api/collections", response_model=schemas.CollectionResponse)
+def create_collection(collection_in: schemas.CollectionCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    db_collection = models.Collection(
+        name=collection_in.name,
+        description=collection_in.description
+    )
+    db.add(db_collection)
+    db.commit()
+    db.refresh(db_collection)
+    db_collection.book_count = 0
+    return db_collection
+
+@app.put("/api/collections/{collection_id}", response_model=schemas.CollectionResponse)
+def update_collection(collection_id: str, collection_in: schemas.CollectionUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    collection = db.query(models.Collection).filter(models.Collection.id == collection_id).first()
+    if not collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    if collection_in.name is not None: collection.name = collection_in.name
+    if collection_in.description is not None: collection.description = collection_in.description
+    
+    db.commit()
+    db.refresh(collection)
+    collection.book_count = db.query(models.CollectionBook).filter(models.CollectionBook.collection_id == collection_id).count()
+    return collection
+
+@app.delete("/api/collections/{collection_id}")
+def delete_collection(collection_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    collection = db.query(models.Collection).filter(models.Collection.id == collection_id).first()
+    if not collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    db.delete(collection)
+    db.commit()
+    return {"message": "Collection deleted successfully"}
+
+@app.post("/api/collections/{collection_id}/books/{book_id}")
+def add_book_to_collection(collection_id: str, book_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    collection = db.query(models.Collection).filter(models.Collection.id == collection_id).first()
+    if not collection: raise HTTPException(status_code=404, detail="Collection not found")
+    
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book: raise HTTPException(status_code=404, detail="Book not found")
+    
+    existing = db.query(models.CollectionBook).filter_by(collection_id=collection_id, book_id=book_id).first()
+    if existing:
+        return {"message": "Book already in collection"}
+        
+    cb = models.CollectionBook(collection_id=collection_id, book_id=book_id)
+    db.add(cb)
+    db.commit()
+    return {"message": "Book added to collection"}
+
+@app.delete("/api/collections/{collection_id}/books/{book_id}")
+def remove_book_from_collection(collection_id: str, book_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    cb = db.query(models.CollectionBook).filter_by(collection_id=collection_id, book_id=book_id).first()
+    if not cb:
+        raise HTTPException(status_code=404, detail="Book not found in collection")
+    
+    db.delete(cb)
+    db.commit()
+    return {"message": "Book removed from collection"}
 
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
