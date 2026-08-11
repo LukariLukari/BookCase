@@ -16,6 +16,8 @@ interface Collection {
 export default function AdminCollectionsPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   
   // Create/Edit Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,6 +30,8 @@ export default function AdminCollectionsPage() {
   const [activeCollection, setActiveCollection] = useState<any>(null);
   const [allBooks, setAllBooks] = useState<any[]>([]);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
   useEffect(() => {
     fetchCollections();
     fetchAllBooks();
@@ -36,7 +40,7 @@ export default function AdminCollectionsPage() {
   const fetchCollections = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const res = await axios.get('http://localhost:8000/api/collections', {
+      const res = await axios.get(`${API_URL}/api/collections`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCollections(res.data);
@@ -49,7 +53,7 @@ export default function AdminCollectionsPage() {
 
   const fetchAllBooks = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/books');
+      const res = await axios.get(`${API_URL}/api/books`);
       setAllBooks(res.data);
     } catch (error) {
       console.error(error);
@@ -78,14 +82,15 @@ export default function AdminCollectionsPage() {
       const payload = { name, description };
       
       if (editingCollection) {
-        await axios.put(`http://localhost:8000/api/collections/${editingCollection.id}`, payload, { headers });
+        await axios.put(`${API_URL}/api/collections/${editingCollection.id}`, payload, { headers });
       } else {
-        await axios.post('http://localhost:8000/api/collections', payload, { headers });
+        await axios.post(`${API_URL}/api/collections`, payload, { headers });
       }
       setIsModalOpen(false);
       fetchCollections();
-    } catch (error) {
-      alert("Đã có lỗi xảy ra");
+    } catch (err) {
+      setError("Đã có lỗi xảy ra khi lưu");
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -93,31 +98,34 @@ export default function AdminCollectionsPage() {
     if (!confirm('Bạn có chắc chắn muốn xóa Tệp Sách này?')) return;
     try {
       const token = localStorage.getItem('access_token');
-      await axios.delete(`http://localhost:8000/api/collections/${id}`, {
+      await axios.delete(`${API_URL}/api/collections/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchCollections();
-    } catch (error) {
-      alert("Lỗi khi xóa");
+    } catch (err) {
+      setError("Lỗi khi xóa");
+      setTimeout(() => setError(null), 3000);
     }
   };
 
   const copyShareLink = (id: string) => {
     const url = `${window.location.origin}/share/collection/${id}`;
     navigator.clipboard.writeText(url);
-    alert('Đã copy link chia sẻ vào Clipboard!');
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const openManageModal = async (collectionId: string) => {
     try {
       const token = localStorage.getItem('access_token');
-      const res = await axios.get(`http://localhost:8000/api/collections/${collectionId}`, {
+      const res = await axios.get(`${API_URL}/api/collections/${collectionId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setActiveCollection(res.data);
       setIsManageModalOpen(true);
-    } catch (error) {
-      alert("Lỗi khi tải chi tiết tệp");
+    } catch (err) {
+      setError("Lỗi khi tải chi tiết tệp");
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -130,13 +138,13 @@ export default function AdminCollectionsPage() {
       const headers = { Authorization: `Bearer ${token}` };
       
       if (isAdded) {
-        await axios.delete(`http://localhost:8000/api/collections/${activeCollection.id}/books/${bookId}`, { headers });
+        await axios.delete(`${API_URL}/api/collections/${activeCollection.id}/books/${bookId}`, { headers });
         setActiveCollection({
           ...activeCollection,
           books: activeCollection.books.filter((b: any) => b.id !== bookId)
         });
       } else {
-        await axios.post(`http://localhost:8000/api/collections/${activeCollection.id}/books/${bookId}`, {}, { headers });
+        await axios.post(`${API_URL}/api/collections/${activeCollection.id}/books/${bookId}`, {}, { headers });
         const bookObj = allBooks.find(b => b.id === bookId);
         setActiveCollection({
           ...activeCollection,
@@ -144,8 +152,9 @@ export default function AdminCollectionsPage() {
         });
       }
       fetchCollections(); // Refresh counts
-    } catch (error) {
-      alert("Lỗi thao tác");
+    } catch (err) {
+      setError("Lỗi thao tác");
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -170,6 +179,11 @@ export default function AdminCollectionsPage() {
 
         {/* Content */}
         <main className="flex-1 px-4 md:px-10 pt-8 pb-12">
+          {error && (
+            <div className="text-center bg-red-50 text-red-500 p-4 rounded-xl text-sm font-bold mb-6">
+              {error}
+            </div>
+          )}
           {loading ? (
             <div className="flex justify-center mt-20"><div className="animate-spin rounded-full h-10 w-10 border-4 border-orange-500 border-t-transparent"></div></div>
           ) : (
@@ -182,7 +196,7 @@ export default function AdminCollectionsPage() {
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => copyShareLink(c.id)} className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-full transition-colors" title="Copy Share Link">
-                        <LinkIcon size={18} />
+                        {copiedId === c.id ? <Check size={18} className="text-green-500" /> : <LinkIcon size={18} />}
                       </button>
                       <button onClick={() => openEditModal(c)} className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors">
                         <Edit2 size={18} />

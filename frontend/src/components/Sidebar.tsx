@@ -1,14 +1,19 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Library, LayoutDashboard, Bookmark, User, LogOut, Settings, Menu, X, LogIn } from 'lucide-react';
+import { Library, LayoutDashboard, Bookmark, User, LogOut, Settings, Menu, X, LogIn, Loader2 } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
   const { user, logout } = useAuth();
+  
+  useEffect(() => {
+    setNavigatingTo(null);
+  }, [pathname]);
 
   const menuItems = [
     { icon: <LayoutDashboard size={20} />, label: 'My BookCase Board', href: '/' },
@@ -66,7 +71,7 @@ export default function Sidebar() {
               const isActive = item.href === pathname || (item.href !== '/' && item.href !== '#' && pathname.startsWith(item.href));
               return (
                 <li key={index} className="w-full">
-                  <a 
+                  <Link 
                     href={item.href} 
                     className={`flex items-center justify-start gap-4 p-3 md:px-4 md:py-3 rounded-xl transition-colors font-medium text-sm w-full ${
                       isActive 
@@ -74,11 +79,16 @@ export default function Sidebar() {
                         : 'text-gray-500 hover:text-black hover:bg-white/50'
                     }`}
                     title={item.label}
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      if (item.href !== pathname && item.href !== '#') {
+                        setNavigatingTo(item.href);
+                      }
+                    }}
                   >
-                    <span>{item.icon}</span>
+                    <span>{navigatingTo === item.href ? <Loader2 size={20} className="animate-spin" /> : item.icon}</span>
                     <span>{item.label}</span>
-                  </a>
+                  </Link>
                 </li>
               );
             })}

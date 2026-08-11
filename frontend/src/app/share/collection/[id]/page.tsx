@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Download, AlertCircle, Library, Link as LinkIcon, Upload } from 'lucide-react';
+import { Download, AlertCircle, Library, Link as LinkIcon, Upload, Loader2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { getCoverUrl } from '@/utils/image';
 
@@ -10,6 +10,9 @@ export default function ShareCollectionPage() {
   const [collection, setCollection] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   useEffect(() => {
     if (id) {
@@ -19,7 +22,7 @@ export default function ShareCollectionPage() {
 
   const fetchCollection = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/collections/${id}`);
+      const res = await axios.get(`${API_URL}/api/collections/${id}`);
       setCollection(res.data);
       setLoading(false);
     } catch (err) {
@@ -30,7 +33,9 @@ export default function ShareCollectionPage() {
   };
 
   const handleDownload = (book: any) => {
-    window.location.href = `http://localhost:8000/api/books/${book.id}/download`;
+    setDownloadingId(book.id);
+    window.location.href = `${API_URL}/api/books/${book.id}/download`;
+    setTimeout(() => setDownloadingId(null), 1500);
   };
 
   if (loading) {
@@ -127,11 +132,12 @@ export default function ShareCollectionPage() {
                    {/* Overlay Actions (Download) */}
                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-[2px]">
                        <button 
-                         onClick={() => handleDownload(book)} 
-                         className="flex items-center gap-2 px-5 py-2.5 bg-white text-black hover:bg-orange-500 hover:text-white rounded-full font-bold shadow-lg transition-colors transform hover:scale-105"
+                         onClick={() => handleDownload(book)}
+                         disabled={downloadingId === book.id} 
+                         className="flex items-center gap-2 px-5 py-2.5 bg-white text-black hover:bg-orange-500 hover:text-white rounded-full font-bold shadow-lg transition-colors transform hover:scale-105 disabled:opacity-70 disabled:hover:scale-100"
                        >
-                         <Download size={16} />
-                         <span>Tải Xuống</span>
+                         {downloadingId === book.id ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                         <span>{downloadingId === book.id ? 'Đang tải...' : 'Tải Xuống'}</span>
                        </button>
                    </div>
                 </div>

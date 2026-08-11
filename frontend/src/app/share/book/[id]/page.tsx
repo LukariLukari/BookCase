@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Download, AlertCircle, BookOpen } from 'lucide-react';
+import { Download, AlertCircle, BookOpen, Loader2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { getCoverUrl } from '@/utils/image';
 
@@ -10,6 +10,9 @@ export default function ShareBookPage() {
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   useEffect(() => {
     if (id) {
@@ -19,7 +22,7 @@ export default function ShareBookPage() {
 
   const fetchBook = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/books/${id}`);
+      const res = await axios.get(`${API_URL}/api/books/${id}`);
       setBook(res.data);
       setLoading(false);
     } catch (err) {
@@ -31,7 +34,9 @@ export default function ShareBookPage() {
 
   const handleDownload = () => {
     if (book) {
-      window.location.href = `http://localhost:8000/api/books/${book.id}/download`;
+      setIsDownloading(true);
+      window.location.href = `${API_URL}/api/books/${book.id}/download`;
+      setTimeout(() => setIsDownloading(false), 2000);
     }
   };
 
@@ -123,10 +128,11 @@ export default function ShareBookPage() {
           <div className="mt-auto pt-8 border-t border-gray-100">
              <button 
                 onClick={handleDownload}
-                className="w-full sm:w-auto flex items-center justify-center gap-3 bg-black hover:bg-gray-800 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                disabled={isDownloading}
+                className="w-full sm:w-auto flex items-center justify-center gap-3 bg-black hover:bg-gray-800 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-70 disabled:hover:-translate-y-0"
              >
-                <Download size={20} />
-                <span>Tải Sách Xuống</span>
+                {isDownloading ? <Loader2 size={20} className="animate-spin" /> : <Download size={20} />}
+                <span>{isDownloading ? 'Đang Tải...' : 'Tải Sách Xuống'}</span>
              </button>
              <p className="text-xs text-gray-400 mt-4 text-center sm:text-left">
                Được chia sẻ thông qua nền tảng Kindle.

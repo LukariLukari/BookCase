@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, X, Trash2 } from 'lucide-react';
+import { Download, X, Trash2, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { getCoverUrl } from '@/utils/image';
@@ -18,6 +18,7 @@ interface Book {
 
 export default function Bookshelf({ books, refresh }: { books: Book[], refresh: () => void }) {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const router = useRouter();
 
   if (books.length === 0) return null;
@@ -35,13 +36,15 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   const handleDownload = (id: string, title: string) => {
+    setDownloadingId(id);
     const url = `${API_URL}/api/books/${id}/download`;
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${title}.pdf`; // Hoặc xử lý linh hoạt phần mở rộng
+    a.download = `${title}.pdf`; 
     document.body.appendChild(a);
     a.click();
     a.remove();
+    setTimeout(() => setDownloadingId(null), 1500);
   };
 
   return (
@@ -193,10 +196,11 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
                   <div className="mt-8 pt-4">
                     <button 
                       onClick={() => handleDownload(selectedBook.id, selectedBook.title)}
-                      className="btn-primary w-full shadow-md"
+                      disabled={downloadingId === selectedBook.id}
+                      className="btn-primary w-full shadow-md disabled:opacity-70 flex justify-center items-center gap-2"
                     >
-                      <Download size={18} />
-                      <span>Download File</span>
+                      {downloadingId === selectedBook.id ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+                      <span>{downloadingId === selectedBook.id ? 'Downloading...' : 'Download File'}</span>
                     </button>
                   </div>
                 </div>

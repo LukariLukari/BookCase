@@ -14,6 +14,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,6 +28,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
 
     setIsUploading(true);
     setUploadProgress(0);
+    setError(null);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -53,7 +55,8 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
       onClose();
     } catch (error) {
       console.error('Lỗi upload:', error);
-      alert('Tải lên thất bại. Vui lòng kiểm tra lại backend.');
+      setError('Tải lên thất bại. Vui lòng kiểm tra lại backend.');
+      setTimeout(() => setError(null), 3000);
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
@@ -130,6 +133,12 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
                     style={{ width: `${uploadProgress}%` }}
                   ></div>
                 </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="mt-4 p-3 rounded-xl bg-red-50 text-red-500 text-sm font-bold text-center">
+                {error}
               </div>
             )}
 

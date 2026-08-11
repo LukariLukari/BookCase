@@ -4,7 +4,8 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
-import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2 } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2 } from 'lucide-react';
+import { getCoverUrl } from '@/utils/image';
 
 interface Book {
   id: string;
@@ -25,6 +26,7 @@ interface UploadItem {
 export default function AdminPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   
   const { user, token, isLoading } = useAuth();
   const router = useRouter();
@@ -48,6 +50,7 @@ export default function AdminPage() {
   const [uploadItems, setUploadItems] = useState<UploadItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [smartPasteText, setSmartPasteText] = useState('');
+  const [uploadStatus, setUploadStatus] = useState<{type: 'error'|'success', msg: string} | null>(null);
   
   // Add State (Direct Link)
   const [linkForm, setLinkForm] = useState({ title: '', author: '', genre: '', cover_url: '', external_url: '' });
@@ -73,7 +76,8 @@ export default function AdminPage() {
     }
     
     if (extractedLinks.length === 0) {
-      alert('Không tìm thấy link Google Drive hợp lệ trong đoạn text.');
+      setUploadStatus({type: 'error', msg: 'Không tìm thấy link Google Drive hợp lệ trong đoạn text.'});
+      setTimeout(() => setUploadStatus(null), 3000);
       return;
     }
 
@@ -107,7 +111,8 @@ export default function AdminPage() {
         }
       }
       
-      setTimeout(() => alert(`Đã tự động ghép nối thành công ${filledCount} links!`), 100);
+      setUploadStatus({type: 'success', msg: `Đã tự động ghép nối thành công ${filledCount} links!`});
+      setTimeout(() => setUploadStatus(null), 3000);
       return newItems;
     });
     
@@ -148,7 +153,8 @@ export default function AdminPage() {
       });
       fetchBooks();
     } catch (err) {
-      alert('Lỗi khi xóa sách!');
+      setError('Lỗi khi xóa sách!');
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -174,7 +180,8 @@ export default function AdminPage() {
       setIsEditModalOpen(false);
       fetchBooks();
     } catch (err) {
-      alert('Lỗi khi cập nhật sách!');
+      setError('Lỗi khi cập nhật sách!');
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -229,12 +236,16 @@ export default function AdminPage() {
     setIsAddModalOpen(false);
     setUploadItems([]);
     fetchBooks();
-    if (uploadedCount > 0) alert(`Đã tải lên thành công ${uploadedCount} sách!`);
+    if (uploadedCount > 0) {
+       setError(`Đã tải lên thành công ${uploadedCount} sách!`);
+       setTimeout(() => setError(null), 3000);
+    }
   };
 
   const handleAddByLinkSubmit = async () => {
     if (!linkForm.title || !linkForm.external_url) {
-       alert("Vui lòng nhập tối thiểu Tên sách và Link Drive!");
+       setUploadStatus({type: 'error', msg: "Vui lòng nhập tối thiểu Tên sách và Link Drive!"});
+       setTimeout(() => setUploadStatus(null), 3000);
        return;
     }
     setIsUploading(true);
@@ -246,17 +257,20 @@ export default function AdminPage() {
        setIsAddModalOpen(false);
        setLinkForm({ title: '', author: '', genre: '', cover_url: '', external_url: '' });
        fetchBooks();
-       alert("Đã thêm sách thành công!");
+       setError("Đã thêm sách thành công!");
+       setTimeout(() => setError(null), 3000);
     } catch(err) {
        setIsUploading(false);
-       alert("Lỗi khi thêm sách bằng Link!");
+       setUploadStatus({type: 'error', msg: "Lỗi khi thêm sách bằng Link!"});
+       setTimeout(() => setUploadStatus(null), 3000);
     }
   };
 
   const copyShareLink = (id: string) => {
     const url = `${window.location.origin}/share/book/${id}`;
     navigator.clipboard.writeText(url);
-    alert('Đã copy link chia sẻ sách vào Clipboard!');
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const filteredBooks = books.filter(book => 
@@ -333,7 +347,7 @@ export default function AdminPage() {
                    {/* Overlay Actions (Edit/Delete/Share) - Hiện trên Mobile luôn, ẩn trên Desktop cho đến khi hover */}
                    <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 md:gap-3 z-20 backdrop-blur-[2px] p-2">
                        <button onClick={() => copyShareLink(book.id)} className="p-2 md:p-2.5 bg-white text-black hover:text-green-500 rounded-full shadow-lg transition-transform hover:scale-110" title="Copy Share Link">
-                         <Share2 size={16} />
+                         {copiedId === book.id ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
                        </button>
                        <button onClick={() => openEditModal(book)} className="p-2 md:p-2.5 bg-white text-black hover:text-orange-500 rounded-full shadow-lg transition-transform hover:scale-110">
                          <Edit2 size={16} />
@@ -432,6 +446,12 @@ export default function AdminPage() {
                     Thêm Nhanh (Bằng Link)
                  </button>
               </div>
+
+              {uploadStatus && (
+                <div className={`p-3 rounded-xl mb-4 text-sm font-bold ${uploadStatus.type === 'error' ? 'bg-red-50 text-red-500' : 'bg-green-50 text-green-600'}`}>
+                  {uploadStatus.msg}
+                </div>
+              )}
               
               <div className="flex-1 overflow-y-auto pr-2 space-y-4 min-h-[200px]">
                 {addMode === 'upload' ? (
@@ -467,7 +487,8 @@ export default function AdminPage() {
                                   const text = await navigator.clipboard.readText();
                                   setSmartPasteText(prev => prev + (prev && !prev.endsWith('\n') ? '\n' : '') + text + '\n');
                                 } catch(err) {
-                                  alert("Trình duyệt chặn quyền Clipboard. Vui lòng dán thủ công bằng Ctrl+V");
+                                  setUploadStatus({type: 'error', msg: "Trình duyệt chặn quyền Clipboard. Vui lòng dán thủ công bằng Ctrl+V"});
+                                  setTimeout(() => setUploadStatus(null), 3000);
                                 }
                               }}
                               className="btn-secondary !py-2 !px-4 text-xs whitespace-nowrap bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center gap-1"
