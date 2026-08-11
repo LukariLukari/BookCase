@@ -9,7 +9,7 @@ import { KeyRound, Plus, Copy, Check, Trash2, ShieldCheck, ShieldAlert, Loader2 
 interface RegistrationCode {
   id: string;
   code: string;
-  is_used: bool;
+  is_used: boolean;
   used_by_username: string | null;
   created_at: string;
   created_by: string | null;
