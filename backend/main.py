@@ -2,6 +2,7 @@ import os
 import io
 from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import List
 from fastapi.responses import RedirectResponse
@@ -25,6 +26,9 @@ import string
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Virtual Bookshelf API")
+
+os.makedirs("uploads/covers", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 from create_admin import create_default_admin
 
@@ -102,6 +106,25 @@ async def upload_book(
                         cover_b64 = img_url
             except Exception as e:
                 print(f"ImgBB Upload Failed: {e}")
+                
+        # Fallback: Save base64 as local file if still starts with data:image
+        if cover_b64 and cover_b64.startswith("data:image"):
+            import uuid
+            match = re.match(r'data:image/(?P<ext>[a-zA-Z0-9]+);base64,(?P<data>.*)', cover_b64)
+            if match:
+                ext = match.group('ext')
+                if ext == 'jpeg': ext = 'jpg'
+                b64_data = match.group('data')
+                try:
+                    import base64
+                    img_data = base64.b64decode(b64_data)
+                    file_id = str(uuid.uuid4())
+                    filepath = f'uploads/covers/{file_id}.{ext}'
+                    with open(filepath, 'wb') as f:
+                        f.write(img_data)
+                    cover_b64 = f'/{filepath}'
+                except Exception as e:
+                    print(f"Failed to save local cover: {e}")
             
         drive_file_id = None
         if not external_url or not external_url.strip():

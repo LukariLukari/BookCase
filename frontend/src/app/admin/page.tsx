@@ -119,6 +119,12 @@ export default function AdminPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
 
+  const getCoverUrl = (url: string | undefined | null) => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
+    return `${baseUrl}${url}`;
+  };
+
   const fetchBooks = async () => {
     try {
       const response = await axios.get(`${baseUrl}/api/books`);
@@ -297,7 +303,7 @@ export default function AdminPage() {
                 <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-gray-100 group-hover:shadow-xl transition-all duration-300">
                    {book.cover_url ? (
                      <img 
-                        src={book.cover_url} 
+                        src={getCoverUrl(book.cover_url)} 
                         className="w-full h-full object-cover" 
                         alt={book.title} 
                         onError={(e) => {
@@ -389,7 +395,7 @@ export default function AdminPage() {
                   </div>
                   <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center flex-1 min-h-[200px] md:min-h-[280px] p-4">
                     {editForm.cover_url ? (
-                      <img src={editForm.cover_url} className="max-h-[200px] md:max-h-[260px] rounded-lg object-contain shadow-sm" alt="cover preview" 
+                      <img src={getCoverUrl(editForm.cover_url)} className="max-h-[200px] md:max-h-[260px] rounded-lg object-contain shadow-sm" alt="cover preview" 
                            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=Broken+Link'; }} />
                     ) : (
                       <span className="text-gray-400 text-sm font-medium">No Cover Provided</span>
