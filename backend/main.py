@@ -507,45 +507,92 @@ def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
 
 @app.post("/api/admin/fix-all-covers")
 def fix_all_covers(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
-    books = db.query(models.Book).filter(models.Book.cover_url.like('/uploads/%')).all()
+    from sqlalchemy import or_
+    import requests
+    import re
+    
+    books = db.query(models.Book).filter(
+        or_(
+            models.Book.cover_url.like('%lh3.googleusercontent.com%'),
+            models.Book.cover_url.like('/uploads/%'),
+            models.Book.cover_url == None,
+            models.Book.cover_url == ''
+        )
+    ).all()
+    
     fixed_count = 0
     failed = []
     
     for book in books:
         b64 = None
-        # Try to re-download from Drive if it has drive_file_id
-        if book.drive_file_id:
+        
+        # 1. Tìm Drive File ID
+        file_id = book.drive_file_id
+        if not file_id and book.external_url:
+            match_d = re.search(r'/file/d/([a-zA-Z0-9_-]+)', book.external_url)
+            if match_d:
+                file_id = match_d.group(1)
+            else:
+                match_id = re.search(r'[?&]id=([a-zA-Z0-9_-]+)', book.external_url)
+                if match_id:
+                    file_id = match_id.group(1)
+
+        # 2. Thử tải file
+        file_bytes = None
+        if file_id:
             try:
-                file_bytes = drive_service.download_file_bytes(book.drive_file_id)
-                if file_bytes:
-                    if book.mime_type == 'application/pdf':
-                        extracted = extract_pdf_info(file_bytes)
-                    else:
-                        extracted = extract_epub_info(file_bytes)
-                    b64 = extracted.get('cover_b64')
+                # Cố gắng dùng Service Account
+                file_bytes = drive_service.download_file_bytes(file_id)
             except Exception as e:
-                print(f"Error redownloading {book.title}: {e}")
+                print(f"Service account download failed for {book.title}: {e}")
                 
-        # Fallback to local if Drive fails but local file happens to exist
+            # Nếu Service Account không được, thử tải qua link Public ẩn danh
+            if not file_bytes:
+                try:
+                    res = requests.get(f'https://drive.google.com/uc?export=download&id={file_id}')
+                    if res.status_code == 200:
+                        file_bytes = res.content
+                except Exception as e:
+                    print(f"Public download failed for {book.title}: {e}")
+
+        # 3. Trích xuất bìa
+        if file_bytes and len(file_bytes) > 0:
+            try:
+                # Phân loại đuôi file
+                is_pdf = False
+                if book.mime_type == 'application/pdf': is_pdf = True
+                elif book.external_url and '.pdf' in book.external_url.lower(): is_pdf = True
+                elif file_bytes.startswith(b'%PDF'): is_pdf = True
+                
+                if is_pdf:
+                    extracted = extract_pdf_info(file_bytes)
+                else:
+                    extracted = extract_epub_info(file_bytes)
+                    
+                b64 = extracted.get('cover_b64')
+            except Exception as e:
+                print(f"Extraction failed for {book.title}: {e}")
+
+        # 4. Fallback cục bộ
         if not b64 and book.cover_url:
             local_path = book.cover_url.lstrip('/')
             if os.path.exists(local_path):
                 try:
                     with open(local_path, "rb") as f:
                         b64 = compress_cover_image(f.read())
-                except Exception as e:
+                except Exception:
                     pass
                 
+        # 5. Lưu DB
         if b64:
             book.cover_url = b64
             fixed_count += 1
+            # Commit từng cuốn để tránh mất mát nếu time out
+            db.commit()
         else:
             failed.append(book.title)
             
-    if fixed_count > 0:
-        db.commit()
-        
-    return {"message": f"Đã khắc phục {fixed_count} bìa sách cũ thành công!", "fixed_count": fixed_count, "failed": failed}
+    return {"message": f"Đã quét và khắc phục {fixed_count} bìa sách cũ thành công!", "fixed_count": fixed_count, "failed": failed}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
