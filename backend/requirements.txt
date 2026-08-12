@@ -13,3 +13,6 @@ python-dotenv
 psycopg2-binary
 passlib[bcrypt]
 python-jose[cryptography]
+
+Pillow
+requests
