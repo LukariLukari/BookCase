@@ -42,7 +42,7 @@ class BookResponse(BookBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    @root_validator(pre=False)
+    @root_validator(pre=False, skip_on_failure=True)
     def parse_cover_url_root(cls, values):
         cover_url = values.get('cover_url')
         book_id = values.get('id')
