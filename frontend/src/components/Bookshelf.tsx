@@ -16,23 +16,13 @@ interface Book {
   created_at?: string;
 }
 
-export default function Bookshelf({ books, refresh }: { books: Book[], refresh: () => void }) {
+export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books: Book[], refresh: () => void, sortBy?: string }) {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const router = useRouter();
 
   if (books.length === 0) return null;
-
-  // Sách mới nhất làm Hero
-  const heroBook = [...books].sort((a, b) => {
-    if (a.created_at && b.created_at) {
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    }
-    return 0;
-  })[0];
-  // Vẫn hiển thị đầy đủ sách đó bên dưới
-  const gridBooks = books;
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -56,91 +46,128 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  // Render Book Card
+  const renderBookCard = (book: Book) => (
+    <motion.div
+      key={book.id}
+      layoutId={`book-container-${book.id}`}
+      className="flex flex-col cursor-pointer group"
+      onClick={() => setSelectedBook(book)}
+      whileHover={{ y: -5 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    >
+      <motion.div layoutId={`book-cover-${book.id}`} className="w-full aspect-[2/3] relative z-10 mb-4">
+        <BookCoverImage 
+          coverUrl={book.cover_url}
+          title={book.title}
+          author={book.author}
+          className="w-full h-full object-cover rounded-2xl shadow-md group-hover:shadow-xl transition-shadow duration-300"
+        />
+      </motion.div>
+      <div className="px-1 mt-1 flex justify-between items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-base md:text-sm font-bold text-black leading-tight line-clamp-2 mb-1">{book.title}</h3>
+          <p className="text-sm md:text-xs text-gray-500 truncate mb-2">{book.author || "Unknown Author"}</p>
+        </div>
+        <button 
+          onClick={(e) => copyShareLink(e, book.id)} 
+          className="p-1.5 md:p-2 text-gray-400 hover:bg-green-50 hover:text-green-500 rounded-full transition-colors flex-shrink-0"
+          title="Share Book"
+        >
+          {copiedId === book.id ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
+        </button>
+      </div>
+    </motion.div>
+  );
+
+  const showHero = sortBy === 'newest';
+  let heroBook: Book | null = null;
+  
+  if (showHero) {
+    heroBook = [...books].sort((a, b) => {
+      if (a.created_at && b.created_at) {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+      return 0;
+    })[0];
+  }
+
+  // Handle Grouping by Author
+  let groupedBooks: Record<string, Book[]> = {};
+  if (sortBy === 'author') {
+    books.forEach(book => {
+      const author = book.author?.trim() || "Unknown Author";
+      if (!groupedBooks[author]) groupedBooks[author] = [];
+      groupedBooks[author].push(book);
+    });
+    // Sort keys alphabetically
+    groupedBooks = Object.keys(groupedBooks).sort().reduce((acc, key) => {
+      acc[key] = groupedBooks[key];
+      return acc;
+    }, {} as Record<string, Book[]>);
+  }
+
   return (
     <div className="w-full pb-10">
       
       {/* Recently Added (Hero Section) */}
-      <div className="mb-12">
-        <h2 className="text-lg font-bold text-black mb-4">Recently Added</h2>
-        <motion.div 
-          layoutId={`book-container-${heroBook.id}`}
-          className="relative bg-gradient-to-r from-[#9d8373] to-[#80695b] rounded-[2rem] p-6 md:pr-12 flex flex-row items-center md:items-center gap-4 md:gap-6 cursor-pointer shadow-lg w-full md:w-3/4 lg:w-2/3"
-          onClick={() => setSelectedBook(heroBook)}
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        >
-          {/* Cover */}
-          <motion.div layoutId={`book-cover-${heroBook.id}`} className="w-24 md:w-28 flex-shrink-0 -mt-8 md:-mt-10 mb-0 md:mb-2 shadow-2xl">
-            <BookCoverImage 
-              coverUrl={heroBook.cover_url}
-              title={heroBook.title}
-              author={heroBook.author}
-              className="w-full aspect-[2/3] object-cover rounded-xl shadow-xl border border-white/20"
-            />
-          </motion.div>
-          
-          {/* Info */}
-          <div className="text-white flex-1 min-w-0 py-2">
-            <h3 className="text-xl md:text-2xl font-bold mb-1 truncate">{heroBook.title}</h3>
-            <p className="text-white/80 text-xs md:text-sm mb-3 md:mb-4 truncate">{heroBook.author || "Unknown Author"}</p>
-            
-            <p className="text-white/80 text-[10px] md:text-xs mt-2">
-              Added: {heroBook.created_at ? new Date(heroBook.created_at).toLocaleDateString() : 'Just added'}
-            </p>
-          </div>
-          
-          <button 
-            onClick={(e) => copyShareLink(e, heroBook.id)} 
-            className="absolute top-4 right-4 md:top-6 md:right-6 p-2.5 bg-white/10 hover:bg-white text-white hover:text-green-500 rounded-full shadow-lg transition-all hover:scale-110 backdrop-blur-md z-20"
-            title="Share Book"
+      {showHero && heroBook && (
+        <div className="mb-12">
+          <h2 className="text-lg font-bold text-black mb-4">Recently Added</h2>
+          <motion.div 
+            layoutId={`book-container-${heroBook.id}-hero`}
+            className="relative bg-gradient-to-r from-[#9d8373] to-[#80695b] rounded-[2rem] p-6 md:pr-12 flex flex-row items-center md:items-center gap-4 md:gap-6 cursor-pointer shadow-lg w-full md:w-3/4 lg:w-2/3"
+            onClick={() => setSelectedBook(heroBook)}
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            {copiedId === heroBook.id ? <Check size={18} className="text-green-500" /> : <Share2 size={18} />}
-          </button>
-        </motion.div>
-      </div>
-
-      {/* New Release (Grid) */}
-      {gridBooks.length > 0 && (
-        <div>
-          <h2 className="text-lg font-bold text-black mb-6">New Release</h2>
-          <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
-            {gridBooks.map(book => (
-              <motion.div
-                key={book.id}
-                layoutId={`book-container-${book.id}`}
-                className="flex flex-col cursor-pointer group"
-                onClick={() => setSelectedBook(book)}
-                whileHover={{ y: -5 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                {/* Ảnh bìa */}
-                <motion.div layoutId={`book-cover-${book.id}`} className="w-full aspect-[2/3] relative z-10 mb-4">
-                  <BookCoverImage 
-                    coverUrl={book.cover_url}
-                    title={book.title}
-                    author={book.author}
-                    className="w-full h-full object-cover rounded-2xl shadow-md group-hover:shadow-xl transition-shadow duration-300"
-                  />
-                </motion.div>
-                
-                {/* Thông tin Text và Nút Share */}
-                <div className="px-1 mt-1 flex justify-between items-start gap-2">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-base md:text-sm font-bold text-black leading-tight line-clamp-2 mb-1">{book.title}</h3>
-                    <p className="text-sm md:text-xs text-gray-500 truncate mb-2">{book.author || "Unknown Author"}</p>
-                  </div>
-                  <button 
-                    onClick={(e) => copyShareLink(e, book.id)} 
-                    className="p-1.5 md:p-2 text-gray-400 hover:bg-green-50 hover:text-green-500 rounded-full transition-colors flex-shrink-0"
-                    title="Share Book"
-                  >
-                    {copiedId === book.id ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
-                  </button>
-                </div>
-              </motion.div>
-            ))}
+            <motion.div layoutId={`book-cover-${heroBook.id}-hero`} className="w-24 md:w-28 flex-shrink-0 -mt-8 md:-mt-10 mb-0 md:mb-2 shadow-2xl">
+              <BookCoverImage 
+                coverUrl={heroBook.cover_url}
+                title={heroBook.title}
+                author={heroBook.author}
+                className="w-full aspect-[2/3] object-cover rounded-xl shadow-xl border border-white/20"
+              />
+            </motion.div>
+            <div className="text-white flex-1 min-w-0 py-2">
+              <h3 className="text-xl md:text-2xl font-bold mb-1 truncate">{heroBook.title}</h3>
+              <p className="text-white/80 text-xs md:text-sm mb-3 md:mb-4 truncate">{heroBook.author || "Unknown Author"}</p>
+              <p className="text-white/80 text-[10px] md:text-xs mt-2">
+                Added: {heroBook.created_at ? new Date(heroBook.created_at).toLocaleDateString() : 'Just added'}
+              </p>
+            </div>
+            <button 
+              onClick={(e) => copyShareLink(e, heroBook.id)} 
+              className="absolute top-4 right-4 md:top-6 md:right-6 p-2.5 bg-white/10 hover:bg-white text-white hover:text-green-500 rounded-full shadow-lg transition-all hover:scale-110 backdrop-blur-md z-20"
+              title="Share Book"
+            >
+              {copiedId === heroBook.id ? <Check size={18} className="text-green-500" /> : <Share2 size={18} />}
+            </button>
           </motion.div>
         </div>
+      )}
+
+      {/* Grid Rendering */}
+      {sortBy === 'author' ? (
+        <div className="space-y-12">
+          {Object.entries(groupedBooks).map(([author, authorBooks]) => (
+            <div key={author}>
+              <h2 className="text-lg font-bold text-black mb-6 pb-2 border-b border-gray-200 inline-block pr-8">{author}</h2>
+              <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
+                {authorBooks.map(renderBookCard)}
+              </motion.div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        books.length > 0 && (
+          <div>
+            <h2 className="text-lg font-bold text-black mb-6">{showHero ? 'New Release' : 'All Books'}</h2>
+            <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
+              {books.map(renderBookCard)}
+            </motion.div>
+          </div>
+        )
       )}
 
       {/* Modal chi tiết sách */}
