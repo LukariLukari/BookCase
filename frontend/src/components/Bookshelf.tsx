@@ -6,6 +6,8 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import BookCoverImage from '@/components/BookCoverImage';
 
+import BookSpineShelf from '@/components/BookSpineShelf';
+
 interface Book {
   id: string;
   title: string;
@@ -71,26 +73,14 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
         </div>
         <button 
           onClick={(e) => copyShareLink(e, book.id)} 
-          className="p-1.5 md:p-2 text-gray-400 hover:bg-green-50 hover:text-green-500 rounded-full transition-colors flex-shrink-0"
+          className="p-1.5 md:p-2 text-gray-700 bg-gray-100 hover:bg-green-100 hover:text-green-700 rounded-full transition-colors flex-shrink-0 cursor-pointer"
           title="Share Book"
         >
-          {copiedId === book.id ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
+          {copiedId === book.id ? <Check size={16} className="text-green-600" /> : <Share2 size={16} />}
         </button>
       </div>
     </motion.div>
   );
-
-  const showHero = sortBy === 'newest';
-  let heroBook: Book | null = null;
-  
-  if (showHero) {
-    heroBook = [...books].sort((a, b) => {
-      if (a.created_at && b.created_at) {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      }
-      return 0;
-    })[0];
-  }
 
   // Handle Grouping by Author
   let groupedBooks: Record<string, Book[]> = {};
@@ -110,42 +100,12 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
   return (
     <div className="w-full pb-10">
       
-      {/* Recently Added (Hero Section) */}
-      {showHero && heroBook && (
-        <div className="mb-12">
-          <h2 className="text-lg font-bold text-black mb-4">Recently Added</h2>
-          <motion.div 
-            layoutId={`book-container-${heroBook.id}-hero`}
-            className="relative bg-gradient-to-r from-[#9d8373] to-[#80695b] rounded-[2rem] p-6 md:pr-12 flex flex-row items-center md:items-center gap-4 md:gap-6 cursor-pointer shadow-lg w-full md:w-3/4 lg:w-2/3"
-            onClick={() => setSelectedBook(heroBook)}
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <motion.div layoutId={`book-cover-${heroBook.id}-hero`} className="w-24 md:w-28 flex-shrink-0 -mt-8 md:-mt-10 mb-0 md:mb-2 shadow-2xl">
-              <BookCoverImage 
-                coverUrl={heroBook.cover_url}
-                title={heroBook.title}
-                author={heroBook.author}
-                className="w-full aspect-[2/3] object-cover rounded-xl shadow-xl border border-white/20"
-              />
-            </motion.div>
-            <div className="text-white flex-1 min-w-0 py-2">
-              <h3 className="text-xl md:text-2xl font-bold mb-1 truncate">{heroBook.title}</h3>
-              <p className="text-white/80 text-xs md:text-sm mb-3 md:mb-4 truncate">{heroBook.author || "Unknown Author"}</p>
-              <p className="text-white/80 text-[10px] md:text-xs mt-2">
-                Added: {heroBook.created_at ? new Date(heroBook.created_at).toLocaleDateString() : 'Just added'}
-              </p>
-            </div>
-            <button 
-              onClick={(e) => copyShareLink(e, heroBook.id)} 
-              className="absolute top-4 right-4 md:top-6 md:right-6 p-2.5 bg-white/10 hover:bg-white text-white hover:text-green-500 rounded-full shadow-lg transition-all hover:scale-110 backdrop-blur-md z-20"
-              title="Share Book"
-            >
-              {copiedId === heroBook.id ? <Check size={18} className="text-green-500" /> : <Share2 size={18} />}
-            </button>
-          </motion.div>
-        </div>
-      )}
+      {/* Horizontal Book Spines Shelf Header Section */}
+      <BookSpineShelf 
+        books={books} 
+        onSelectBook={(book) => setSelectedBook(book)} 
+        title="Tủ Sách Gáy Nổi Bật"
+      />
 
       {/* Grid Rendering */}
       {sortBy === 'author' ? (
@@ -162,7 +122,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
       ) : (
         books.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold text-black mb-6">{showHero ? 'New Release' : 'All Books'}</h2>
+            <h2 className="text-lg font-bold text-black mb-6">{sortBy === 'newest' ? 'Tất cả sách' : 'Danh sách sách'}</h2>
             <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
               {books.map(renderBookCard)}
             </motion.div>
