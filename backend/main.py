@@ -234,7 +234,8 @@ def get_book_cover(book_id: str, db: Session = Depends(get_db)):
             header, encoded = book.cover_url.split(",", 1)
             # Get mime type from header
             mime_type = header.split(":")[1].split(";")[0]
-            # Decode base64
+            # Decode base64 (add padding if necessary)
+            encoded += "=" * ((4 - len(encoded) % 4) % 4)
             image_bytes = base64.b64decode(encoded)
             return Response(content=image_bytes, media_type=mime_type)
         except Exception as e:
