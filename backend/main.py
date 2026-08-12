@@ -107,25 +107,7 @@ async def upload_book(
             except Exception as e:
                 print(f"ImgBB Upload Failed: {e}")
                 
-        # Fallback: Save base64 as local file if still starts with data:image
-        if cover_b64 and cover_b64.startswith("data:image"):
-            import uuid
-            match = re.match(r'data:image/(?P<ext>[a-zA-Z0-9]+);base64,(?P<data>.*)', cover_b64)
-            if match:
-                ext = match.group('ext')
-                if ext == 'jpeg': ext = 'jpg'
-                b64_data = match.group('data')
-                try:
-                    import base64
-                    img_data = base64.b64decode(b64_data)
-                    file_id = str(uuid.uuid4())
-                    filepath = f'uploads/covers/{file_id}.{ext}'
-                    with open(filepath, 'wb') as f:
-                        f.write(img_data)
-                    cover_b64 = f'/{filepath}'
-                except Exception as e:
-                    print(f"Failed to save local cover: {e}")
-            
+        # Giữ nguyên cover_b64 dạng data:image/jpeg;base64,... nhẹ trong DB để không bao giờ bị 404 khi Vercel/Render redeploy hay reload trang
         drive_file_id = None
         if not external_url or not external_url.strip():
             file_stream = io.BytesIO(contents)
@@ -241,14 +223,16 @@ def get_collection(collection_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Collection not found")
     
     collection_books = db.query(models.CollectionBook).filter(models.CollectionBook.collection_id == collection_id).all()
-    books = []
-    for cb in collection_books:
-        if cb.book: books.append(cb.book)
+    books = [cb.book for cb in collection_books if cb.book]
         
-    response = schemas.CollectionDetailResponse.from_orm(collection)
-    response.books = books
-    response.book_count = len(books)
-    return response
+    return {
+        "id": collection.id,
+        "name": collection.name,
+        "description": collection.description,
+        "created_at": collection.created_at,
+        "book_count": len(books),
+        "books": books
+    }
 
 @app.post("/api/collections", response_model=schemas.CollectionResponse)
 def create_collection(collection_in: schemas.CollectionCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
