@@ -27,6 +27,8 @@ interface UploadItem {
 export default function AdminPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFixing, setIsFixing] = useState(false);
+  const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isFetchingBooks, setIsFetchingBooks] = useState(true);
   const [downloadProgress, setDownloadProgress] = useState(0);
@@ -57,7 +59,7 @@ export default function AdminPage() {
   
   // Add State (Direct Link)
   const [linkForm, setLinkForm] = useState({ title: '', author: '', genre: '', cover_url: '', external_url: '' });
-  const [isFixing, setIsFixing] = useState(false);
+
 
   const handleFixCovers = async () => {
     setIsFixing(true);
@@ -194,11 +196,11 @@ export default function AdminPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa cuốn sách này?')) return;
     try {
       await axios.delete(`${API_URL}/api/books/${id}`, {
         headers: getHeaders()
       });
+      setSelectedBooks(prev => prev.filter(bookId => bookId !== id));
       fetchBooks();
     } catch (err: any) {
       if (err.response?.status === 401) {
@@ -208,6 +210,31 @@ export default function AdminPage() {
         setTimeout(() => setError(null), 3000);
       }
     }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedBooks.length === 0) return;
+    try {
+      await axios.delete(`${API_URL}/api/books`, {
+        headers: getHeaders(),
+        data: { book_ids: selectedBooks }
+      });
+      setSelectedBooks([]);
+      fetchBooks();
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        setError('Lỗi khi xóa sách đồng loạt!');
+        setTimeout(() => setError(null), 3000);
+      }
+    }
+  };
+
+  const toggleBookSelection = (id: string) => {
+    setSelectedBooks(prev => 
+      prev.includes(id) ? prev.filter(bookId => bookId !== id) : [...prev, id]
+    );
   };
 
   const openEditModal = (book: Book) => {
@@ -364,6 +391,15 @@ export default function AdminPage() {
                 className="w-full bg-white rounded-full py-3.5 md:py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/50 shadow-sm transition-all text-black placeholder-gray-400"
               />
             </div>
+            {selectedBooks.length > 0 && (
+              <button 
+                onClick={handleBulkDelete}
+                className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 !bg-red-500 !text-white hover:!bg-red-600 border-none shadow-md shadow-red-500/30"
+              >
+                <Trash2 size={16} className="inline mr-1 text-white" />
+                <span className="hidden sm:inline">Xóa {selectedBooks.length} mục</span>
+              </button>
+            )}
             <button 
               onClick={handleFixCovers}
               disabled={isFixing}
@@ -401,6 +437,16 @@ export default function AdminPage() {
                        author={book.author}
                        className="w-full h-full object-cover"
                      />
+                     
+                     {/* Checkbox Select */}
+                     <div className="absolute top-2 right-2 z-30" onClick={(e) => e.stopPropagation()}>
+                       <input 
+                         type="checkbox" 
+                         checked={selectedBooks.includes(book.id)}
+                         onChange={() => toggleBookSelection(book.id)}
+                         className="w-5 h-5 rounded-md border-2 border-white/80 bg-black/20 checked:bg-orange-500 checked:border-orange-500 cursor-pointer shadow-sm focus:ring-0 focus:ring-offset-0 transition-colors"
+                       />
+                     </div>
                      
                      {/* Tag Nguồn (Source) */}
                      <div className="absolute top-2 left-2 z-20">

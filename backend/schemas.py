@@ -22,6 +22,9 @@ class BookUpdate(BaseModel):
     cover_url: Optional[str] = None
     external_url: Optional[str] = None
 
+class BookBulkDelete(BaseModel):
+    book_ids: list[str]
+
 class BookLinkCreate(BaseModel):
     title: str
     author: Optional[str] = "Unknown Author"

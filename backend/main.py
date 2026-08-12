@@ -207,6 +207,17 @@ def delete_book(book_id: str, db: Session = Depends(get_db), current_user: model
     db.commit()
     return {"message": "Deleted successfully"}
 
+@app.delete("/api/books")
+def delete_books_bulk(book_ids: schemas.BookBulkDelete, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    if not book_ids.book_ids:
+        raise HTTPException(status_code=400, detail="No books selected")
+        
+    books = db.query(models.Book).filter(models.Book.id.in_(book_ids.book_ids)).all()
+    for book in books:
+        db.delete(book)
+    db.commit()
+    return {"message": f"Deleted {len(books)} books successfully"}
+
 # --- COLLECTIONS API ---
 
 @app.get("/api/books/cover/{book_id}")
