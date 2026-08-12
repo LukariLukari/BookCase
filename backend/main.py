@@ -229,6 +229,7 @@ def get_book_cover(book_id: str, db: Session = Depends(get_db)):
     if book.cover_url.startswith("data:image"):
         try:
             import base64
+            from fastapi.responses import Response
             # Extract base64 part
             header, encoded = book.cover_url.split(",", 1)
             # Get mime type from header
