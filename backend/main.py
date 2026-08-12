@@ -209,6 +209,38 @@ def delete_book(book_id: str, db: Session = Depends(get_db), current_user: model
 
 # --- COLLECTIONS API ---
 
+@app.get("/api/books/cover/{book_id}")
+def get_book_cover(book_id: str, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book or not book.cover_url:
+        raise HTTPException(status_code=404, detail="Cover not found")
+        
+    if book.cover_url.startswith("data:image"):
+        try:
+            import base64
+            # Extract base64 part
+            header, encoded = book.cover_url.split(",", 1)
+            # Get mime type from header
+            mime_type = header.split(":")[1].split(";")[0]
+            # Decode base64
+            image_bytes = base64.b64decode(encoded)
+            return Response(content=image_bytes, media_type=mime_type)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Invalid cover format")
+            
+    # If it's a URL (ImgBB, etc.), redirect
+    if book.cover_url.startswith("http"):
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(book.cover_url)
+        
+    # If it's a local file path
+    local_path = book.cover_url.lstrip("/")
+    if os.path.exists(local_path):
+        from fastapi.responses import FileResponse
+        return FileResponse(local_path)
+        
+    raise HTTPException(status_code=404, detail="Cover file not found")
+
 @app.get("/api/collections", response_model=List[schemas.CollectionResponse])
 def get_collections(db: Session = Depends(get_db)):
     collections = db.query(models.Collection).order_by(models.Collection.created_at.desc()).all()

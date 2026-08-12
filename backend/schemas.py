@@ -32,10 +32,20 @@ class BookLinkCreate(BaseModel):
 class BookCreate(BookBase):
     pass
 
+from pydantic import validator
+
 class BookResponse(BookBase):
     id: str
     created_at: datetime
     updated_at: Optional[datetime] = None
+
+    @validator('cover_url')
+    def parse_cover_url(cls, v, values):
+        if v and v.startswith("data:image"):
+            book_id = values.get('id')
+            if book_id:
+                return f"/api/books/cover/{book_id}"
+        return v
 
     class Config:
         orm_mode = True
