@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
-import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2 } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings } from 'lucide-react';
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 import BookCoverImage from '@/components/BookCoverImage';
 
@@ -57,6 +57,27 @@ export default function AdminPage() {
   
   // Add State (Direct Link)
   const [linkForm, setLinkForm] = useState({ title: '', author: '', genre: '', cover_url: '', external_url: '' });
+  const [isFixing, setIsFixing] = useState(false);
+
+  const handleFixCovers = async () => {
+    setIsFixing(true);
+    try {
+      const res = await axios.post(`${API_URL}/api/admin/fix-all-covers`, {}, {
+        headers: getHeaders()
+      });
+      fetchBooks();
+      setError(res.data.message || "Đã khắc phục xong!");
+      setTimeout(() => setError(null), 5000);
+    } catch (err: any) {
+      if (err.response?.status === 401) logout();
+      else {
+        setError("Lỗi khi khắc phục bìa sách");
+        setTimeout(() => setError(null), 3000);
+      }
+    } finally {
+      setIsFixing(false);
+    }
+  };
 
   const handleSmartPaste = () => {
     if (!smartPasteText) return;
@@ -343,6 +364,14 @@ export default function AdminPage() {
                 className="w-full bg-white rounded-full py-3.5 md:py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/50 shadow-sm transition-all text-black placeholder-gray-400"
               />
             </div>
+            <button 
+              onClick={handleFixCovers}
+              disabled={isFixing}
+              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-orange-200 text-orange-600 hover:border-orange-500 hover:text-orange-700 bg-white"
+            >
+              {isFixing ? <Loader2 size={16} className="animate-spin inline mr-1" /> : <Settings size={16} className="inline mr-1" />} 
+              <span className="hidden sm:inline">{isFixing ? 'Đang sửa...' : 'Sửa bìa lỗi'}</span>
+            </button>
             <button 
               onClick={() => setIsAddModalOpen(true)}
               className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-6 md:!px-5 text-sm whitespace-nowrap"

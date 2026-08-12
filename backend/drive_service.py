@@ -65,4 +65,20 @@ class DriveService:
         headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
         return StreamingResponse(iterfile(), media_type=mime_type, headers=headers)
 
+    def download_file_bytes(self, file_id: str) -> bytes:
+        if self.mock_mode and file_id.startswith("local_"):
+            file_path = os.path.join(self.upload_dir, file_id)
+            if os.path.exists(file_path):
+                with open(file_path, "rb") as f:
+                    return f.read()
+            return b""
+            
+        request = self.service.files().get_media(fileId=file_id)
+        fh = io.BytesIO()
+        downloader = MediaIoBaseDownload(fh, request)
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
+        return fh.getvalue()
+
 drive_service = DriveService()

@@ -17,7 +17,7 @@ import schemas
 from database import engine, get_db
 import auth
 from drive_service import drive_service
-from extract_service import extract_pdf_info, extract_epub_info
+from extract_service import extract_pdf_info, extract_epub_info, compress_cover_image
 from email_service import send_otp_email
 from datetime import datetime, timezone
 import random
@@ -504,6 +504,48 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
 @app.get("/api/auth/me", response_model=schemas.UserResponse)
 def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
     return current_user
+
+@app.post("/api/admin/fix-all-covers")
+def fix_all_covers(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    books = db.query(models.Book).filter(models.Book.cover_url.like('/uploads/%')).all()
+    fixed_count = 0
+    failed = []
+    
+    for book in books:
+        b64 = None
+        # Try to re-download from Drive if it has drive_file_id
+        if book.drive_file_id:
+            try:
+                file_bytes = drive_service.download_file_bytes(book.drive_file_id)
+                if file_bytes:
+                    if book.mime_type == 'application/pdf':
+                        extracted = extract_pdf_info(file_bytes)
+                    else:
+                        extracted = extract_epub_info(file_bytes)
+                    b64 = extracted.get('cover_b64')
+            except Exception as e:
+                print(f"Error redownloading {book.title}: {e}")
+                
+        # Fallback to local if Drive fails but local file happens to exist
+        if not b64 and book.cover_url:
+            local_path = book.cover_url.lstrip('/')
+            if os.path.exists(local_path):
+                try:
+                    with open(local_path, "rb") as f:
+                        b64 = compress_cover_image(f.read())
+                except Exception as e:
+                    pass
+                
+        if b64:
+            book.cover_url = b64
+            fixed_count += 1
+        else:
+            failed.append(book.title)
+            
+    if fixed_count > 0:
+        db.commit()
+        
+    return {"message": f"Đã khắc phục {fixed_count} bìa sách cũ thành công!", "fixed_count": fixed_count, "failed": failed}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
