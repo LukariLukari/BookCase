@@ -68,26 +68,26 @@ export default function ShareCollectionPage() {
         </h1>
       </div>
 
-      {/* Collection Header */}
+      {/* Collection Header - Black card with orange text */}
       <div className="w-full max-w-6xl px-4 mb-12">
-        <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-3xl p-8 md:p-12 text-white shadow-xl flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden">
+        <div className="bg-black rounded-3xl p-8 md:p-12 text-orange-500 shadow-2xl flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden border border-neutral-800">
            {/* Decor circle */}
-           <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
+           <div className="absolute -top-24 -right-24 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
            
-           <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner">
-             <Library size={40} className="text-white" />
+           <div className="w-20 h-20 bg-neutral-900 border border-orange-500/30 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+             <Library size={40} className="text-orange-500" />
            </div>
            
            <div className="text-center md:text-left z-10">
-             <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm text-white font-bold text-xs rounded-full uppercase tracking-wider mb-3">
+             <span className="inline-block px-3.5 py-1 bg-orange-500/20 border border-orange-500/30 text-orange-400 font-bold text-xs rounded-full uppercase tracking-wider mb-3">
                Tệp Sách Được Chia Sẻ
              </span>
-             <h1 className="text-3xl md:text-5xl font-black mb-3">{collection.name}</h1>
+             <h1 className="text-3xl md:text-5xl font-black mb-3 text-orange-500 tracking-tight">{collection.name}</h1>
              {collection.description && (
-               <p className="text-white/80 text-lg max-w-2xl">{collection.description}</p>
+               <p className="text-orange-300/80 text-lg max-w-2xl">{collection.description}</p>
              )}
-             <p className="mt-4 text-white/60 font-medium">{collection.book_count} cuốn sách</p>
+             <p className="mt-4 text-orange-400/70 font-semibold text-sm">{collection.book_count} cuốn sách</p>
            </div>
         </div>
       </div>

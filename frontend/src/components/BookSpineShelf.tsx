@@ -20,20 +20,20 @@ interface BookSpineShelfProps {
   title?: string;
 }
 
-// Elegant color palettes for book spines
+// Elegant pastel color palettes for book spines
 const SPINE_PALETTES = [
-  { bg: '#1c1917', text: '#f5f5f4', accent: '#78716c' },
-  { bg: '#1e293b', text: '#f8fafc', accent: '#64748b' },
-  { bg: '#27272a', text: '#fafafa', accent: '#a1a1aa' },
-  { bg: '#1e1b4b', text: '#e0e7ff', accent: '#6366f1' },
-  { bg: '#312e81', text: '#e0e7ff', accent: '#818cf8' },
-  { bg: '#064e3b', text: '#ecfdf5', accent: '#34d399' },
-  { bg: '#451a03', text: '#fff7ed', accent: '#fb923c' },
-  { bg: '#701a75', text: '#fdf4ff', accent: '#e879f9' },
-  { bg: '#0f172a', text: '#f8fafc', accent: '#38bdf8' },
-  { bg: '#18181b', text: '#fef08a', accent: '#facc15' },
-  { bg: '#7c2d12', text: '#ffedd5', accent: '#fb923c' },
-  { bg: '#0369a1', text: '#f0f9ff', accent: '#38bdf8' },
+  { bg: '#bae6fd', text: '#0369a1', accent: '#0284c7' }, // Pastel Sky Blue
+  { bg: '#a7f3d0', text: '#047857', accent: '#059669' }, // Pastel Mint
+  { bg: '#fed7aa', text: '#c2410c', accent: '#ea580c' }, // Pastel Peach
+  { bg: '#e9d5ff', text: '#7e22ce', accent: '#9333ea' }, // Pastel Lavender
+  { bg: '#fbcfe8', text: '#be185d', accent: '#db2777' }, // Pastel Pink
+  { bg: '#fef08a', text: '#a16207', accent: '#ca8a04' }, // Pastel Yellow
+  { bg: '#99f6e4', text: '#0f766e', accent: '#0d9488' }, // Pastel Teal
+  { bg: '#ddd6fe', text: '#6d28d9', accent: '#7c3aed' }, // Pastel Lilac
+  { bg: '#fecdd3', text: '#be123c', accent: '#e11d48' }, // Pastel Soft Coral
+  { bg: '#d9f99d', text: '#4d7c0f', accent: '#65a30d' }, // Pastel Matcha
+  { bg: '#cffafe', text: '#0e7490', accent: '#0891b2' }, // Pastel Ice Blue
+  { bg: '#fef3c7', text: '#b45309', accent: '#d97706' }, // Pastel Cream
 ];
 
 function getHash(str: string) {
@@ -153,11 +153,11 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
                     color: palette.text,
                     boxShadow: isHovered ? '0 12px 20px -4px rgba(0,0,0,0.25)' : '0 2px 6px rgba(0,0,0,0.12)'
                   }}
-                  className="rounded-t-md rounded-b-sm overflow-hidden flex flex-col justify-between p-2 relative border-t border-white/20 select-none"
+                  className="rounded-t-md rounded-b-sm overflow-hidden flex flex-col justify-between p-2 relative border-t border-black/10 select-none"
                 >
                   {/* Top Line Accent */}
                   <div
-                    className="w-full h-1 rounded-full opacity-75"
+                    className="w-full h-1 rounded-full opacity-90"
                     style={{ backgroundColor: palette.accent }}
                   />
 
@@ -176,7 +176,7 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
                   </div>
 
                   {/* Bottom Spine Number */}
-                  <div className="text-[10px] font-mono text-center opacity-60 font-bold border-t border-white/10 pt-1">
+                  <div className="text-[10px] font-mono text-center opacity-70 font-bold border-t border-black/10 pt-1">
                     {(idx + 1).toString().padStart(2, '0')}
                   </div>
                 </motion.div>

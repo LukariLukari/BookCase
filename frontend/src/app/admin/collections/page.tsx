@@ -272,9 +272,9 @@ export default function AdminCollectionsPage() {
                     <span className="text-sm font-bold text-gray-400">{c.book_count} cuốn sách</span>
                     <button 
                       onClick={() => openManageModal(c.id)}
-                      className="text-sm font-bold text-orange-600 hover:text-orange-700 underline underline-offset-4"
+                      className="text-xs md:text-sm font-bold px-3.5 py-1.5 rounded-full text-orange-700 bg-orange-50 border border-orange-200 hover:bg-orange-500 hover:text-white hover:border-orange-500 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer active:scale-95 flex items-center gap-1.5"
                     >
-                      Quản lý sách
+                      <span>Quản lý sách</span>
                     </button>
                   </div>
                 </div>

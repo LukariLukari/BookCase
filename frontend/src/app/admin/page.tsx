@@ -461,16 +461,28 @@ export default function AdminPage() {
                        )}
                      </div>
 
-                     {/* Overlay Actions (Edit/Delete/Share) - Hiện trên Mobile luôn, ẩn trên Desktop cho đến khi hover */}
-                     <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 md:gap-3 z-20 backdrop-blur-[2px] p-2">
-                         <button onClick={() => copyShareLink(book.id)} className="p-2 md:p-2.5 bg-white text-black hover:text-green-500 rounded-full shadow-lg transition-transform hover:scale-110" title="Copy Share Link">
-                           {copiedId === book.id ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
+                     {/* Action Icons in Bottom Right Corner with Strong Black Shadow - No Cover Blur */}
+                     <div className="absolute bottom-2 right-2 flex items-center gap-1.5 z-20">
+                         <button 
+                           onClick={() => copyShareLink(book.id)} 
+                           className="p-1.5 md:p-2 bg-white/95 text-gray-900 hover:text-green-600 hover:bg-green-50 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.6)] border border-black/10 transition-all hover:scale-110 cursor-pointer" 
+                           title="Sao chép link chia sẻ"
+                         >
+                           {copiedId === book.id ? <Check size={14} className="text-green-600" /> : <Share2 size={14} className="text-gray-900 hover:text-green-600" />}
                          </button>
-                         <button onClick={() => openEditModal(book)} className="p-2 md:p-2.5 bg-white text-black hover:text-orange-500 rounded-full shadow-lg transition-transform hover:scale-110">
-                           <Edit2 size={16} />
+                         <button 
+                           onClick={() => openEditModal(book)} 
+                           className="p-1.5 md:p-2 bg-white/95 text-gray-900 hover:text-orange-600 hover:bg-orange-50 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.6)] border border-black/10 transition-all hover:scale-110 cursor-pointer"
+                           title="Sửa thông tin sách"
+                         >
+                           <Edit2 size={14} className="text-gray-900 hover:text-orange-600" />
                          </button>
-                         <button onClick={() => handleDelete(book.id)} className="p-2 md:p-2.5 bg-white text-black hover:text-red-500 rounded-full shadow-lg transition-transform hover:scale-110">
-                           <Trash2 size={16} />
+                         <button 
+                           onClick={() => handleDelete(book.id)} 
+                           className="p-1.5 md:p-2 bg-white/95 text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.6)] border border-black/10 transition-all hover:scale-110 cursor-pointer"
+                           title="Xóa sách"
+                         >
+                           <Trash2 size={14} className="text-gray-900 hover:text-red-600" />
                          </button>
                      </div>
                   </div>
