@@ -609,7 +609,7 @@ export default function AdminPage() {
                                   setTimeout(() => setUploadStatus(null), 3000);
                                 }
                               }}
-                              className="btn-secondary !py-2 !px-4 text-xs whitespace-nowrap bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center gap-1"
+                              className="btn-secondary !py-2 !px-4 text-xs whitespace-nowrap bg-white border border-gray-200 !text-gray-700 hover:bg-gray-50 flex items-center gap-1 shadow-sm"
                             >
                               Dán (Paste)
                             </button>
@@ -648,6 +648,22 @@ export default function AdminPage() {
                                   setUploadItems(newItems);
                                 }}
                               />
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const text = await navigator.clipboard.readText();
+                                    const newItems = [...uploadItems];
+                                    newItems[index].external_url = text;
+                                    setUploadItems(newItems);
+                                  } catch (err) {
+                                    setUploadStatus({type: 'error', msg: "Trình duyệt chặn quyền Clipboard. Vui lòng dán thủ công"});
+                                    setTimeout(() => setUploadStatus(null), 3000);
+                                  }
+                                }}
+                                className="!py-1.5 !px-3 text-[10px] font-bold rounded-lg border border-gray-200 bg-white !text-gray-700 hover:bg-gray-100 whitespace-nowrap shadow-sm transition-colors"
+                              >
+                                Paste
+                              </button>
                             </div>
                           </div>
                         ))}
