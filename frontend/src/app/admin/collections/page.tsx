@@ -165,27 +165,42 @@ export default function AdminCollectionsPage() {
 
   const toggleBookInCollection = async (bookId: string) => {
     if (!activeCollection) return;
-    const isAdded = activeCollection.books.some((b: any) => b.id === bookId);
+    
+    const isCurrentlyAdded = activeCollection.books.some((b: any) => b.id === bookId);
+    const bookObj = allBooks.find(b => b.id === bookId);
+    
+    // Cập nhật giao diện lập tức (Optimistic Update)
+    setActiveCollection((prev: any) => {
+      if (!prev) return prev;
+      const isAdded = prev.books.some((b: any) => b.id === bookId);
+      if (isAdded) {
+        return { ...prev, books: prev.books.filter((b: any) => b.id !== bookId) };
+      } else {
+        return { ...prev, books: [...prev.books, bookObj] };
+      }
+    });
     
     try {
       const headers = getHeaders();
       
-      if (isAdded) {
+      if (isCurrentlyAdded) {
         await axios.delete(`${baseUrl}/api/collections/${activeCollection.id}/books/${bookId}`, { headers });
-        setActiveCollection({
-          ...activeCollection,
-          books: activeCollection.books.filter((b: any) => b.id !== bookId)
-        });
       } else {
         await axios.post(`${baseUrl}/api/collections/${activeCollection.id}/books/${bookId}`, {}, { headers });
-        const bookObj = allBooks.find(b => b.id === bookId);
-        setActiveCollection({
-          ...activeCollection,
-          books: [...activeCollection.books, bookObj]
-        });
       }
-      fetchCollections(); // Refresh counts
+      
+      fetchCollections(); // Cập nhật lại số lượng sách ở màn hình ngoài
     } catch (err: any) {
+      // Khôi phục lại trạng thái cũ nếu API lỗi
+      setActiveCollection((prev: any) => {
+        if (!prev) return prev;
+        if (isCurrentlyAdded) {
+          return { ...prev, books: [...prev.books, bookObj] };
+        } else {
+          return { ...prev, books: prev.books.filter((b: any) => b.id !== bookId) };
+        }
+      });
+      
       if (err.response?.status === 401) {
         logout();
       } else {
