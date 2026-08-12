@@ -126,6 +126,16 @@ async def upload_book(
                 except Exception as e:
                     print(f"Failed to save local cover: {e}")
             
+        # Fallback: Auto-generate Google Drive thumbnail as cover if cover_b64 is missing
+        if not cover_b64 and external_url:
+            match_d = re.search(r'/file/d/([a-zA-Z0-9_-]+)', external_url)
+            if match_d:
+                cover_b64 = f"https://lh3.googleusercontent.com/d/{match_d.group(1)}"
+            else:
+                match_id = re.search(r'[?&]id=([a-zA-Z0-9_-]+)', external_url)
+                if match_id:
+                    cover_b64 = f"https://lh3.googleusercontent.com/d/{match_id.group(1)}"
+
         drive_file_id = None
         if not external_url or not external_url.strip():
             file_stream = io.BytesIO(contents)
@@ -152,11 +162,21 @@ async def upload_book(
 
 @app.post("/api/books/link", response_model=schemas.BookResponse)
 def create_book_from_link(book_in: schemas.BookLinkCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    cover_url = book_in.cover_url
+    if not cover_url and book_in.external_url:
+        match_d = re.search(r'/file/d/([a-zA-Z0-9_-]+)', book_in.external_url)
+        if match_d:
+            cover_url = f"https://lh3.googleusercontent.com/d/{match_d.group(1)}"
+        else:
+            match_id = re.search(r'[?&]id=([a-zA-Z0-9_-]+)', book_in.external_url)
+            if match_id:
+                cover_url = f"https://lh3.googleusercontent.com/d/{match_id.group(1)}"
+
     db_book = models.Book(
         title=book_in.title,
         author=book_in.author,
         genre=book_in.genre,
-        cover_url=book_in.cover_url,
+        cover_url=cover_url,
         external_url=book_in.external_url,
         progress=0
     )

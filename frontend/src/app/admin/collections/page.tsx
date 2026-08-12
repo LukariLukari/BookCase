@@ -99,8 +99,7 @@ export default function AdminCollectionsPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('access_token');
-      const headers = { Authorization: `Bearer ${token}` };
+      const headers = getHeaders();
       const payload = { name, description };
       
       if (editingCollection) {
@@ -112,23 +111,30 @@ export default function AdminCollectionsPage() {
       fetchCollections();
     } catch (err: any) {
       console.error(err);
-      const msg = err.response?.data?.detail || "Đã có lỗi xảy ra khi lưu";
-      setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
-      setTimeout(() => setError(null), 3000);
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        const msg = err.response?.data?.detail || "Đã có lỗi xảy ra khi lưu";
+        setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
+        setTimeout(() => setError(null), 3000);
+      }
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa Tệp Sách này?')) return;
     try {
-      const token = localStorage.getItem('access_token');
       await axios.delete(`${baseUrl}/api/collections/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getHeaders()
       });
       fetchCollections();
-    } catch (err) {
-      setError("Lỗi khi xóa");
-      setTimeout(() => setError(null), 3000);
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        setError("Lỗi khi xóa");
+        setTimeout(() => setError(null), 3000);
+      }
     }
   };
 
@@ -141,15 +147,18 @@ export default function AdminCollectionsPage() {
 
   const openManageModal = async (collectionId: string) => {
     try {
-      const token = localStorage.getItem('access_token');
       const res = await axios.get(`${baseUrl}/api/collections/${collectionId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getHeaders()
       });
       setActiveCollection(res.data);
       setIsManageModalOpen(true);
-    } catch (err) {
-      setError("Lỗi khi tải chi tiết tệp");
-      setTimeout(() => setError(null), 3000);
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        setError("Lỗi khi tải chi tiết tệp");
+        setTimeout(() => setError(null), 3000);
+      }
     }
   };
 
@@ -158,8 +167,7 @@ export default function AdminCollectionsPage() {
     const isAdded = activeCollection.books.some((b: any) => b.id === bookId);
     
     try {
-      const token = localStorage.getItem('access_token');
-      const headers = { Authorization: `Bearer ${token}` };
+      const headers = getHeaders();
       
       if (isAdded) {
         await axios.delete(`${baseUrl}/api/collections/${activeCollection.id}/books/${bookId}`, { headers });
@@ -176,9 +184,13 @@ export default function AdminCollectionsPage() {
         });
       }
       fetchCollections(); // Refresh counts
-    } catch (err) {
-      setError("Lỗi thao tác");
-      setTimeout(() => setError(null), 3000);
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        setError("Lỗi thao tác");
+        setTimeout(() => setError(null), 3000);
+      }
     }
   };
 
@@ -199,9 +211,9 @@ export default function AdminCollectionsPage() {
           </div>
           <button 
             onClick={openCreateModal}
-            className="btn-primary !rounded-full !p-2.5 md:!py-3 md:!px-6 shadow-md hover:shadow-lg"
+            className="btn-primary !rounded-full !p-2.5 md:!py-3 md:!px-6 shadow-md hover:shadow-lg flex items-center gap-2"
           >
-            <Plus size={16} /> <span className="hidden sm:inline">Tạo Tệp Mới</span>
+            <Plus size={16} className="!text-white" /> <span className="hidden sm:inline !text-white">Tạo Tệp Mới</span>
           </button>
         </header>
 

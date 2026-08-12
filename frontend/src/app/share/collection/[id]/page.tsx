@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Download, AlertCircle, Library, Link as LinkIcon, Upload, Loader2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { getCoverUrl } from '@/utils/image';
+import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 
 export default function ShareCollectionPage() {
   const { id } = useParams();
@@ -107,7 +107,7 @@ export default function ShareCollectionPage() {
                         alt={book.title} 
                         onError={(e) => {
                           e.currentTarget.onerror = null;
-                          e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover';
+                          e.currentTarget.src = DEFAULT_COVER_SVG;
                         }}
                       />
                    ) : (

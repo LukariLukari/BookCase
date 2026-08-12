@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
 import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2 } from 'lucide-react';
-import { getCoverUrl } from '@/utils/image';
+import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 
 interface Book {
   id: string;
@@ -351,7 +351,7 @@ export default function AdminPage() {
                           alt={book.title} 
                           onError={(e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover';
+                            e.currentTarget.src = DEFAULT_COVER_SVG;
                           }}
                         />
                      ) : (
@@ -440,7 +440,7 @@ export default function AdminPage() {
                   <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center flex-1 min-h-[200px] md:min-h-[280px] p-4">
                     {editForm.cover_url ? (
                       <img src={getCoverUrl(editForm.cover_url)} className="max-h-[200px] md:max-h-[260px] rounded-lg object-contain shadow-sm" alt="cover preview" 
-                           onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=Broken+Link'; }} />
+                           onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = DEFAULT_COVER_SVG; }} />
                     ) : (
                       <span className="text-gray-400 text-sm font-medium">No Cover Provided</span>
                     )}

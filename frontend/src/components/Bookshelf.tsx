@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Download, X, Trash2, Loader2, Share2, Check } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { getCoverUrl } from '@/utils/image';
+import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 
 interface Book {
   id: string;
@@ -76,6 +76,10 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
                 src={getCoverUrl(heroBook.cover_url)} 
                 alt={heroBook.title}
                 className="w-full aspect-[2/3] object-cover rounded-xl shadow-xl border border-white/20"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = DEFAULT_COVER_SVG;
+                }}
               />
             ) : (
               <div className="w-full aspect-[2/3] bg-slate-800 rounded-xl shadow-xl flex items-center justify-center p-2 text-center border border-white/20">
@@ -127,7 +131,7 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
                         alt={book.title} 
                         onError={(e) => {
                           e.currentTarget.onerror = null;
-                          e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover';
+                          e.currentTarget.src = DEFAULT_COVER_SVG;
                         }}
                       />
                    ) : (
@@ -186,6 +190,11 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
                       <img 
                         src={getCoverUrl(selectedBook.cover_url)} 
                         className="w-full h-full object-cover rounded-2xl shadow-xl"
+                        alt={selectedBook.title}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = DEFAULT_COVER_SVG;
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full bg-slate-200 rounded-2xl shadow-xl flex items-center justify-center p-4">
