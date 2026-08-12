@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Download, X, Trash2, Loader2, Share2, Check } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
+import BookCoverImage from '@/components/BookCoverImage';
 
 interface Book {
   id: string;
@@ -71,21 +71,12 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
         >
           {/* Cover */}
           <motion.div layoutId={`book-cover-${heroBook.id}`} className="w-24 md:w-28 flex-shrink-0 -mt-8 md:-mt-10 mb-0 md:mb-2 shadow-2xl">
-            {heroBook.cover_url ? (
-              <img 
-                src={getCoverUrl(heroBook.cover_url)} 
-                alt={heroBook.title}
-                className="w-full aspect-[2/3] object-cover rounded-xl shadow-xl border border-white/20"
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = DEFAULT_COVER_SVG;
-                }}
-              />
-            ) : (
-              <div className="w-full aspect-[2/3] bg-slate-800 rounded-xl shadow-xl flex items-center justify-center p-2 text-center border border-white/20">
-                 <span className="font-bold text-gray-400 text-xs">{heroBook.title}</span>
-              </div>
-            )}
+            <BookCoverImage 
+              coverUrl={heroBook.cover_url}
+              title={heroBook.title}
+              author={heroBook.author}
+              className="w-full aspect-[2/3] object-cover rounded-xl shadow-xl border border-white/20"
+            />
           </motion.div>
           
           {/* Info */}
@@ -124,21 +115,12 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
               >
                 {/* Ảnh bìa */}
                 <motion.div layoutId={`book-cover-${book.id}`} className="w-full aspect-[2/3] relative z-10 mb-4">
-                   {book.cover_url ? (
-                     <img 
-                        src={getCoverUrl(book.cover_url)} 
-                        className="w-full h-full object-cover rounded-2xl shadow-md group-hover:shadow-xl transition-shadow duration-300" 
-                        alt={book.title} 
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = DEFAULT_COVER_SVG;
-                        }}
-                      />
-                   ) : (
-                     <div className="w-full h-full bg-slate-200 rounded-2xl shadow-md flex items-center justify-center p-4 text-center">
-                        <span className="font-bold text-gray-500">{book.title}</span>
-                     </div>
-                   )}
+                  <BookCoverImage 
+                    coverUrl={book.cover_url}
+                    title={book.title}
+                    author={book.author}
+                    className="w-full h-full object-cover rounded-2xl shadow-md group-hover:shadow-xl transition-shadow duration-300"
+                  />
                 </motion.div>
                 
                 {/* Thông tin Text và Nút Share */}
@@ -186,21 +168,12 @@ export default function Bookshelf({ books, refresh }: { books: Book[], refresh: 
 
                 <div className="md:w-5/12 p-8 flex justify-center items-center bg-[#f8f7f4]">
                   <motion.div layoutId={`book-cover-${selectedBook.id}`} className="w-full max-w-[200px] aspect-[2/3]">
-                    {selectedBook.cover_url ? (
-                      <img 
-                        src={getCoverUrl(selectedBook.cover_url)} 
-                        className="w-full h-full object-cover rounded-2xl shadow-xl"
-                        alt={selectedBook.title}
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = DEFAULT_COVER_SVG;
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-slate-200 rounded-2xl shadow-xl flex items-center justify-center p-4">
-                         <span className="font-bold text-gray-500 text-xl text-center">{selectedBook.title}</span>
-                      </div>
-                    )}
+                    <BookCoverImage 
+                      coverUrl={selectedBook.cover_url}
+                      title={selectedBook.title}
+                      author={selectedBook.author}
+                      className="w-full h-full object-cover rounded-2xl shadow-xl"
+                    />
                   </motion.div>
                 </div>
                 

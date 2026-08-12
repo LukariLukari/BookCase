@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Download, AlertCircle, Library, Link as LinkIcon, Upload, Loader2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
+import BookCoverImage from '@/components/BookCoverImage';
 
 export default function ShareCollectionPage() {
   const { id } = useParams();
@@ -100,21 +100,12 @@ export default function ShareCollectionPage() {
               <div key={book.id} className="flex flex-col group relative">
                 {/* Cover Image */}
                 <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-gray-100 group-hover:shadow-xl transition-all duration-300">
-                   {book.cover_url ? (
-                     <img 
-                        src={getCoverUrl(book.cover_url)} 
-                        className="w-full h-full object-cover" 
-                        alt={book.title} 
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = DEFAULT_COVER_SVG;
-                        }}
-                      />
-                   ) : (
-                     <div className="w-full h-full bg-slate-100 flex items-center justify-center p-4 text-center">
-                        <span className="font-bold text-gray-400 text-xs">{book.title}</span>
-                     </div>
-                   )}
+                   <BookCoverImage 
+                     coverUrl={book.cover_url}
+                     title={book.title}
+                     author={book.author}
+                     className="w-full h-full object-cover"
+                   />
                    
                    {/* Source Tag */}
                    <div className="absolute top-2 left-2 z-20">

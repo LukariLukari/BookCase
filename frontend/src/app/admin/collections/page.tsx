@@ -4,6 +4,7 @@ import axios from 'axios';
 import Sidebar from '@/components/Sidebar';
 import { Plus, Edit2, Trash2, Library, FolderOpen, Link as LinkIcon, X, Check } from 'lucide-react';
 import { getCoverUrl } from '@/utils/image';
+import BookCoverImage from '@/components/BookCoverImage';
 
 interface Collection {
   id: string;
@@ -317,11 +318,12 @@ export default function AdminCollectionsPage() {
                         className={`cursor-pointer group relative rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isAdded ? 'border-orange-500 shadow-md ring-2 ring-orange-200' : 'border-transparent hover:border-gray-200'}`}
                       >
                          <div className="w-full aspect-[2/3] relative">
-                           {book.cover_url ? (
-                             <img src={getCoverUrl(book.cover_url)} className={`w-full h-full object-cover transition-all ${isAdded ? 'brightness-110' : 'brightness-90 group-hover:brightness-100'}`} alt={book.title} />
-                           ) : (
-                             <div className="w-full h-full bg-slate-100 flex items-center justify-center p-2 text-center text-xs text-gray-400 font-bold">{book.title}</div>
-                           )}
+                            <BookCoverImage 
+                              coverUrl={book.cover_url}
+                              title={book.title}
+                              author={book.author}
+                              className={`w-full h-full object-cover transition-all ${isAdded ? 'brightness-110' : 'brightness-90 group-hover:brightness-100'}`}
+                            />
                            
                            {/* Checkmark overlay */}
                            {isAdded && (

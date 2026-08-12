@@ -6,6 +6,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
 import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2 } from 'lucide-react';
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
+import BookCoverImage from '@/components/BookCoverImage';
 
 interface Book {
   id: string;
@@ -166,16 +167,25 @@ export default function AdminPage() {
     fetchBooks();
   }, []);
 
+  const getHeaders = () => {
+    const authToken = token || localStorage.getItem('access_token') || localStorage.getItem('token');
+    return { Authorization: `Bearer ${authToken}` };
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa cuốn sách này?')) return;
     try {
       await axios.delete(`${API_URL}/api/books/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getHeaders()
       });
       fetchBooks();
-    } catch (err) {
-      setError('Lỗi khi xóa sách!');
-      setTimeout(() => setError(null), 3000);
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        setError('Lỗi khi xóa sách!');
+        setTimeout(() => setError(null), 3000);
+      }
     }
   };
 
@@ -196,13 +206,17 @@ export default function AdminPage() {
     if (!editingBook) return;
     try {
       await axios.put(`${API_URL}/api/books/${editingBook.id}`, editForm, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getHeaders()
       });
       setIsEditModalOpen(false);
       fetchBooks();
-    } catch (err) {
-      setError('Lỗi khi cập nhật sách!');
-      setTimeout(() => setError(null), 3000);
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        logout();
+      } else {
+        setError('Lỗi khi cập nhật sách!');
+        setTimeout(() => setError(null), 3000);
+      }
     }
   };
 
@@ -244,12 +258,16 @@ export default function AdminPage() {
         await axios.post(`${API_URL}/api/books/upload`, formData, {
           headers: { 
             'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`
+            ...getHeaders()
           }
         });
         uploadedCount++;
-      } catch (err) {
+      } catch (err: any) {
         console.error(`Lỗi tải lên file ${item.file.name}:`, err);
+        if (err.response?.status === 401) {
+          logout();
+          return;
+        }
       }
     }
     
@@ -272,7 +290,7 @@ export default function AdminPage() {
     setIsUploading(true);
     try {
        await axios.post(`${API_URL}/api/books/link`, linkForm, {
-         headers: { Authorization: `Bearer ${token}` }
+         headers: getHeaders()
        });
        setIsUploading(false);
        setIsAddModalOpen(false);
@@ -280,10 +298,14 @@ export default function AdminPage() {
        fetchBooks();
        setError("Đã thêm sách thành công!");
        setTimeout(() => setError(null), 3000);
-    } catch(err) {
+    } catch(err: any) {
        setIsUploading(false);
-       setUploadStatus({type: 'error', msg: "Lỗi khi thêm sách bằng Link!"});
-       setTimeout(() => setUploadStatus(null), 3000);
+       if (err.response?.status === 401) {
+         logout();
+       } else {
+         setUploadStatus({type: 'error', msg: err.response?.data?.detail || "Lỗi khi thêm sách bằng Link!"});
+         setTimeout(() => setUploadStatus(null), 3000);
+       }
     }
   };
 
@@ -344,21 +366,12 @@ export default function AdminPage() {
                 <div key={book.id} className="flex flex-col group relative">
                   {/* Ảnh bìa */}
                   <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-gray-100 group-hover:shadow-xl transition-all duration-300">
-                     {book.cover_url ? (
-                       <img 
-                          src={getCoverUrl(book.cover_url)} 
-                          className="w-full h-full object-cover" 
-                          alt={book.title} 
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = DEFAULT_COVER_SVG;
-                          }}
-                        />
-                     ) : (
-                       <div className="w-full h-full bg-slate-100 flex items-center justify-center p-4 text-center">
-                          <span className="font-bold text-gray-400 text-xs">{book.title}</span>
-                       </div>
-                     )}
+                     <BookCoverImage 
+                       coverUrl={book.cover_url}
+                       title={book.title}
+                       author={book.author}
+                       className="w-full h-full object-cover"
+                     />
                      
                      {/* Tag Nguồn (Source) */}
                      <div className="absolute top-2 left-2 z-20">

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Download, AlertCircle, BookOpen, Loader2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
+import BookCoverImage from '@/components/BookCoverImage';
 
 export default function ShareBookPage() {
   const { id } = useParams();
@@ -75,22 +75,12 @@ export default function ShareBookPage() {
         {/* Left Side: Cover Image */}
         <div className="w-full md:w-5/12 bg-gray-50 p-8 md:p-12 flex items-center justify-center border-b md:border-b-0 md:border-r border-gray-100">
           <div className="w-full max-w-[320px] aspect-[2/3] relative">
-            {book.cover_url ? (
-              <img 
-                src={getCoverUrl(book.cover_url)} 
-                className="absolute inset-0 w-full h-full object-cover rounded-2xl shadow-2xl" 
-                alt={book.title} 
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = DEFAULT_COVER_SVG;
-                }}
-              />
-            ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-white rounded-2xl shadow-2xl border border-gray-100">
-                <BookOpen size={48} className="text-gray-300 mb-4" />
-                <span className="font-bold text-gray-400 text-lg">{book.title}</span>
-              </div>
-            )}
+            <BookCoverImage 
+              coverUrl={book.cover_url}
+              title={book.title}
+              author={book.author}
+              className="absolute inset-0 w-full h-full object-cover rounded-2xl shadow-2xl"
+            />
           </div>
         </div>
 
