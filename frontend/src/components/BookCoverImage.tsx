@@ -5,6 +5,7 @@ import { getCoverUrl } from '@/utils/image';
 
 interface BookCoverImageProps {
   coverUrl?: string | null;
+  bookId?: string | null;
   title: string;
   author?: string | null;
   className?: string;
@@ -13,13 +14,27 @@ interface BookCoverImageProps {
 
 export default function BookCoverImage({
   coverUrl,
+  bookId,
   title,
   author,
   className = "w-full h-full object-cover",
   aspectRatio = "aspect-[2/3]"
 }: BookCoverImageProps) {
   const [imageError, setImageError] = useState(false);
-  const src = getCoverUrl(coverUrl);
+  const [triedFallback, setTriedFallback] = useState(false);
+  
+  let src = getCoverUrl(coverUrl);
+  if (imageError && !triedFallback && bookId) {
+    src = getCoverUrl(`/api/books/cover/${bookId}`);
+  }
+
+  const handleImageError = () => {
+    if (!triedFallback && bookId && coverUrl !== `/api/books/cover/${bookId}`) {
+      setTriedFallback(true);
+    } else {
+      setImageError(true);
+    }
+  };
 
   const getGradient = (str: string) => {
     const gradients = [
@@ -39,7 +54,7 @@ export default function BookCoverImage({
     return gradients[index];
   };
 
-  if (!src || imageError) {
+  if (!src || (imageError && (triedFallback || !bookId))) {
     const bgGradient = getGradient(title || "Book");
     return (
       <div className={`w-full h-full ${aspectRatio} bg-gradient-to-br ${bgGradient} p-4 flex flex-col justify-between relative overflow-hidden select-none border border-black/10 shadow-md rounded-2xl`}>
@@ -67,7 +82,7 @@ export default function BookCoverImage({
       src={src} 
       alt={title} 
       className={className} 
-      onError={() => setImageError(true)} 
+      onError={handleImageError} 
     />
   );
 }

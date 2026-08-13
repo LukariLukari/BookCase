@@ -223,34 +223,62 @@ def delete_books_bulk(book_ids: schemas.BookBulkDelete, db: Session = Depends(ge
 @app.get("/api/books/cover/{book_id}")
 def get_book_cover(book_id: str, db: Session = Depends(get_db)):
     book = db.query(models.Book).filter(models.Book.id == book_id).first()
-    if not book or not book.cover_url:
-        raise HTTPException(status_code=404, detail="Cover not found")
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
         
+    # If cover_url is empty, attempt on-the-fly extraction
+    if not book.cover_url:
+        b64 = None
+        file_id = book.drive_file_id
+        if not file_id and book.external_url:
+            match_d = re.search(r'/file/d/([a-zA-Z0-9_-]+)', book.external_url)
+            if match_d: file_id = match_d.group(1)
+            else:
+                match_id = re.search(r'[?&]id=([a-zA-Z0-9_-]+)', book.external_url)
+                if match_id: file_id = match_id.group(1)
+        if file_id:
+            try:
+                file_bytes = drive_service.download_file_bytes(file_id)
+                if file_bytes:
+                    is_pdf = True if (book.mime_type == 'application/pdf' or file_bytes.startswith(b'%PDF')) else False
+                    extracted = extract_pdf_info(file_bytes) if is_pdf else extract_epub_info(file_bytes)
+                    b64 = extracted.get('cover_b64')
+                    if b64:
+                        book.cover_url = b64
+                        db.commit()
+            except Exception as e:
+                print(f"Auto cover fix failed for {book_id}: {e}")
+
+    if not book.cover_url:
+        raise HTTPException(status_code=404, detail="Cover not found")
+
     if book.cover_url.startswith("data:image"):
         try:
             import base64
             from fastapi.responses import Response
-            # Extract base64 part
             header, encoded = book.cover_url.split(",", 1)
-            # Get mime type from header
             mime_type = header.split(":")[1].split(";")[0]
-            # Decode base64 (add padding if necessary)
             encoded += "=" * ((4 - len(encoded) % 4) % 4)
             image_bytes = base64.b64decode(encoded)
-            return Response(content=image_bytes, media_type=mime_type)
+            return Response(
+                content=image_bytes, 
+                media_type=mime_type,
+                headers={"Cache-Control": "public, max-age=86400, stale-while-revalidate=604800"}
+            )
         except Exception as e:
             raise HTTPException(status_code=500, detail="Invalid cover format")
             
-    # If it's a URL (ImgBB, etc.), redirect
     if book.cover_url.startswith("http"):
         from fastapi.responses import RedirectResponse
         return RedirectResponse(book.cover_url)
         
-    # If it's a local file path
     local_path = book.cover_url.lstrip("/")
     if os.path.exists(local_path):
         from fastapi.responses import FileResponse
-        return FileResponse(local_path)
+        return FileResponse(
+            local_path,
+            headers={"Cache-Control": "public, max-age=86400, stale-while-revalidate=604800"}
+        )
         
     raise HTTPException(status_code=404, detail="Cover file not found")
 

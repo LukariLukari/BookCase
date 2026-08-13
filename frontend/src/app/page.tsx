@@ -1,15 +1,14 @@
 import BooksClient from './BooksClient';
 
-export const revalidate = 60; // Tự động làm mới cache (bộ nhớ đệm) 60 giây một lần
+export const revalidate = 0; // Dynamic fetch on every request
 
 export default async function Home() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   let books = [];
   
   try {
-    // Vercel sẽ "nhớ" kết quả này lại thay vì gọi xuống API mỗi khi có khách truy cập
     const res = await fetch(`${API_URL}/api/books`, { 
-      next: { revalidate: 60 } 
+      cache: 'no-store' 
     });
     
     if (res.ok) {

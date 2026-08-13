@@ -6,16 +6,34 @@ import { Search } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
+import axios from 'axios';
+
 export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
+  const [books, setBooks] = useState<any[]>(initialBooks || []);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+  const refreshBooks = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/books`);
+      if (res.data && Array.isArray(res.data)) {
+        setBooks(res.data);
+      }
+    } catch (err) {
+      console.error('Lỗi sync danh sách sách client:', err);
+    }
+  };
 
   useEffect(() => {
     if (!isLoading && !user) {
       router.push('/login');
+    }
+    if (user) {
+      refreshBooks();
     }
   }, [user, isLoading, router]);
 
@@ -23,7 +41,7 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
     return <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center font-bold text-gray-500">Đang tải...</div>;
   }
 
-  let filteredBooks = initialBooks.filter((book: any) => 
+  let filteredBooks = books.filter((book: any) => 
     book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (book.author && book.author.toLowerCase().includes(searchQuery.toLowerCase()))
   );
@@ -82,12 +100,12 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
 
         {/* Content */}
         <main className="flex-1 px-4 md:px-10 pt-4 pb-12">
-          {initialBooks.length === 0 ? (
+          {books.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center bg-white rounded-3xl shadow-sm border border-gray-100">
               <p className="text-gray-500 font-medium mb-4">Bookshelf is currently empty.</p>
             </div>
           ) : (
-            <Bookshelf books={filteredBooks} refresh={() => {}} />
+            <Bookshelf books={filteredBooks} refresh={refreshBooks} sortBy={sortBy} />
           )}
         </main>
 

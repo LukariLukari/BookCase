@@ -433,6 +433,7 @@ export default function AdminPage() {
                   <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-gray-100 group-hover:shadow-xl transition-all duration-300">
                      <BookCoverImage 
                        coverUrl={book.cover_url}
+                       bookId={book.id}
                        title={book.title}
                        author={book.author}
                        className="w-full h-full object-cover"

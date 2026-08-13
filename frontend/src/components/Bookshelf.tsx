@@ -61,6 +61,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
       <motion.div layoutId={`book-cover-${book.id}`} className="w-full aspect-[2/3] relative z-10 mb-4">
         <BookCoverImage 
           coverUrl={book.cover_url}
+          bookId={book.id}
           title={book.title}
           author={book.author}
           className="w-full h-full object-cover rounded-2xl shadow-md group-hover:shadow-xl transition-shadow duration-300"
@@ -157,6 +158,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   <motion.div layoutId={`book-cover-${selectedBook.id}`} className="w-full max-w-[200px] aspect-[2/3]">
                     <BookCoverImage 
                       coverUrl={selectedBook.cover_url}
+                      bookId={selectedBook.id}
                       title={selectedBook.title}
                       author={selectedBook.author}
                       className="w-full h-full object-cover rounded-2xl shadow-xl"

@@ -46,8 +46,10 @@ class BookResponse(BookBase):
     def parse_cover_url_root(cls, values):
         cover_url = values.get('cover_url')
         book_id = values.get('id')
-        if cover_url and isinstance(cover_url, str) and cover_url.startswith("data:image") and book_id:
-            values['cover_url'] = f"/api/books/cover/{book_id}"
+        if book_id and cover_url and isinstance(cover_url, str):
+            # If cover_url is a heavy base64 string or local relative path, serve via lightweight endpoint
+            if cover_url.startswith("data:image") or cover_url.startswith("/uploads") or cover_url.startswith("uploads"):
+                values['cover_url'] = f"/api/books/cover/{book_id}"
         return values
 
     class Config:
