@@ -40,7 +40,7 @@ export default function ShareCollectionPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center" suppressHydrationWarning>
+      <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center" suppressHydrationWarning>
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent" suppressHydrationWarning></div>
       </div>
     );
@@ -48,34 +48,30 @@ export default function ShareCollectionPage() {
 
   if (error || !collection) {
     return (
-      <div className="min-h-screen bg-[#f8f7f4] flex flex-col items-center justify-center p-4 text-center" suppressHydrationWarning>
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 max-w-md w-full" suppressHydrationWarning>
-          <AlertCircle size={48} className="text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-black mb-2">Oops!</h1>
-          <p className="text-gray-500">{error}</p>
+      <div className="min-h-screen bg-[#1F1D20] flex flex-col items-center justify-center p-4 text-center" suppressHydrationWarning>
+        <div className="bg-[#2A272A] border border-[#4D4845]/50 p-8 rounded-3xl shadow-xl max-w-md w-full" suppressHydrationWarning>
+          <AlertCircle size={48} className="text-red-400 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-[#F5ECDC] mb-2">Oops!</h1>
+          <p className="text-[#D7C9B2]">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f7f4] font-sans flex flex-col items-center p-4 pt-8 md:pt-16 pb-24" suppressHydrationWarning>
+    <div className="min-h-screen bg-[#1F1D20] text-[#F5ECDC] font-sans flex flex-col items-center p-4 pt-8 md:pt-16 pb-24" suppressHydrationWarning>
       
       {/* Brand Header */}
       <div className="w-full max-w-6xl flex justify-between items-center mb-12 px-4">
-         <h1 className="text-2xl font-extrabold text-black tracking-tight">
+         <h1 className="text-2xl font-extrabold text-[#F5ECDC] tracking-tight">
           BookCase<span className="text-orange-500">.</span>
         </h1>
       </div>
 
-      {/* Collection Header - Black card with orange text */}
+      {/* Collection Header Banner */}
       <div className="w-full max-w-6xl px-4 mb-12">
-        <div className="bg-black rounded-3xl p-8 md:p-12 text-orange-500 shadow-2xl flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden border border-neutral-800">
-           {/* Decor circle */}
-           <div className="absolute -top-24 -right-24 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
-           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
-           
-           <div className="w-20 h-20 bg-neutral-900 border border-orange-500/30 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+        <div className="bg-[#2A272A] rounded-3xl p-8 md:p-12 text-[#F5ECDC] shadow-2xl flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden border border-[#4D4845]/50">
+           <div className="w-20 h-20 bg-[#1F1D20] border border-orange-500/30 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
              <Library size={40} className="text-orange-500" />
            </div>
            
@@ -85,9 +81,9 @@ export default function ShareCollectionPage() {
              </span>
              <h1 className="text-3xl md:text-5xl font-black mb-3 text-orange-500 tracking-tight">{collection.name}</h1>
              {collection.description && (
-               <p className="text-orange-300/80 text-lg max-w-2xl">{collection.description}</p>
+               <p className="text-[#D7C9B2] text-lg max-w-2xl">{collection.description}</p>
              )}
-             <p className="mt-4 text-orange-400/70 font-semibold text-sm">{collection.book_count} cuốn sách</p>
+             <p className="mt-4 text-[#D7C9B2] font-semibold text-sm">{collection.book_count} cuốn sách</p>
            </div>
         </div>
       </div>
@@ -99,9 +95,10 @@ export default function ShareCollectionPage() {
             {collection.books.map((book: any) => (
               <div key={book.id} className="flex flex-col group relative">
                 {/* Cover Image */}
-                <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-gray-100 group-hover:shadow-xl transition-all duration-300">
+                <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-[#4D4845]/40 group-hover:shadow-xl transition-all duration-300">
                    <BookCoverImage 
                      coverUrl={book.cover_url}
+                     bookId={book.id}
                      title={book.title}
                      author={book.author}
                      className="w-full h-full object-cover"
@@ -110,22 +107,22 @@ export default function ShareCollectionPage() {
                    {/* Source Tag */}
                    <div className="absolute top-2 left-2 z-20">
                      {book.external_url ? (
-                       <span className="flex items-center gap-1 text-orange-600 font-bold bg-orange-50/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-100" title={book.external_url}>
+                       <span className="flex items-center gap-1 text-orange-400 font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-500/30" title={book.external_url}>
                          <LinkIcon size={12} /> Drive
                        </span>
                      ) : (
-                       <span className="flex items-center gap-1 text-gray-700 font-bold bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-gray-100">
+                       <span className="flex items-center gap-1 text-[#D7C9B2] font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-[#4D4845]/40">
                          <Upload size={12} /> Local
                        </span>
                      )}
                    </div>
 
                    {/* Overlay Actions (Download) */}
-                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-[2px]">
+                   <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-[2px]">
                        <button 
                          onClick={() => handleDownload(book)}
                          disabled={downloadingId === book.id} 
-                         className="flex items-center gap-2 px-5 py-2.5 bg-white text-black hover:bg-orange-500 hover:text-white rounded-full font-bold shadow-lg transition-colors transform hover:scale-105 disabled:opacity-70 disabled:hover:scale-100"
+                         className="btn-primary shadow-lg hover:scale-105 disabled:opacity-70 disabled:hover:scale-100"
                        >
                          {downloadingId === book.id ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                          <span>{downloadingId === book.id ? 'Đang tải...' : 'Tải Xuống'}</span>
@@ -135,17 +132,17 @@ export default function ShareCollectionPage() {
                 
                 {/* Text Info */}
                 <div className="px-1">
-                  <h3 className="text-sm font-bold text-black leading-tight line-clamp-2">{book.title}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{book.author || 'Unknown Author'}</p>
+                  <h3 className="text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2">{book.title}</h3>
+                  <p className="text-xs text-[#D7C9B2] mt-1">{book.author || 'Unknown Author'}</p>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 bg-white rounded-3xl border border-gray-100 shadow-sm">
-            <Library size={48} className="text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Tệp sách trống</h3>
-            <p className="text-gray-500">Chưa có cuốn sách nào trong tệp này.</p>
+          <div className="text-center py-24 bg-[#2A272A] rounded-3xl border border-[#4D4845]/50 shadow-sm">
+            <Library size={48} className="text-[#7B7369] mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-[#F5ECDC] mb-2">Tệp sách trống</h3>
+            <p className="text-[#D7C9B2]">Chưa có cuốn sách nào trong tệp này.</p>
           </div>
         )}
       </div>

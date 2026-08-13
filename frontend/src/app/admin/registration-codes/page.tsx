@@ -132,41 +132,41 @@ export default function AdminRegistrationCodesPage() {
   };
 
   if (isAuthLoading || !user || user.role !== 'admin') {
-    return <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center font-bold text-gray-500">Đang tải...</div>;
+    return <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center font-bold text-[#D7C9B2]">Đang tải...</div>;
   }
 
   return (
-    <div className="flex bg-[#f8f7f4] min-h-screen font-sans selection:bg-orange-200 overflow-x-hidden">
+    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60 overflow-x-hidden">
       <Sidebar />
       <div className="flex-1 ml-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen w-full max-w-full">
         
         {/* Header */}
-        <header className="sticky top-16 md:top-0 z-30 bg-[#f8f7f4]/80 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex justify-between items-center border-b border-gray-200">
-          <div className="flex items-center gap-4 text-xl font-bold">
+        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex justify-between items-center border-b border-[#4D4845]/40">
+          <div className="flex items-center gap-3 text-xl font-bold">
             <KeyRound size={24} className="text-orange-500" />
-            <span className="text-black">Quản Lý Mã Đăng Ký</span>
+            <span className="text-[#F5ECDC]">Quản Lý Mã Đăng Ký</span>
           </div>
           <button 
             onClick={handleCreateCode}
             disabled={isCreating}
-            className="!bg-orange-500 hover:!bg-orange-600 !text-white font-bold rounded-full py-3 px-6 shadow-md hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-70"
+            className="btn-primary !rounded-full !py-2.5 md:!py-3 !px-5 md:!px-6 shadow-md flex items-center gap-2"
           >
-            {isCreating ? <Loader2 size={18} className="animate-spin !text-white" /> : <Plus size={18} className="!text-white" />}
-            <span className="!text-white">Tạo Mã Mới</span>
+            {isCreating ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+            <span>Tạo Mã Mới</span>
           </button>
         </header>
 
         {/* Content */}
         <main className="flex-1 px-4 md:px-10 pt-8 pb-12">
           {error && (
-            <div className="bg-red-50 text-red-500 p-4 rounded-2xl text-sm font-bold mb-6 text-center border border-red-100">
+            <div className="bg-red-950/40 border border-red-500/40 text-red-400 p-4 rounded-2xl text-sm font-bold mb-6 text-center">
               {error}
             </div>
           )}
 
           {successNotice && (
-            <div className="bg-green-50 text-green-700 p-4 rounded-2xl text-sm font-bold mb-6 text-center border border-green-200 flex items-center justify-center gap-2 animate-in fade-in">
-              <Check size={18} className="text-green-600" />
+            <div className="bg-green-950/40 border border-green-500/40 text-green-400 p-4 rounded-2xl text-sm font-bold mb-6 text-center flex items-center justify-center gap-2">
+              <Check size={18} className="text-green-400" />
               <span>{successNotice}</span>
             </div>
           )}
@@ -176,35 +176,35 @@ export default function AdminRegistrationCodesPage() {
               <div className="animate-spin rounded-full h-10 w-10 border-4 border-orange-500 border-t-transparent"></div>
             </div>
           ) : (
-            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+            <div className="bg-[#2A272A] rounded-3xl p-6 md:p-8 shadow-md border border-[#4D4845]/50">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-black">Danh sách mã đăng ký</h2>
-                  <p className="text-sm text-gray-500">Mã ngẫu nhiên được Admin cấp cho thành viên để đăng ký tài khoản.</p>
+                  <h2 className="text-xl font-bold text-[#F5ECDC]">Danh sách mã đăng ký</h2>
+                  <p className="text-sm text-[#D7C9B2]">Mã ngẫu nhiên được Admin cấp cho thành viên để đăng ký tài khoản.</p>
                 </div>
-                <span className="text-xs font-bold px-3 py-1 bg-gray-100 text-gray-600 rounded-full">
+                <span className="text-xs font-bold px-3 py-1 bg-[#1F1D20] text-[#D7C9B2] border border-[#4D4845]/40 rounded-full">
                   Tổng: {codes.length} mã
                 </span>
               </div>
 
               {codes.length === 0 ? (
-                <div className="text-center py-16 border border-dashed border-gray-200 rounded-2xl">
-                  <KeyRound size={48} className="text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500 font-medium mb-4">Chưa có mã đăng ký nào.</p>
+                <div className="text-center py-16 border border-dashed border-[#4D4845]/60 rounded-2xl">
+                  <KeyRound size={48} className="text-[#7B7369] mx-auto mb-3" />
+                  <p className="text-[#D7C9B2] font-medium mb-4">Chưa có mã đăng ký nào.</p>
                   <button 
                     onClick={handleCreateCode}
                     disabled={isCreating}
-                    className="!bg-black hover:!bg-gray-800 !text-white font-bold py-2.5 px-6 rounded-xl transition-all inline-flex items-center gap-2 shadow-sm"
+                    className="btn-primary"
                   >
-                    <Plus size={16} className="!text-white" />
-                    <span className="!text-white">Tạo mã ngay</span>
+                    <Plus size={16} />
+                    <span>Tạo mã ngay</span>
                   </button>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                      <tr className="border-b border-[#4D4845]/50 text-xs font-bold text-[#7B7369] uppercase tracking-wider">
                         <th className="pb-4 pl-4">Mã Code</th>
                         <th className="pb-4">Trạng thái</th>
                         <th className="pb-4">Người sử dụng</th>
@@ -212,46 +212,46 @@ export default function AdminRegistrationCodesPage() {
                         <th className="pb-4 pr-4 text-right">Thao tác</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 text-sm">
+                    <tbody className="divide-y divide-[#4D4845]/30 text-sm">
                       {codes.map((item) => (
-                        <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="py-4 pl-4 font-mono font-bold text-base text-black">
+                        <tr key={item.id} className="hover:bg-[#1F1D20]/50 transition-colors">
+                          <td className="py-4 pl-4 font-mono font-bold text-base text-orange-400">
                             {item.code}
                           </td>
                           <td className="py-4">
                             {item.is_used ? (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">
-                                <ShieldAlert size={14} className="text-gray-500" />
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#1F1D20] text-[#7B7369] border border-[#4D4845]/40 rounded-full text-xs font-bold">
+                                <ShieldAlert size={14} className="text-[#7B7369]" />
                                 Đã sử dụng
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
-                                <ShieldCheck size={14} className="text-green-600" />
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-950/40 text-green-400 border border-green-500/30 rounded-full text-xs font-bold">
+                                <ShieldCheck size={14} className="text-green-400" />
                                 Có thể dùng
                               </span>
                             )}
                           </td>
-                          <td className="py-4 font-medium text-gray-700">
+                          <td className="py-4 font-medium text-[#F5ECDC]">
                             {item.used_by_username ? (
-                              <span className="font-bold text-black">@{item.used_by_username}</span>
+                              <span className="font-bold text-[#F5ECDC]">@{item.used_by_username}</span>
                             ) : (
-                              <span className="text-gray-400 font-normal">—</span>
+                              <span className="text-[#7B7369] font-normal">—</span>
                             )}
                           </td>
-                          <td className="py-4 text-gray-500 text-xs">
+                          <td className="py-4 text-[#D7C9B2] text-xs">
                             {new Date(item.created_at).toLocaleString('vi-VN')}
                           </td>
                           <td className="py-4 pr-4 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <button 
                                 onClick={() => copyToClipboard(item.code, item.id)}
-                                className="p-2 rounded-xl text-gray-600 hover:text-black hover:bg-gray-100 transition-colors flex items-center gap-1 text-xs font-bold"
+                                className="p-2 rounded-xl text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#1F1D20] transition-colors flex items-center gap-1 text-xs font-bold border border-[#4D4845]/30"
                                 title="Sao chép mã"
                               >
                                 {copiedId === item.id ? (
                                   <>
-                                    <Check size={16} className="text-green-600" />
-                                    <span className="text-green-600">Đã chép</span>
+                                    <Check size={16} className="text-green-400" />
+                                    <span className="text-green-400">Đã chép</span>
                                   </>
                                 ) : (
                                   <>
@@ -265,14 +265,14 @@ export default function AdminRegistrationCodesPage() {
                                 <>
                                   <button 
                                     onClick={() => handleRegenerateCode(item.id)}
-                                    className="p-2 rounded-xl text-orange-600 hover:bg-orange-50 transition-colors"
+                                    className="p-2 rounded-xl text-orange-400 hover:bg-[#1F1D20] transition-colors border border-[#4D4845]/30"
                                     title="Tạo lại mã ngẫu nhiên mới"
                                   >
                                     <RefreshCw size={16} />
                                   </button>
                                   <button 
                                     onClick={() => handleDeleteCode(item.id)}
-                                    className="p-2 rounded-xl text-red-500 hover:bg-red-50 transition-colors"
+                                    className="p-2 rounded-xl text-red-400 hover:bg-[#1F1D20] transition-colors border border-[#4D4845]/30"
                                     title="Xóa mã"
                                   >
                                     <Trash2 size={16} />

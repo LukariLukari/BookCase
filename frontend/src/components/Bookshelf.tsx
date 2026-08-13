@@ -108,21 +108,14 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
         <div className="space-y-12">
           {Object.entries(groupedBooks).map(([author, authorBooks]) => (
             <div key={author} className="space-y-6">
-              {/* Dark Author Banner Card (#1F1D20, #D7C9B2, #F5ECDC) */}
-              <div className="bg-[#1F1D20] rounded-[2rem] p-6 sm:p-8 md:p-10 shadow-xl border border-[#4D4845]/30 relative overflow-hidden">
-                <div className="flex flex-col gap-2">
-                  <div>
-                    <span className="inline-block px-3 py-1 bg-orange-500/10 text-orange-500 border border-orange-500/20 font-bold text-xs rounded-full uppercase tracking-wider mb-2">
-                      Tệp sách được chia sẻ
-                    </span>
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-orange-500 tracking-tight leading-none">
-                    {author}
-                  </h2>
-                  <p className="text-sm font-medium text-[#D7C9B2] mt-1">
-                    {authorBooks.length} cuốn sách
-                  </p>
-                </div>
+              {/* Clean Author Header (Unboxed with Name, Count, and Bottom Line) */}
+              <div className="flex items-end justify-between pb-3 border-b border-[#4D4845]/50">
+                <h2 className="text-xl sm:text-2xl font-black text-orange-500 tracking-tight">
+                  {author}
+                </h2>
+                <span className="text-xs sm:text-sm font-semibold text-[#D7C9B2]">
+                  {authorBooks.length} cuốn sách
+                </span>
               </div>
 
               {/* Book Cards Grid for this Author */}
