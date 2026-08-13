@@ -247,11 +247,9 @@ export default function AdminCollectionsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {collections.map(c => (
                 <div key={c.id} className="bg-[#2A272A] rounded-3xl p-6 shadow-md border border-[#4D4845]/50 flex flex-col hover:border-[#F97316]/50 transition-all">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center justify-center text-orange-500 shrink-0">
-                      <FolderOpen size={24} />
-                    </div>
-                    <div className="flex gap-2">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-xl font-bold text-[#F5ECDC]">{c.name}</h3>
+                    <div className="flex gap-2 shrink-0">
                       <button onClick={() => copyShareLink(c.id)} className="p-2 text-[#D7C9B2] hover:text-green-400 hover:bg-[#1F1D20] rounded-full transition-colors" title="Copy Share Link">
                         {copiedId === c.id ? <Check size={18} className="text-green-400" /> : <LinkIcon size={18} />}
                       </button>
@@ -263,8 +261,6 @@ export default function AdminCollectionsPage() {
                       </button>
                     </div>
                   </div>
-                  
-                  <h3 className="text-xl font-bold text-[#F5ECDC] mb-1">{c.name}</h3>
                   <p className="text-[#D7C9B2] text-sm mb-4 line-clamp-2 min-h-[40px]">
                     {c.description || 'Không có mô tả'}
                   </p>

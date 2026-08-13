@@ -70,16 +70,12 @@ export default function ShareCollectionPage() {
 
       {/* Collection Header Banner */}
       <div className="w-full max-w-6xl px-4 mb-12">
-        <div className="bg-[#2A272A] rounded-3xl p-8 md:p-12 text-[#F5ECDC] shadow-2xl flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden border border-[#4D4845]/50">
-           <div className="w-20 h-20 bg-[#1F1D20] border border-orange-500/30 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
-             <Library size={40} className="text-orange-500" />
-           </div>
-           
-           <div className="text-center md:text-left z-10">
+        <div className="bg-[#2A272A] rounded-3xl p-8 md:p-12 text-[#F5ECDC] shadow-2xl flex flex-col items-start relative overflow-hidden border border-[#4D4845]/50">
+           <div className="text-left z-10">
              <span className="inline-block px-3.5 py-1 bg-orange-500/20 border border-orange-500/30 text-orange-400 font-bold text-xs rounded-full uppercase tracking-wider mb-3">
                Tệp Sách Được Chia Sẻ
              </span>
-             <h1 className="text-3xl md:text-5xl font-black mb-3 text-orange-500 tracking-tight">{collection.name}</h1>
+             <h1 className="text-3xl md:text-5xl font-black mb-3 text-[#F5ECDC] tracking-tight">{collection.name}</h1>
              {collection.description && (
                <p className="text-[#D7C9B2] text-lg max-w-2xl">{collection.description}</p>
              )}
