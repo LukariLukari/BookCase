@@ -6,8 +6,6 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import BookCoverImage from '@/components/BookCoverImage';
 
-import BookSpineShelf from '@/components/BookSpineShelf';
-
 interface Book {
   id: string;
   title: string;
@@ -101,13 +99,6 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
   return (
     <div className="w-full pb-10">
       
-      {/* Horizontal Book Spines Shelf Header Section */}
-      <BookSpineShelf 
-        books={books} 
-        onSelectBook={(book) => setSelectedBook(book)} 
-        title="Tủ Sách Gáy Nổi Bật"
-      />
-
       {/* Grid Rendering */}
       {sortBy === 'author' ? (
         <div className="space-y-12">
