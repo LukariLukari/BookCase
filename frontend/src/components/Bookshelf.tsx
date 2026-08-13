@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, X, Trash2, Loader2, Share2, Check } from 'lucide-react';
+import { Download, X, Trash2, Loader2, Share2, Check, User } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import BookCoverImage from '@/components/BookCoverImage';
@@ -85,12 +85,16 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
   let groupedBooks: Record<string, Book[]> = {};
   if (sortBy === 'author') {
     books.forEach(book => {
-      const author = book.author?.trim() || "Unknown Author";
+      const author = book.author?.trim() || "Tác giả khác / Chưa rõ";
       if (!groupedBooks[author]) groupedBooks[author] = [];
       groupedBooks[author].push(book);
     });
-    // Sort keys alphabetically
-    groupedBooks = Object.keys(groupedBooks).sort().reduce((acc, key) => {
+    // Sort keys alphabetically (with unknown authors last)
+    groupedBooks = Object.keys(groupedBooks).sort((a, b) => {
+      if (a.includes("Chưa rõ")) return 1;
+      if (b.includes("Chưa rõ")) return -1;
+      return a.localeCompare(b);
+    }).reduce((acc, key) => {
       acc[key] = groupedBooks[key];
       return acc;
     }, {} as Record<string, Book[]>);
@@ -103,12 +107,28 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
       {sortBy === 'author' ? (
         <div className="space-y-12">
           {Object.entries(groupedBooks).map(([author, authorBooks]) => (
-            <div key={author}>
-              <h2 className="text-lg font-bold text-black mb-6 pb-2 border-b border-gray-200 inline-block pr-8">{author}</h2>
+            <section key={author} className="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-gray-200/80 shadow-sm transition-all">
+              {/* Dedicated Author Section Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-orange-500 text-white flex items-center justify-center font-bold shadow-md shadow-orange-500/20 shrink-0">
+                    <User size={20} className="text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg md:text-xl font-extrabold text-black tracking-tight">{author}</h2>
+                    <p className="text-xs text-gray-500 font-medium">Danh mục tác phẩm</p>
+                  </div>
+                </div>
+                <span className="self-start sm:self-auto bg-orange-100 text-orange-800 text-xs font-extrabold px-3.5 py-1.5 rounded-full border border-orange-200 shadow-xs">
+                  {authorBooks.length} tác phẩm
+                </span>
+              </div>
+
+              {/* Book Cards Grid for this Author */}
               <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
                 {authorBooks.map(renderBookCard)}
               </motion.div>
-            </div>
+            </section>
           ))}
         </div>
       ) : (
