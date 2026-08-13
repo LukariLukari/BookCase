@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, X, Trash2, Loader2, Share2, Check, User } from 'lucide-react';
+import { Download, X, Trash2, Loader2, Share2, Check } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import BookCoverImage from '@/components/BookCoverImage';
@@ -67,15 +67,15 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
       </motion.div>
       <div className="px-1 mt-1 flex justify-between items-start gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="text-base md:text-sm font-bold text-black leading-tight line-clamp-2 mb-1">{book.title}</h3>
-          <p className="text-sm md:text-xs text-gray-500 truncate mb-2">{book.author || "Unknown Author"}</p>
+          <h3 className="text-base md:text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2 mb-1 group-hover:text-orange-500 transition-colors">{book.title}</h3>
+          <p className="text-sm md:text-xs text-[#D7C9B2] truncate mb-2">{book.author || "Unknown Author"}</p>
         </div>
         <button 
           onClick={(e) => copyShareLink(e, book.id)} 
-          className="p-1.5 md:p-2 text-gray-700 bg-gray-100 hover:bg-green-100 hover:text-green-700 rounded-full transition-colors flex-shrink-0 cursor-pointer"
+          className="p-1.5 md:p-2 text-[#D7C9B2] bg-[#2A272A] hover:bg-green-600 hover:text-white rounded-full border border-[#4D4845]/50 transition-colors flex-shrink-0 cursor-pointer shadow-sm"
           title="Share Book"
         >
-          {copiedId === book.id ? <Check size={16} className="text-green-600" /> : <Share2 size={16} />}
+          {copiedId === book.id ? <Check size={16} className="text-green-400" /> : <Share2 size={16} />}
         </button>
       </div>
     </motion.div>
@@ -107,34 +107,35 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
       {sortBy === 'author' ? (
         <div className="space-y-12">
           {Object.entries(groupedBooks).map(([author, authorBooks]) => (
-            <section key={author} className="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-gray-200/80 shadow-sm transition-all">
-              {/* Dedicated Author Section Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-orange-500 text-white flex items-center justify-center font-bold shadow-md shadow-orange-500/20 shrink-0">
-                    <User size={20} className="text-white" />
-                  </div>
+            <div key={author} className="space-y-6">
+              {/* Dark Author Banner Card (#1F1D20, #D7C9B2, #F5ECDC) */}
+              <div className="bg-[#1F1D20] rounded-[2rem] p-6 sm:p-8 md:p-10 shadow-xl border border-[#4D4845]/30 relative overflow-hidden">
+                <div className="flex flex-col gap-2">
                   <div>
-                    <h2 className="text-lg md:text-xl font-extrabold text-black tracking-tight">{author}</h2>
-                    <p className="text-xs text-gray-500 font-medium">Danh mục tác phẩm</p>
+                    <span className="inline-block px-3 py-1 bg-orange-500/10 text-orange-500 border border-orange-500/20 font-bold text-xs rounded-full uppercase tracking-wider mb-2">
+                      Tệp sách được chia sẻ
+                    </span>
                   </div>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-orange-500 tracking-tight leading-none">
+                    {author}
+                  </h2>
+                  <p className="text-sm font-medium text-[#D7C9B2] mt-1">
+                    {authorBooks.length} cuốn sách
+                  </p>
                 </div>
-                <span className="self-start sm:self-auto bg-orange-100 text-orange-800 text-xs font-extrabold px-3.5 py-1.5 rounded-full border border-orange-200 shadow-xs">
-                  {authorBooks.length} tác phẩm
-                </span>
               </div>
 
               {/* Book Cards Grid for this Author */}
-              <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
+              <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10 pt-2">
                 {authorBooks.map(renderBookCard)}
               </motion.div>
-            </section>
+            </div>
           ))}
         </div>
       ) : (
         books.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold text-black mb-6">{sortBy === 'newest' ? 'Tất cả sách' : 'Danh sách sách'}</h2>
+            <h2 className="text-lg font-bold text-[#F5ECDC] mb-6">{sortBy === 'newest' ? 'Tất cả sách' : 'Danh sách sách'}</h2>
             <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
               {books.map(renderBookCard)}
             </motion.div>
@@ -150,22 +151,22 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
                exit={{ opacity: 0 }}
-               className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+               className="absolute inset-0 bg-black/70 backdrop-blur-sm"
                onClick={() => setSelectedBook(null)}
              />
              
              <motion.div 
                layoutId={`book-container-${selectedBook.id}`}
-               className="relative bg-white rounded-3xl max-w-3xl w-full flex flex-col md:flex-row overflow-hidden shadow-2xl z-10 max-h-[90vh]"
+               className="relative bg-[#1F1D20] text-[#F5ECDC] rounded-3xl max-w-3xl w-full flex flex-col md:flex-row overflow-hidden shadow-2xl z-10 max-h-[90vh] border border-[#4D4845]/50"
              >
                 <button 
                   onClick={() => setSelectedBook(null)}
-                  className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-500 hover:text-black md:hidden z-20"
+                  className="absolute top-4 right-4 p-2 bg-[#2A272A] rounded-full text-[#D7C9B2] hover:text-[#F5ECDC] md:hidden z-20 border border-[#4D4845]/40"
                 >
                   <X size={20} />
                 </button>
 
-                <div className="md:w-5/12 p-8 flex justify-center items-center bg-[#f8f7f4]">
+                <div className="md:w-5/12 p-8 flex justify-center items-center bg-[#2A272A] border-b md:border-b-0 md:border-r border-[#4D4845]/40">
                   <motion.div layoutId={`book-cover-${selectedBook.id}`} className="w-full max-w-[200px] aspect-[2/3]">
                     <BookCoverImage 
                       coverUrl={selectedBook.cover_url}
@@ -177,16 +178,16 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   </motion.div>
                 </div>
                 
-                <div className="md:w-7/12 p-8 flex flex-col overflow-y-auto">
+                <div className="md:w-7/12 p-8 flex flex-col overflow-y-auto bg-[#1F1D20]">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h2 className="text-2xl font-bold mb-1 text-black">{selectedBook.title}</h2>
-                      <p className="text-gray-500 text-sm mb-1">{selectedBook.author || "Unknown Author"}</p>
+                      <h2 className="text-2xl font-bold mb-1 text-[#F5ECDC]">{selectedBook.title}</h2>
+                      <p className="text-[#D7C9B2] text-sm mb-1">{selectedBook.author || "Unknown Author"}</p>
                     </div>
                     <div className="hidden md:flex gap-2">
                       <button 
                         onClick={() => setSelectedBook(null)}
-                        className="p-2 text-gray-400 hover:text-black transition-colors bg-gray-50 rounded-full"
+                        className="p-2 text-[#D7C9B2] hover:text-[#F5ECDC] transition-colors bg-[#2A272A] rounded-full border border-[#4D4845]/40"
                       >
                         <X size={20} />
                       </button>
@@ -194,13 +195,13 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   </div>
                   
                   <div className="flex-grow mt-6">
-                    <h3 className="text-sm font-bold mb-2 text-black border-b border-gray-100 pb-2">Summary</h3>
-                    <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-wrap">
+                    <h3 className="text-sm font-bold mb-2 text-[#F5ECDC] border-b border-[#4D4845]/40 pb-2">Summary</h3>
+                    <p className="text-[#D7C9B2] leading-relaxed text-sm whitespace-pre-wrap">
                       {selectedBook.summary || "No summary available for this book."}
                     </p>
                   </div>
 
-                  <div className="mt-8 pt-4">
+                  <div className="mt-8 pt-4 border-t border-[#4D4845]/40">
                     <button 
                       onClick={() => handleDownload(selectedBook.id, selectedBook.title)}
                       disabled={downloadingId === selectedBook.id}

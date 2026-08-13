@@ -369,32 +369,32 @@ export default function AdminPage() {
   );
 
   if (isLoading || !user || user.role !== 'admin') {
-    return <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center font-bold text-gray-500">Loading...</div>;
+    return <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center font-bold text-[#D7C9B2]">Loading...</div>;
   }
 
   return (
-    <div className="flex bg-[#f8f7f4] min-h-screen font-sans selection:bg-orange-200 overflow-x-hidden">
+    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60 overflow-x-hidden">
       <Sidebar />
       <div className="flex-1 ml-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen w-full max-w-full">
-        <header className="sticky top-16 md:top-0 z-30 bg-[#f8f7f4]/80 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-200 gap-4 md:gap-0">
-          <div className="flex items-center gap-8 text-sm font-bold text-gray-400">
-             <span className="text-black border-b-2 border-black pb-1 text-xl whitespace-nowrap">Admin Dashboard</span>
+        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#4D4845]/30 gap-4 md:gap-0">
+          <div className="flex items-center gap-8 text-sm font-bold text-[#D7C9B2]">
+             <span className="text-[#F5ECDC] border-b-2 border-[#F97316] pb-1 text-xl whitespace-nowrap">Admin Dashboard</span>
           </div>
           <div className="flex items-center w-full md:w-auto gap-4">
             <div className="relative flex-1 md:w-72">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7B7369]" size={16} />
               <input 
                 type="text" 
                 placeholder="Search books..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white rounded-full py-3.5 md:py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/50 shadow-sm transition-all text-black placeholder-gray-400"
+                className="w-full bg-[#2A272A] border border-[#4D4845]/60 rounded-full py-3.5 md:py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#F97316]/50 shadow-inner transition-all text-[#F5ECDC] placeholder-[#7B7369]"
               />
             </div>
             {selectedBooks.length > 0 && (
               <button 
                 onClick={handleBulkDelete}
-                className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 !bg-red-500 !text-white hover:!bg-red-600 border-none shadow-md shadow-red-500/30"
+                className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 !bg-red-600 !text-white hover:!bg-red-700 border-none shadow-md shadow-red-950/40"
               >
                 <Trash2 size={16} className="inline mr-1 text-white" />
                 <span className="hidden sm:inline">Xóa {selectedBooks.length} mục</span>
@@ -403,9 +403,9 @@ export default function AdminPage() {
             <button 
               onClick={handleFixCovers}
               disabled={isFixing}
-              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-orange-200 text-orange-600 hover:border-orange-500 hover:text-orange-700 bg-white"
+              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#F97316] hover:text-[#F97316] bg-[#2A272A]"
             >
-              {isFixing ? <Loader2 size={16} className="animate-spin inline mr-1" /> : <Settings size={16} className="inline mr-1" />} 
+              {isFixing ? <Loader2 size={16} className="animate-spin inline mr-1 text-[#F97316]" /> : <Settings size={16} className="inline mr-1 text-[#F97316]" />} 
               <span className="hidden sm:inline">{isFixing ? 'Đang sửa...' : 'Sửa bìa lỗi'}</span>
             </button>
             <button 
@@ -420,17 +420,17 @@ export default function AdminPage() {
         <main className="flex-1 px-4 md:px-10 pt-8 pb-12">
           {isFetchingBooks ? (
             <div className="flex flex-col items-center justify-center mt-32 max-w-md mx-auto w-full px-4">
-               <div className="w-full bg-gray-200 rounded-full h-3 mb-3 shadow-inner overflow-hidden">
-                 <div className="bg-gradient-to-r from-orange-400 to-orange-600 h-full rounded-full transition-all duration-300" style={{ width: `${downloadProgress}%` }}></div>
+               <div className="w-full bg-[#2A272A] border border-[#4D4845]/50 rounded-full h-3 mb-3 shadow-inner overflow-hidden">
+                 <div className="bg-gradient-to-r from-orange-500 to-orange-600 h-full rounded-full transition-all duration-300" style={{ width: `${downloadProgress}%` }}></div>
                </div>
-               <span className="text-sm font-bold text-gray-500 animate-pulse">Đang tải danh sách sách... {downloadProgress}%</span>
+               <span className="text-sm font-bold text-[#D7C9B2] animate-pulse">Đang tải danh sách sách... {downloadProgress}%</span>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10">
               {filteredBooks.map((book) => (
                 <div key={book.id} className="flex flex-col group relative">
                   {/* Ảnh bìa */}
-                  <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-gray-100 group-hover:shadow-xl transition-all duration-300">
+                  <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-[#4D4845]/40 group-hover:shadow-xl transition-all duration-300">
                      <BookCoverImage 
                        coverUrl={book.cover_url}
                        bookId={book.id}
@@ -445,52 +445,52 @@ export default function AdminPage() {
                          type="checkbox" 
                          checked={selectedBooks.includes(book.id)}
                          onChange={() => toggleBookSelection(book.id)}
-                         className="w-5 h-5 rounded-md border-2 border-white/80 bg-black/20 checked:bg-orange-500 checked:border-orange-500 cursor-pointer shadow-sm focus:ring-0 focus:ring-offset-0 transition-colors"
+                         className="w-5 h-5 rounded-md border-2 border-white/80 bg-black/40 checked:bg-orange-500 checked:border-orange-500 cursor-pointer shadow-sm focus:ring-0 focus:ring-offset-0 transition-colors"
                        />
                      </div>
                      
                      {/* Tag Nguồn (Source) */}
                      <div className="absolute top-2 left-2 z-20">
                        {book.external_url ? (
-                         <span className="flex items-center gap-1 text-orange-600 font-bold bg-orange-50/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-100" title={book.external_url}>
+                         <span className="flex items-center gap-1 text-orange-400 font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-500/30" title={book.external_url}>
                            <LinkIcon size={12} /> Drive
                          </span>
                        ) : (
-                         <span className="flex items-center gap-1 text-gray-700 font-bold bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-gray-100">
+                         <span className="flex items-center gap-1 text-[#D7C9B2] font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-[#4D4845]/40">
                            <Upload size={12} /> Local
                          </span>
                        )}
                      </div>
 
-                     {/* Action Icons in Bottom Right Corner with Strong Black Shadow - No Cover Blur */}
+                     {/* Action Icons */}
                      <div className="absolute bottom-2 right-2 flex items-center gap-1.5 z-20">
                          <button 
                            onClick={() => copyShareLink(book.id)} 
-                           className="p-1.5 md:p-2 bg-white/95 text-gray-900 hover:text-green-600 hover:bg-green-50 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.6)] border border-black/10 transition-all hover:scale-110 cursor-pointer" 
+                           className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-green-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer" 
                            title="Sao chép link chia sẻ"
                          >
-                           {copiedId === book.id ? <Check size={14} className="text-green-600" /> : <Share2 size={14} className="text-gray-900 hover:text-green-600" />}
+                           {copiedId === book.id ? <Check size={14} className="text-green-400" /> : <Share2 size={14} className="text-[#D7C9B2] hover:text-green-400" />}
                          </button>
                          <button 
                            onClick={() => openEditModal(book)} 
-                           className="p-1.5 md:p-2 bg-white/95 text-gray-900 hover:text-orange-600 hover:bg-orange-50 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.6)] border border-black/10 transition-all hover:scale-110 cursor-pointer"
+                           className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-orange-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer"
                            title="Sửa thông tin sách"
                          >
-                           <Edit2 size={14} className="text-gray-900 hover:text-orange-600" />
+                           <Edit2 size={14} className="text-[#D7C9B2] hover:text-orange-400" />
                          </button>
                          <button 
                            onClick={() => handleDelete(book.id)} 
-                           className="p-1.5 md:p-2 bg-white/95 text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.6)] border border-black/10 transition-all hover:scale-110 cursor-pointer"
+                           className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-red-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer"
                            title="Xóa sách"
                          >
-                           <Trash2 size={14} className="text-gray-900 hover:text-red-600" />
+                           <Trash2 size={14} className="text-[#D7C9B2] hover:text-red-400" />
                          </button>
-                     </div>
+                      </div>
                   </div>
                   
                   {/* Thông tin Text */}
                   <div className="px-1">
-                    <h3 className="text-sm font-bold text-black leading-tight line-clamp-2">{book.title}</h3>
+                    <h3 className="text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2">{book.title}</h3>
                   </div>
                 </div>
               ))}
@@ -498,23 +498,23 @@ export default function AdminPage() {
           )}
 
           {error && (
-            <div className="text-center bg-red-50 text-red-500 p-4 rounded-xl text-sm font-bold mt-10">
+            <div className="text-center bg-red-950/40 border border-red-500/30 text-red-400 p-4 rounded-xl text-sm font-bold mt-10">
               {error}
             </div>
           )}
 
           {!isFetchingBooks && filteredBooks.length === 0 && !error && (
-            <div className="text-center text-gray-500 text-sm mt-10">No books found.</div>
+            <div className="text-center text-[#D7C9B2] text-sm mt-10">No books found.</div>
           )}
         </main>
       </div>
 
       {/* Edit Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-           <div className="bg-white rounded-3xl w-full max-w-4xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] flex flex-col">
-              <button onClick={() => setIsEditModalOpen(false)} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 bg-gray-100 rounded-full text-gray-500 hover:text-black transition-colors"><X size={16}/></button>
-              <h3 className="text-xl md:text-2xl font-extrabold mb-4 md:mb-8 text-black shrink-0">Edit Book</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+           <div className="bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845]/60 rounded-3xl w-full max-w-4xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] flex flex-col">
+              <button onClick={() => setIsEditModalOpen(false)} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 bg-[#2A272A] rounded-full text-[#D7C9B2] hover:text-[#F5ECDC] transition-colors border border-[#4D4845]/40"><X size={16}/></button>
+              <h3 className="text-xl md:text-2xl font-extrabold mb-4 md:mb-8 text-[#F5ECDC] shrink-0">Edit Book</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 overflow-y-auto flex-1 pr-2">
                 {/* Left Column - Details */}
