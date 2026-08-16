@@ -35,6 +35,18 @@ def fix_db_url(url: str) -> str:
 
 SQLALCHEMY_DATABASE_URL = fix_db_url(SQLALCHEMY_DATABASE_URL)
 
+# Log connection info (with password masked) for easy debugging on Render logs
+if SQLALCHEMY_DATABASE_URL.startswith("postgresql"):
+    try:
+        masked_url = SQLALCHEMY_DATABASE_URL
+        if "@" in masked_url and ":" in masked_url.split("@")[0]:
+            prefix, rest = masked_url.rsplit("@", 1)
+            scheme_user, _ = prefix.rsplit(":", 1)
+            masked_url = f"{scheme_user}:****@{rest}"
+        print(f"[Database] Connecting to Postgres: {masked_url}")
+    except Exception:
+        pass
+
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 else:
@@ -42,6 +54,7 @@ else:
     if "sslmode" not in SQLALCHEMY_DATABASE_URL:
         connect_args["sslmode"] = "require"
     engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
+
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
