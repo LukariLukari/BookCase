@@ -20,20 +20,11 @@ async def connect_client():
     if not client.is_connected():
         await client.connect()
 
-async def search_books_via_telegram(query: str):
-    await connect_client()
-    
-    if not await client.is_user_authorized():
-        raise Exception("Telegram client chưa được xác thực. Vui lòng chạy telegram_login.py trước.")
-        
-    # Send search query
-    await client.send_message(BOT_USERNAME, query)
-    
-    # Wait for reply (we wait up to 10 seconds for the bot to reply with results)
-    books = []
-    
+CLOUDILY_BOT = '@cloudilybot'
+
+async def search_zlib_bot(query: str):
     try:
-        # Use a temporary event handler to catch the reply
+        await client.send_message(BOT_USERNAME, query)
         future_reply = asyncio.Future()
         
         @client.on(events.NewMessage(chats=BOT_USERNAME))
@@ -41,15 +32,14 @@ async def search_books_via_telegram(query: str):
             if not future_reply.done():
                 future_reply.set_result(event.message)
                 
-        # Wait for the first message
-        message = await asyncio.wait_for(future_reply, timeout=15.0)
+        message = await asyncio.wait_for(future_reply, timeout=12.0)
         client.remove_event_handler(handler)
         
-        # Z-Library Bot Parser
         text = message.text or ""
         lines = text.split('\n')
         import re
         
+        books = []
         current_book = {}
         for i, line in enumerate(lines):
             line = line.strip()
@@ -58,7 +48,7 @@ async def search_books_via_telegram(query: str):
             if line.startswith('📚'):
                 current_book = {
                     'title': line.replace('📚', '').strip(), 
-                    'author': 'Unknown', 
+                    'author': 'Z-Library Bot', 
                     'language': '', 
                     'extension': '', 
                     'size': '', 
@@ -68,7 +58,6 @@ async def search_books_via_telegram(query: str):
                 if 'language' in current_book:
                     current_book['language'] = line.replace('🌐', '').strip()
             elif line.startswith('/book_'):
-                # Format: /book_a5jJ5lJP0Rp (pdf, 53.43 MB)
                 match = re.search(r'(/book_[^\s]+)\s*\(([^,]+),\s*([^)]+)\)', line)
                 if match:
                     current_book['id'] = match.group(1)
@@ -77,7 +66,6 @@ async def search_books_via_telegram(query: str):
                 else:
                     current_book['id'] = line.split(' ')[0]
                 
-                # Find author (usually the line before 🌐 or /book_)
                 for j in range(i-1, -1, -1):
                     prev = lines[j].strip()
                     if prev.startswith('📚'): break
@@ -88,17 +76,134 @@ async def search_books_via_telegram(query: str):
                 if current_book.get('id'):
                     books.append(current_book)
                     current_book = {}
-                    
         return books
-    except asyncio.TimeoutError:
-        client.remove_event_handler(handler)
-        raise Exception("Bot Telegram không phản hồi.")
     except Exception as e:
-        raise e
+        print(f"Z-Lib Bot Error: {e}")
+        return []
+
+async def search_cloudily_bot(query: str):
+    try:
+        await client.send_message(CLOUDILY_BOT, f"/search {query}")
+        future_reply = asyncio.Future()
+        
+        @client.on(events.NewMessage(chats=CLOUDILY_BOT))
+        async def handler(event):
+            if not future_reply.done() and event.message.reply_markup:
+                future_reply.set_result(event.message)
+                
+        message = await asyncio.wait_for(future_reply, timeout=12.0)
+        client.remove_event_handler(handler)
+        
+        books = []
+        button_idx = 0
+        if message.reply_markup:
+            for row in message.reply_markup.rows:
+                for button in row.buttons:
+                    txt = (button.text or "").strip()
+                    if "Trước" in txt or "Tiếp" in txt or "Trang" in txt:
+                        button_idx += 1
+                        continue
+                    
+                    # Clean up title and extension
+                    title = txt.lstrip('📥').lstrip('🧙‍♂️').strip()
+                    ext = ''
+                    if '.' in title:
+                        ext = title.split('.')[-1].strip()
+                    
+                    books.append({
+                        'title': title,
+                        'author': 'Cloudily Bot',
+                        'language': 'Vietnamese/English',
+                        'extension': ext,
+                        'size': '',
+                        'id': f"cloudily|{query}|{button_idx}"
+                    })
+                    button_idx += 1
+        return books
+    except Exception as e:
+        print(f"Cloudily Bot Error: {e}")
+        return []
+
+async def search_books_via_telegram(query: str):
+    await connect_client()
+    
+    if not await client.is_user_authorized():
+        raise Exception("Telegram client chưa được xác thực. Vui lòng chạy telegram_login.py trước.")
+        
+    zlib_books, cloudily_books = await asyncio.gather(
+        search_zlib_bot(query),
+        search_cloudily_bot(query)
+    )
+    
+    return zlib_books + cloudily_books
+
+async def download_cloudily_bot(book_id: str):
+    # Format: cloudily|query|button_idx
+    parts = book_id.split('|')
+    query = parts[1]
+    button_idx = int(parts[2])
+    
+    await client.send_message(CLOUDILY_BOT, f"/search {query}")
+    
+    future_reply = asyncio.Future()
+    @client.on(events.NewMessage(chats=CLOUDILY_BOT))
+    async def handler(event):
+        if not future_reply.done() and event.message.reply_markup:
+            future_reply.set_result(event.message)
+            
+    message = await asyncio.wait_for(future_reply, timeout=15.0)
+    client.remove_event_handler(handler)
+    
+    reply_future = asyncio.Future()
+    @client.on(events.NewMessage(chats=CLOUDILY_BOT))
+    async def reply_handler(event):
+        if not reply_future.done():
+            reply_future.set_result(event.message)
+            
+    await message.click(button_idx)
+    detail_msg = await asyncio.wait_for(reply_future, timeout=15.0)
+    client.remove_event_handler(reply_handler)
+    
+    url = None
+    if detail_msg.entities:
+        for ent, text_chunk in detail_msg.get_entities_text():
+            if hasattr(ent, 'url') and ent.url:
+                url = ent.url
+                break
+                
+    if not url and detail_msg.reply_markup:
+        for row in detail_msg.reply_markup.rows:
+            for b in row.buttons:
+                if hasattr(b, 'url') and b.url:
+                    url = b.url
+                    break
+                    
+    if not url:
+        raise Exception("Cloudily Bot không trả về link tải.")
+        
+    import requests
+    res = requests.get(url, stream=True, timeout=60)
+    if res.status_code != 200:
+        raise Exception(f"Không thể tải file từ Cloudily. Status: {res.status_code}")
+        
+    filename = "cloudily_book"
+    if 'content-disposition' in res.headers:
+        import re
+        d = res.headers['content-disposition']
+        fname = re.findall(r'filename\*?=(?:UTF-8\'\')?"?([^\";]+)"?', d)
+        if fname: filename = fname[0]
+    elif 'filename=' in url:
+        import urllib.parse
+        filename = urllib.parse.unquote(url.split('/')[-1].split('?')[0])
+        
+    return res.content, filename
 
 async def download_book_via_telegram(book_id: str):
     await connect_client()
     
+    if book_id.startswith('cloudily|'):
+        return await download_cloudily_bot(book_id)
+        
     # Send the command or click the button
     await client.send_message(BOT_USERNAME, book_id)
         
