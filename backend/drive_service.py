@@ -37,6 +37,12 @@ class DriveService:
         return file.get('id')
 
     def stream_download(self, file_id, filename, mime_type):
+        import urllib.parse
+        encoded_filename = urllib.parse.quote(filename)
+        headers = {
+            "Content-Disposition": f"attachment; filename*=utf-8''{encoded_filename}"
+        }
+        
         if self.mock_mode and file_id.startswith("local_"):
             # Lấy file từ thư mục local
             file_path = os.path.join(self.upload_dir, file_id)
@@ -46,7 +52,6 @@ class DriveService:
                     while chunk := f.read(1024 * 1024): # Đọc chunk 1MB
                         yield chunk
 
-            headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
             return StreamingResponse(iterfile(), media_type=mime_type, headers=headers)
 
         # Code gọi Drive API (khi có json credentials)
@@ -62,7 +67,6 @@ class DriveService:
                 fh.seek(0)
                 fh.truncate(0)
 
-        headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
         return StreamingResponse(iterfile(), media_type=mime_type, headers=headers)
 
     def download_file_bytes(self, file_id: str) -> bytes:
