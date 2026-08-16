@@ -31,7 +31,9 @@ export default function AdminPage() {
   const [isFixing, setIsFixing] = useState(false);
   const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [isFetchingBooks, setIsFetchingBooks] = useState(true);
+
   const [downloadProgress, setDownloadProgress] = useState(0);
   
   const { user, token, logout, isLoading } = useAuth();
