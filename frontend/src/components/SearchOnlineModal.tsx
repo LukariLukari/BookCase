@@ -59,11 +59,10 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
     setImportProgress(10);
     setError(null);
 
-    // Simulated smooth progress interval
     const interval = setInterval(() => {
       setImportProgress((prev) => {
         if (prev < 90) {
-          const step = Math.floor(Math.random() * 8) + 4; // increment 4% to 12%
+          const step = Math.floor(Math.random() * 8) + 4;
           return Math.min(prev + step, 92);
         }
         return prev;
@@ -85,7 +84,6 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
 
       const newBook = res.data;
       if (newBook && newBook.id) {
-        // Tự động kích hoạt tải file sách về máy tính người dùng
         const downloadUrl = `${API_URL}/api/books/${newBook.id}/download`;
         const a = document.createElement('a');
         a.href = downloadUrl;
@@ -96,8 +94,10 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
       }
       
       setTimeout(() => {
+        setImportingId(null);
+        setImportProgress(0);
         onImportSuccess();
-        onClose(); // Đóng modal và để app tự refresh
+        onClose();
       }, 500);
     } catch (err: any) {
       clearInterval(interval);
@@ -107,7 +107,11 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
     }
   };
 
-
+  const handleModalClose = () => {
+    setImportingId(null);
+    setImportProgress(0);
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -119,7 +123,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-          onClick={onClose}
+          onClick={handleModalClose}
         />
         
         <motion.div 
@@ -135,7 +139,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
               Tìm & Tải Sách Online
             </h2>
             <button 
-              onClick={onClose}
+              onClick={handleModalClose}
               className="p-2 bg-[#1F1D20] hover:bg-orange-500 hover:text-white text-[#D7C9B2] rounded-full transition-colors"
             >
               <X size={20} />
@@ -192,20 +196,20 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                   </div>
                   
                   {importingId === item.id ? (
-                    <div className="w-full sm:w-60 flex flex-col gap-1.5 p-2 bg-[#1F1D20]/90 rounded-xl border border-orange-500/40">
-                      <div className="flex justify-between items-center text-xs font-bold px-1">
-                        <span className="flex items-center gap-1.5 text-orange-400">
-                          <Loader2 size={13} className="animate-spin text-orange-400" />
+                    <div className="w-full sm:w-60 flex flex-col gap-1.5 py-1">
+                      <div className="flex justify-between items-center text-xs font-bold px-0.5">
+                        <span className="flex items-center gap-1.5 text-[#F5ECDC]">
+                          <Loader2 size={13} className="animate-spin text-[#F5ECDC]" />
                           Đang xử lý & tải file...
                         </span>
-                        <span className="text-orange-400 font-extrabold">{Math.round(importProgress)}%</span>
+                        <span className="text-[#F5ECDC] font-extrabold">{Math.round(importProgress)}%</span>
                       </div>
-                      <div className="w-full bg-[#2A272A] rounded-full h-3.5 shadow-inner overflow-hidden relative">
+                      <div className="w-full bg-[#1F1D20] rounded-full h-3 shadow-inner overflow-hidden relative">
                         <motion.div 
-                          className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 h-full rounded-full transition-all duration-300 relative overflow-hidden"
+                          className="bg-gradient-to-r from-[#D7C9B2] via-[#E6D9C5] to-[#F5ECDC] h-full rounded-full transition-all duration-300 relative overflow-hidden"
                           style={{ width: `${importProgress}%` }}
                         >
-                          <div className="absolute inset-0 bg-white/25 animate-pulse" />
+                          <div className="absolute inset-0 bg-white/30 animate-pulse" />
                         </motion.div>
                       </div>
                     </div>
@@ -219,7 +223,6 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                       Tải về máy & Thêm vào web
                     </button>
                   )}
-
 
                 </div>
               ))}
