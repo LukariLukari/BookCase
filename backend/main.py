@@ -145,7 +145,155 @@ def create_book_from_link(book_in: schemas.BookLinkCreate, db: Session = Depends
     db.add(db_book)
     db.commit()
     db.refresh(db_book)
+    db.refresh(db_book)
     return db_book
+
+@app.get("/api/external-search", response_model=List[schemas.ExternalSearchItem])
+def external_search(q: str):
+    import requests
+    from bs4 import BeautifulSoup
+    import urllib.parse
+    
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    mirrors = ["libgen.is", "libgen.rs", "libgen.st"]
+    books = []
+    
+    for mirror in mirrors:
+        url = f"https://{mirror}/search.php?req={urllib.parse.quote(q)}&res=25&column=def"
+        try:
+            response = requests.get(url, headers=headers, timeout=8)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.text, 'html.parser')
+                table = soup.find('table', class_='c')
+                if not table: return []
+                
+                rows = table.find_all('tr')[1:]
+                for row in rows:
+                    cols = row.find_all('td')
+                    if len(cols) < 9: continue
+                    
+                    author = cols[1].get_text(strip=True)
+                    title_td = cols[2]
+                    title_links = title_td.find_all('a')
+                    
+                    title = ""
+                    for a in title_links:
+                        if a.get('id'):
+                            title = a.get_text(strip=True)
+                            break
+                    if not title and title_links:
+                        title = title_links[0].get_text(strip=True)
+                        
+                    md5_link = None
+                    for a in title_links:
+                        href = a.get('href', '')
+                        if href.startswith('book/index.php?md5='):
+                            md5_link = href.split('md5=')[1]
+                            break
+                            
+                    if not md5_link and len(cols) > 9:
+                        mirror_links = cols[9].find_all('a')
+                        if mirror_links:
+                            href = mirror_links[0].get('href', '')
+                            if 'md5=' in href:
+                                md5_link = href.split('md5=')[1]
+                            elif 'library.lol' in href:
+                                md5_link = href.split('/')[-1]
+                                
+                    ext = cols[8].get_text(strip=True).lower()
+                    if ext not in ['pdf', 'epub']: continue
+                    
+                    size = cols[7].get_text(strip=True)
+                    lang = cols[6].get_text(strip=True)
+                    
+                    if md5_link:
+                        books.append({
+                            "id": md5_link,
+                            "title": title,
+                            "author": author,
+                            "extension": ext,
+                            "size": size,
+                            "language": lang
+                        })
+                return books
+        except Exception as e:
+            continue
+            
+    raise HTTPException(status_code=504, detail="Không thể kết nối đến máy chủ tìm kiếm sách (Có thể bị nhà mạng chặn).")
+
+@app.post("/api/external-import", response_model=schemas.BookResponse)
+def external_import(
+    request: schemas.ExternalImportRequest, 
+    db: Session = Depends(get_db), 
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    import requests
+    from bs4 import BeautifulSoup
+    import io
+    
+    md5 = request.id
+    url = f"http://library.lol/main/{md5}"
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        download_link = None
+        links = soup.find_all('a')
+        for a in links:
+            if a.get_text(strip=True) == 'GET' or 'cloudflare' in a.get('href', '').lower():
+                download_link = a.get('href')
+                break
+                
+        if not download_link:
+            raise HTTPException(status_code=404, detail="Không tìm thấy link tải sách.")
+            
+        file_res = requests.get(download_link, headers=headers, stream=True, timeout=30)
+        if file_res.status_code != 200:
+            raise HTTPException(status_code=400, detail="Không thể tải file sách.")
+            
+        file_bytes = file_res.content
+        
+        ext_hint = download_link.lower()
+        if '.pdf' in ext_hint: mime_type = 'application/pdf'
+        elif '.epub' in ext_hint: mime_type = 'application/epub+zip'
+        else: mime_type = file_res.headers.get('content-type', 'application/pdf')
+        
+        extracted = {}
+        if 'pdf' in mime_type.lower() or file_bytes.startswith(b'%PDF'):
+            mime_type = 'application/pdf'
+            extracted = extract_pdf_info(file_bytes)
+        else:
+            mime_type = 'application/epub+zip'
+            extracted = extract_epub_info(file_bytes)
+            
+        final_title = extracted.get('title') or request.title
+        final_author = extracted.get('author') or request.author or "Unknown Author"
+        cover_b64 = extracted.get('cover_b64')
+        
+        file_stream = io.BytesIO(file_bytes)
+        filename = f"{request.title}.pdf" if 'pdf' in mime_type.lower() else f"{request.title}.epub"
+        drive_file_id = drive_service.upload_file(file_stream, filename, mime_type)
+        
+        db_book = models.Book(
+            title=final_title,
+            author=final_author,
+            summary="",
+            cover_url=cover_b64,
+            drive_file_id=drive_file_id,
+            mime_type=mime_type,
+            file_size=len(file_bytes),
+            progress=0
+        )
+        db.add(db_book)
+        db.commit()
+        db.refresh(db_book)
+        
+        return db_book
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.put("/api/books/{book_id}", response_model=schemas.BookResponse)
 def update_book(book_id: str, book_in: schemas.BookUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Bookshelf from '@/components/Bookshelf';
 import Sidebar from '@/components/Sidebar';
+import SearchOnlineModal from '@/components/SearchOnlineModal';
 import { Search } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -12,6 +13,7 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
   const [books, setBooks] = useState<any[]>(initialBooks || []);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('author');
+  const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
   
   const { user, isLoading } = useAuth();
   const router = useRouter();
@@ -73,6 +75,12 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
 
           {/* Search & Actions */}
           <div className="flex flex-col md:flex-row items-center w-full md:w-auto gap-3">
+            <button
+              onClick={() => setIsSearchOnlineOpen(true)}
+              className="w-full md:w-auto bg-[#F97316] hover:bg-[#F97316]/80 text-white border border-[#F97316]/60 rounded-full py-3.5 md:py-2.5 px-5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#F97316]/50 shadow-inner transition-all cursor-pointer whitespace-nowrap"
+            >
+              Tìm Sách Online
+            </button>
             <div className="relative w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7B7369]" size={16} />
               <input 
@@ -108,6 +116,12 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
             <Bookshelf books={filteredBooks} refresh={refreshBooks} sortBy={sortBy} />
           )}
         </main>
+
+        <SearchOnlineModal 
+          isOpen={isSearchOnlineOpen} 
+          onClose={() => setIsSearchOnlineOpen(false)} 
+          onImportSuccess={() => refreshBooks()} 
+        />
 
       </div>
     </div>

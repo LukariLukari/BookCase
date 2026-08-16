@@ -119,3 +119,16 @@ class CollectionResponse(BaseModel):
 
 class CollectionDetailResponse(CollectionResponse):
     books: list[BookResponse] = []
+
+class ExternalSearchItem(BaseModel):
+    id: str
+    title: str
+    author: Optional[str] = None
+    extension: Optional[str] = None
+    size: Optional[str] = None
+    language: Optional[str] = None
+
+class ExternalImportRequest(BaseModel):
+    id: str
+    title: str
+    author: Optional[str] = None
