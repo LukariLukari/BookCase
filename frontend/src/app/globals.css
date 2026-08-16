@@ -40,8 +40,8 @@ body {
 @layer components {
   /* Buttons - Strict High Contrast Rules */
   .btn-primary {
-    @apply bg-[#F97316] border-2 border-[#F97316] font-extrabold py-3 px-6 rounded-xl hover:bg-[#ea580c] transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-orange-950/40;
-    color: #1F1D20 !important; /* Dark text on bright orange button for maximum contrast */
+    @apply bg-[#D7C9B2] border-2 border-[#D7C9B2] font-extrabold py-3 px-6 rounded-xl hover:bg-[#F5ECDC] transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-black/20;
+    color: #1F1D20 !important; /* Dark text on bright beige button for maximum contrast */
   }
   
   .btn-secondary {
@@ -50,15 +50,16 @@ body {
   }
 
   .btn-outline {
-    @apply bg-[#2A272A] border-2 border-[#4D4845] font-bold py-2.5 px-5 rounded-xl hover:border-[#F97316] hover:text-[#F97316] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm;
+    @apply bg-[#2A272A] border-2 border-[#4D4845] font-bold py-2.5 px-5 rounded-xl hover:border-[#D7C9B2] hover:text-[#D7C9B2] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm;
     color: #F5ECDC !important;
   }
 
   /* Inputs */
   .input-primary {
-    @apply w-full bg-[#2A272A] border-2 border-[#4D4845] rounded-xl px-4 py-3 focus:outline-none focus:border-[#F97316] focus:ring-0 transition-all text-[#F5ECDC];
+    @apply w-full bg-[#2A272A] border-2 border-[#4D4845] rounded-xl px-4 py-3 focus:outline-none focus:border-[#D7C9B2] focus:ring-0 transition-all text-[#F5ECDC];
     color: #F5ECDC !important;
   }
+
   
   .input-primary::placeholder {
     color: #7B7369 !important;

@@ -67,7 +67,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
       </motion.div>
       <div className="px-1 mt-1 flex justify-between items-start gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="text-base md:text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2 mb-1 group-hover:text-orange-500 transition-colors">{book.title}</h3>
+          <h3 className="text-base md:text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2 mb-1 group-hover:text-[#D7C9B2] transition-colors">{book.title}</h3>
           <p className="text-sm md:text-xs text-[#D7C9B2] truncate mb-2">{book.author || "Unknown Author"}</p>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -77,15 +77,16 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
               handleDownload(book.id, book.title);
             }}
             disabled={downloadingId === book.id}
-            className="p-1.5 md:p-2 text-white bg-[#F97316] hover:bg-[#EA580C] rounded-full border border-[#F97316] transition-all flex-shrink-0 cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
+            className="p-1.5 md:p-2 text-[#1F1D20] bg-[#D7C9B2] hover:bg-[#F5ECDC] rounded-full border border-[#D7C9B2] transition-all flex-shrink-0 cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
             title="Tải Sách Xuống"
           >
             {downloadingId === book.id ? (
-              <Loader2 size={16} className="animate-spin text-white" />
+              <Loader2 size={16} className="animate-spin text-[#1F1D20]" />
             ) : (
-              <Download size={16} className="text-white" />
+              <Download size={16} className="text-[#1F1D20]" />
             )}
           </button>
+
           <button 
             onClick={(e) => copyShareLink(e, book.id)} 
             className="p-1.5 md:p-2 text-[#D7C9B2] bg-[#2A272A] hover:bg-green-600 hover:text-white rounded-full border border-[#4D4845]/50 transition-colors flex-shrink-0 cursor-pointer shadow-sm"
@@ -128,9 +129,10 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
             <div key={author} className="space-y-6">
               {/* Clean Author Header (Unboxed with Name, Count, and Bottom Line) */}
               <div className="flex items-end justify-between pb-3 border-b border-[#4D4845]/50">
-                <h2 className="text-xl sm:text-2xl font-black text-orange-500 tracking-tight">
+                <h2 className="text-xl sm:text-2xl font-black text-[#D7C9B2] tracking-tight">
                   {author}
                 </h2>
+
                 <span className="text-xs sm:text-sm font-semibold text-[#D7C9B2]">
                   {authorBooks.length} cuốn sách
                 </span>
