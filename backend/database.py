@@ -39,6 +39,7 @@ if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 else:
     engine_kwargs = {}
+    if "sslmode" not in SQLALCHEMY_DATABASE_URL:
         engine_kwargs["connect_args"] = {"sslmode": "require"}
     engine = create_engine(SQLALCHEMY_DATABASE_URL, **engine_kwargs)
 
