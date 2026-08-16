@@ -219,12 +219,16 @@ def update_book(book_id: str, book_in: schemas.BookUpdate, db: Session = Depends
     if book_in.author is not None: book.author = book_in.author
     if book_in.genre is not None: book.genre = book_in.genre
     if book_in.summary is not None: book.summary = book_in.summary
-    if book_in.cover_url is not None: book.cover_url = book_in.cover_url
     if book_in.external_url is not None: book.external_url = book_in.external_url
+    
+    # Do not overwrite actual cover_url in database with endpoint route string
+    if book_in.cover_url is not None and not book_in.cover_url.startswith("/api/books/cover/") and not book_in.cover_url.startswith("api/books/cover/"):
+        book.cover_url = book_in.cover_url
     
     db.commit()
     db.refresh(book)
     return book
+
 
 @app.get("/api/books/{book_id}/download")
 def download_book(book_id: str, db: Session = Depends(get_db)):
@@ -650,10 +654,12 @@ def fix_all_covers(db: Session = Depends(get_db), current_user: models.User = De
         or_(
             models.Book.cover_url.like('%lh3.googleusercontent.com%'),
             models.Book.cover_url.like('/uploads/%'),
+            models.Book.cover_url.like('%/api/books/cover/%'),
             models.Book.cover_url == None,
             models.Book.cover_url == ''
         )
     ).all()
+
     
     fixed_count = 0
     failed = []

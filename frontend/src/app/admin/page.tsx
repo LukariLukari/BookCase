@@ -239,12 +239,13 @@ export default function AdminPage() {
 
   const openEditModal = (book: Book) => {
     setEditingBook(book);
+    const initialCover = (book.cover_url && book.cover_url.includes('/api/books/cover/')) ? '' : (book.cover_url || '');
     setEditForm({ 
       title: book.title, 
       author: book.author || '', 
       genre: book.genre || '', 
       summary: book.summary || '',
-      cover_url: book.cover_url || '',
+      cover_url: initialCover,
       external_url: book.external_url || ''
     });
     setIsEditModalOpen(true);
@@ -253,7 +254,11 @@ export default function AdminPage() {
   const handleEditSubmit = async () => {
     if (!editingBook) return;
     try {
-      await axios.put(`${API_URL}/api/books/${editingBook.id}`, editForm, {
+      const payload: any = { ...editForm };
+      if (payload.cover_url && payload.cover_url.includes('/api/books/cover/')) {
+        delete payload.cover_url;
+      }
+      await axios.put(`${API_URL}/api/books/${editingBook.id}`, payload, {
         headers: getHeaders()
       });
       setIsEditModalOpen(false);
@@ -267,6 +272,7 @@ export default function AdminPage() {
       }
     }
   };
+
 
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
