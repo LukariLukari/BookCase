@@ -31,6 +31,7 @@ os.makedirs("uploads/covers", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 from create_admin import create_default_admin
+from migrate_to_pg import migrate_sqlite_to_target_db
 
 @app.on_event("startup")
 def startup_event():
@@ -47,6 +48,8 @@ def startup_event():
         db.close()
         
     create_default_admin()
+    migrate_sqlite_to_target_db()
+
 
 app.add_middleware(
     CORSMiddleware,
