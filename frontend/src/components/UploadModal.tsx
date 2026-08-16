@@ -94,7 +94,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
 
             <div 
               className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors ${
-                file ? 'border-orange-400 bg-orange-50' : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
+                file ? 'border-[#F5ECDC] bg-[#2A272A]' : 'border-gray-200 hover:border-[#D7C9B2] hover:bg-gray-50/50'
               } ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
               onClick={() => fileInputRef.current?.click()}
             >
@@ -108,7 +108,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
               
               {file ? (
                 <div className="flex flex-col items-center">
-                  <FileIcon size={48} className="text-orange-500 mb-4" />
+                  <FileIcon size={48} className="text-[#F5ECDC] mb-4" />
                   <p className="text-black font-semibold mb-1 truncate max-w-[200px]">{file.name}</p>
                   <p className="text-gray-500 text-sm">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
                 </div>
@@ -125,16 +125,17 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
               <div className="mt-6">
                 <div className="flex justify-between text-sm mb-2">
                   <span className="text-gray-500 font-medium">Uploading...</span>
-                  <span className="text-orange-500 font-bold">{uploadProgress}%</span>
+                  <span className="text-[#F5ECDC] font-bold">{uploadProgress}%</span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2">
                   <div 
-                    className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                    className="bg-[#F5ECDC] h-2 rounded-full transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   ></div>
                 </div>
               </div>
             )}
+
 
             {error && (
               <div className="mt-4 p-3 rounded-xl bg-red-50 text-red-500 text-sm font-bold text-center">

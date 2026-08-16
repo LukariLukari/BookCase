@@ -34,7 +34,7 @@ export default function Sidebar() {
         <div className="flex items-center md:mb-10 flex-shrink-0 z-50">
           <Link href="/">
             <h1 className="text-2xl md:text-3xl font-extrabold text-[#F5ECDC] cursor-pointer hover:opacity-80 transition-opacity">
-              BookCase<span className="text-orange-500">.</span>
+              BookCase<span className="text-[#F5ECDC]">.</span>
             </h1>
           </Link>
         </div>
@@ -76,9 +76,9 @@ export default function Sidebar() {
                 <li key={index} className="w-full">
                   <Link 
                     href={item.href} 
-                    className={`flex items-center justify-start gap-4 p-3 md:px-4 md:py-3 rounded-xl transition-all font-bold text-sm w-full ${
+                    className={`flex items-center justify-start gap-4 p-3 md:px-4 md:py-3 rounded-xl transition-all font-extrabold text-sm w-full ${
                       isActive 
-                        ? 'bg-[#F97316] text-[#1F1D20] shadow-md shadow-orange-950/40' 
+                        ? 'bg-[#F5ECDC] text-black shadow-md' 
                         : 'text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#2A272A]'
                     }`}
                     title={item.label}
@@ -115,7 +115,7 @@ export default function Sidebar() {
                    </button>
                  </>
                ) : (
-                 <Link href="/login" className="flex items-center gap-4 p-3 text-[#F97316] hover:bg-[#2A272A] rounded-xl transition-colors font-medium text-sm w-full">
+                 <Link href="/login" className="flex items-center gap-4 p-3 text-[#F5ECDC] hover:bg-[#2A272A] rounded-xl transition-colors font-medium text-sm w-full">
                    <LogIn size={20} />
                    <span>Login</span>
                  </Link>
