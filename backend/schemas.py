@@ -35,22 +35,19 @@ class BookLinkCreate(BaseModel):
 class BookCreate(BookBase):
     pass
 
-from pydantic import validator, root_validator
+from pydantic import validator, root_validator, model_validator
 
 class BookResponse(BookBase):
     id: str
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    @root_validator(pre=False, skip_on_failure=True)
-    def parse_cover_url_root(cls, values):
-        cover_url = values.get('cover_url')
-        book_id = values.get('id')
-        if book_id and cover_url and isinstance(cover_url, str):
-            # If cover_url is a heavy base64 string or local relative path, serve via lightweight endpoint
-            if cover_url.startswith("data:image") or cover_url.startswith("/uploads") or cover_url.startswith("uploads"):
-                values['cover_url'] = f"/api/books/cover/{book_id}"
-        return values
+    @model_validator(mode='after')
+    def parse_cover_url_root(self):
+        if self.id and self.cover_url and isinstance(self.cover_url, str):
+            if self.cover_url.startswith("data:image") or self.cover_url.startswith("/uploads") or self.cover_url.startswith("uploads"):
+                self.cover_url = f"/api/books/cover/{self.id}"
+        return self
 
     class Config:
         orm_mode = True
