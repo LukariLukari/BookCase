@@ -77,10 +77,12 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
           <div className="flex flex-col md:flex-row items-center w-full md:w-auto gap-3">
             <button
               onClick={() => setIsSearchOnlineOpen(true)}
-              className="w-full md:w-auto bg-[#F5ECDC] hover:bg-white text-black border border-[#F5ECDC] rounded-full py-3.5 md:py-2.5 px-5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-md transition-all cursor-pointer whitespace-nowrap"
+              className="w-full md:w-auto bg-[#F5ECDC] hover:bg-white !text-black border border-[#F5ECDC] rounded-full py-3.5 md:py-2.5 px-5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-md transition-all cursor-pointer whitespace-nowrap"
+              style={{ color: '#000000' }}
             >
-              Tìm Sách Online
+              <span style={{ color: '#000000' }} className="!text-black font-black">Tìm Sách Online</span>
             </button>
+
             <div className="relative w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7B7369]" size={16} />
               <input 

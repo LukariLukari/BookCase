@@ -160,10 +160,11 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
               <button 
                 type="submit"
                 disabled={isSearching || !query.trim()}
-                className="bg-[#F5ECDC] hover:bg-white text-black font-black px-6 py-3 rounded-xl disabled:bg-[#3A373A] disabled:text-[#8A817C] disabled:border disabled:border-[#4D4845]/50 flex items-center gap-2 transition-all shadow-md cursor-pointer disabled:cursor-not-allowed"
+                className="bg-[#F5ECDC] hover:bg-white font-black px-6 py-3 rounded-xl disabled:bg-[#3A373A] disabled:border disabled:border-[#4D4845]/50 flex items-center gap-2 transition-all shadow-md cursor-pointer disabled:cursor-not-allowed"
+                style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }}
               >
-                {isSearching ? <Loader2 size={20} className="animate-spin" /> : <Search size={20} />}
-                <span className="hidden sm:inline">Tìm kiếm</span>
+                {isSearching ? <Loader2 size={20} className="animate-spin" /> : <Search size={20} style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }} />}
+                <span className="hidden sm:inline font-black" style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }}>Tìm kiếm</span>
               </button>
             </form>
           </div>
@@ -217,10 +218,11 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                     <button
                       onClick={() => handleImport(item)}
                       disabled={importingId !== null}
-                      className="w-full sm:w-auto bg-[#F5ECDC] hover:bg-white text-black px-5 py-2.5 rounded-xl text-sm font-black flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:bg-[#3A373A] disabled:text-[#8A817C] whitespace-nowrap cursor-pointer"
+                      className="w-full sm:w-auto bg-[#F5ECDC] hover:bg-white px-5 py-2.5 rounded-xl text-sm font-black flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:bg-[#3A373A] whitespace-nowrap cursor-pointer"
+                      style={{ color: importingId !== null ? '#8A817C' : '#000000' }}
                     >
-                      <Download size={16} className="text-black stroke-[2.5]" />
-                      <span className="text-black font-black">Tải về máy & Thêm vào web</span>
+                      <Download size={16} className="stroke-[2.5]" style={{ color: importingId !== null ? '#8A817C' : '#000000' }} />
+                      <span className="font-black" style={{ color: importingId !== null ? '#8A817C' : '#000000' }}>Tải về máy & Thêm vào web</span>
                     </button>
                   )}
 
@@ -228,6 +230,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
               ))}
             </div>
           </div>
+
 
 
         </motion.div>
