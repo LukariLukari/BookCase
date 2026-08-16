@@ -3,12 +3,18 @@ from telethon.tl.types import ReplyInlineMarkup
 import asyncio
 import os
 
+from telethon.sessions import StringSession
+
 api_id = 31840703
 api_hash = 'e72130f8cbf7d43f7ece893c526019e8'
 BOT_USERNAME = '@LukariEbook_bot'
 
 # Connect to the existing session
-client = TelegramClient('user_session', api_id, api_hash)
+string_session = os.getenv('TELEGRAM_STRING_SESSION')
+if string_session:
+    client = TelegramClient(StringSession(string_session), api_id, api_hash)
+else:
+    client = TelegramClient('user_session', api_id, api_hash)
 
 async def connect_client():
     if not client.is_connected():

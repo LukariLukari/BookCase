@@ -9,9 +9,31 @@ from fastapi.responses import StreamingResponse
 
 class DriveService:
     def __init__(self):
-        # MOCK MODE: Nếu chưa có file json, sẽ chạy chế độ lưu Local (cục bộ)
+        self.r2_access_key = os.getenv('R2_ACCESS_KEY_ID')
+        self.r2_secret_key = os.getenv('R2_SECRET_ACCESS_KEY')
+        self.r2_endpoint = os.getenv('R2_ENDPOINT_URL')
+        self.r2_bucket = os.getenv('R2_BUCKET_NAME')
+        self.use_r2 = bool(self.r2_access_key and self.r2_secret_key and self.r2_endpoint and self.r2_bucket)
+        
+        if self.use_r2:
+            import boto3
+            from botocore.config import Config
+            self.s3 = boto3.client(
+                's3',
+                endpoint_url=self.r2_endpoint,
+                aws_access_key_id=self.r2_access_key,
+                aws_secret_access_key=self.r2_secret_key,
+                config=Config(signature_version='s3v4')
+            )
+            print("INFO: Using Cloudflare R2 for Storage.")
+            self.mock_mode = False
+            self.use_gdrive = False
+            return
+
         self.mock_mode = not os.path.exists('service-account.json')
-        if not self.mock_mode:
+        self.use_gdrive = not self.mock_mode
+
+        if self.use_gdrive:
             SCOPES = ['https://www.googleapis.com/auth/drive']
             self.creds = service_account.Credentials.from_service_account_file('service-account.json', scopes=SCOPES)
             self.service = build('drive', 'v3', credentials=self.creds)
@@ -23,6 +45,16 @@ class DriveService:
             os.makedirs(self.upload_dir, exist_ok=True)
 
     def upload_file(self, file_stream, filename, mime_type):
+        if self.use_r2:
+            file_id = f"{uuid.uuid4().hex}_{filename}"
+            self.s3.upload_fileobj(
+                file_stream,
+                self.r2_bucket,
+                file_id,
+                ExtraArgs={'ContentType': mime_type}
+            )
+            return f"r2_{file_id}"
+
         if self.mock_mode:
             # Sinh ID ngẫu nhiên và lưu file vào thư mục local
             local_id = f"local_{uuid.uuid4().hex}"
@@ -43,6 +75,17 @@ class DriveService:
             "Content-Disposition": f"attachment; filename*=utf-8''{encoded_filename}"
         }
         
+        if self.use_r2 and file_id.startswith("r2_"):
+            real_id = file_id[3:]
+            obj = self.s3.get_object(Bucket=self.r2_bucket, Key=real_id)
+            
+            def iterfile():
+                stream = obj['Body']
+                while chunk := stream.read(1024 * 1024):
+                    yield chunk
+            
+            return StreamingResponse(iterfile(), media_type=mime_type, headers=headers)
+
         if self.mock_mode and file_id.startswith("local_"):
             # Lấy file từ thư mục local
             file_path = os.path.join(self.upload_dir, file_id)
@@ -70,6 +113,11 @@ class DriveService:
         return StreamingResponse(iterfile(), media_type=mime_type, headers=headers)
 
     def download_file_bytes(self, file_id: str) -> bytes:
+        if self.use_r2 and file_id.startswith("r2_"):
+            real_id = file_id[3:]
+            obj = self.s3.get_object(Bucket=self.r2_bucket, Key=real_id)
+            return obj['Body'].read()
+
         if self.mock_mode and file_id.startswith("local_"):
             file_path = os.path.join(self.upload_dir, file_id)
             if os.path.exists(file_path):

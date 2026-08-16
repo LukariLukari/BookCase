@@ -16,3 +16,5 @@ python-jose[cryptography]
 
 Pillow
 requests
+boto3
+telethon
