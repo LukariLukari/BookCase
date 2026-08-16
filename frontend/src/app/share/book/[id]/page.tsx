@@ -77,10 +77,12 @@ export default function ShareBookPage() {
           <div className="w-full max-w-[320px] aspect-[2/3] relative">
             <BookCoverImage 
               coverUrl={book.cover_url}
+              bookId={book.id}
               title={book.title}
               author={book.author}
               className="absolute inset-0 w-full h-full object-cover rounded-2xl shadow-2xl"
             />
+
           </div>
         </div>
 
