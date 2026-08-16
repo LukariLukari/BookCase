@@ -44,8 +44,16 @@ if SQLALCHEMY_DATABASE_URL.startswith("postgresql"):
             scheme_user, _ = prefix.rsplit(":", 1)
             masked_url = f"{scheme_user}:****@{rest}"
         print(f"[Database] Connecting to Postgres: {masked_url}")
+        
+        # Check if connecting to Supabase Pooler with missing project ref in username
+        if "pooler.supabase.com" in SQLALCHEMY_DATABASE_URL:
+            auth_part = SQLALCHEMY_DATABASE_URL.split("://", 1)[1].split("@", 1)[0]
+            db_user = auth_part.split(":", 1)[0]
+            if "." not in urllib.parse.unquote(db_user):
+                print("[Database WARNING] Host is Supabase Pooler (6543) but username is missing project ref (e.g., 'postgres.ref'). This will fail authentication!")
     except Exception:
         pass
+
 
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
