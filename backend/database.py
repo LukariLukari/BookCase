@@ -38,10 +38,10 @@ SQLALCHEMY_DATABASE_URL = fix_db_url(SQLALCHEMY_DATABASE_URL)
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 else:
-    engine_kwargs = {}
+    connect_args = {}
     if "sslmode" not in SQLALCHEMY_DATABASE_URL:
-        engine_kwargs["connect_args"] = {"sslmode": "require"}
-    engine = create_engine(SQLALCHEMY_DATABASE_URL, **engine_kwargs)
+        connect_args["sslmode"] = "require"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -53,4 +53,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
