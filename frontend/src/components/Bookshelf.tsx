@@ -70,14 +70,32 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
           <h3 className="text-base md:text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2 mb-1 group-hover:text-orange-500 transition-colors">{book.title}</h3>
           <p className="text-sm md:text-xs text-[#D7C9B2] truncate mb-2">{book.author || "Unknown Author"}</p>
         </div>
-        <button 
-          onClick={(e) => copyShareLink(e, book.id)} 
-          className="p-1.5 md:p-2 text-[#D7C9B2] bg-[#2A272A] hover:bg-green-600 hover:text-white rounded-full border border-[#4D4845]/50 transition-colors flex-shrink-0 cursor-pointer shadow-sm"
-          title="Share Book"
-        >
-          {copiedId === book.id ? <Check size={16} className="text-green-400" /> : <Share2 size={16} />}
-        </button>
+        <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDownload(book.id, book.title);
+            }}
+            disabled={downloadingId === book.id}
+            className="p-1.5 md:p-2 text-white bg-[#F97316] hover:bg-[#EA580C] rounded-full border border-[#F97316] transition-all flex-shrink-0 cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
+            title="Tải Sách Xuống"
+          >
+            {downloadingId === book.id ? (
+              <Loader2 size={16} className="animate-spin text-white" />
+            ) : (
+              <Download size={16} className="text-white" />
+            )}
+          </button>
+          <button 
+            onClick={(e) => copyShareLink(e, book.id)} 
+            className="p-1.5 md:p-2 text-[#D7C9B2] bg-[#2A272A] hover:bg-green-600 hover:text-white rounded-full border border-[#4D4845]/50 transition-colors flex-shrink-0 cursor-pointer shadow-sm"
+            title="Chia sẻ sách"
+          >
+            {copiedId === book.id ? <Check size={16} className="text-green-400" /> : <Share2 size={16} />}
+          </button>
+        </div>
       </div>
+
     </motion.div>
   );
 

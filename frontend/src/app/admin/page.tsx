@@ -4,7 +4,8 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
-import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download } from 'lucide-react';
+
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 import BookCoverImage from '@/components/BookCoverImage';
 
@@ -471,12 +472,30 @@ export default function AdminPage() {
                      {/* Action Icons */}
                      <div className="absolute bottom-2 right-2 flex items-center gap-1.5 z-20">
                          <button 
+                           onClick={() => {
+                             setDownloadingId(book.id);
+                             const a = document.createElement('a');
+                             a.href = `${baseUrl}/api/books/${book.id}/download`;
+                             a.download = `${book.title}.pdf`;
+                             document.body.appendChild(a);
+                             a.click();
+                             a.remove();
+                             setTimeout(() => setDownloadingId(null), 1500);
+                           }} 
+                           disabled={downloadingId === book.id}
+                           className="p-1.5 md:p-2 bg-[#F97316] text-white hover:bg-[#EA580C] rounded-full shadow-lg border border-[#F97316] transition-all hover:scale-110 cursor-pointer disabled:opacity-50" 
+                           title="Tải sách xuống"
+                         >
+                           {downloadingId === book.id ? <Loader2 size={14} className="animate-spin text-white" /> : <Download size={14} className="text-white" />}
+                         </button>
+                         <button 
                            onClick={() => copyShareLink(book.id)} 
                            className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-green-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer" 
                            title="Sao chép link chia sẻ"
                          >
                            {copiedId === book.id ? <Check size={14} className="text-green-400" /> : <Share2 size={14} className="text-[#D7C9B2] hover:text-green-400" />}
                          </button>
+
                          <button 
                            onClick={() => openEditModal(book)} 
                            className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-orange-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer"
