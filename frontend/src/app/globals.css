@@ -40,9 +40,10 @@ body {
 @layer components {
   /* Buttons - Strict High Contrast Rules */
   .btn-primary {
-    @apply bg-[#D7C9B2] border-2 border-[#D7C9B2] font-extrabold py-3 px-6 rounded-xl hover:bg-[#F5ECDC] transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-black/20;
-    color: #1F1D20 !important; /* Dark text on bright beige button for maximum contrast */
+    @apply bg-[#F5ECDC] border-2 border-[#F5ECDC] font-black py-3 px-6 rounded-xl hover:bg-white transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-[#3A373A] disabled:text-[#8A817C] disabled:border-[#4D4845]/50 shadow-md text-black;
+    color: #000000 !important; /* Pure black text on bright cream beige button */
   }
+
   
   .btn-secondary {
     @apply bg-[#4D4845] border-2 border-[#4D4845] font-bold py-3 px-6 rounded-xl hover:bg-[#5c5653] transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md;

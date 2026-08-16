@@ -77,15 +77,16 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
               handleDownload(book.id, book.title);
             }}
             disabled={downloadingId === book.id}
-            className="p-1.5 md:p-2 text-[#1F1D20] bg-[#D7C9B2] hover:bg-[#F5ECDC] rounded-full border border-[#D7C9B2] transition-all flex-shrink-0 cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
+            className="p-1.5 md:p-2 text-black bg-[#F5ECDC] hover:bg-white rounded-full border border-[#F5ECDC] transition-all flex-shrink-0 cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
             title="Tải Sách Xuống"
           >
             {downloadingId === book.id ? (
-              <Loader2 size={16} className="animate-spin text-[#1F1D20]" />
+              <Loader2 size={16} className="animate-spin text-black" />
             ) : (
-              <Download size={16} className="text-[#1F1D20]" />
+              <Download size={16} className="text-black stroke-[2.5]" />
             )}
           </button>
+
 
           <button 
             onClick={(e) => copyShareLink(e, book.id)} 
