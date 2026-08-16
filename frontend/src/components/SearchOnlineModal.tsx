@@ -67,6 +67,18 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
         author: item.author
       }, { headers });
       
+      const newBook = res.data;
+      if (newBook && newBook.id) {
+        // Tự động kích hoạt tải file sách về máy tính người dùng
+        const downloadUrl = `${API_URL}/api/books/${newBook.id}/download`;
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `${newBook.title || item.title}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      
       onImportSuccess();
       onClose(); // Đóng modal và để app tự refresh
     } catch (err: any) {
@@ -75,6 +87,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
       setImportingId(null);
     }
   };
+
 
   if (!isOpen) return null;
 
@@ -161,20 +174,21 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                   <button
                     onClick={() => handleImport(item)}
                     disabled={importingId !== null}
-                    className="w-full sm:w-auto bg-[#4D4845] hover:bg-green-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 whitespace-nowrap"
+                    className="w-full sm:w-auto bg-[#F97316] hover:bg-[#EA580C] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:opacity-50 whitespace-nowrap"
                   >
                     {importingId === item.id ? (
                       <>
-                        <Loader2 size={16} className="animate-spin" />
-                        Đang lấy...
+                        <Loader2 size={16} className="animate-spin text-white" />
+                        Đang tải & Thêm...
                       </>
                     ) : (
                       <>
-                        <Download size={16} />
-                        Thêm vào thư viện
+                        <Download size={16} className="text-white" />
+                        Tải về máy & Thêm vào web
                       </>
                     )}
                   </button>
+
                 </div>
               ))}
             </div>
