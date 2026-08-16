@@ -20,19 +20,22 @@ export default function BookCoverImage({
   className = "w-full h-full object-cover",
   aspectRatio = "aspect-[2/3]"
 }: BookCoverImageProps) {
-  const [imageError, setImageError] = useState(false);
-  const [triedFallback, setTriedFallback] = useState(false);
-  
-  let src = getCoverUrl(coverUrl);
-  if (imageError && !triedFallback && bookId) {
+  const [imgState, setImgState] = useState<'initial' | 'fallback' | 'error'>(
+    (coverUrl && coverUrl.trim()) ? 'initial' : 'fallback'
+  );
+
+  let src = '';
+  if (imgState === 'initial') {
+    src = getCoverUrl(coverUrl);
+  } else if (imgState === 'fallback' && bookId) {
     src = getCoverUrl(`/api/books/cover/${bookId}`);
   }
 
   const handleImageError = () => {
-    if (!triedFallback && bookId && coverUrl !== `/api/books/cover/${bookId}`) {
-      setTriedFallback(true);
+    if (imgState === 'initial' && bookId) {
+      setImgState('fallback');
     } else {
-      setImageError(true);
+      setImgState('error');
     }
   };
 
@@ -54,7 +57,7 @@ export default function BookCoverImage({
     return gradients[index];
   };
 
-  if (!src || (imageError && (triedFallback || !bookId))) {
+  if (imgState === 'error' || (!src && !bookId)) {
     return (
       <div className={`w-full h-full ${aspectRatio} bg-[#2A272A] p-4 flex flex-col justify-between relative overflow-hidden select-none border border-[#4D4845]/60 shadow-md rounded-2xl`}>
         {/* Book spine line overlay */}
