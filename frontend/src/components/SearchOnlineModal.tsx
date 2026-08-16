@@ -24,6 +24,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
   const [results, setResults] = useState<ExternalSearchItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [importingId, setImportingId] = useState<string | null>(null);
+  const [importProgress, setImportProgress] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -55,7 +56,19 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
 
   const handleImport = async (item: ExternalSearchItem) => {
     setImportingId(item.id);
+    setImportProgress(10);
     setError(null);
+
+    // Simulated smooth progress interval
+    const interval = setInterval(() => {
+      setImportProgress((prev) => {
+        if (prev < 90) {
+          const step = Math.floor(Math.random() * 8) + 4; // increment 4% to 12%
+          return Math.min(prev + step, 92);
+        }
+        return prev;
+      });
+    }, 350);
 
     try {
       const token = localStorage.getItem('token');
@@ -67,6 +80,9 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
         author: item.author
       }, { headers });
       
+      clearInterval(interval);
+      setImportProgress(100);
+
       const newBook = res.data;
       if (newBook && newBook.id) {
         // Tự động kích hoạt tải file sách về máy tính người dùng
@@ -79,14 +95,18 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
         a.remove();
       }
       
-      onImportSuccess();
-      onClose(); // Đóng modal và để app tự refresh
+      setTimeout(() => {
+        onImportSuccess();
+        onClose(); // Đóng modal và để app tự refresh
+      }, 500);
     } catch (err: any) {
+      clearInterval(interval);
       setError(err.response?.data?.detail || 'Lỗi khi tải sách về máy chủ.');
-    } finally {
       setImportingId(null);
+      setImportProgress(0);
     }
   };
+
 
 
   if (!isOpen) return null;
@@ -171,23 +191,35 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                     </div>
                   </div>
                   
-                  <button
-                    onClick={() => handleImport(item)}
-                    disabled={importingId !== null}
-                    className="w-full sm:w-auto bg-[#F97316] hover:bg-[#EA580C] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:opacity-50 whitespace-nowrap"
-                  >
-                    {importingId === item.id ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin text-white" />
-                        Đang tải & Thêm...
-                      </>
-                    ) : (
-                      <>
-                        <Download size={16} className="text-white" />
-                        Tải về máy & Thêm vào web
-                      </>
-                    )}
-                  </button>
+                  {importingId === item.id ? (
+                    <div className="w-full sm:w-60 flex flex-col gap-1.5 p-2 bg-[#1F1D20]/90 rounded-xl border border-orange-500/40">
+                      <div className="flex justify-between items-center text-xs font-bold px-1">
+                        <span className="flex items-center gap-1.5 text-orange-400">
+                          <Loader2 size={13} className="animate-spin text-orange-400" />
+                          Đang xử lý & tải file...
+                        </span>
+                        <span className="text-orange-400 font-extrabold">{Math.round(importProgress)}%</span>
+                      </div>
+                      <div className="w-full bg-[#2A272A] rounded-full h-3.5 shadow-inner overflow-hidden relative">
+                        <motion.div 
+                          className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 h-full rounded-full transition-all duration-300 relative overflow-hidden"
+                          style={{ width: `${importProgress}%` }}
+                        >
+                          <div className="absolute inset-0 bg-white/25 animate-pulse" />
+                        </motion.div>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleImport(item)}
+                      disabled={importingId !== null}
+                      className="w-full sm:w-auto bg-[#F97316] hover:bg-[#EA580C] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:opacity-50 whitespace-nowrap"
+                    >
+                      <Download size={16} className="text-white" />
+                      Tải về máy & Thêm vào web
+                    </button>
+                  )}
+
 
                 </div>
               ))}
