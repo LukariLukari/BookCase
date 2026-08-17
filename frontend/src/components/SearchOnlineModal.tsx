@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Download, Loader2, BookOpen } from 'lucide-react';
+import { Search, X, Download, Loader2, BookOpen, Globe, Library, Cloud } from 'lucide-react';
 import axios from 'axios';
 
 interface ExternalSearchItem {
@@ -163,7 +163,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
           {/* Header */}
           <div className="p-6 border-b border-[#4D4845]/50 flex justify-between items-center bg-[#2A272A]">
             <h2 className="text-xl font-bold text-[#F5ECDC] flex items-center gap-2">
-              <BookOpen className="text-[#F5ECDC]" />
+              <BookOpen className="text-[#F5ECDC]" size={22} />
               Tìm & Tải Sách Online
             </h2>
             <button 
@@ -188,10 +188,13 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
               <button 
                 type="submit"
                 disabled={isSearching || !query.trim()}
-                className="bg-[#F5ECDC] hover:bg-white font-black px-6 py-3 rounded-xl disabled:bg-[#3A373A] disabled:border disabled:border-[#4D4845]/50 flex items-center gap-2 transition-all shadow-md cursor-pointer disabled:cursor-not-allowed"
-                style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }}
+                className="font-black px-6 py-3 rounded-xl disabled:bg-[#3A373A] border disabled:border-[#4D4845]/50 flex items-center gap-2 transition-all shadow-md cursor-pointer disabled:cursor-not-allowed"
+                style={{ 
+                  backgroundColor: isSearching || !query.trim() ? '#3A373A' : '#F5ECDC',
+                  color: isSearching || !query.trim() ? '#8A817C' : '#000000' 
+                }}
               >
-                {isSearching ? <Loader2 size={20} className="animate-spin" /> : <Search size={20} style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }} />}
+                {isSearching ? <Loader2 size={20} className="animate-spin" style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }} /> : <Search size={20} style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }} />}
                 <span className="hidden sm:inline font-black" style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }}>Tìm kiếm</span>
               </button>
             </form>
@@ -201,37 +204,46 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
               <button
                 type="button"
                 onClick={() => handleTabChange('all')}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
-                  activeSource === 'all'
-                    ? 'bg-[#F5ECDC] text-[#000000] shadow-md scale-[1.02]'
-                    : 'bg-[#2A272A] text-[#F5ECDC] hover:bg-[#3A373A] border border-[#4D4845]/60'
-                }`}
+                className="px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer shadow-sm border border-[#4D4845]/60"
+                style={{
+                  backgroundColor: activeSource === 'all' ? '#F5ECDC' : '#2A272A',
+                  color: activeSource === 'all' ? '#000000' : '#F5ECDC'
+                }}
               >
-                Tất cả nguồn {results.length > 0 && `(${results.length})`}
+                <Globe size={15} style={{ color: activeSource === 'all' ? '#000000' : '#F5ECDC' }} />
+                <span style={{ color: activeSource === 'all' ? '#000000' : '#F5ECDC' }}>
+                  Tất cả nguồn {results.length > 0 && `(${results.length})`}
+                </span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleTabChange('zlib')}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
-                  activeSource === 'zlib'
-                    ? 'bg-[#F5ECDC] text-[#000000] shadow-md scale-[1.02]'
-                    : 'bg-[#2A272A] text-[#F5ECDC] hover:bg-[#3A373A] border border-[#4D4845]/60'
-                }`}
+                className="px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer shadow-sm border border-[#4D4845]/60"
+                style={{
+                  backgroundColor: activeSource === 'zlib' ? '#F5ECDC' : '#2A272A',
+                  color: activeSource === 'zlib' ? '#000000' : '#F5ECDC'
+                }}
               >
-                📚 Z-Library {results.length > 0 && activeSource === 'all' ? `(${zlibCount})` : ''}
+                <Library size={15} style={{ color: activeSource === 'zlib' ? '#000000' : '#F5ECDC' }} />
+                <span style={{ color: activeSource === 'zlib' ? '#000000' : '#F5ECDC' }}>
+                  Z-Library {results.length > 0 && activeSource === 'all' ? `(${zlibCount})` : ''}
+                </span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleTabChange('cloudily')}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
-                  activeSource === 'cloudily'
-                    ? 'bg-[#F5ECDC] text-[#000000] shadow-md scale-[1.02]'
-                    : 'bg-[#2A272A] text-[#F5ECDC] hover:bg-[#3A373A] border border-[#4D4845]/60'
-                }`}
+                className="px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer shadow-sm border border-[#4D4845]/60"
+                style={{
+                  backgroundColor: activeSource === 'cloudily' ? '#F5ECDC' : '#2A272A',
+                  color: activeSource === 'cloudily' ? '#000000' : '#F5ECDC'
+                }}
               >
-                ☁️ Cloudily Bot {results.length > 0 && activeSource === 'all' ? `(${cloudilyCount})` : ''}
+                <Cloud size={15} style={{ color: activeSource === 'cloudily' ? '#000000' : '#F5ECDC' }} />
+                <span style={{ color: activeSource === 'cloudily' ? '#000000' : '#F5ECDC' }}>
+                  Cloudily Bot {results.length > 0 && activeSource === 'all' ? `(${cloudilyCount})` : ''}
+                </span>
               </button>
             </div>
           </div>
@@ -262,14 +274,14 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                 return (
                   <div key={idx} className="bg-[#2A272A] border border-[#4D4845]/50 rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between hover:border-[#F5ECDC]/60 transition-colors">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1.5">
                         {isCloud ? (
-                          <span className="bg-[#003846] text-[#00E5FF] border border-[#00E5FF]/40 text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1">
-                            ☁️ Cloudily Bot
+                          <span className="bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845] text-[10px] font-extrabold px-2.5 py-0.5 rounded-md flex items-center gap-1.5">
+                            <Cloud size={12} className="text-[#F5ECDC]" /> Cloudily Bot
                           </span>
                         ) : (
-                          <span className="bg-[#3D2C00] text-[#FFD700] border border-[#FFD700]/40 text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1">
-                            📚 Z-Library Bot
+                          <span className="bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845] text-[10px] font-extrabold px-2.5 py-0.5 rounded-md flex items-center gap-1.5">
+                            <Library size={12} className="text-[#F5ECDC]" /> Z-Library Bot
                           </span>
                         )}
                       </div>
@@ -304,8 +316,11 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                       <button
                         onClick={() => handleImport(item)}
                         disabled={importingId !== null}
-                        className="w-full sm:w-auto bg-[#F5ECDC] hover:bg-white px-5 py-2.5 rounded-xl text-sm font-black flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:bg-[#3A373A] whitespace-nowrap cursor-pointer"
-                        style={{ color: importingId !== null ? '#8A817C' : '#000000' }}
+                        className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-black flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer border border-[#4D4845]/50"
+                        style={{ 
+                          backgroundColor: importingId !== null ? '#3A373A' : '#F5ECDC',
+                          color: importingId !== null ? '#8A817C' : '#000000' 
+                        }}
                       >
                         <Download size={16} className="stroke-[2.5]" style={{ color: importingId !== null ? '#8A817C' : '#000000' }} />
                         <span className="font-black" style={{ color: importingId !== null ? '#8A817C' : '#000000' }}>Tải về máy & Thêm vào web</span>
