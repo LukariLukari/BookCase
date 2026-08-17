@@ -381,11 +381,25 @@ kindle_pins = {}
 
 def get_local_ip():
     try:
+        hostname = socket.gethostname()
+        ip_list = socket.gethostbyname_ex(hostname)[2]
+        
+        # 1. Ưu tiên IP Wi-Fi gia đình chuẩn (192.168.x.x)
+        for ip in ip_list:
+            if ip.startswith("192.168."):
+                return ip
+                
+        # 2. Thử các IP LAN khác (loại bỏ cạc mạng ảo Radmin VPN 10.29.x.x)
+        for ip in ip_list:
+            if (ip.startswith("172.") or ip.startswith("10.")) and not ip.startswith("10.29."):
+                return ip
+
+        # 3. Fallback UDP Socket
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('8.8.8.8', 80))
-        local_ip = s.getsockname()[0]
+        ip = s.getsockname()[0]
         s.close()
-        return local_ip
+        return ip
     except Exception:
         return '127.0.0.1'
 

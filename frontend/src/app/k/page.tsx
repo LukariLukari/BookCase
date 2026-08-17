@@ -20,7 +20,16 @@ export default function KindleReceiverPage() {
     setError(null);
     setLoading(true);
 
-    const downloadUrl = `${API_URL}/api/kindle/download-by-pin/${cleanPin}`;
+    // Tự động thay thế localhost bằng hostname thực tế để Kindle kết nối tới máy chủ backend LAN
+    let backendUrl = API_URL;
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname;
+      if (host && host !== 'localhost' && host !== '127.0.0.1') {
+        backendUrl = API_URL.replace('localhost', host).replace('127.0.0.1', host);
+      }
+    }
+
+    const downloadUrl = `${backendUrl}/api/kindle/download-by-pin/${cleanPin}`;
     
     // Chuyển hướng trực tiếp để Kindle tự động nhận diện đòn tải file
     window.location.href = downloadUrl;

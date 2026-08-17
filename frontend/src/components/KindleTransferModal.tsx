@@ -47,7 +47,19 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
     try {
       const res = await axios.post(`${API_URL}/api/kindle/generate-pin/${bookId}`);
       setPin(res.data.pin);
-      setKindleUrl(res.data.kindle_url);
+      
+      const realIp = res.data.local_ip || '127.0.0.1';
+      const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
+      const currentPort = typeof window !== 'undefined' ? window.location.port : '3000';
+      
+      // Nếu người dùng gõ IP/domain cụ thể trên trình duyệt máy tính, dùng IP/domain đó cho Kindle
+      let displayHost = (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') ? currentHost : realIp;
+      let displayPort = currentPort ? `:${currentPort}` : '';
+      let protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
+      
+      let computedUrl = `${protocol}//${displayHost}${displayPort}/k`;
+      
+      setKindleUrl(computedUrl);
       setTimeLeft(res.data.expires_in || 300);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Không thể tạo mã PIN gửi Kindle.');
