@@ -84,16 +84,47 @@ async def search_zlib_bot(query: str):
 async def search_cloudily_bot(query: str):
     try:
         await client.send_message(CLOUDILY_BOT, f"/search {query}")
+        
         future_reply = asyncio.Future()
         
         @client.on(events.NewMessage(chats=CLOUDILY_BOT))
         async def handler(event):
-            if not future_reply.done() and event.message.reply_markup:
-                future_reply.set_result(event.message)
+            if not future_reply.done():
+                text = event.message.text or ""
+                if "Đừng vội" in text or "Vui lòng chờ" in text:
+                    import re
+                    match = re.search(r'chờ\s*\**(\d+)\s*giây', text)
+                    wait_sec = int(match.group(1)) + 2 if match else 16
+                    print(f"[Cloudily Bot] Rate-limited. Sleeping for {wait_sec} seconds...")
+                    await asyncio.sleep(wait_sec)
+                    await client.send_message(CLOUDILY_BOT, f"/search {query}")
+                elif event.message.reply_markup:
+                    future_reply.set_result(event.message)
                 
-        message = await asyncio.wait_for(future_reply, timeout=12.0)
+        message = await asyncio.wait_for(future_reply, timeout=25.0)
         client.remove_event_handler(handler)
         
+        text_books = {}
+        import re
+        lines = (message.text or "").split("\n")
+        for line in lines:
+            line_str = line.strip()
+            m = re.search(r'(?:📄\s*)?(\d+)\.\s*(.*?)\s*\(([^)]+)\)', line_str)
+            if m:
+                idx_str = m.group(1)
+                title_ext = m.group(2).strip('`').strip()
+                size_str = m.group(3).strip('`').strip()
+                
+                ext = ""
+                if "." in title_ext:
+                    ext = title_ext.split(".")[-1].strip('`').strip()
+                    
+                text_books[idx_str] = {
+                    "title": title_ext,
+                    "extension": ext,
+                    "size": size_str
+                }
+                
         books = []
         button_idx = 0
         if message.reply_markup:
@@ -104,21 +135,37 @@ async def search_cloudily_bot(query: str):
                         button_idx += 1
                         continue
                     
-                    # Clean up title and extension
-                    title = txt.lstrip('📥').lstrip('🧙‍♂️').strip()
-                    ext = ''
-                    if '.' in title:
-                        ext = title.split('.')[-1].strip()
+                    m_btn = re.search(r'(\d+)\.', txt)
+                    btn_num = m_btn.group(1) if m_btn else str(len(books) + 1)
                     
+                    parsed_info = text_books.get(btn_num, {})
+                    full_title = parsed_info.get("title") or txt.lstrip('📥').lstrip('🧙‍♂️').lstrip('📩').strip()
+                    full_title = full_title.strip('`').strip()
+                    if full_title.startswith(f"{btn_num}."):
+                        full_title = full_title[len(f"{btn_num}."):].strip()
+                    
+                    ext = parsed_info.get("extension") or (full_title.split(".")[-1] if "." in full_title else "")
+                    ext = ext.strip('`').strip()
+                    size = parsed_info.get("size") or ""
+                    
+                    cb_data = getattr(button, 'data', None)
+                    data_str = cb_data.decode('utf-8') if isinstance(cb_data, bytes) else str(cb_data or "")
+                    
+                    if data_str and data_str.startswith("dl:"):
+                        id_str = f"cloudily|data:{data_str}|{query}|{button_idx}"
+                    else:
+                        id_str = f"cloudily|idx:{button_idx}|{query}|{button_idx}"
+                        
                     books.append({
-                        'title': title,
+                        'title': full_title,
                         'author': 'Cloudily Bot',
                         'language': 'Vietnamese/English',
                         'extension': ext,
-                        'size': '',
-                        'id': f"cloudily|{query}|{button_idx}"
+                        'size': size,
+                        'id': id_str
                     })
                     button_idx += 1
+                    
         return books
     except Exception as e:
         print(f"Cloudily Bot Error: {e}")
@@ -138,38 +185,124 @@ async def search_books_via_telegram(query: str):
     return zlib_books + cloudily_books
 
 async def download_cloudily_bot(book_id: str):
-    # Format: cloudily|query|button_idx
     parts = book_id.split('|')
-    query = parts[1]
-    button_idx = int(parts[2])
     
-    await client.send_message(CLOUDILY_BOT, f"/search {query}")
+    cb_data_str = None
+    query = ""
+    button_idx = 0
     
-    future_reply = asyncio.Future()
-    @client.on(events.NewMessage(chats=CLOUDILY_BOT))
-    async def handler(event):
-        if not future_reply.done() and event.message.reply_markup:
-            future_reply.set_result(event.message)
+    if len(parts) >= 4 and parts[1].startswith("data:"):
+        cb_data_str = parts[1][5:]
+        query = parts[2]
+        button_idx = int(parts[3])
+    elif len(parts) >= 3:
+        query = parts[1]
+        button_idx = int(parts[2])
+    else:
+        raise Exception("ID sách Cloudily không hợp lệ.")
+        
+    msgs = await client.get_messages(CLOUDILY_BOT, limit=10)
+    target_msg = None
+    target_button_idx = button_idx
+    import re
+    
+    for m in msgs:
+        if m.reply_markup and m.text and ("kết quả" in m.text or (query and query.lower() in m.text.lower())):
+            if cb_data_str:
+                curr_idx = 0
+                for r in m.reply_markup.rows:
+                    for b in r.buttons:
+                        b_data = getattr(b, 'data', None)
+                        b_data_str = b_data.decode('utf-8') if isinstance(b_data, bytes) else str(b_data or "")
+                        if b_data_str == cb_data_str:
+                            target_msg = m
+                            target_button_idx = curr_idx
+                            break
+                        curr_idx += 1
+                    if target_msg: break
+            if not target_msg:
+                target_msg = m
+            break
             
-    message = await asyncio.wait_for(future_reply, timeout=15.0)
-    client.remove_event_handler(handler)
-    
+    if not target_msg:
+        await client.send_message(CLOUDILY_BOT, f"/search {query}")
+        
+        future_reply = asyncio.Future()
+        @client.on(events.NewMessage(chats=CLOUDILY_BOT))
+        async def handler(event):
+            if not future_reply.done():
+                text = event.message.text or ""
+                if "Đừng vội" in text or "Vui lòng chờ" in text:
+                    match = re.search(r'chờ\s*\**(\d+)\s*giây', text)
+                    wait_sec = int(match.group(1)) + 2 if match else 16
+                    print(f"[Cloudily Bot] Rate limited during download. Sleeping {wait_sec}s...")
+                    await asyncio.sleep(wait_sec)
+                    await client.send_message(CLOUDILY_BOT, f"/search {query}")
+                elif event.message.reply_markup:
+                    future_reply.set_result(event.message)
+                    
+        target_msg = await asyncio.wait_for(future_reply, timeout=25.0)
+        client.remove_event_handler(handler)
+        
+        if cb_data_str and target_msg.reply_markup:
+            curr_idx = 0
+            for r in target_msg.reply_markup.rows:
+                for b in r.buttons:
+                    b_data = getattr(b, 'data', None)
+                    b_data_str = b_data.decode('utf-8') if isinstance(b_data, bytes) else str(b_data or "")
+                    if b_data_str == cb_data_str:
+                        target_button_idx = curr_idx
+                        break
+                    curr_idx += 1
+
     reply_future = asyncio.Future()
+    
     @client.on(events.NewMessage(chats=CLOUDILY_BOT))
     async def reply_handler(event):
         if not reply_future.done():
-            reply_future.set_result(event.message)
-            
-    await message.click(button_idx)
-    detail_msg = await asyncio.wait_for(reply_future, timeout=15.0)
-    client.remove_event_handler(reply_handler)
+            text = event.message.text or ""
+            if event.message.document or "Nhấn vào đây để Tải Xuống" in text or "http" in text:
+                reply_future.set_result(event.message)
+                
+    @client.on(events.MessageEdited(chats=CLOUDILY_BOT))
+    async def edit_handler(event):
+        if not reply_future.done():
+            text = event.message.text or ""
+            if event.message.document or "Nhấn vào đây để Tải Xuống" in text or "http" in text:
+                reply_future.set_result(event.message)
+
+    await target_msg.click(target_button_idx)
     
+    try:
+        detail_msg = await asyncio.wait_for(reply_future, timeout=20.0)
+    finally:
+        client.remove_event_handler(reply_handler)
+        client.remove_event_handler(edit_handler)
+    
+    if detail_msg.document:
+        print("[Cloudily Bot] Sent Telegram document directly...")
+        file_bytes = await client.download_media(detail_msg.document, bytes)
+        filename = "cloudily_book"
+        for attr in detail_msg.document.attributes:
+            if hasattr(attr, 'file_name'):
+                filename = attr.file_name
+        return file_bytes, filename
+        
     url = None
     if detail_msg.entities:
         for ent, text_chunk in detail_msg.get_entities_text():
             if hasattr(ent, 'url') and ent.url:
                 url = ent.url
                 break
+                
+    if not url and detail_msg.text:
+        match_url = re.search(r'\[.*?\]\((https?://[^\)]+)\)', detail_msg.text)
+        if match_url:
+            url = match_url.group(1)
+        else:
+            match_raw = re.search(r'(https?://[^\s]+)', detail_msg.text)
+            if match_raw:
+                url = match_raw.group(1)
                 
     if not url and detail_msg.reply_markup:
         for row in detail_msg.reply_markup.rows:
@@ -179,16 +312,16 @@ async def download_cloudily_bot(book_id: str):
                     break
                     
     if not url:
-        raise Exception("Cloudily Bot không trả về link tải.")
+        raise Exception("Cloudily Bot không trả về link hoặc file hợp lệ.")
         
     import requests
-    res = requests.get(url, stream=True, timeout=60)
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    res = requests.get(url, headers=headers, stream=True, timeout=120)
     if res.status_code != 200:
         raise Exception(f"Không thể tải file từ Cloudily. Status: {res.status_code}")
         
     filename = "cloudily_book"
     if 'content-disposition' in res.headers:
-        import re
         d = res.headers['content-disposition']
         fname = re.findall(r'filename\*?=(?:UTF-8\'\')?"?([^\";]+)"?', d)
         if fname: filename = fname[0]
