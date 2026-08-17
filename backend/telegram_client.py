@@ -81,7 +81,7 @@ async def search_zlib_bot(query: str):
         print(f"Z-Lib Bot Error: {e}")
         return []
 
-async def search_cloudily_bot(query: str):
+async def search_cloudily_bot(query: str, max_pages: int = 3):
     try:
         await client.send_message(CLOUDILY_BOT, f"/search {query}")
         
@@ -101,72 +101,106 @@ async def search_cloudily_bot(query: str):
                 elif event.message.reply_markup:
                     future_reply.set_result(event.message)
                 
-        message = await asyncio.wait_for(future_reply, timeout=25.0)
+        curr_msg = await asyncio.wait_for(future_reply, timeout=25.0)
         client.remove_event_handler(handler)
         
-        text_books = {}
+        all_books = []
         import re
-        lines = (message.text or "").split("\n")
-        for line in lines:
-            line_str = line.strip()
-            m = re.search(r'(?:📄\s*)?(\d+)\.\s*(.*?)\s*\(([^)]+)\)', line_str)
-            if m:
-                idx_str = m.group(1)
-                title_ext = m.group(2).strip('`').strip()
-                size_str = m.group(3).strip('`').strip()
-                
-                ext = ""
-                if "." in title_ext:
-                    ext = title_ext.split(".")[-1].strip('`').strip()
-                    
-                text_books[idx_str] = {
-                    "title": title_ext,
-                    "extension": ext,
-                    "size": size_str
-                }
-                
-        books = []
-        button_idx = 0
-        if message.reply_markup:
-            for row in message.reply_markup.rows:
-                for button in row.buttons:
-                    txt = (button.text or "").strip()
-                    if "Trước" in txt or "Tiếp" in txt or "Trang" in txt:
-                        button_idx += 1
-                        continue
-                    
-                    m_btn = re.search(r'(\d+)\.', txt)
-                    btn_num = m_btn.group(1) if m_btn else str(len(books) + 1)
-                    
-                    parsed_info = text_books.get(btn_num, {})
-                    full_title = parsed_info.get("title") or txt.lstrip('📥').lstrip('🧙‍♂️').lstrip('📩').strip()
-                    full_title = full_title.strip('`').strip()
-                    if full_title.startswith(f"{btn_num}."):
-                        full_title = full_title[len(f"{btn_num}."):].strip()
-                    
-                    ext = parsed_info.get("extension") or (full_title.split(".")[-1] if "." in full_title else "")
-                    ext = ext.strip('`').strip()
-                    size = parsed_info.get("size") or ""
-                    
-                    cb_data = getattr(button, 'data', None)
-                    data_str = cb_data.decode('utf-8') if isinstance(cb_data, bytes) else str(cb_data or "")
-                    
-                    if data_str and data_str.startswith("dl:"):
-                        id_str = f"cloudily|data:{data_str}|{query}|{button_idx}"
-                    else:
-                        id_str = f"cloudily|idx:{button_idx}|{query}|{button_idx}"
-                        
-                    books.append({
-                        'title': full_title,
-                        'author': 'Cloudily Bot',
-                        'language': 'Vietnamese/English',
-                        'extension': ext,
-                        'size': size,
-                        'id': id_str
+
+        for page in range(1, max_pages + 1):
+            lines = (curr_msg.text or "").split("\n")
+            item_lines = []
+            for line in lines:
+                line_str = line.strip()
+                m = re.search(r'(?:📄\s*)?(?:(\d+)\.\s*)?(.*?)\s*\(([^)]+)\)', line_str)
+                if m and m.group(2).strip():
+                    title_ext = m.group(2).strip('`').strip()
+                    size_str = m.group(3).strip('`').strip()
+                    raw_ext = title_ext.split(".")[-1].strip('`').strip() if "." in title_ext else ""
+                    clean_ext = re.sub(r'[^a-zA-Z0-9]', '', raw_ext).lower()
+                    item_lines.append({
+                        "title": title_ext,
+                        "extension": clean_ext,
+                        "size": size_str
                     })
-                    button_idx += 1
-                    
-        return books
+
+            next_button_idx = None
+            book_buttons = []
+            curr_btn_idx = 0
+
+            if curr_msg.reply_markup:
+                for row in curr_msg.reply_markup.rows:
+                    for button in row.buttons:
+                        txt = (button.text or "").strip()
+                        if "Trước" in txt or "Trang" in txt:
+                            curr_btn_idx += 1
+                            continue
+                        if "Tiếp" in txt:
+                            next_button_idx = curr_btn_idx
+                            curr_btn_idx += 1
+                            continue
+
+                        book_buttons.append((button, curr_btn_idx))
+                        curr_btn_idx += 1
+
+            for idx, (button, btn_pos) in enumerate(book_buttons):
+                parsed = item_lines[idx] if idx < len(item_lines) else {}
+                txt = (button.text or "").strip().lstrip('📥').lstrip('🧙‍♂️').lstrip('📩').strip()
+                txt = txt.strip('`').strip()
+
+                full_title = parsed.get("title") or txt
+                full_title = full_title.strip('`').strip()
+                m_num = re.match(r'^\d+\.\s*', full_title)
+                if m_num:
+                    full_title = full_title[m_num.end():].strip()
+
+                ext = parsed.get("extension") or ""
+                if not ext and "." in full_title:
+                    raw_ext = full_title.split(".")[-1].strip('`').strip()
+                    ext = re.sub(r'[^a-zA-Z0-9]', '', raw_ext).lower()
+
+                size = parsed.get("size") or ""
+
+                cb_data = getattr(button, 'data', None)
+                data_str = cb_data.decode('utf-8') if isinstance(cb_data, bytes) else str(cb_data or "")
+
+                if data_str and data_str.startswith("dl:"):
+                    id_str = f"cloudily|data:{data_str}|{query}|{btn_pos}"
+                else:
+                    id_str = f"cloudily|idx:{btn_pos}|{query}|{btn_pos}"
+
+                all_books.append({
+                    'title': full_title,
+                    'author': 'Cloudily Bot',
+                    'language': 'Vietnamese/English',
+                    'extension': ext,
+                    'size': size,
+                    'id': id_str
+                })
+
+            if next_button_idx is not None and page < max_pages:
+                edit_future = asyncio.Future()
+
+                @client.on(events.MessageEdited(chats=CLOUDILY_BOT))
+                async def edit_handler(event):
+                    if not edit_future.done():
+                        edit_future.set_result(event.message)
+
+                await curr_msg.click(next_button_idx)
+                try:
+                    curr_msg = await asyncio.wait_for(edit_future, timeout=8.0)
+                except Exception as e:
+                    print(f"[Cloudily Bot] No more pages or edit timeout: {e}")
+                    break
+                finally:
+                    client.remove_event_handler(edit_handler)
+            else:
+                break
+
+        ebook_exts = {'epub', 'pdf', 'azw3', 'mobi', 'prc', 'txt'}
+        all_books.sort(key=lambda b: 0 if b['extension'].lower() in ebook_exts else 1)
+
+        return all_books
     except Exception as e:
         print(f"Cloudily Bot Error: {e}")
         return []
