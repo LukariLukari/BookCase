@@ -23,6 +23,8 @@ from datetime import datetime, timezone
 import random
 import string
 
+import sqlite3
+
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Virtual Bookshelf API")
@@ -32,6 +34,74 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 from create_admin import create_default_admin
 from migrate_to_pg import migrate_sqlite_to_target_db
+
+def repair_cover_for_book(book: models.Book, db: Session) -> str | None:
+    if not book:
+        return None
+        
+    if book.cover_url and (book.cover_url.startswith("data:image") or book.cover_url.startswith("http") or book.cover_url.startswith("/uploads") or book.cover_url.startswith("uploads")):
+        return book.cover_url
+
+    # 1. Try local SQLite bookshelf.db backup
+    sqlite_db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bookshelf.db")
+    if os.path.exists(sqlite_db_path):
+        try:
+            conn = sqlite3.connect(sqlite_db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT cover_url FROM books WHERE id = ?", (book.id,))
+            row = cursor.fetchone()
+            conn.close()
+            if row and row[0] and (row[0].startswith("data:image") or row[0].startswith("http") or row[0].startswith("/uploads")):
+                book.cover_url = row[0]
+                db.commit()
+                print(f"[Cover Repair] Restored cover from bookshelf.db for '{book.title}' ({book.id})")
+                return book.cover_url
+        except Exception as e:
+            print(f"[Cover Repair] SQLite lookup failed for {book.id}: {e}")
+
+    # 2. Find file_id from drive_file_id or external_url
+    file_id = book.drive_file_id
+    if not file_id and book.external_url:
+        match_d = re.search(r'/file/d/([a-zA-Z0-9_-]+)', book.external_url)
+        if match_d:
+            file_id = match_d.group(1)
+        else:
+            match_id = re.search(r'[?&]id=([a-zA-Z0-9_-]+)', book.external_url)
+            if match_id:
+                file_id = match_id.group(1)
+
+    # 3. Download file_bytes via Service Account OR Public link
+    file_bytes = None
+    if file_id:
+        try:
+            file_bytes = drive_service.download_file_bytes(file_id)
+        except Exception as e:
+            print(f"[Cover Repair] Service account download failed for {book.title}: {e}")
+
+        if not file_bytes:
+            try:
+                import requests
+                res = requests.get(f"https://drive.google.com/uc?export=download&id={file_id}", timeout=10)
+                if res.status_code == 200:
+                    file_bytes = res.content
+            except Exception as e:
+                print(f"[Cover Repair] Public download failed for {book.title}: {e}")
+
+    # 4. Extract cover image from PDF/EPUB bytes
+    if file_bytes and len(file_bytes) > 0:
+        try:
+            is_pdf = True if (book.mime_type == 'application/pdf' or file_bytes.startswith(b'%PDF')) else False
+            extracted = extract_pdf_info(file_bytes) if is_pdf else extract_epub_info(file_bytes)
+            b64 = extracted.get('cover_b64')
+            if b64:
+                book.cover_url = b64
+                db.commit()
+                print(f"[Cover Repair] Successfully extracted cover for '{book.title}' ({book.id})")
+                return b64
+        except Exception as e:
+            print(f"[Cover Repair] Extraction failed for {book.title}: {e}")
+
+    return None
 
 @app.on_event("startup")
 def startup_event():
@@ -49,6 +119,20 @@ def startup_event():
         
     create_default_admin()
     migrate_sqlite_to_target_db()
+
+    # Auto-repair books with missing covers on startup
+    try:
+        db_session = SessionLocal()
+        books_without_covers = db_session.query(models.Book).filter(
+            (models.Book.cover_url == None) | 
+            (models.Book.cover_url == "") | 
+            (models.Book.cover_url.like("%/api/books/cover/%"))
+        ).all()
+        for b in books_without_covers:
+            repair_cover_for_book(b, db_session)
+        db_session.close()
+    except Exception as err:
+        print(f"[Startup Auto-Repair] Error: {err}")
 
 
 app.add_middleware(
@@ -246,6 +330,10 @@ def update_book(book_id: str, book_in: schemas.BookUpdate, db: Session = Depends
         clean_cover = book_in.cover_url.strip()
         if clean_cover and not clean_cover.startswith("/api/books/cover/") and not clean_cover.startswith("api/books/cover/"):
             book.cover_url = clean_cover
+            
+    # Auto-repair cover if currently missing
+    if not book.cover_url or book.cover_url.startswith("/api/books/cover/") or book.cover_url.startswith("api/books/cover/"):
+        repair_cover_for_book(book, db)
     
     db.commit()
     db.refresh(book)
@@ -314,28 +402,9 @@ def get_book_cover(book_id: str, db: Session = Depends(get_db)):
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
         
-    # If cover_url is empty, attempt on-the-fly extraction
-    if not book.cover_url:
-        b64 = None
-        file_id = book.drive_file_id
-        if not file_id and book.external_url:
-            match_d = re.search(r'/file/d/([a-zA-Z0-9_-]+)', book.external_url)
-            if match_d: file_id = match_d.group(1)
-            else:
-                match_id = re.search(r'[?&]id=([a-zA-Z0-9_-]+)', book.external_url)
-                if match_id: file_id = match_id.group(1)
-        if file_id:
-            try:
-                file_bytes = drive_service.download_file_bytes(file_id)
-                if file_bytes:
-                    is_pdf = True if (book.mime_type == 'application/pdf' or file_bytes.startswith(b'%PDF')) else False
-                    extracted = extract_pdf_info(file_bytes) if is_pdf else extract_epub_info(file_bytes)
-                    b64 = extracted.get('cover_b64')
-                    if b64:
-                        book.cover_url = b64
-                        db.commit()
-            except Exception as e:
-                print(f"Auto cover fix failed for {book_id}: {e}")
+    # If cover_url is missing or endpoint route, attempt repair
+    if not book.cover_url or book.cover_url.startswith("/api/books/cover/") or book.cover_url.startswith("api/books/cover/"):
+        repair_cover_for_book(book, db)
 
     if not book.cover_url:
         raise HTTPException(status_code=404, detail="Cover not found")
