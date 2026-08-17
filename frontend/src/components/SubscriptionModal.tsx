@@ -112,18 +112,11 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
           </div>
 
           {/* Body Content */}
-          <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8">
+          <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
             {!showPayment ? (
               <>
-                {/* Intro Subtitle */}
-                <div className="text-center max-w-xl mx-auto space-y-2">
-                  <p className="text-[#D7C9B2] text-sm md:text-base font-medium">
-                    Mở khóa quyền tải sách không giới hạn từ kho Z-Library & Cloudily Bot với tốc độ cao.
-                  </p>
-                </div>
-
                 {/* Plan Tiers Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-3">
                   {plans.map((plan) => {
                     const isSelected = selectedPlan === plan.id;
                     const isPopular = plan.id === 'semi_annual';
@@ -132,7 +125,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                       <div
                         key={plan.id}
                         onClick={() => setSelectedPlan(plan.id as any)}
-                        className={`relative bg-[#2A272A] rounded-2xl p-6 border transition-all duration-200 flex flex-col justify-between cursor-pointer ${
+                        className={`relative bg-[#2A272A] rounded-2xl p-6 md:p-7 border transition-all duration-200 flex flex-col justify-between cursor-pointer ${
                           isSelected
                             ? 'border-[#F5ECDC] shadow-xl ring-2 ring-[#F5ECDC]/30 scale-[1.02]'
                             : 'border-[#4D4845]/50 hover:border-[#F5ECDC]/50'
@@ -140,26 +133,26 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                       >
                         {plan.badge && (
                           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                            <span className="bg-[#F5ECDC] text-[#000000] font-black text-[10px] uppercase px-3 py-1 rounded-full shadow-md whitespace-nowrap">
+                            <span className="bg-[#F5ECDC] text-[#000000] font-black text-[10px] uppercase px-3.5 py-1 rounded-full shadow-md whitespace-nowrap">
                               {plan.badge}
                             </span>
                           </div>
                         )}
 
                         <div>
-                          <div className="text-center pb-4 border-b border-[#4D4845]/40 mb-4">
-                            <h3 className="font-bold text-lg text-[#F5ECDC] mb-1">{plan.name}</h3>
-                            <p className="text-[#8A817C] text-xs mb-3">{plan.description}</p>
+                          <div className="text-center pb-5 border-b border-[#4D4845]/40 mb-5 pt-1">
+                            <h3 className="font-bold text-lg text-[#F5ECDC] mb-1.5">{plan.name}</h3>
+                            <p className="text-[#8A817C] text-xs mb-4 min-h-[32px] flex items-center justify-center">{plan.description}</p>
                             <div className="flex items-baseline justify-center gap-1">
-                              <span className="text-3xl font-black text-[#F5ECDC] tracking-tight">{plan.price}</span>
+                              <span className="text-3xl md:text-4xl font-black text-[#F5ECDC] tracking-tight">{plan.price}</span>
                               <span className="text-[#8A817C] text-xs font-semibold">{plan.period}</span>
                             </div>
                           </div>
 
-                          <ul className="space-y-2.5 text-xs text-[#D7C9B2] mb-6">
+                          <ul className="space-y-3.5 text-xs text-[#D7C9B2] mb-8">
                             {plan.features.map((feat, idx) => (
-                              <li key={idx} className="flex items-start gap-2">
-                                <Check size={15} className="text-[#F5ECDC] shrink-0 mt-0.5" />
+                              <li key={idx} className="flex items-start gap-2.5 leading-relaxed">
+                                <Check size={16} className="text-[#F5ECDC] shrink-0 mt-0.5" />
                                 <span className={feat.includes('KHÔNG GIỚI HẠN') ? 'font-black text-[#F5ECDC]' : ''}>
                                   {feat}
                                 </span>
@@ -175,7 +168,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                             setSelectedPlan(plan.id as any);
                             setShowPayment(true);
                           }}
-                          className="w-full py-3 px-4 rounded-xl font-black text-sm transition-all shadow-md cursor-pointer border border-[#4D4845]/50 flex items-center justify-center gap-2"
+                          className="w-full py-3.5 px-4 rounded-xl font-black text-sm transition-all shadow-md cursor-pointer border border-[#4D4845]/50 flex items-center justify-center gap-2 mt-2"
                           style={{
                             backgroundColor: isSelected ? '#F5ECDC' : '#1F1D20',
                             color: isSelected ? '#000000' : '#F5ECDC'
