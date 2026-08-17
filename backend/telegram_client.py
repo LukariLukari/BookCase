@@ -373,13 +373,17 @@ async def download_cloudily_bot(book_id: str):
         'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
     }
     
-    res = requests.get(clean_url, headers=headers, stream=True, timeout=120)
+    res = requests.get(clean_url, headers=headers, timeout=120)
     if res.status_code != 200:
-        res = requests.get(url, headers=headers, stream=True, timeout=120)
+        res = requests.get(url, headers=headers, timeout=120)
         
     if res.status_code != 200:
         raise Exception(f"Không thể tải file từ Cloudily. Status: {res.status_code}")
         
+    file_bytes = res.content
+    if not file_bytes or len(file_bytes) == 0:
+        raise Exception("File nhận từ Cloudily bị rỗng (0 bytes).")
+
     filename = "cloudily_book"
     if 'content-disposition' in res.headers:
         d = res.headers['content-disposition']
@@ -388,7 +392,7 @@ async def download_cloudily_bot(book_id: str):
     elif 'filename=' in url:
         filename = urllib.parse.unquote(url.split('/')[-1].split('?')[0])
         
-    return res.content, filename
+    return file_bytes, filename
 
 async def download_book_via_telegram(book_id: str):
     await connect_client()

@@ -113,10 +113,8 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
 
           {/* Body Content */}
           <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
-            {!showPayment ? (
-              <>
-                {/* Plan Tiers Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-3">
+            {/* Plan Tiers Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-3">
                   {plans.map((plan) => {
                     const isSelected = selectedPlan === plan.id;
                     const isPopular = plan.id === 'semi_annual';
@@ -166,7 +164,8 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedPlan(plan.id as any);
-                            setShowPayment(true);
+                            alert('Tính năng đăng ký tự động đang được hoàn thiện. Cảm ơn bạn đã quan tâm!');
+                            onClose();
                           }}
                           className="w-full py-3.5 px-4 rounded-xl font-black text-sm transition-all shadow-md cursor-pointer border border-[#4D4845]/50 flex items-center justify-center gap-2 mt-2"
                           style={{
@@ -187,78 +186,15 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                 {/* Trust Footer */}
                 <div className="flex flex-wrap items-center justify-center gap-6 pt-4 border-t border-[#4D4845]/40 text-xs text-[#8A817C]">
                   <span className="flex items-center gap-1.5">
-                    <ShieldCheck size={16} className="text-[#F5ECDC]" /> Kích hoạt tự động sau 1-3 phút
+                    <ShieldCheck size={16} className="text-[#F5ECDC]" /> Tải sách tốc độ cao 24/7
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Zap size={16} className="text-[#F5ECDC]" /> Tải không giới hạn dung lượng
+                    <Zap size={16} className="text-[#F5ECDC]" /> Đọc trực tiếp EPub / PDF online
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <PhoneCall size={16} className="text-[#F5ECDC]" /> Hỗ trợ 24/7 qua Zalo & Telegram
+                    <PhoneCall size={16} className="text-[#F5ECDC]" /> Hỗ trợ tìm sách theo yêu cầu
                   </span>
                 </div>
-              </>
-            ) : (
-              /* Payment Details View */
-              <div className="max-w-xl mx-auto bg-[#2A272A] border border-[#4D4845]/60 rounded-2xl p-6 md:p-8 space-y-6">
-                <div className="text-center space-y-2">
-                  <span className="inline-block bg-[#F5ECDC] text-[#000000] font-black text-xs px-3 py-1 rounded-full uppercase">
-                    Hướng dẫn thanh toán
-                  </span>
-                  <h3 className="text-xl font-bold text-[#F5ECDC]">
-                    {plans.find((p) => p.id === selectedPlan)?.name} - {plans.find((p) => p.id === selectedPlan)?.price}
-                  </h3>
-                  <p className="text-xs text-[#D7C9B2]">
-                    Chuyển khoản theo thông tin bên dưới để hoàn tất kích hoạt tài khoản VIP.
-                  </p>
-                </div>
-
-                {/* Bank / QR Transfer Details */}
-                <div className="bg-[#1F1D20] p-5 rounded-xl border border-[#4D4845]/50 space-y-3 text-sm">
-                  <div className="flex justify-between items-center pb-2 border-b border-[#4D4845]/40">
-                    <span className="text-[#8A817C]">Ngân hàng:</span>
-                    <span className="font-extrabold text-[#F5ECDC]">MB BANK (Ngân hàng Quân Đội)</span>
-                  </div>
-                  <div className="flex justify-between items-center pb-2 border-b border-[#4D4845]/40">
-                    <span className="text-[#8A817C]">Số tài khoản:</span>
-                    <div className="flex items-center gap-2">
-                      <span className="font-black text-[#F5ECDC] text-base">BOOKCASEVIP</span>
-                      <button
-                        onClick={() => handleCopy('BOOKCASEVIP')}
-                        className="p-1 hover:bg-[#3A373A] rounded transition-colors text-[#F5ECDC] cursor-pointer"
-                        title="Copy"
-                      >
-                        {copied ? <CheckCircle2 size={16} className="text-green-400" /> : <Copy size={16} />}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center pb-2 border-b border-[#4D4845]/40">
-                    <span className="text-[#8A817C]">Chủ tài khoản:</span>
-                    <span className="font-bold text-[#F5ECDC]">BOOKCASE SYSTEM</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[#8A817C]">Nội dung chuyển khoản:</span>
-                    <span className="font-black text-[#F5ECDC]">VIP {selectedPlan.toUpperCase()}</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowPayment(false)}
-                    className="flex-1 py-3 px-4 rounded-xl text-sm font-bold bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845] hover:bg-[#3A373A] cursor-pointer transition-colors"
-                  >
-                    Quay lại
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="flex-1 py-3 px-4 rounded-xl text-sm font-black bg-[#F5ECDC] text-[#000000] hover:bg-white cursor-pointer shadow-md transition-colors"
-                  >
-                    Tôi đã chuyển khoản
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </motion.div>
       </div>

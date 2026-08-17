@@ -113,12 +113,8 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
       const newBook = res.data;
       if (newBook && newBook.id) {
         const downloadUrl = `${API_URL}/api/books/${newBook.id}/download`;
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = `${newBook.title || item.title}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        // Kích hoạt download trực tiếp cho cả Mobile Safari (iOS) và Android/Desktop
+        window.location.href = downloadUrl;
       }
       
       setTimeout(() => {
@@ -126,7 +122,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
         setImportProgress(0);
         onImportSuccess();
         onClose();
-      }, 500);
+      }, 800);
     } catch (err: any) {
       clearInterval(interval);
       setError(err.response?.data?.detail || 'Lỗi khi tải sách về máy chủ.');

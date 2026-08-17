@@ -68,49 +68,56 @@ class DriveService:
         file = self.service.files().create(body=file_metadata, media_body=media, fields='id').execute()
         return file.get('id')
 
-    def stream_download(self, file_id, filename, mime_type):
+    def stream_download(self, file_id, filename, mime_type, file_size=None):
         import urllib.parse
+        from fastapi.responses import Response
+        from fastapi import HTTPException
+
+        # Sanitize filename for headers (ASCII fallback + UTF-8 encoded)
+        safe_filename = filename.encode('ascii', 'ignore').decode('ascii').replace('"', '').strip()
+        if not safe_filename:
+            safe_filename = "downloaded_book"
         encoded_filename = urllib.parse.quote(filename)
+
         headers = {
-            "Content-Disposition": f"attachment; filename*=utf-8''{encoded_filename}"
+            "Content-Disposition": f'attachment; filename="{safe_filename}"; filename*=UTF-8\'\'{encoded_filename}',
+            "Access-Control-Expose-Headers": "Content-Disposition, Content-Length",
         }
-        
+
+        # 1. Local Storage Mode (mock_mode)
+        if self.mock_mode and file_id.startswith("local_"):
+            file_path = os.path.join(self.upload_dir, file_id)
+            if os.path.exists(file_path):
+                actual_size = os.path.getsize(file_path)
+                headers["Content-Length"] = str(actual_size)
+                
+                with open(file_path, "rb") as f:
+                    content_bytes = f.read()
+                return Response(content=content_bytes, media_type=mime_type, headers=headers)
+            else:
+                raise HTTPException(status_code=404, detail="File không tồn tại trên lưu trữ local")
+
+        # 2. R2 Storage Mode
         if self.use_r2 and file_id.startswith("r2_"):
             real_id = file_id[3:]
             obj = self.s3.get_object(Bucket=self.r2_bucket, Key=real_id)
-            
-            def iterfile():
-                stream = obj['Body']
-                while chunk := stream.read(1024 * 1024):
-                    yield chunk
-            
-            return StreamingResponse(iterfile(), media_type=mime_type, headers=headers)
+            content_bytes = obj['Body'].read()
+            headers["Content-Length"] = str(len(content_bytes))
+            return Response(content=content_bytes, media_type=mime_type, headers=headers)
 
-        if self.mock_mode and file_id.startswith("local_"):
-            # Lấy file từ thư mục local
-            file_path = os.path.join(self.upload_dir, file_id)
-            
-            def iterfile():
-                with open(file_path, "rb") as f:
-                    while chunk := f.read(1024 * 1024): # Đọc chunk 1MB
-                        yield chunk
-
-            return StreamingResponse(iterfile(), media_type=mime_type, headers=headers)
-
-        # Code gọi Drive API (khi có json credentials)
-        request = self.service.files().get_media(fileId=file_id)
-        def iterfile():
+        # 3. Google Drive Mode
+        try:
+            request = self.service.files().get_media(fileId=file_id)
             fh = io.BytesIO()
             downloader = MediaIoBaseDownload(fh, request)
             done = False
             while done is False:
                 status, done = downloader.next_chunk()
-                fh.seek(0)
-                yield fh.read()
-                fh.seek(0)
-                fh.truncate(0)
-
-        return StreamingResponse(iterfile(), media_type=mime_type, headers=headers)
+            content_bytes = fh.getvalue()
+            headers["Content-Length"] = str(len(content_bytes))
+            return Response(content=content_bytes, media_type=mime_type, headers=headers)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Lỗi khi tải file từ Google Drive: {str(e)}")
 
     def download_file_bytes(self, file_id: str) -> bytes:
         if self.use_r2 and file_id.startswith("r2_"):

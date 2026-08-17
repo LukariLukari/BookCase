@@ -29,12 +29,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
   const handleDownload = (id: string, title: string) => {
     setDownloadingId(id);
     const url = `${API_URL}/api/books/${id}/download`;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${title}.pdf`; 
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    window.location.href = url;
     setTimeout(() => setDownloadingId(null), 1500);
   };
 

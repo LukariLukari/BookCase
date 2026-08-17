@@ -118,29 +118,35 @@ export default function ShareBookPage() {
              )}
           </div>
 
-          <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col md:flex-row items-stretch md:items-center gap-4">
+          <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col gap-3.5 w-full">
+             {/* Nút Tải Sách Xuống (Nằm LÊN TRÊN) */}
              <button 
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className="btn-secondary whitespace-nowrap px-10 py-4 min-w-[210px] flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-70 disabled:hover:-translate-y-0 text-base font-bold"
+                className="btn-secondary w-full flex items-center justify-center gap-3 py-4 px-8 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:-translate-y-0 text-base font-extrabold cursor-pointer"
              >
-                {isDownloading ? <Loader2 size={20} className="animate-spin" /> : <Download size={20} />}
-                <span className="whitespace-nowrap">{isDownloading ? 'Đang Tải...' : 'Tải Sách Xuống'}</span>
+                {isDownloading ? (
+                  <Loader2 size={22} className="animate-spin" />
+                ) : (
+                  <Download size={22} className="stroke-[2.5]" />
+                )}
+                <span className="font-black text-base">{isDownloading ? 'Đang Tải...' : 'Tải Sách Xuống'}</span>
              </button>
 
+             {/* Nút ĐĂNG KÍ (Nằm BÊN DƯỚI) */}
              <button
                 onClick={() => setIsSubscriptionModalOpen(true)}
-                className="bg-[#1F1D20] hover:bg-[#2A272A] border border-[#4D4845]/40 rounded-2xl py-3.5 px-6 sm:px-8 text-left shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer flex items-center gap-3.5 shrink-0 max-w-full min-w-fit"
+                className="w-full bg-[#1F1D20] hover:bg-[#2A272A] border border-[#4D4845]/40 rounded-2xl py-3.5 px-6 text-left shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer flex items-center gap-3.5"
                 style={{ backgroundColor: '#1F1D20', color: '#F5ECDC' }}
              >
                 <div className="p-2.5 bg-[#F5ECDC] rounded-xl shrink-0" style={{ backgroundColor: '#F5ECDC', color: '#000000' }}>
                    <Sparkles size={18} style={{ color: '#000000' }} />
                 </div>
-                <div className="shrink-0">
+                <div>
                    <div className="text-base font-black tracking-wide leading-tight text-[#F5ECDC]" style={{ color: '#F5ECDC' }}>
                       ĐĂNG KÍ
                    </div>
-                   <div className="text-xs text-[#D7C9B2] font-semibold mt-0.5 whitespace-nowrap" style={{ color: '#D7C9B2' }}>
+                   <div className="text-xs text-[#D7C9B2] font-semibold mt-0.5" style={{ color: '#D7C9B2' }}>
                       Để tải thêm sách theo yêu cầu
                    </div>
                 </div>
