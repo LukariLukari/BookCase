@@ -71,18 +71,18 @@ export default function ShareCollectionPage() {
 
         <button
           onClick={() => setIsSubscriptionModalOpen(true)}
-          className="bg-[#2A272A] hover:bg-[#3A373A] border border-[#4D4845]/60 rounded-xl py-2 px-4 text-left shadow-md transition-all cursor-pointer flex items-center gap-2.5"
+          className="bg-[#2A272A] hover:bg-[#3A373A] border border-[#4D4845]/60 rounded-xl py-2 px-4 text-left shadow-md transition-all cursor-pointer flex items-center gap-2.5 whitespace-nowrap"
           style={{ backgroundColor: '#2A272A', color: '#F5ECDC' }}
         >
           <div className="p-1.5 bg-[#F5ECDC] rounded-lg shrink-0" style={{ backgroundColor: '#F5ECDC', color: '#000000' }}>
             <Sparkles size={15} style={{ color: '#000000' }} />
           </div>
           <div>
-            <div className="text-xs font-black text-[#F5ECDC]" style={{ color: '#F5ECDC' }}>
-              Đăng ký
+            <div className="text-xs font-black text-[#F5ECDC] tracking-wide" style={{ color: '#F5ECDC' }}>
+              ĐĂNG KÍ
             </div>
-            <div className="text-[10px] text-[#D7C9B2] font-medium" style={{ color: '#D7C9B2' }}>
-              để tải thêm sách theo nhu cầu
+            <div className="text-[10px] text-[#D7C9B2] font-semibold" style={{ color: '#D7C9B2' }}>
+              Để tải thêm sách theo yêu cầu
             </div>
           </div>
         </button>
@@ -105,16 +105,16 @@ export default function ShareCollectionPage() {
            <div className="z-10 shrink-0">
              <button
                 onClick={() => setIsSubscriptionModalOpen(true)}
-                className="bg-[#F5ECDC] hover:bg-white text-[#000000] border border-[#F5ECDC] rounded-2xl py-3.5 px-6 text-left shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer flex items-center gap-3"
+                className="bg-[#F5ECDC] hover:bg-white text-[#000000] border border-[#F5ECDC] rounded-2xl py-3.5 px-6 text-left shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer flex items-center gap-3 whitespace-nowrap"
                 style={{ backgroundColor: '#F5ECDC', color: '#000000' }}
              >
                 <Sparkles size={20} style={{ color: '#000000' }} />
                 <div>
-                   <div className="text-sm font-black leading-tight text-[#000000]" style={{ color: '#000000' }}>
-                      Đăng ký
+                   <div className="text-sm font-black leading-tight text-[#000000] tracking-wide" style={{ color: '#000000' }}>
+                      ĐĂNG KÍ
                    </div>
                    <div className="text-xs opacity-80 font-semibold" style={{ color: '#000000' }}>
-                      để tải thêm sách theo nhu cầu
+                      Để tải thêm sách theo yêu cầu
                    </div>
                 </div>
              </button>

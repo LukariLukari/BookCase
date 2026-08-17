@@ -9,7 +9,7 @@ interface SubscriptionModalProps {
 }
 
 export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'semi_annual' | 'lifetime'>('semi_annual');
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'semi_annual' | 'annual'>('semi_annual');
   const [showPayment, setShowPayment] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -22,42 +22,46 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
       price: '49.000đ',
       period: '/ tháng',
       badge: null,
-      description: 'Phù hợp người đọc trải nghiệm ngắn hạn',
+      description: 'Phù hợp đọc sách linh hoạt',
       features: [
-        'Tải tối đa 50 sách / tháng',
-        'Tải tốc độ cao từ Z-Library & Cloudily',
-        'Đọc EPub, PDF online trên máy tính & điện thoại',
-        'Lưu trữ tủ sách cá nhân trên Cloud'
+        'Kho sách có sẵn trên web',
+        'Tải tối đa 12 sách / tháng (1 tuần 3 cuốn)',
+        'Được Yêu cầu sách 4 cuốn / tháng',
+        'Tải tốc độ cao',
+        'File đọc trực tiếp trên điện thoại hoặc gửi qua máy đọc sách',
+        'Không quảng cáo'
       ]
     },
     {
       id: 'semi_annual',
-      name: 'Gói 6 Tháng (VIP)',
+      name: 'Gói 6 Tháng',
       price: '199.000đ',
       period: '/ 6 tháng',
-      badge: 'PHỔ BIẾN NHẤT (-20%)',
-      description: 'Lựa chọn tiết kiệm nhất cho người yêu sách',
+      badge: 'PHỔ BIẾN NHẤT',
+      description: 'Tiết kiệm & không giới hạn tải theo tuần',
       features: [
-        'Tải SÁCH KHÔNG GIỚI HẠN',
-        'Tải siêu tốc không chờ đợi từ Z-Lib & Cloudily',
-        'Đọc EPub, PDF online mọi thiết bị',
-        'Đội ngũ hỗ trợ tìm sách theo yêu cầu 24/7',
-        'Quyền ưu tiên truy cập sách độc quyền'
+        'Kho sách có sẵn trên web',
+        'Tải tối đa 20 sách / tháng (không giới hạn theo tuần)',
+        'Được yêu cầu 10 cuốn / tháng',
+        'Tải tốc độ cao hơn',
+        'File đọc trực tiếp trên điện thoại hoặc gửi qua máy đọc sách',
+        'Không quảng cáo'
       ]
     },
     {
-      id: 'lifetime',
-      name: 'Gói Trọn Đời',
-      price: '499.000đ',
-      period: '/ trọn đời',
-      badge: 'TRỌN ĐỜI VIP',
-      description: 'Đăng ký một lần, đọc sách mãi mãi',
+      id: 'annual',
+      name: 'Gói 1 Năm',
+      price: '349.000đ',
+      period: '/ 1 năm',
+      badge: 'ƯU ĐÃI NHẤT',
+      description: 'Tải không giới hạn trọn vẹn cả năm',
       features: [
-        'Truy cập kho sách VIP vĩnh viễn',
-        'Tải không giới hạn số lượng & băng thông',
-        'Đọc EPub, PDF online không giới hạn',
-        'Được yêu cầu bổ sung sách mới ưu tiên Top 1',
-        'Cập nhật mọi tính năng VIP mới trong tương lai'
+        'Kho sách có sẵn trên web',
+        'Tải KHÔNG GIỚI HẠN',
+        'Được yêu cầu 15 cuốn / tháng',
+        'Tải tốc độ cao hơn',
+        'File đọc trực tiếp trên điện thoại hoặc gửi qua máy đọc sách',
+        'Không quảng cáo'
       ]
     }
   ];
