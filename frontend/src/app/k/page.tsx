@@ -9,7 +9,22 @@ export default function KindleReceiverPage() {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-  const handleDownload = (e?: React.FormEvent) => {
+  const getBackendUrl = () => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('b')) {
+        return decodeURIComponent(params.get('b')!);
+      }
+
+      const host = window.location.hostname;
+      if (host && host !== 'localhost' && host !== '127.0.0.1' && !host.includes('vercel.app')) {
+        return `http://${host}:8000`;
+      }
+    }
+    return API_URL;
+  };
+
+  const handleDownload = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const cleanPin = pin.trim();
     if (cleanPin.length !== 4) {
@@ -20,23 +35,45 @@ export default function KindleReceiverPage() {
     setError(null);
     setLoading(true);
 
-    // Tự động thay thế localhost bằng hostname thực tế để Kindle kết nối tới máy chủ backend LAN
-    let backendUrl = API_URL;
-    if (typeof window !== 'undefined') {
-      const host = window.location.hostname;
-      if (host && host !== 'localhost' && host !== '127.0.0.1') {
-        backendUrl = API_URL.replace('localhost', host).replace('127.0.0.1', host);
+    const targetBackend = getBackendUrl();
+    const downloadUrl = `${targetBackend}/api/kindle/download-by-pin/${cleanPin}`;
+
+    try {
+      // 1. Kiểm tra mã PIN với Backend trước để báo lỗi rõ ràng nếu hết hạn hoặc sai mã PIN
+      const res = await fetch(downloadUrl, { method: 'GET' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.detail || 'Mã PIN không đúng hoặc đã hết hạn (5 phút).');
+        setLoading(false);
+        return;
       }
-    }
 
-    const downloadUrl = `${backendUrl}/api/kindle/download-by-pin/${cleanPin}`;
-    
-    // Chuyển hướng trực tiếp để Kindle tự động nhận diện đòn tải file
-    window.location.href = downloadUrl;
+      // 2. Đọc file dạng Blob và kích hoạt tải về máy đọc sách
+      const blob = await res.blob();
+      const contentDisposition = res.headers.get('content-disposition') || '';
+      let filename = 'book_download.epub';
+      const match = contentDisposition.match(/filename\*?=(?:UTF-8\'\')?"?([^\";]+)"?/);
+      if (match) {
+        filename = decodeURIComponent(match[1]);
+      }
 
-    setTimeout(() => {
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+
+      setError(null);
+      setPin('');
+    } catch (err: any) {
+      // Direct redirect fallback nếu fetch bị chặn CORS
+      window.location.href = downloadUrl;
+    } finally {
       setLoading(false);
-    }, 3000);
+    }
   };
 
   const handlePinChange = (val: string) => {
@@ -53,7 +90,7 @@ export default function KindleReceiverPage() {
         </h1>
 
         <p style={{ fontSize: '15px', marginBottom: '20px', lineHeight: '1.4' }}>
-          Nhập <strong>mã PIN 4 số</strong> hiển thị trên máy tính/điện thoại để nhận sách trực tiếp qua Wi-Fi:
+          Nhập <strong>mã PIN 4 số</strong> hiển thị trên máy tính/điện thoại để nhận sách trực tiếp:
         </p>
 
         <form onSubmit={handleDownload} style={{ marginBottom: '20px' }}>
@@ -108,7 +145,7 @@ export default function KindleReceiverPage() {
         </form>
 
         <div style={{ marginTop: '30px', borderTop: '1px solid #CCCCCC', paddingTop: '15px', fontSize: '13px', color: '#444444' }}>
-          💡 <strong>Mẹo:</strong> Hãy bấm nút Menu (⋮) trên Kindle và chọn <strong>Add Bookmark (Lưu Dấu Trang)</strong> trang web này để lần sau chỉ cần bấm vào là nhận sách ngay!
+          💡 <strong>Mẹo:</strong> Bấm nút Menu (⋮) trên trình duyệt và chọn <strong>Add Bookmark (Lưu Dấu Trang)</strong> để lần sau mở nhanh!
         </div>
       </div>
     </div>

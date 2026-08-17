@@ -52,14 +52,13 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
       const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
       const currentPort = typeof window !== 'undefined' && window.location.port ? `:${window.location.port}` : '';
       const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
+      const backendPort = process.env.NEXT_PUBLIC_API_URL || `http://${realIp}:8000`;
 
       let computedUrl = '';
       if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-        // Tự động dùng đúng địa chỉ URL/Domain mà user đang truy cập (Dù ở Vercel, VPS hay IP Wi-Fi)
-        computedUrl = `${protocol}//${currentHost}${currentPort}/k`;
+        computedUrl = `${protocol}//${currentHost}${currentPort}/k?b=${encodeURIComponent(backendPort)}`;
       } else {
-        // Nếu mở ở máy local localhost, tự động lấy IP Wi-Fi thật của máy chủ
-        computedUrl = `http://${realIp}:3000/k`;
+        computedUrl = `http://${realIp}:3000/k?b=${encodeURIComponent(`http://${realIp}:8000`)}`;
       }
       
       setKindleUrl(computedUrl);
@@ -163,21 +162,33 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
               <div className="space-y-3 text-xs leading-relaxed text-[#D7C9B2] bg-[#2A272A]/60 p-4 rounded-2xl border border-[#4D4845]/30">
                 <p className="font-bold text-[#F5ECDC] flex items-center gap-1.5">
                   <span className="w-5 h-5 rounded-full bg-[#F5ECDC] text-black flex items-center justify-center font-black text-xs shrink-0">1</span>
-                  Mở trình duyệt Kindle & nhập địa chỉ bên dưới:
+                  Mở trình duyệt Kindle & nhập địa chỉ (hoặc quét mã QR):
                 </p>
 
-                <div className="flex items-center gap-2 bg-[#1F1D20] p-2.5 rounded-xl border border-[#4D4845]/50">
-                  <code className="text-[#F5ECDC] font-mono text-xs font-bold flex-1 select-all break-all px-1">
-                    {kindleUrl || `http://<IP_LAN>:8000/k`}
-                  </code>
-                  <button
-                    onClick={copyUrl}
-                    className="p-1.5 bg-[#4D4845] hover:bg-[#5c5653] text-[#F5ECDC] rounded-lg transition-colors cursor-pointer shrink-0"
-                    title="Sao chép link"
-                    style={{ backgroundColor: '#4D4845', color: '#F5ECDC' }}
-                  >
-                    {isCopied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} style={{ color: '#F5ECDC' }} />}
-                  </button>
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <div className="flex-1 w-full flex items-center gap-2 bg-[#1F1D20] p-2.5 rounded-xl border border-[#4D4845]/50">
+                    <code className="text-[#F5ECDC] font-mono text-xs font-bold flex-1 select-all break-all px-1">
+                      {kindleUrl || `https://book-case-one.vercel.app/k`}
+                    </code>
+                    <button
+                      onClick={copyUrl}
+                      className="p-1.5 bg-[#4D4845] hover:bg-[#5c5653] text-[#F5ECDC] rounded-lg transition-colors cursor-pointer shrink-0"
+                      title="Sao chép link"
+                      style={{ backgroundColor: '#4D4845', color: '#F5ECDC' }}
+                    >
+                      {isCopied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} style={{ color: '#F5ECDC' }} />}
+                    </button>
+                  </div>
+
+                  {kindleUrl && (
+                    <div className="p-1.5 bg-white rounded-xl shrink-0 shadow-md border border-white/20">
+                      <img 
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(kindleUrl)}`} 
+                        alt="QR Code Truy Cập Kindle"
+                        className="w-20 h-20 object-contain rounded"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <p className="font-bold text-[#F5ECDC] flex items-center gap-1.5 pt-1">
