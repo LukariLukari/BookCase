@@ -81,7 +81,48 @@ async def search_zlib_bot(query: str):
         print(f"Z-Lib Bot Error: {e}")
         return []
 
-async def search_cloudily_bot(query: str, max_pages: int = 3):
+import unicodedata
+
+def remove_accents(input_str: str) -> str:
+    if not input_str:
+        return ""
+    nfkd_form = unicodedata.normalize('NFKD', input_str)
+    return "".join([c for c in nfkd_form if not unicodedata.combining(c)]).lower()
+
+def calculate_book_relevance(book: dict, query: str) -> int:
+    norm_query = remove_accents(query).strip()
+    norm_title = remove_accents(book.get('title', '')).strip()
+    
+    score = 0
+    query_words = [w for w in norm_query.split() if len(w) > 0]
+    
+    # 1. Khớp chuỗi chính xác (Sequence match)
+    if norm_query in norm_title:
+        score += 1000
+    else:
+        # Khớp theo số lượng từ xuất hiện trong tiêu đề
+        matched_words = sum(1 for w in query_words if w in norm_title)
+        if matched_words == len(query_words) and len(query_words) > 0:
+            score += 600
+        elif matched_words > 1:
+            score += matched_words * 150
+        elif matched_words == 1:
+            score += 20
+            
+    # 2. Ưu tiên định dạng sách (.epub là số 1)
+    ext = (book.get('extension') or '').lower()
+    if ext == 'epub':
+        score += 350
+    elif ext == 'pdf':
+        score += 250
+    elif ext in ['azw3', 'azw', 'mobi']:
+        score += 200
+    elif ext in ['prc', 'txt']:
+        score += 100
+
+    return score
+
+async def search_cloudily_bot(query: str, max_pages: int = 7):
     try:
         await client.send_message(CLOUDILY_BOT, f"/search {query}")
         
@@ -169,14 +210,25 @@ async def search_cloudily_bot(query: str, max_pages: int = 3):
                 else:
                     id_str = f"cloudily|idx:{btn_pos}|{query}|{btn_pos}"
 
-                all_books.append({
+                book_item = {
                     'title': full_title,
                     'author': 'Cloudily Bot',
                     'language': 'Vietnamese/English',
                     'extension': ext,
                     'size': size,
                     'id': id_str
-                })
+                }
+                
+                # Tính điểm độ khớp và chỉ lưu sách có độ tương quan
+                score = calculate_book_relevance(book_item, query)
+                book_item['_score'] = score
+                all_books.append(book_item)
+
+            # Kiểm tra nếu đã tìm đủ sách chuẩn khớp exact match với định dạng epub thì có thể dừng sớm
+            exact_epub_matches = [b for b in all_books if b['_score'] >= 1300]
+            if len(exact_epub_matches) >= 3 and page >= 4:
+                print(f"[Cloudily Bot] Early stopping at page {page} with {len(exact_epub_matches)} exact EPUB matches.")
+                break
 
             if next_button_idx is not None and page < max_pages:
                 edit_future = asyncio.Future()
@@ -197,10 +249,16 @@ async def search_cloudily_bot(query: str, max_pages: int = 3):
             else:
                 break
 
-        ebook_exts = {'epub', 'pdf', 'azw3', 'mobi', 'prc', 'txt'}
-        all_books.sort(key=lambda b: 0 if b['extension'].lower() in ebook_exts else 1)
+        # Loại bỏ trùng lặp tiêu đề + định dạng
+        unique_books = []
+        seen = set()
+        for b in sorted(all_books, key=lambda x: x['_score'], reverse=True):
+            key = f"{remove_accents(b['title'])}_{b['extension']}"
+            if key not in seen:
+                seen.add(key)
+                unique_books.append(b)
 
-        return all_books
+        return unique_books
     except Exception as e:
         print(f"Cloudily Bot Error: {e}")
         return []
