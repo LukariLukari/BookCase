@@ -50,14 +50,17 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
       
       const realIp = res.data.local_ip || '127.0.0.1';
       const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
-      const currentPort = typeof window !== 'undefined' ? window.location.port : '3000';
-      
-      // Nếu người dùng gõ IP/domain cụ thể trên trình duyệt máy tính, dùng IP/domain đó cho Kindle
-      let displayHost = (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') ? currentHost : realIp;
-      let displayPort = currentPort ? `:${currentPort}` : '';
-      let protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
-      
-      let computedUrl = `${protocol}//${displayHost}${displayPort}/k`;
+      const currentPort = typeof window !== 'undefined' && window.location.port ? `:${window.location.port}` : '';
+      const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
+
+      let computedUrl = '';
+      if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+        // Tự động dùng đúng địa chỉ URL/Domain mà user đang truy cập (Dù ở Vercel, VPS hay IP Wi-Fi)
+        computedUrl = `${protocol}//${currentHost}${currentPort}/k`;
+      } else {
+        // Nếu mở ở máy local localhost, tự động lấy IP Wi-Fi thật của máy chủ
+        computedUrl = `http://${realIp}:3000/k`;
+      }
       
       setKindleUrl(computedUrl);
       setTimeLeft(res.data.expires_in || 300);
