@@ -349,8 +349,30 @@ async def download_cloudily_bot(book_id: str):
         raise Exception("Cloudily Bot không trả về link hoặc file hợp lệ.")
         
     import requests
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-    res = requests.get(url, headers=headers, stream=True, timeout=120)
+    import urllib.parse
+    
+    parsed_url = urllib.parse.urlparse(url)
+    encoded_path = urllib.parse.quote(parsed_url.path, safe='/')
+    clean_url = urllib.parse.urlunparse((
+        parsed_url.scheme,
+        parsed_url.netloc,
+        encoded_path,
+        parsed_url.params,
+        parsed_url.query,
+        parsed_url.fragment
+    ))
+    
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://cloudily.org/',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
+    }
+    
+    res = requests.get(clean_url, headers=headers, stream=True, timeout=120)
+    if res.status_code != 200:
+        res = requests.get(url, headers=headers, stream=True, timeout=120)
+        
     if res.status_code != 200:
         raise Exception(f"Không thể tải file từ Cloudily. Status: {res.status_code}")
         
@@ -360,7 +382,6 @@ async def download_cloudily_bot(book_id: str):
         fname = re.findall(r'filename\*?=(?:UTF-8\'\')?"?([^\";]+)"?', d)
         if fname: filename = fname[0]
     elif 'filename=' in url:
-        import urllib.parse
         filename = urllib.parse.unquote(url.split('/')[-1].split('?')[0])
         
     return res.content, filename
