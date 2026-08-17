@@ -52,13 +52,12 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
       const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
       const currentPort = typeof window !== 'undefined' && window.location.port ? `:${window.location.port}` : '';
       const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
-      const backendPort = process.env.NEXT_PUBLIC_API_URL || `http://${realIp}:8000`;
 
       let computedUrl = '';
       if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-        computedUrl = `${protocol}//${currentHost}${currentPort}/k?b=${encodeURIComponent(backendPort)}`;
+        computedUrl = `${protocol}//${currentHost}${currentPort}/k`;
       } else {
-        computedUrl = `http://${realIp}:3000/k?b=${encodeURIComponent(`http://${realIp}:8000`)}`;
+        computedUrl = `http://${realIp}:3000/k`;
       }
       
       setKindleUrl(computedUrl);
