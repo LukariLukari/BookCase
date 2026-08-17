@@ -130,17 +130,17 @@ export default function ShareBookPage() {
 
              <button
                 onClick={() => setIsSubscriptionModalOpen(true)}
-                className="bg-[#1F1D20] hover:bg-[#2A272A] border border-[#4D4845]/40 rounded-2xl py-3.5 px-7 text-left shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer flex items-center gap-3.5 whitespace-nowrap min-w-[260px]"
+                className="bg-[#1F1D20] hover:bg-[#2A272A] border border-[#4D4845]/40 rounded-2xl py-3.5 px-6 sm:px-8 text-left shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer flex items-center gap-3.5 shrink-0 max-w-full min-w-fit"
                 style={{ backgroundColor: '#1F1D20', color: '#F5ECDC' }}
              >
                 <div className="p-2.5 bg-[#F5ECDC] rounded-xl shrink-0" style={{ backgroundColor: '#F5ECDC', color: '#000000' }}>
                    <Sparkles size={18} style={{ color: '#000000' }} />
                 </div>
-                <div>
+                <div className="shrink-0">
                    <div className="text-base font-black tracking-wide leading-tight text-[#F5ECDC]" style={{ color: '#F5ECDC' }}>
                       ĐĂNG KÍ
                    </div>
-                   <div className="text-xs text-[#D7C9B2] font-semibold mt-0.5" style={{ color: '#D7C9B2' }}>
+                   <div className="text-xs text-[#D7C9B2] font-semibold mt-0.5 whitespace-nowrap" style={{ color: '#D7C9B2' }}>
                       Để tải thêm sách theo yêu cầu
                    </div>
                 </div>

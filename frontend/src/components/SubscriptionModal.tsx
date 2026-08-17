@@ -183,7 +183,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                         >
                           <Sparkles size={16} style={{ color: isSelected ? '#000000' : '#F5ECDC' }} />
                           <span style={{ color: isSelected ? '#000000' : '#F5ECDC' }}>
-                            Đăng Ký {plan.name}
+                            Chọn Mua
                           </span>
                         </button>
                       </div>
