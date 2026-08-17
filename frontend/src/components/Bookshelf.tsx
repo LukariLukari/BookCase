@@ -1,10 +1,11 @@
 'use client';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, X, Trash2, Loader2, Share2, Check } from 'lucide-react';
+import { Download, X, Loader2, Share2, Check, Smartphone } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import BookCoverImage from '@/components/BookCoverImage';
+import KindleTransferModal from '@/components/KindleTransferModal';
 
 interface Book {
   id: string;
@@ -20,6 +21,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [kindleBook, setKindleBook] = useState<{ id: string; title: string } | null>(null);
   const router = useRouter();
 
   if (books.length === 0) return null;
@@ -60,8 +62,8 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
           className="w-full h-full object-cover rounded-2xl shadow-md group-hover:shadow-xl transition-shadow duration-300"
         />
       </motion.div>
-      <div className="px-1 mt-1 flex justify-between items-start gap-2">
-        <div className="min-w-0 flex-1">
+      <div className="flex justify-between items-start gap-2">
+        <div className="flex-1 min-w-0">
           <h3 className="text-base md:text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2 mb-1 group-hover:text-[#D7C9B2] transition-colors">{book.title}</h3>
           <p className="text-sm md:text-xs text-[#D7C9B2] truncate mb-2">{book.author || "Unknown Author"}</p>
         </div>
@@ -82,6 +84,16 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
             )}
           </button>
 
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setKindleBook({ id: book.id, title: book.title });
+            }}
+            className="p-1.5 md:p-2 text-[#D7C9B2] bg-[#2A272A] hover:bg-[#F5ECDC] hover:text-black rounded-full border border-[#4D4845]/50 transition-colors flex-shrink-0 cursor-pointer shadow-sm"
+            title="Gửi sang Kindle (Wi-Fi)"
+          >
+            <Smartphone size={16} />
+          </button>
 
           <button 
             onClick={(e) => copyShareLink(e, book.id)} 
@@ -92,7 +104,6 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
           </button>
         </div>
       </div>
-
     </motion.div>
   );
 
@@ -116,46 +127,33 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
   }
 
   return (
-    <div className="w-full pb-10">
-      
-      {/* Grid Rendering */}
+    <div>
       {sortBy === 'author' ? (
         <div className="space-y-12">
           {Object.entries(groupedBooks).map(([author, authorBooks]) => (
-            <div key={author} className="space-y-6">
-              {/* Clean Author Header (Unboxed with Name, Count, and Bottom Line) */}
-              <div className="flex items-end justify-between pb-3 border-b border-[#4D4845]/50">
-                <h2 className="text-xl sm:text-2xl font-black text-[#D7C9B2] tracking-tight">
-                  {author}
-                </h2>
-
-                <span className="text-xs sm:text-sm font-semibold text-[#D7C9B2]">
-                  {authorBooks.length} cuốn sách
+            <div key={author} className="space-y-4">
+              <div className="flex items-center gap-3 border-b border-[#4D4845]/40 pb-2">
+                <h2 className="text-lg md:text-xl font-extrabold text-[#F5ECDC]">{author}</h2>
+                <span className="text-xs bg-[#2A272A] text-[#D7C9B2] border border-[#4D4845]/50 px-2.5 py-0.5 rounded-full font-bold">
+                  {authorBooks.length} cuốn
                 </span>
               </div>
-
-              {/* Book Cards Grid for this Author */}
-              <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10 pt-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 md:gap-8">
                 {authorBooks.map(renderBookCard)}
-              </motion.div>
+              </div>
             </div>
           ))}
         </div>
       ) : (
-        books.length > 0 && (
-          <div>
-            <h2 className="text-lg font-bold text-[#F5ECDC] mb-6">{sortBy === 'newest' ? 'Tất cả sách' : 'Danh sách sách'}</h2>
-            <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
-              {books.map(renderBookCard)}
-            </motion.div>
-          </div>
-        )
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 md:gap-8">
+          {books.map(renderBookCard)}
+        </div>
       )}
 
-      {/* Modal chi tiết sách */}
+      {/* Book Detail Modal */}
       <AnimatePresence>
         {selectedBook && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
              <motion.div 
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
@@ -163,40 +161,34 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                className="absolute inset-0 bg-black/70 backdrop-blur-sm"
                onClick={() => setSelectedBook(null)}
              />
-             
+
              <motion.div 
                layoutId={`book-container-${selectedBook.id}`}
-               className="relative bg-[#1F1D20] text-[#F5ECDC] rounded-3xl max-w-3xl w-full flex flex-col md:flex-row overflow-hidden shadow-2xl z-10 max-h-[90vh] border border-[#4D4845]/50"
+               className="relative bg-[#1F1D20] border border-[#4D4845]/40 rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col md:flex-row gap-6 md:gap-8 text-[#F5ECDC]"
              >
-                <button 
-                  onClick={() => setSelectedBook(null)}
-                  className="absolute top-4 right-4 p-2 bg-[#2A272A] rounded-full text-[#D7C9B2] hover:text-[#F5ECDC] md:hidden z-20 border border-[#4D4845]/40"
-                >
-                  <X size={20} />
-                </button>
-
-                <div className="md:w-5/12 p-8 flex justify-center items-center bg-[#2A272A] border-b md:border-b-0 md:border-r border-[#4D4845]/40">
-                  <motion.div layoutId={`book-cover-${selectedBook.id}`} className="w-full max-w-[200px] aspect-[2/3]">
+                <div className="w-full md:w-1/3 flex-shrink-0 flex flex-col items-center">
+                  <motion.div layoutId={`book-cover-${selectedBook.id}`} className="w-48 md:w-full aspect-[2/3] relative mb-4">
                     <BookCoverImage 
                       coverUrl={selectedBook.cover_url}
                       bookId={selectedBook.id}
                       title={selectedBook.title}
                       author={selectedBook.author}
-                      className="w-full h-full object-cover rounded-2xl shadow-xl"
+                      className="w-full h-full object-cover rounded-2xl shadow-lg"
                     />
                   </motion.div>
                 </div>
-                
-                <div className="md:w-7/12 p-8 flex flex-col overflow-y-auto bg-[#1F1D20]">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h2 className="text-2xl font-bold mb-1 text-[#F5ECDC]">{selectedBook.title}</h2>
-                      <p className="text-[#D7C9B2] text-sm mb-1">{selectedBook.author || "Unknown Author"}</p>
-                    </div>
-                    <div className="hidden md:flex gap-2">
+
+                <div className="w-full md:w-2/3 flex flex-col justify-between overflow-y-auto">
+                  <div>
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#8A817C]">{selectedBook.genre || "General"}</span>
+                        <h2 className="text-2xl font-black text-[#F5ECDC] leading-tight mt-1">{selectedBook.title}</h2>
+                        <p className="text-base text-[#D7C9B2] font-semibold mt-1">{selectedBook.author || "Unknown Author"}</p>
+                      </div>
                       <button 
                         onClick={() => setSelectedBook(null)}
-                        className="p-2 text-[#D7C9B2] hover:text-[#F5ECDC] transition-colors bg-[#2A272A] rounded-full border border-[#4D4845]/40"
+                        className="p-2 text-[#D7C9B2] hover:text-[#F5ECDC] bg-[#2A272A] rounded-full transition-colors flex-shrink-0 cursor-pointer"
                       >
                         <X size={20} />
                       </button>
@@ -204,20 +196,28 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   </div>
                   
                   <div className="flex-grow mt-6">
-                    <h3 className="text-sm font-bold mb-2 text-[#F5ECDC] border-b border-[#4D4845]/40 pb-2">Summary</h3>
+                    <h3 className="text-sm font-bold mb-2 text-[#F5ECDC] border-b border-[#4D4845]/40 pb-2">Tóm tắt nội dung</h3>
                     <p className="text-[#D7C9B2] leading-relaxed text-sm whitespace-pre-wrap">
-                      {selectedBook.summary || "No summary available for this book."}
+                      {selectedBook.summary || "Chưa có tóm tắt cho cuốn sách này."}
                     </p>
                   </div>
 
-                  <div className="mt-8 pt-4 border-t border-[#4D4845]/40">
+                  <div className="mt-8 pt-4 border-t border-[#4D4845]/40 flex flex-col sm:flex-row gap-3">
                     <button 
                       onClick={() => handleDownload(selectedBook.id, selectedBook.title)}
                       disabled={downloadingId === selectedBook.id}
-                      className="btn-primary w-full shadow-md disabled:opacity-70 flex justify-center items-center gap-2"
+                      className="btn-primary flex-1 shadow-md disabled:opacity-70 flex justify-center items-center gap-2"
                     >
                       {downloadingId === selectedBook.id ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                      <span>{downloadingId === selectedBook.id ? 'Downloading...' : 'Download File'}</span>
+                      <span>{downloadingId === selectedBook.id ? 'Đang tải...' : 'Tải Sách Xuống'}</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setKindleBook({ id: selectedBook.id, title: selectedBook.title })}
+                      className="btn-secondary flex-1 shadow-md flex justify-center items-center gap-2"
+                    >
+                      <Smartphone size={18} />
+                      <span>Gửi Sang Kindle</span>
                     </button>
                   </div>
                 </div>
@@ -225,6 +225,14 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
           </div>
         )}
       </AnimatePresence>
+
+      {/* Kindle Transfer Modal */}
+      <KindleTransferModal 
+        isOpen={!!kindleBook}
+        onClose={() => setKindleBook(null)}
+        bookId={kindleBook?.id || null}
+        bookTitle={kindleBook?.title}
+      />
     </div>
   );
 }

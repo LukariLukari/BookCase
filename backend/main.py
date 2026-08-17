@@ -373,6 +373,80 @@ def download_book(book_id: str, db: Session = Depends(get_db)):
     filename = f"{book.title}.pdf" if book.mime_type == 'application/pdf' else f"{book.title}.epub"
     return drive_service.stream_download(book.drive_file_id, filename, book.mime_type)
 
+import socket
+import random
+import time
+
+kindle_pins = {}
+
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+        return local_ip
+    except Exception:
+        return '127.0.0.1'
+
+def clean_expired_pins():
+    now = time.time()
+    expired = [k for k, v in list(kindle_pins.items()) if v.get('expires_at', 0) < now]
+    for k in expired:
+        del kindle_pins[k]
+
+@app.post("/api/kindle/generate-pin/{book_id}")
+def generate_kindle_pin(book_id: str, db: Session = Depends(get_db)):
+    clean_expired_pins()
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+        
+    pin = "8492"
+    for _ in range(100):
+        candidate = f"{random.randint(1000, 9999)}"
+        if candidate not in kindle_pins:
+            pin = candidate
+            break
+            
+    kindle_pins[pin] = {
+        "book_id": book_id,
+        "title": book.title,
+        "expires_at": time.time() + 300
+    }
+    
+    local_ip = get_local_ip()
+    port = os.getenv("PORT", "8000")
+    kindle_url = f"http://{local_ip}:{port}/k"
+    
+    return {
+        "pin": pin,
+        "expires_in": 300,
+        "local_ip": local_ip,
+        "kindle_url": kindle_url,
+        "book_title": book.title
+    }
+
+@app.get("/api/kindle/download-by-pin/{pin}")
+def download_by_pin(pin: str, db: Session = Depends(get_db)):
+    clean_expired_pins()
+    clean_pin = pin.strip()
+    if clean_pin not in kindle_pins:
+        raise HTTPException(status_code=400, detail="Mã PIN không hợp lệ hoặc đã hết hạn (5 phút).")
+        
+    item = kindle_pins[clean_pin]
+    book_id = item["book_id"]
+    
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Sách không tồn tại")
+        
+    # Xóa PIN sau khi dùng
+    del kindle_pins[clean_pin]
+    
+    filename = f"{book.title}.pdf" if book.mime_type == 'application/pdf' else f"{book.title}.epub"
+    return drive_service.stream_download(book.drive_file_id, filename, book.mime_type, file_size=book.file_size)
+
 @app.delete("/api/books/{book_id}")
 def delete_book(book_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
     book = db.query(models.Book).filter(models.Book.id == book_id).first()
