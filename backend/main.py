@@ -253,10 +253,10 @@ def create_book_from_link(book_in: schemas.BookLinkCreate, db: Session = Depends
     return db_book
 
 @app.get("/api/external-search", response_model=List[schemas.ExternalSearchItem])
-async def external_search(q: str):
+async def external_search(q: str, source: Optional[str] = None):
     import telegram_client
     try:
-        books = await telegram_client.search_books_via_telegram(q)
+        books = await telegram_client.search_books_via_telegram(q, source=source)
         return books
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

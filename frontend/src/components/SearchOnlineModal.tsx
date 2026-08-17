@@ -26,10 +26,11 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
   const [importingId, setImportingId] = useState<string | null>(null);
   const [importProgress, setImportProgress] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+  const [activeSource, setActiveSource] = useState<'all' | 'zlib' | 'cloudily'>('all');
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-  const handleSearch = async (e?: React.FormEvent) => {
+  const handleSearch = async (e?: React.FormEvent, sourceOverride?: 'all' | 'zlib' | 'cloudily') => {
     if (e) e.preventDefault();
     if (!query.trim()) return;
 
@@ -37,8 +38,14 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
     setError(null);
     setResults([]);
 
+    const targetSource = sourceOverride || activeSource;
+
     try {
-      const res = await axios.get(`${API_URL}/api/external-search?q=${encodeURIComponent(query)}`);
+      let url = `${API_URL}/api/external-search?q=${encodeURIComponent(query)}`;
+      if (targetSource !== 'all') {
+        url += `&source=${targetSource}`;
+      }
+      const res = await axios.get(url);
       setResults(res.data);
       if (res.data.length === 0) {
         setError('Không tìm thấy sách nào.');
@@ -53,6 +60,27 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
       setIsSearching(false);
     }
   };
+
+  const handleTabChange = (source: 'all' | 'zlib' | 'cloudily') => {
+    setActiveSource(source);
+    if (query.trim() && results.length > 0) {
+      handleSearch(undefined, source);
+    }
+  };
+
+  const isCloudilyItem = (item: ExternalSearchItem) => {
+    return item.id.startsWith('cloudily|') || item.author === 'Cloudily Bot';
+  };
+
+  const zlibCount = results.filter((item) => !isCloudilyItem(item)).length;
+  const cloudilyCount = results.filter((item) => isCloudilyItem(item)).length;
+
+  const filteredResults = results.filter((item) => {
+    const isCloud = isCloudilyItem(item);
+    if (activeSource === 'zlib') return !isCloud;
+    if (activeSource === 'cloudily') return isCloud;
+    return true;
+  });
 
   const handleImport = async (item: ExternalSearchItem) => {
     setImportingId(item.id);
@@ -140,14 +168,14 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
             </h2>
             <button 
               onClick={handleModalClose}
-              className="p-2 bg-[#1F1D20] hover:bg-[#F5ECDC] hover:text-black text-[#F5ECDC] rounded-full transition-colors"
+              className="p-2 bg-[#1F1D20] hover:bg-[#F5ECDC] hover:text-black text-[#F5ECDC] rounded-full transition-colors cursor-pointer"
             >
               <X size={20} />
             </button>
           </div>
 
           {/* Search Bar */}
-          <div className="p-6 bg-[#1F1D20]">
+          <div className="p-6 bg-[#1F1D20] pb-3">
             <form onSubmit={handleSearch} className="flex gap-3">
               <input 
                 type="text" 
@@ -167,10 +195,49 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                 <span className="hidden sm:inline font-black" style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }}>Tìm kiếm</span>
               </button>
             </form>
+
+            {/* Source Filter Tabs */}
+            <div className="flex gap-2 mt-4 overflow-x-auto pb-1">
+              <button
+                type="button"
+                onClick={() => handleTabChange('all')}
+                className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeSource === 'all'
+                    ? 'bg-[#F5ECDC] text-[#000000] shadow-md scale-[1.02]'
+                    : 'bg-[#2A272A] text-[#F5ECDC] hover:bg-[#3A373A] border border-[#4D4845]/60'
+                }`}
+              >
+                Tất cả nguồn {results.length > 0 && `(${results.length})`}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabChange('zlib')}
+                className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeSource === 'zlib'
+                    ? 'bg-[#F5ECDC] text-[#000000] shadow-md scale-[1.02]'
+                    : 'bg-[#2A272A] text-[#F5ECDC] hover:bg-[#3A373A] border border-[#4D4845]/60'
+                }`}
+              >
+                📚 Z-Library {results.length > 0 && activeSource === 'all' ? `(${zlibCount})` : ''}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabChange('cloudily')}
+                className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeSource === 'cloudily'
+                    ? 'bg-[#F5ECDC] text-[#000000] shadow-md scale-[1.02]'
+                    : 'bg-[#2A272A] text-[#F5ECDC] hover:bg-[#3A373A] border border-[#4D4845]/60'
+                }`}
+              >
+                ☁️ Cloudily Bot {results.length > 0 && activeSource === 'all' ? `(${cloudilyCount})` : ''}
+              </button>
+            </div>
           </div>
 
           {/* Results Area */}
-          <div className="flex-1 overflow-y-auto p-6 pt-0">
+          <div className="flex-1 overflow-y-auto p-6 pt-3">
             {error && (
               <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-xl mb-4 text-sm text-center">
                 {error}
@@ -183,56 +250,73 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
               </div>
             )}
 
-            <div className="space-y-3">
-              {results.map((item, idx) => (
-                <div key={idx} className="bg-[#2A272A] border border-[#4D4845]/50 rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between hover:border-[#F5ECDC]/60 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-[#F5ECDC] font-bold line-clamp-2">{item.title}</h3>
-                    <p className="text-[#D7C9B2] text-sm mt-1">{item.author || 'Không rõ tác giả'}</p>
-                    <div className="flex gap-2 mt-2 text-xs text-[#8A817C] font-semibold">
-                      <span className="bg-[#1F1D20] px-2 py-1 rounded-md uppercase">{item.extension}</span>
-                      {item.size && <span className="bg-[#1F1D20] px-2 py-1 rounded-md">{item.size}</span>}
-                      {item.language && <span className="bg-[#1F1D20] px-2 py-1 rounded-md">{item.language}</span>}
-                    </div>
-                  </div>
-                  
-                  {importingId === item.id ? (
-                    <div className="w-full sm:w-60 flex flex-col gap-1.5 py-1">
-                      <div className="flex justify-between items-center text-xs font-bold px-0.5">
-                        <span className="flex items-center gap-1.5 text-[#F5ECDC]">
-                          <Loader2 size={13} className="animate-spin text-[#F5ECDC]" />
-                          Đang xử lý & tải file...
-                        </span>
-                        <span className="text-[#F5ECDC] font-extrabold">{Math.round(importProgress)}%</span>
-                      </div>
-                      <div className="w-full bg-[#1F1D20] rounded-full h-3 shadow-inner overflow-hidden relative">
-                        <motion.div 
-                          className="bg-gradient-to-r from-[#D7C9B2] via-[#E6D9C5] to-[#F5ECDC] h-full rounded-full transition-all duration-300 relative overflow-hidden"
-                          style={{ width: `${importProgress}%` }}
-                        >
-                          <div className="absolute inset-0 bg-white/30 animate-pulse" />
-                        </motion.div>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => handleImport(item)}
-                      disabled={importingId !== null}
-                      className="w-full sm:w-auto bg-[#F5ECDC] hover:bg-white px-5 py-2.5 rounded-xl text-sm font-black flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:bg-[#3A373A] whitespace-nowrap cursor-pointer"
-                      style={{ color: importingId !== null ? '#8A817C' : '#000000' }}
-                    >
-                      <Download size={16} className="stroke-[2.5]" style={{ color: importingId !== null ? '#8A817C' : '#000000' }} />
-                      <span className="font-black" style={{ color: importingId !== null ? '#8A817C' : '#000000' }}>Tải về máy & Thêm vào web</span>
-                    </button>
-                  )}
+            {!isSearching && results.length > 0 && filteredResults.length === 0 && (
+              <div className="text-center text-[#D7C9B2] py-10 opacity-60">
+                Không có kết quả từ nguồn đã chọn.
+              </div>
+            )}
 
-                </div>
-              ))}
+            <div className="space-y-3">
+              {filteredResults.map((item, idx) => {
+                const isCloud = isCloudilyItem(item);
+                return (
+                  <div key={idx} className="bg-[#2A272A] border border-[#4D4845]/50 rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between hover:border-[#F5ECDC]/60 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        {isCloud ? (
+                          <span className="bg-[#003846] text-[#00E5FF] border border-[#00E5FF]/40 text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1">
+                            ☁️ Cloudily Bot
+                          </span>
+                        ) : (
+                          <span className="bg-[#3D2C00] text-[#FFD700] border border-[#FFD700]/40 text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1">
+                            📚 Z-Library Bot
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="text-[#F5ECDC] font-bold line-clamp-2">{item.title}</h3>
+                      <p className="text-[#D7C9B2] text-sm mt-1">{item.author || 'Không rõ tác giả'}</p>
+                      <div className="flex gap-2 mt-2 text-xs text-[#8A817C] font-semibold">
+                        {item.extension && <span className="bg-[#1F1D20] px-2 py-1 rounded-md uppercase text-[#F5ECDC]">{item.extension}</span>}
+                        {item.size && <span className="bg-[#1F1D20] px-2 py-1 rounded-md text-[#F5ECDC]">{item.size}</span>}
+                        {item.language && <span className="bg-[#1F1D20] px-2 py-1 rounded-md text-[#F5ECDC]">{item.language}</span>}
+                      </div>
+                    </div>
+                    
+                    {importingId === item.id ? (
+                      <div className="w-full sm:w-60 flex flex-col gap-1.5 py-1">
+                        <div className="flex justify-between items-center text-xs font-bold px-0.5">
+                          <span className="flex items-center gap-1.5 text-[#F5ECDC]">
+                            <Loader2 size={13} className="animate-spin text-[#F5ECDC]" />
+                            Đang xử lý & tải file...
+                          </span>
+                          <span className="text-[#F5ECDC] font-extrabold">{Math.round(importProgress)}%</span>
+                        </div>
+                        <div className="w-full bg-[#1F1D20] rounded-full h-3 shadow-inner overflow-hidden relative">
+                          <motion.div 
+                            className="bg-gradient-to-r from-[#D7C9B2] via-[#E6D9C5] to-[#F5ECDC] h-full rounded-full transition-all duration-300 relative overflow-hidden"
+                            style={{ width: `${importProgress}%` }}
+                          >
+                            <div className="absolute inset-0 bg-white/30 animate-pulse" />
+                          </motion.div>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleImport(item)}
+                        disabled={importingId !== null}
+                        className="w-full sm:w-auto bg-[#F5ECDC] hover:bg-white px-5 py-2.5 rounded-xl text-sm font-black flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:bg-[#3A373A] whitespace-nowrap cursor-pointer"
+                        style={{ color: importingId !== null ? '#8A817C' : '#000000' }}
+                      >
+                        <Download size={16} className="stroke-[2.5]" style={{ color: importingId !== null ? '#8A817C' : '#000000' }} />
+                        <span className="font-black" style={{ color: importingId !== null ? '#8A817C' : '#000000' }}>Tải về máy & Thêm vào web</span>
+                      </button>
+                    )}
+
+                  </div>
+                );
+              })}
             </div>
           </div>
-
-
-
         </motion.div>
       </div>
     </AnimatePresence>
