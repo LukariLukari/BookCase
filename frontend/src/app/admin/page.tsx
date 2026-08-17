@@ -164,19 +164,19 @@ export default function AdminPage() {
       setIsFetchingBooks(true);
       setDownloadProgress(0);
       const response = await axios.get(`${baseUrl}/api/books`, {
+        timeout: 15000,
         onDownloadProgress: (progressEvent) => {
           if (progressEvent.total) {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             setDownloadProgress(percentCompleted);
           } else {
-            // Fake progress if total is unknown (e.g. gzip without content-length)
-            setDownloadProgress(prev => Math.min(prev + 10, 90));
+            setDownloadProgress(prev => Math.min(prev + 20, 95));
           }
         }
       });
       setBooks(response.data);
       setDownloadProgress(100);
-      setTimeout(() => setIsFetchingBooks(false), 300);
+      setTimeout(() => setIsFetchingBooks(false), 200);
       setError(null);
     } catch (err: any) {
       console.error('Lỗi lấy dữ liệu sách:', err);
@@ -258,7 +258,7 @@ export default function AdminPage() {
     if (!editingBook) return;
     try {
       const payload: any = { ...editForm };
-      if (payload.cover_url && payload.cover_url.includes('/api/books/cover/')) {
+      if (!payload.cover_url || !payload.cover_url.trim() || payload.cover_url.includes('/api/books/cover/')) {
         delete payload.cover_url;
       }
       await axios.put(`${API_URL}/api/books/${editingBook.id}`, payload, {
@@ -565,20 +565,24 @@ export default function AdminPage() {
                       <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
                     </label>
                   </div>
-                  <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center flex-1 min-h-[200px] md:min-h-[280px] p-4">
+                  <div className="bg-[#2A272A] border border-[#4D4845]/50 rounded-2xl flex items-center justify-center flex-1 min-h-[200px] md:min-h-[280px] p-4 overflow-hidden">
                     {editForm.cover_url ? (
                       <img src={getCoverUrl(editForm.cover_url)} className="max-h-[200px] md:max-h-[260px] rounded-lg object-contain shadow-sm" alt="cover preview" 
                            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = DEFAULT_COVER_SVG; }} />
+                    ) : editingBook ? (
+                      <div className="w-full max-w-[160px] aspect-[2/3]">
+                        <BookCoverImage coverUrl={editingBook.cover_url} bookId={editingBook.id} title={editingBook.title} author={editingBook.author} />
+                      </div>
                     ) : (
-                      <span className="text-gray-400 text-sm font-medium">No Cover Provided</span>
+                      <span className="text-[#D7C9B2] text-sm font-medium">No Cover Provided</span>
                     )}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 md:mt-10 pt-4 md:pt-6 border-t border-gray-100 flex justify-end gap-3 shrink-0">
-                 <button onClick={() => setIsEditModalOpen(false)} className="btn-outline !py-3 !px-6 text-sm">Cancel</button>
-                 <button onClick={handleEditSubmit} className="btn-primary !py-3 !px-8 text-sm">Save Changes</button>
+              <div className="mt-6 md:mt-10 pt-4 md:pt-6 border-t border-[#4D4845]/40 flex justify-end gap-3 shrink-0">
+                 <button onClick={() => setIsEditModalOpen(false)} className="btn-outline !py-3 !px-6 text-sm text-[#F5ECDC] bg-[#2A272A] border-[#4D4845] hover:bg-[#363236]">Cancel</button>
+                 <button onClick={handleEditSubmit} className="btn-primary !py-3 !px-8 text-sm !bg-[#F97316] !text-white font-bold hover:!bg-[#EA580C] shadow-md border-none">Save Changes</button>
               </div>
            </div>
         </div>

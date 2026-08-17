@@ -10,10 +10,20 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
-  const [books, setBooks] = useState<any[]>(initialBooks || []);
+  const [books, setBooks] = useState<any[]>(() => {
+    if (initialBooks && initialBooks.length > 0) return initialBooks;
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('cached_books');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('author');
   const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
+  const [isLoadingBooks, setIsLoadingBooks] = useState(true);
   
   const { user, isLoading } = useAuth();
   const router = useRouter();
@@ -21,12 +31,18 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
 
   const refreshBooks = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/books`);
+      setIsLoadingBooks(true);
+      const res = await axios.get(`${API_URL}/api/books`, { timeout: 15000 });
       if (res.data && Array.isArray(res.data)) {
         setBooks(res.data);
+        try {
+          sessionStorage.setItem('cached_books', JSON.stringify(res.data));
+        } catch (e) {}
       }
     } catch (err) {
       console.error('Lỗi sync danh sách sách client:', err);
+    } finally {
+      setIsLoadingBooks(false);
     }
   };
 
@@ -111,7 +127,17 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
 
         {/* Content */}
         <main className="flex-1 px-4 md:px-10 pt-4 pb-12">
-          {books.length === 0 ? (
+          {isLoadingBooks && books.length === 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10 pt-2 animate-pulse">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="flex flex-col">
+                  <div className="w-full aspect-[2/3] bg-[#2A272A] rounded-2xl mb-4 border border-[#4D4845]/30"></div>
+                  <div className="h-4 bg-[#2A272A] rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-[#2A272A] rounded w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          ) : books.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center bg-[#2A272A] rounded-3xl shadow-sm border border-[#4D4845]/40">
               <p className="text-[#D7C9B2] font-medium mb-4">Bookshelf is currently empty.</p>
             </div>

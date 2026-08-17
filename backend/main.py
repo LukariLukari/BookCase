@@ -3,7 +3,7 @@ import io
 from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer
 from typing import List
 from fastapi.responses import RedirectResponse
 import uvicorn
@@ -59,17 +59,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def serialize_book_lightweight(b: models.Book) -> dict:
+    return {
+        "id": b.id,
+        "title": b.title,
+        "author": b.author,
+        "genre": b.genre,
+        "summary": b.summary,
+        "cover_url": f"/api/books/cover/{b.id}",
+        "drive_file_id": b.drive_file_id,
+        "external_url": b.external_url,
+        "mime_type": b.mime_type,
+        "file_size": b.file_size,
+        "progress": b.progress,
+        "created_at": b.created_at,
+        "updated_at": b.updated_at,
+    }
+
 @app.get("/api/books", response_model=List[schemas.BookResponse])
 def get_books(db: Session = Depends(get_db)):
-    books = db.query(models.Book).order_by(models.Book.created_at.desc()).all()
-    return books
+    books = db.query(models.Book).options(defer(models.Book.cover_url)).order_by(models.Book.created_at.desc()).all()
+    return [serialize_book_lightweight(b) for b in books]
 
 @app.get("/api/books/{book_id}", response_model=schemas.BookResponse)
 def get_book(book_id: str, db: Session = Depends(get_db)):
-    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    book = db.query(models.Book).options(defer(models.Book.cover_url)).filter(models.Book.id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
-    return book
+    return serialize_book_lightweight(book)
 
 @app.post("/api/books/upload", response_model=schemas.BookResponse)
 async def upload_book(
@@ -224,13 +241,15 @@ def update_book(book_id: str, book_in: schemas.BookUpdate, db: Session = Depends
     if book_in.summary is not None: book.summary = book_in.summary
     if book_in.external_url is not None: book.external_url = book_in.external_url
     
-    # Do not overwrite actual cover_url in database with endpoint route string
-    if book_in.cover_url is not None and not book_in.cover_url.startswith("/api/books/cover/") and not book_in.cover_url.startswith("api/books/cover/"):
-        book.cover_url = book_in.cover_url
+    # Do not overwrite existing cover_url in database if input is empty, None, or endpoint route string
+    if book_in.cover_url is not None:
+        clean_cover = book_in.cover_url.strip()
+        if clean_cover and not clean_cover.startswith("/api/books/cover/") and not clean_cover.startswith("api/books/cover/"):
+            book.cover_url = clean_cover
     
     db.commit()
     db.refresh(book)
-    return book
+    return serialize_book_lightweight(book)
 
 
 @app.get("/api/books/{book_id}/download")
@@ -365,7 +384,7 @@ def get_collection(collection_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Collection not found")
     
     collection_books = db.query(models.CollectionBook).filter(models.CollectionBook.collection_id == collection_id).all()
-    books = [cb.book for cb in collection_books if cb.book]
+    books = [serialize_book_lightweight(cb.book) for cb in collection_books if cb.book]
         
     return {
         "id": collection.id,
