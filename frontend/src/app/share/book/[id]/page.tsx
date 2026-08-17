@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Download, AlertCircle, BookOpen, Loader2 } from 'lucide-react';
+import { Download, AlertCircle, BookOpen, Loader2, Sparkles } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import BookCoverImage from '@/components/BookCoverImage';
+import SubscriptionModal from '@/components/SubscriptionModal';
 
 export default function ShareBookPage() {
   const { id } = useParams();
@@ -11,6 +12,7 @@ export default function ShareBookPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -82,7 +84,6 @@ export default function ShareBookPage() {
               author={book.author}
               className="absolute inset-0 w-full h-full object-cover rounded-2xl shadow-2xl"
             />
-
           </div>
         </div>
 
@@ -109,7 +110,7 @@ export default function ShareBookPage() {
             bởi <span className="text-gray-800">{book.author || 'Unknown Author'}</span>
           </p>
 
-          <div className="prose prose-sm text-gray-600 mb-10 line-clamp-4">
+          <div className="prose prose-sm text-gray-600 mb-8 line-clamp-4">
              {book.summary ? (
                <p>{book.summary}</p>
              ) : (
@@ -117,21 +118,46 @@ export default function ShareBookPage() {
              )}
           </div>
 
-          <div className="mt-auto pt-8 border-t border-gray-100">
+          <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
              <button 
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className="w-full sm:w-auto btn-secondary flex items-center justify-center gap-3 py-4 px-8 shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-70 disabled:hover:-translate-y-0"
+                className="btn-secondary flex items-center justify-center gap-3 py-4 px-8 shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-70 disabled:hover:-translate-y-0"
              >
                 {isDownloading ? <Loader2 size={20} className="animate-spin" /> : <Download size={20} />}
                 <span>{isDownloading ? 'Đang Tải...' : 'Tải Sách Xuống'}</span>
              </button>
-             <p className="text-xs text-gray-400 mt-4 text-center sm:text-left">
-               Được chia sẻ thông qua nền tảng BookCase.
-             </p>
+
+             <button
+                onClick={() => setIsSubscriptionModalOpen(true)}
+                className="bg-[#1F1D20] hover:bg-[#2A272A] border border-[#4D4845]/40 rounded-2xl py-3 px-6 text-left shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer flex items-center gap-3"
+                style={{ backgroundColor: '#1F1D20', color: '#F5ECDC' }}
+             >
+                <div className="p-2 bg-[#F5ECDC] rounded-xl shrink-0" style={{ backgroundColor: '#F5ECDC', color: '#000000' }}>
+                   <Sparkles size={18} style={{ color: '#000000' }} />
+                </div>
+                <div>
+                   <div className="text-base font-extrabold leading-tight text-[#F5ECDC]" style={{ color: '#F5ECDC' }}>
+                      Đăng ký
+                   </div>
+                   <div className="text-xs text-[#D7C9B2] font-medium mt-0.5" style={{ color: '#D7C9B2' }}>
+                      để tải thêm sách theo nhu cầu
+                   </div>
+                </div>
+             </button>
           </div>
+
+          <p className="text-xs text-gray-400 mt-4 text-center sm:text-left">
+             Được chia sẻ thông qua nền tảng BookCase.
+          </p>
         </div>
       </div>
+
+      {/* Subscription Pricing Modal */}
+      <SubscriptionModal 
+        isOpen={isSubscriptionModalOpen}
+        onClose={() => setIsSubscriptionModalOpen(false)}
+      />
     </div>
   );
 }

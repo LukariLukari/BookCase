@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Download, AlertCircle, Library, Link as LinkIcon, Upload, Loader2 } from 'lucide-react';
+import { Download, AlertCircle, Library, Link as LinkIcon, Upload, Loader2, Sparkles } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import BookCoverImage from '@/components/BookCoverImage';
+import SubscriptionModal from '@/components/SubscriptionModal';
 
 export default function ShareCollectionPage() {
   const { id } = useParams();
@@ -11,6 +12,7 @@ export default function ShareCollectionPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -66,11 +68,29 @@ export default function ShareCollectionPage() {
          <h1 className="text-2xl font-extrabold text-[#F5ECDC] tracking-tight">
           BookCase<span className="text-orange-500">.</span>
         </h1>
+
+        <button
+          onClick={() => setIsSubscriptionModalOpen(true)}
+          className="bg-[#2A272A] hover:bg-[#3A373A] border border-[#4D4845]/60 rounded-xl py-2 px-4 text-left shadow-md transition-all cursor-pointer flex items-center gap-2.5"
+          style={{ backgroundColor: '#2A272A', color: '#F5ECDC' }}
+        >
+          <div className="p-1.5 bg-[#F5ECDC] rounded-lg shrink-0" style={{ backgroundColor: '#F5ECDC', color: '#000000' }}>
+            <Sparkles size={15} style={{ color: '#000000' }} />
+          </div>
+          <div>
+            <div className="text-xs font-black text-[#F5ECDC]" style={{ color: '#F5ECDC' }}>
+              Đăng ký
+            </div>
+            <div className="text-[10px] text-[#D7C9B2] font-medium" style={{ color: '#D7C9B2' }}>
+              để tải thêm sách theo nhu cầu
+            </div>
+          </div>
+        </button>
       </div>
 
       {/* Collection Header Banner */}
       <div className="w-full max-w-6xl px-4 mb-12">
-        <div className="bg-[#2A272A] rounded-3xl p-8 md:p-12 text-[#F5ECDC] shadow-2xl flex flex-col items-start relative overflow-hidden border border-[#4D4845]/50">
+        <div className="bg-[#2A272A] rounded-3xl p-8 md:p-12 text-[#F5ECDC] shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden border border-[#4D4845]/50">
            <div className="text-left z-10">
              <span className="inline-block px-3.5 py-1 bg-orange-500/20 border border-orange-500/30 text-orange-400 font-bold text-xs rounded-full uppercase tracking-wider mb-3">
                Tệp Sách Được Chia Sẻ
@@ -80,6 +100,24 @@ export default function ShareCollectionPage() {
                <p className="text-[#D7C9B2] text-lg max-w-2xl">{collection.description}</p>
              )}
              <p className="mt-4 text-[#D7C9B2] font-semibold text-sm">{collection.book_count} cuốn sách</p>
+           </div>
+
+           <div className="z-10 shrink-0">
+             <button
+                onClick={() => setIsSubscriptionModalOpen(true)}
+                className="bg-[#F5ECDC] hover:bg-white text-[#000000] border border-[#F5ECDC] rounded-2xl py-3.5 px-6 text-left shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer flex items-center gap-3"
+                style={{ backgroundColor: '#F5ECDC', color: '#000000' }}
+             >
+                <Sparkles size={20} style={{ color: '#000000' }} />
+                <div>
+                   <div className="text-sm font-black leading-tight text-[#000000]" style={{ color: '#000000' }}>
+                      Đăng ký
+                   </div>
+                   <div className="text-xs opacity-80 font-semibold" style={{ color: '#000000' }}>
+                      để tải thêm sách theo nhu cầu
+                   </div>
+                </div>
+             </button>
            </div>
         </div>
       </div>
@@ -143,6 +181,11 @@ export default function ShareCollectionPage() {
         )}
       </div>
 
+      {/* Subscription Modal */}
+      <SubscriptionModal 
+        isOpen={isSubscriptionModalOpen} 
+        onClose={() => setIsSubscriptionModalOpen(false)} 
+      />
     </div>
   );
 }
