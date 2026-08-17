@@ -6,6 +6,7 @@ export default function KindleReceiverPage() {
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -33,14 +34,16 @@ export default function KindleReceiverPage() {
     }
 
     setError(null);
+    setSuccessMsg(null);
     setLoading(true);
 
     const targetBackend = getBackendUrl();
+    const verifyUrl = `${targetBackend}/api/kindle/verify-pin/${cleanPin}`;
     const downloadUrl = `${targetBackend}/api/kindle/download-by-pin/${cleanPin}`;
 
     try {
-      // 1. Kiểm tra mã PIN với Backend trước để báo lỗi rõ ràng nếu hết hạn hoặc sai mã PIN
-      const res = await fetch(downloadUrl, { method: 'GET' });
+      // 1. Kiểm tra xem mã PIN có hợp lệ hay không trước khi chuyển hướng
+      const res = await fetch(verifyUrl, { method: 'GET' });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setError(data.detail || 'Mã PIN không đúng hoặc đã hết hạn (5 phút).');
@@ -48,28 +51,14 @@ export default function KindleReceiverPage() {
         return;
       }
 
-      // 2. Đọc file dạng Blob và kích hoạt tải về máy đọc sách
-      const blob = await res.blob();
-      const contentDisposition = res.headers.get('content-disposition') || '';
-      let filename = 'book_download.epub';
-      const match = contentDisposition.match(/filename\*?=(?:UTF-8\'\')?"?([^\";]+)"?/);
-      if (match) {
-        filename = decodeURIComponent(match[1]);
-      }
+      const data = await res.json().catch(() => ({}));
+      const titleStr = data.title ? ` "${data.title}"` : '';
+      setSuccessMsg(`🚀 Đang khởi tạo tải sách${titleStr}... Kindle sẽ tự động bắt đầu tải về.`);
 
-      const blobUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(blobUrl);
-
-      setError(null);
-      setPin('');
+      // 2. Chuyển hướng trực tiếp URL để trình duyệt Kindle kích hoạt trình tải file hệ thống (Content-Disposition)
+      window.location.href = downloadUrl;
     } catch (err: any) {
-      // Direct redirect fallback nếu fetch bị chặn CORS
+      // Fallback nếu fetch verify bị chặn
       window.location.href = downloadUrl;
     } finally {
       setLoading(false);
@@ -80,6 +69,7 @@ export default function KindleReceiverPage() {
     const digits = val.replace(/\D/g, '').slice(0, 4);
     setPin(digits);
     setError(null);
+    setSuccessMsg(null);
   };
 
   return (
@@ -122,6 +112,12 @@ export default function KindleReceiverPage() {
           {error && (
             <div style={{ color: '#000000', backgroundColor: '#F0F0F0', border: '2px solid #000000', padding: '10px', borderRadius: '6px', marginBottom: '15px', fontWeight: 'bold', fontSize: '14px' }}>
               ⚠️ {error}
+            </div>
+          )}
+
+          {successMsg && (
+            <div style={{ color: '#000000', backgroundColor: '#E6F4EA', border: '2px solid #000000', padding: '10px', borderRadius: '6px', marginBottom: '15px', fontWeight: 'bold', fontSize: '14px' }}>
+              {successMsg}
             </div>
           )}
 

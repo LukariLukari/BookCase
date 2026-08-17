@@ -441,6 +441,14 @@ def generate_kindle_pin(book_id: str, db: Session = Depends(get_db)):
         "book_title": book.title
     }
 
+@app.get("/api/kindle/verify-pin/{pin}")
+def verify_kindle_pin(pin: str):
+    clean_expired_pins()
+    clean_pin = pin.strip()
+    if clean_pin not in kindle_pins:
+        raise HTTPException(status_code=400, detail="Mã PIN không đúng hoặc đã hết hạn (5 phút).")
+    return {"valid": True, "title": kindle_pins[clean_pin].get("title", "")}
+
 @app.get("/api/kindle/download-by-pin/{pin}")
 def download_by_pin(pin: str, db: Session = Depends(get_db)):
     clean_expired_pins()
@@ -455,8 +463,26 @@ def download_by_pin(pin: str, db: Session = Depends(get_db)):
     if not book:
         raise HTTPException(status_code=404, detail="Sách không tồn tại")
         
-    # Xóa PIN sau khi dùng
-    del kindle_pins[clean_pin]
+    # Handle external link download redirect
+    if book.external_url:
+        url = book.external_url
+        file_id = None
+        match_d = re.search(r'/file/d/([a-zA-Z0-9_-]+)', url)
+        if match_d:
+            file_id = match_d.group(1)
+        else:
+            match_id = re.search(r'[?&]id=([a-zA-Z0-9_-]+)', url)
+            if match_id:
+                file_id = match_id.group(1)
+                
+        if file_id:
+            direct_download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+            return RedirectResponse(url=direct_download_url)
+            
+        return RedirectResponse(url=url)
+
+    if not book.drive_file_id:
+        raise HTTPException(status_code=400, detail="Sách này không có file đính kèm để tải về.")
     
     filename = f"{book.title}.pdf" if book.mime_type == 'application/pdf' else f"{book.title}.epub"
     return drive_service.stream_download(book.drive_file_id, filename, book.mime_type, file_size=book.file_size)
