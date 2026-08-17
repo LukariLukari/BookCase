@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Download, Loader2, BookOpen, Globe, Library, Cloud } from 'lucide-react';
+import { Search, X, Download, Loader2, BookOpen, Globe, Pencil, PenTool } from 'lucide-react';
 import axios from 'axios';
 
 interface ExternalSearchItem {
@@ -221,9 +221,9 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                   color: activeSource === 'zlib' ? '#000000' : '#F5ECDC'
                 }}
               >
-                <Library size={15} style={{ color: activeSource === 'zlib' ? '#000000' : '#F5ECDC' }} />
+                <Pencil size={15} style={{ color: activeSource === 'zlib' ? '#000000' : '#F5ECDC' }} />
                 <span style={{ color: activeSource === 'zlib' ? '#000000' : '#F5ECDC' }}>
-                  Z-Library {results.length > 0 && activeSource === 'all' ? `(${zlibCount})` : ''}
+                  Nguồn bút chì {results.length > 0 && activeSource === 'all' ? `(${zlibCount})` : ''}
                 </span>
               </button>
 
@@ -236,9 +236,9 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                   color: activeSource === 'cloudily' ? '#000000' : '#F5ECDC'
                 }}
               >
-                <Cloud size={15} style={{ color: activeSource === 'cloudily' ? '#000000' : '#F5ECDC' }} />
+                <PenTool size={15} style={{ color: activeSource === 'cloudily' ? '#000000' : '#F5ECDC' }} />
                 <span style={{ color: activeSource === 'cloudily' ? '#000000' : '#F5ECDC' }}>
-                  Cloudily Bot {results.length > 0 && activeSource === 'all' ? `(${cloudilyCount})` : ''}
+                  Nguồn bút bi {results.length > 0 && activeSource === 'all' ? `(${cloudilyCount})` : ''}
                 </span>
               </button>
             </div>
@@ -273,11 +273,11 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                       <div className="flex items-center gap-2 mb-1.5">
                         {isCloud ? (
                           <span className="bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845] text-[10px] font-extrabold px-2.5 py-0.5 rounded-md flex items-center gap-1.5">
-                            <Cloud size={12} className="text-[#F5ECDC]" /> Cloudily Bot
+                            <PenTool size={12} className="text-[#F5ECDC]" /> Nguồn bút bi
                           </span>
                         ) : (
                           <span className="bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845] text-[10px] font-extrabold px-2.5 py-0.5 rounded-md flex items-center gap-1.5">
-                            <Library size={12} className="text-[#F5ECDC]" /> Z-Library Bot
+                            <Pencil size={12} className="text-[#F5ECDC]" /> Nguồn bút chì
                           </span>
                         )}
                       </div>

@@ -206,21 +206,29 @@ async def search_cloudily_bot(query: str, max_pages: int = 3):
         return []
 
 async def search_books_via_telegram(query: str, source: str = None):
-    await connect_client()
-    
-    if not await client.is_user_authorized():
-        raise Exception("Telegram client chưa được xác thực. Vui lòng chạy telegram_login.py trước.")
+    try:
+        await connect_client()
         
-    if source == 'zlib':
-        return await search_zlib_bot(query)
-    elif source == 'cloudily':
-        return await search_cloudily_bot(query)
-    else:
-        zlib_books, cloudily_books = await asyncio.gather(
-            search_zlib_bot(query),
-            search_cloudily_bot(query)
-        )
-        return zlib_books + cloudily_books
+        if not await client.is_user_authorized():
+            print("[Telegram] Client chưa được xác thực.")
+            return []
+            
+        if source == 'zlib':
+            return await search_zlib_bot(query)
+        elif source == 'cloudily':
+            return await search_cloudily_bot(query)
+        else:
+            res_zlib, res_cloud = await asyncio.gather(
+                search_zlib_bot(query),
+                search_cloudily_bot(query),
+                return_exceptions=True
+            )
+            books_zlib = res_zlib if isinstance(res_zlib, list) else []
+            books_cloud = res_cloud if isinstance(res_cloud, list) else []
+            return books_zlib + books_cloud
+    except Exception as e:
+        print(f"search_books_via_telegram error: {e}")
+        return []
 
 async def download_cloudily_bot(book_id: str):
     parts = book_id.split('|')
