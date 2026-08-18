@@ -174,8 +174,6 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                 <span className="hidden sm:inline font-black" style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }}>Tìm kiếm</span>
               </button>
             </form>
-
-            </form>
           </div>
 
           {/* Results Area */}
