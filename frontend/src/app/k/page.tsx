@@ -10,7 +10,8 @@ export default function KindleReceiverPage() {
   const [customBackend, setCustomBackend] = useState<string>('');
   const [showConfig, setShowConfig] = useState<boolean>(false);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const DEFAULT_BACKEND = 'https://bookcase-api.onrender.com';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || DEFAULT_BACKEND;
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -41,7 +42,10 @@ export default function KindleReceiverPage() {
       }
 
       const host = window.location.hostname;
-      if (host && host !== 'localhost' && host !== '127.0.0.1' && !host.includes('vercel.app')) {
+      if (host === 'localhost' || host === '127.0.0.1') {
+        return 'http://localhost:8000';
+      }
+      if (host && !host.includes('vercel.app')) {
         return `http://${host}:8000`;
       }
     }
