@@ -206,9 +206,9 @@ async def search_cloudily_bot(query: str, max_pages: int = 7):
                 data_str = cb_data.decode('utf-8') if isinstance(cb_data, bytes) else str(cb_data or "")
 
                 if data_str and data_str.startswith("dl:"):
-                    id_str = f"cloudily|data:{data_str}|{query}|{btn_pos}"
+                    id_str = f"cloudily|data:{data_str}|{query}|{btn_pos}|{page}"
                 else:
-                    id_str = f"cloudily|idx:{btn_pos}|{query}|{btn_pos}"
+                    id_str = f"cloudily|idx:{btn_pos}|{query}|{btn_pos}|{page}"
 
                 book_item = {
                     'title': full_title,
@@ -291,11 +291,14 @@ async def search_books_via_telegram(query: str, source: str = None):
 async def download_cloudily_bot(book_id: str):
     parts = book_id.split('|')
     
-    cb_data_str = None
-    query = ""
-    button_idx = 0
+    page = 1
     
-    if len(parts) >= 4 and parts[1].startswith("data:"):
+    if len(parts) >= 5:
+        cb_data_str = parts[1][5:] if parts[1].startswith("data:") else None
+        query = parts[2]
+        button_idx = int(parts[3])
+        page = int(parts[4])
+    elif len(parts) >= 4 and parts[1].startswith("data:"):
         cb_data_str = parts[1][5:]
         query = parts[2]
         button_idx = int(parts[3])
@@ -324,8 +327,6 @@ async def download_cloudily_bot(book_id: str):
                             break
                         curr_idx += 1
                     if target_msg: break
-            if not target_msg:
-                target_msg = m
             break
             
     if not target_msg:
@@ -347,6 +348,35 @@ async def download_cloudily_bot(book_id: str):
                     
         target_msg = await asyncio.wait_for(future_reply, timeout=25.0)
         client.remove_event_handler(handler)
+        
+        # Navigate to the exact page where the book was found
+        for p in range(1, page):
+            next_btn_idx = None
+            curr_idx = 0
+            if target_msg.reply_markup:
+                for r in target_msg.reply_markup.rows:
+                    for b in r.buttons:
+                        txt = (b.text or "").strip()
+                        if "Tiếp" in txt:
+                            next_btn_idx = curr_idx
+                        curr_idx += 1
+            if next_btn_idx is not None:
+                edit_future = asyncio.Future()
+                @client.on(events.MessageEdited(chats=CLOUDILY_BOT))
+                async def edit_handler(event):
+                    if not edit_future.done():
+                        edit_future.set_result(event.message)
+                
+                await target_msg.click(next_btn_idx)
+                try:
+                    target_msg = await asyncio.wait_for(edit_future, timeout=8.0)
+                except Exception as e:
+                    print(f"[Cloudily Bot] Download pagination edit timeout: {e}")
+                    break
+                finally:
+                    client.remove_event_handler(edit_handler)
+            else:
+                break
         
         if cb_data_str and target_msg.reply_markup:
             curr_idx = 0
@@ -439,9 +469,16 @@ async def download_cloudily_bot(book_id: str):
         'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
     }
     
-    res = requests.get(clean_url, headers=headers, timeout=120)
-    if res.status_code != 200:
-        res = requests.get(url, headers=headers, timeout=120)
+    try:
+        import cloudscraper
+        scraper = cloudscraper.create_scraper()
+        res = scraper.get(clean_url, headers=headers, timeout=120)
+        if res.status_code != 200:
+            res = scraper.get(url, headers=headers, timeout=120)
+    except ImportError:
+        res = requests.get(clean_url, headers=headers, timeout=120)
+        if res.status_code != 200:
+            res = requests.get(url, headers=headers, timeout=120)
         
     if res.status_code != 200:
         raise Exception(f"Không thể tải file từ Cloudily. Status: {res.status_code}")
