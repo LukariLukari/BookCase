@@ -280,7 +280,8 @@ async def external_import(
             return {"status": "manual_download", "external_url": url, "id": "manual", "title": request.title, "progress": 0}
         raise HTTPException(status_code=500, detail=str(e))
         
-    ext_hint = filename.lower()
+    try:
+        ext_hint = filename.lower()
         if '.pdf' in ext_hint: mime_type = 'application/pdf'
         elif '.epub' in ext_hint: mime_type = 'application/epub+zip'
         else: mime_type = 'application/pdf'
@@ -292,7 +293,7 @@ async def external_import(
         else:
             mime_type = 'application/epub+zip'
             extracted = extract_epub_info(file_bytes)
-            
+                
         final_title = extracted.get('title') or request.title or filename
         final_author = extracted.get('author') or request.author or "Unknown Author"
         cover_b64 = extracted.get('cover_b64')
