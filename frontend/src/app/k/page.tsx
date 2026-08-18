@@ -9,12 +9,11 @@ export default function KindleReceiverPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [customBackend, setCustomBackend] = useState<string>('');
   const [showConfig, setShowConfig] = useState<boolean>(false);
-  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   const DEFAULT_BACKEND = 'https://bookcase-api.onrender.com';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || DEFAULT_BACKEND;
 
   useEffect(() => {
-    setIsMounted(true);
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const bParam = params.get('b');
@@ -31,30 +30,7 @@ export default function KindleReceiverPage() {
     }
   }, []);
 
-  const getBackendUrl = () => {
-    if (customBackend && customBackend.trim()) {
-      return customBackend.trim().replace(/\/+$/, '');
-    }
-
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('b')) {
-        return decodeURIComponent(params.get('b')!).replace(/\/+$/, '');
-      }
-
-      const host = window.location.hostname;
-      if (host === 'localhost' || host === '127.0.0.1') {
-        return 'http://localhost:8000';
-      }
-      if (host && !host.includes('vercel.app')) {
-        return `http://${host}:8000`;
-      }
-    }
-    const envApi = process.env.NEXT_PUBLIC_API_URL;
-    return (envApi || DEFAULT_BACKEND).replace(/\/+$/, '');
-  };
-
-  const currentBackend = getBackendUrl();
+  const currentBackend = (customBackend && customBackend.trim() ? customBackend.trim() : API_URL).replace(/\/+$/, '');
   const cleanPin = pin.trim();
   const directDownloadUrl = `${currentBackend}/api/kindle/download-by-pin/${cleanPin}`;
 
@@ -108,15 +84,6 @@ export default function KindleReceiverPage() {
       localStorage.setItem('kindle_backend_url', val);
     }
   };
-
-  if (!isMounted) {
-    return (
-      <div style={{ backgroundColor: '#FFFFFF', color: '#000000', fontFamily: 'sans-serif', minHeight: '100vh', padding: '20px', textAlign: 'center' }}>
-        <h2>BookCase Receiver</h2>
-        <p>Đang tải giao diện máy đọc sách...</p>
-      </div>
-    );
-  }
 
   return (
     <div style={{ backgroundColor: '#FFFFFF', color: '#000000', fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', minHeight: '100vh', padding: '20px' }}>
