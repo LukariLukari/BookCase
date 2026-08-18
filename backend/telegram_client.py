@@ -452,7 +452,7 @@ async def download_cloudily_bot(book_id: str):
     import urllib.parse
     
     parsed_url = urllib.parse.urlparse(url)
-    encoded_path = urllib.parse.quote(parsed_url.path, safe='/')
+    encoded_path = urllib.parse.quote(urllib.parse.unquote(parsed_url.path), safe='/')
     clean_url = urllib.parse.urlunparse((
         parsed_url.scheme,
         parsed_url.netloc,
