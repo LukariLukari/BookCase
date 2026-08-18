@@ -15,6 +15,7 @@ interface KindleTransferModalProps {
 export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle }: KindleTransferModalProps) {
   const [pin, setPin] = useState<string | null>(null);
   const [kindleUrl, setKindleUrl] = useState<string>('');
+  const [localDirectUrl, setLocalDirectUrl] = useState<string>('');
   const [timeLeft, setTimeLeft] = useState<number>(300);
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -29,6 +30,7 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
       setPin(null);
       setTimeLeft(300);
       setIsCopied(false);
+      setLocalDirectUrl('');
     }
   }, [isOpen, bookId]);
 
@@ -53,14 +55,20 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
       const currentPort = typeof window !== 'undefined' && window.location.port ? `:${window.location.port}` : '';
       const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
 
+      let backendParam = API_URL;
+      if (API_URL.includes('localhost') || API_URL.includes('127.0.0.1')) {
+        backendParam = `http://${realIp}:8000`;
+      }
+
       let computedUrl = '';
       if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-        computedUrl = `${protocol}//${currentHost}${currentPort}/k`;
+        computedUrl = `${protocol}//${currentHost}${currentPort}/k?b=${encodeURIComponent(backendParam)}`;
       } else {
-        computedUrl = `http://${realIp}:3000/k`;
+        computedUrl = `http://${realIp}:3000/k?b=${encodeURIComponent(backendParam)}`;
       }
       
       setKindleUrl(computedUrl);
+      setLocalDirectUrl(`http://${realIp}:8000/k`);
       setTimeLeft(res.data.expires_in || 300);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Không thể tạo mã PIN gửi Kindle.');
@@ -194,6 +202,13 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
                   <span className="w-5 h-5 rounded-full bg-[#F5ECDC] text-black flex items-center justify-center font-black text-xs shrink-0">2</span>
                   Nhập mã <span className="font-mono text-[#F5ECDC] font-black text-sm">{pin}</span> vào ô và bấm Tải sách ngay.
                 </p>
+
+                {localDirectUrl && (
+                  <div className="pt-2 border-t border-[#4D4845]/30 text-[11px] text-[#8A817C]">
+                    <span>💡 Hoặc nhập trực tiếp link LAN (Cùng Wi-Fi): </span>
+                    <code className="text-[#F5ECDC] font-mono select-all font-bold underline">{localDirectUrl}</code>
+                  </div>
+                )}
               </div>
 
               {/* Action Button */}

@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session, defer
 from typing import List
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 import uvicorn
 import re
 import urllib.request
@@ -486,6 +486,152 @@ def download_by_pin(pin: str, db: Session = Depends(get_db)):
     
     filename = f"{book.title}.pdf" if book.mime_type == 'application/pdf' else f"{book.title}.epub"
     return drive_service.stream_download(book.drive_file_id, filename, book.mime_type, file_size=book.file_size)
+
+@app.get("/k", response_class=HTMLResponse)
+def kindle_receiver_html():
+    html_content = """<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookCase Receiver - Máy Đọc Sách</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #FFFFFF;
+            color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding-top: 10px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+            border-bottom: 3px solid #000000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 15px;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            font-size: 36px;
+            text-align: center;
+            letter-spacing: 8px;
+            font-weight: bold;
+            width: 80%;
+            padding: 12px;
+            border: 3px solid #000000;
+            border-radius: 8px;
+            background-color: #FFFFFF;
+            color: #000000;
+            margin-bottom: 15px;
+        }
+        .btn-submit {
+            background-color: #000000;
+            color: #FFFFFF;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 85%;
+            margin-top: 5px;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .btn-direct {
+            background-color: #15803D;
+            color: #FFFFFF;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            display: none;
+            width: 85%;
+            margin: 15px auto 0 auto;
+            text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .tip {
+            margin-top: 30px;
+            border-top: 1px solid #CCCCCC;
+            padding-top: 15px;
+            font-size: 13px;
+            color: #444444;
+        }
+        .error-box {
+            color: #7f1d1d;
+            background-color: #fef2f2;
+            border: 2px solid #991b1b;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 14px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BookCase Kindle Receiver</h1>
+        <p>Nhập <strong>mã PIN 4 số</strong> hiển thị trên máy tính/điện thoại để nhận sách trực tiếp:</p>
+        
+        <div id="errorBox" class="error-box"></div>
+
+        <form id="downloadForm" onsubmit="return startDownload(event);">
+            <input type="text" id="pinInput" name="pin" maxlength="4" placeholder="0 0 0 0" pattern="[0-9]*" inputmode="numeric" required autofocus autocomplete="off" />
+            <br>
+            <button type="submit" class="btn-submit">📥 TẢI SÁCH NGAY</button>
+        </form>
+
+        <a id="directLink" href="#" class="btn-direct">🚀 CLICK VÀO ĐÂY ĐỂ TẢI FILE SÁCH DIRECT</a>
+
+        <div class="tip">
+            💡 <strong>Mẹo:</strong> Bấm nút Menu (⋮) trên trình duyệt máy đọc sách và chọn <strong>Add Bookmark (Lưu Dấu Trang)</strong> để lần sau mở nhanh!
+        </div>
+    </div>
+
+    <script>
+        function startDownload(e) {
+            if (e) e.preventDefault();
+            var pinInput = document.getElementById('pinInput');
+            var errorBox = document.getElementById('errorBox');
+            var directLink = document.getElementById('directLink');
+            var pin = pinInput.value.trim();
+
+            if (pin.length !== 4) {
+                errorBox.style.display = 'block';
+                errorBox.innerText = '⚠️ Vui lòng nhập đủ 4 chữ số mã PIN.';
+                return false;
+            }
+
+            errorBox.style.display = 'none';
+            var downloadUrl = '/api/kindle/download-by-pin/' + pin;
+
+            // Hiển thị nút link trực tiếp để dự phòng trường hợp trình duyệt chặn auto-redirect
+            directLink.href = downloadUrl;
+            directLink.style.display = 'block';
+
+            // Kích hoạt chuyển hướng ngay lập tức (Direct synchronous navigation)
+            window.location.href = downloadUrl;
+            return false;
+        }
+    </script>
+</body>
+</html>"""
+    return HTMLResponse(content=html_content)
 
 @app.delete("/api/books/{book_id}")
 def delete_book(book_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
