@@ -4,7 +4,7 @@ from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException, sta
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session, defer
-from typing import List
+from typing import List, Optional
 from fastapi.responses import RedirectResponse, HTMLResponse
 import uvicorn
 import re
