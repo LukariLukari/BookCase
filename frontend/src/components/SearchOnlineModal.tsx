@@ -111,7 +111,10 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
       setImportProgress(100);
 
       const newBook = res.data;
-      if (newBook && newBook.id) {
+      if (newBook && newBook.status === 'manual_download' && newBook.external_url) {
+        window.open(newBook.external_url, '_blank');
+        setError('Hệ thống máy chủ bị Cloudflare chặn. Đã mở link tải trực tiếp trên trình duyệt của bạn. Vui lòng tự tải sách về máy và dùng nút "Upload" để thêm vào thư viện.');
+      } else if (newBook && newBook.id) {
         const downloadUrl = `${API_URL}/api/books/${newBook.id}/download`;
         // Kích hoạt download trực tiếp cho cả Mobile Safari (iOS) và Android/Desktop
         window.location.href = downloadUrl;
@@ -120,8 +123,10 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
       setTimeout(() => {
         setImportingId(null);
         setImportProgress(0);
-        onImportSuccess();
-        onClose();
+        if (!(newBook && newBook.status === 'manual_download')) {
+          onImportSuccess();
+          onClose();
+        }
       }, 800);
     } catch (err: any) {
       clearInterval(interval);

@@ -273,8 +273,14 @@ async def external_import(
     try:
         # Tải file qua Telegram
         file_bytes, filename = await telegram_client.download_book_via_telegram(request.id)
+    except Exception as e:
+        err_str = str(e)
+        if err_str.startswith("MANUAL_DOWNLOAD|"):
+            url = err_str.split("|", 1)[1]
+            return {"status": "manual_download", "external_url": url, "id": "manual", "title": request.title, "progress": 0}
+        raise HTTPException(status_code=500, detail=str(e))
         
-        ext_hint = filename.lower()
+    ext_hint = filename.lower()
         if '.pdf' in ext_hint: mime_type = 'application/pdf'
         elif '.epub' in ext_hint: mime_type = 'application/epub+zip'
         else: mime_type = 'application/pdf'

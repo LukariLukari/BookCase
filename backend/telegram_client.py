@@ -481,6 +481,9 @@ async def download_cloudily_bot(book_id: str):
             res = requests.get(url, headers=headers, timeout=120)
         
     if res.status_code != 200:
+        if res.status_code in [401, 403, 503]:
+            # Bị Cloudflare hoặc Cloudily chặn -> Báo frontend mở tab cho user tự tải
+            raise Exception(f"MANUAL_DOWNLOAD|{url}")
         raise Exception(f"Không thể tải file từ Cloudily. Status: {res.status_code}")
         
     file_bytes = res.content
