@@ -9,22 +9,23 @@ export default function KindleReceiverPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [customBackend, setCustomBackend] = useState<string>('');
   const [showConfig, setShowConfig] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   const DEFAULT_BACKEND = 'https://bookcase-api.onrender.com';
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || DEFAULT_BACKEND;
 
   useEffect(() => {
+    setIsMounted(true);
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const bParam = params.get('b');
       if (bParam) {
-        const decoded = decodeURIComponent(bParam);
+        const decoded = decodeURIComponent(bParam).trim();
         setCustomBackend(decoded);
         localStorage.setItem('kindle_backend_url', decoded);
       } else {
         const saved = localStorage.getItem('kindle_backend_url');
         if (saved) {
-          setCustomBackend(saved);
+          setCustomBackend(saved.trim());
         }
       }
     }
@@ -49,17 +50,18 @@ export default function KindleReceiverPage() {
         return `http://${host}:8000`;
       }
     }
-    return API_URL.replace(/\/+$/, '');
+    const envApi = process.env.NEXT_PUBLIC_API_URL;
+    return (envApi || DEFAULT_BACKEND).replace(/\/+$/, '');
   };
 
   const currentBackend = getBackendUrl();
   const cleanPin = pin.trim();
-  const directDownloadUrl = cleanPin.length === 4 ? `${currentBackend}/api/kindle/download-by-pin/${cleanPin}` : '#';
+  const directDownloadUrl = `${currentBackend}/api/kindle/download-by-pin/${cleanPin}`;
 
   const handleDownload = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (cleanPin.length !== 4) {
-      setError('Vui lòng nhập đúng 4 chữ số mã PIN.');
+      setError('⚠️ Vui lòng nhập đúng 4 chữ số mã PIN (Ví dụ: 3662).');
       return;
     }
 
@@ -70,7 +72,7 @@ export default function KindleReceiverPage() {
     const verifyUrl = `${currentBackend}/api/kindle/verify-pin/${cleanPin}`;
 
     try {
-      // 1. Check if PIN is valid
+      // 1. Kiểm tra mã PIN với server
       const res = await fetch(verifyUrl, { method: 'GET' });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -81,12 +83,12 @@ export default function KindleReceiverPage() {
 
       const data = await res.json().catch(() => ({}));
       const titleStr = data.title ? ` "${data.title}"` : '';
-      setSuccessMsg(`🚀 Đang tải sách${titleStr}... Nếu file chưa tự động tải về, vui lòng nhấp vào nút "CLICK ĐỂ TẢI TRỰC TIẾP" bên dưới.`);
+      setSuccessMsg(`🚀 Đang khởi tạo tải sách${titleStr}... Hãy nhấp nút bên dưới nếu file chưa tự động tải.`);
 
-      // 2. Direct browser navigation to start system download
+      // 2. Chuyển hướng trình duyệt để tải file
       window.location.href = directDownloadUrl;
     } catch (err: any) {
-      // Direct fallback navigation if fetch was blocked by e-reader browser
+      // Direct fallback
       window.location.href = directDownloadUrl;
     } finally {
       setLoading(false);
@@ -107,6 +109,15 @@ export default function KindleReceiverPage() {
     }
   };
 
+  if (!isMounted) {
+    return (
+      <div style={{ backgroundColor: '#FFFFFF', color: '#000000', fontFamily: 'sans-serif', minHeight: '100vh', padding: '20px', textAlign: 'center' }}>
+        <h2>BookCase Receiver</h2>
+        <p>Đang tải giao diện máy đọc sách...</p>
+      </div>
+    );
+  }
+
   return (
     <div style={{ backgroundColor: '#FFFFFF', color: '#000000', fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', minHeight: '100vh', padding: '20px' }}>
       <div style={{ maxWidth: '480px', margin: '0 auto', textAlign: 'center', paddingTop: '10px' }}>
@@ -118,7 +129,12 @@ export default function KindleReceiverPage() {
           Nhập <strong>mã PIN 4 số</strong> hiển thị trên máy tính/điện thoại để nhận sách trực tiếp:
         </p>
 
-        <form onSubmit={handleDownload} style={{ marginBottom: '15px' }}>
+        <form
+          onSubmit={handleDownload}
+          action={cleanPin.length === 4 ? directDownloadUrl : '#'}
+          method="GET"
+          style={{ marginBottom: '15px' }}
+        >
           <div style={{ marginBottom: '15px' }}>
             <input
               type="text"
@@ -126,6 +142,7 @@ export default function KindleReceiverPage() {
               pattern="[0-9]*"
               maxLength={4}
               value={pin}
+              onInput={(e: any) => handlePinChange(e.target.value)}
               onChange={(e) => handlePinChange(e.target.value)}
               placeholder="0 0 0 0"
               style={{
@@ -146,7 +163,7 @@ export default function KindleReceiverPage() {
 
           {error && (
             <div style={{ color: '#7F1D1D', backgroundColor: '#FEF2F2', border: '2px solid #991B1B', padding: '10px', borderRadius: '6px', marginBottom: '15px', fontWeight: 'bold', fontSize: '14px' }}>
-              ⚠️ {error}
+              {error}
             </div>
           )}
 
@@ -156,28 +173,28 @@ export default function KindleReceiverPage() {
             </div>
           )}
 
-          {/* Standard Form Submit Button (High Contrast: White text on Black background) */}
+          {/* Button TẢI SÁCH NGAY - Luôn bấm được 100%, có màu tương phản cao */}
           <button
             type="submit"
-            disabled={loading || cleanPin.length !== 4}
+            onClick={handleDownload}
             style={{
-              backgroundColor: loading || cleanPin.length !== 4 ? '#6B7280' : '#000000',
+              backgroundColor: '#000000',
               color: '#FFFFFF',
               fontSize: '18px',
               fontWeight: 'bold',
               padding: '14px 28px',
               border: 'none',
               borderRadius: '8px',
-              cursor: cleanPin.length === 4 ? 'pointer' : 'not-allowed',
+              cursor: 'pointer',
               width: '85%',
               marginBottom: '12px'
             }}
           >
-            {loading ? '⏳ ĐANG KHỞI TẠO TẢI SÁCH...' : '📥 TẢI SÁCH NGAY'}
+            {loading ? '⏳ ĐANG KHỞI TẠO...' : '📥 TẢI SÁCH NGAY'}
           </button>
         </form>
 
-        {/* Direct Link Fallback (High Contrast: White text on Emerald Green background) */}
+        {/* Nút Link tải file trực tiếp (Dự phòng cho máy đọc sách) */}
         {cleanPin.length === 4 && (
           <div style={{ marginTop: '10px', marginBottom: '20px' }}>
             <a
@@ -203,7 +220,7 @@ export default function KindleReceiverPage() {
           </div>
         )}
 
-        {/* Optional Backend URL Configuration (High Contrast: Dark Gray text on Light Gray background) */}
+        {/* Cấu hình Server IP dành cho sự cố (High Contrast) */}
         <div style={{ marginTop: '25px', paddingTop: '15px', borderTop: '1px solid #E5E7EB' }}>
           <button
             type="button"
@@ -211,9 +228,9 @@ export default function KindleReceiverPage() {
             style={{
               backgroundColor: '#E5E7EB',
               color: '#111827',
-              fontSize: '12px',
+              fontSize: '13px',
               fontWeight: 'bold',
-              padding: '6px 14px',
+              padding: '8px 16px',
               border: '1px solid #9CA3AF',
               borderRadius: '6px',
               cursor: 'pointer'
@@ -230,8 +247,9 @@ export default function KindleReceiverPage() {
               <input
                 type="text"
                 value={customBackend || currentBackend}
+                onInput={(e: any) => handleSaveBackend(e.target.value)}
                 onChange={(e) => handleSaveBackend(e.target.value)}
-                placeholder="http://192.168.1.X:8000"
+                placeholder="http://192.168.1.X:8000 hoặc https://bookcase-api.onrender.com"
                 style={{
                   width: '100%',
                   padding: '8px',
