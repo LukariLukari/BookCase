@@ -449,6 +449,10 @@ def verify_kindle_pin(pin: str):
         raise HTTPException(status_code=400, detail="Mã PIN không đúng hoặc đã hết hạn (5 phút).")
     return {"valid": True, "title": kindle_pins[clean_pin].get("title", "")}
 
+@app.get("/api/kindle/download")
+def download_by_pin_query(pin: str, db: Session = Depends(get_db)):
+    return download_by_pin(pin, db)
+
 @app.get("/api/kindle/download-by-pin/{pin}")
 def download_by_pin(pin: str, db: Session = Depends(get_db)):
     clean_expired_pins()
@@ -590,45 +594,16 @@ def kindle_receiver_html():
         
         <div id="errorBox" class="error-box"></div>
 
-        <form id="downloadForm" onsubmit="return startDownload(event);">
-            <input type="text" id="pinInput" name="pin" maxlength="4" placeholder="0 0 0 0" pattern="[0-9]*" inputmode="numeric" required autofocus autocomplete="off" />
+        <form action="/api/kindle/download" method="GET">
+            <input type="text" name="pin" maxlength="4" placeholder="0 0 0 0" pattern="[0-9]*" inputmode="numeric" required autofocus autocomplete="off" />
             <br>
             <button type="submit" class="btn-submit">📥 TẢI SÁCH NGAY</button>
         </form>
-
-        <a id="directLink" href="#" class="btn-direct">🚀 CLICK VÀO ĐÂY ĐỂ TẢI FILE SÁCH DIRECT</a>
 
         <div class="tip">
             💡 <strong>Mẹo:</strong> Bấm nút Menu (⋮) trên trình duyệt máy đọc sách và chọn <strong>Add Bookmark (Lưu Dấu Trang)</strong> để lần sau mở nhanh!
         </div>
     </div>
-
-    <script>
-        function startDownload(e) {
-            if (e) e.preventDefault();
-            var pinInput = document.getElementById('pinInput');
-            var errorBox = document.getElementById('errorBox');
-            var directLink = document.getElementById('directLink');
-            var pin = pinInput.value.trim();
-
-            if (pin.length !== 4) {
-                errorBox.style.display = 'block';
-                errorBox.innerText = '⚠️ Vui lòng nhập đủ 4 chữ số mã PIN.';
-                return false;
-            }
-
-            errorBox.style.display = 'none';
-            var downloadUrl = '/api/kindle/download-by-pin/' + pin;
-
-            // Hiển thị nút link trực tiếp để dự phòng trường hợp trình duyệt chặn auto-redirect
-            directLink.href = downloadUrl;
-            directLink.style.display = 'block';
-
-            // Kích hoạt chuyển hướng ngay lập tức (Direct synchronous navigation)
-            window.location.href = downloadUrl;
-            return false;
-        }
-    </script>
 </body>
 </html>"""
     return HTMLResponse(content=html_content)

@@ -3,10 +3,6 @@
 import { useState, useEffect } from 'react';
 
 export default function KindleReceiverPage() {
-  const [pin, setPin] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [customBackend, setCustomBackend] = useState<string>('');
   const [showConfig, setShowConfig] = useState<boolean>(false);
 
@@ -31,52 +27,7 @@ export default function KindleReceiverPage() {
   }, []);
 
   const currentBackend = (customBackend && customBackend.trim() ? customBackend.trim() : API_URL).replace(/\/+$/, '');
-  const cleanPin = pin.trim();
-  const directDownloadUrl = `${currentBackend}/api/kindle/download-by-pin/${cleanPin}`;
-
-  const handleDownload = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (cleanPin.length !== 4) {
-      setError('⚠️ Vui lòng nhập đúng 4 chữ số mã PIN (Ví dụ: 3662).');
-      return;
-    }
-
-    setError(null);
-    setSuccessMsg(null);
-    setLoading(true);
-
-    const verifyUrl = `${currentBackend}/api/kindle/verify-pin/${cleanPin}`;
-
-    try {
-      // 1. Kiểm tra mã PIN với server
-      const res = await fetch(verifyUrl, { method: 'GET' });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.detail || 'Mã PIN không đúng hoặc đã hết hạn (5 phút).');
-        setLoading(false);
-        return;
-      }
-
-      const data = await res.json().catch(() => ({}));
-      const titleStr = data.title ? ` "${data.title}"` : '';
-      setSuccessMsg(`🚀 Đang khởi tạo tải sách${titleStr}... Hãy nhấp nút bên dưới nếu file chưa tự động tải.`);
-
-      // 2. Chuyển hướng trình duyệt để tải file
-      window.location.href = directDownloadUrl;
-    } catch (err: any) {
-      // Direct fallback
-      window.location.href = directDownloadUrl;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePinChange = (val: string) => {
-    const digits = val.replace(/\D/g, '').slice(0, 4);
-    setPin(digits);
-    setError(null);
-    setSuccessMsg(null);
-  };
+  const formActionUrl = `${currentBackend}/api/kindle/download`;
 
   const handleSaveBackend = (val: string) => {
     setCustomBackend(val);
@@ -96,22 +47,23 @@ export default function KindleReceiverPage() {
           Nhập <strong>mã PIN 4 số</strong> hiển thị trên máy tính/điện thoại để nhận sách trực tiếp:
         </p>
 
+        {/* Form thuần HTML: submit GET trực tiếp đến backend, trình duyệt máy đọc sách sẽ điều hướng và tải file ngay mà không qua Javascript fetch */}
         <form
-          onSubmit={handleDownload}
-          action={cleanPin.length === 4 ? directDownloadUrl : '#'}
+          action={formActionUrl}
           method="GET"
           style={{ marginBottom: '15px' }}
         >
           <div style={{ marginBottom: '15px' }}>
             <input
               type="text"
+              name="pin"
               inputMode="numeric"
               pattern="[0-9]*"
               maxLength={4}
-              value={pin}
-              onInput={(e: any) => handlePinChange(e.target.value)}
-              onChange={(e) => handlePinChange(e.target.value)}
               placeholder="0 0 0 0"
+              required
+              autoFocus
+              autoComplete="off"
               style={{
                 fontSize: '36px',
                 textAlign: 'center',
@@ -124,26 +76,12 @@ export default function KindleReceiverPage() {
                 backgroundColor: '#FFFFFF',
                 color: '#000000'
               }}
-              autoFocus
             />
           </div>
-
-          {error && (
-            <div style={{ color: '#7F1D1D', backgroundColor: '#FEF2F2', border: '2px solid #991B1B', padding: '10px', borderRadius: '6px', marginBottom: '15px', fontWeight: 'bold', fontSize: '14px' }}>
-              {error}
-            </div>
-          )}
-
-          {successMsg && (
-            <div style={{ color: '#065F46', backgroundColor: '#ECFDF5', border: '2px solid #047857', padding: '10px', borderRadius: '6px', marginBottom: '15px', fontWeight: 'bold', fontSize: '14px' }}>
-              {successMsg}
-            </div>
-          )}
 
           {/* Button TẢI SÁCH NGAY - Luôn bấm được 100%, có màu tương phản cao */}
           <button
             type="submit"
-            onClick={handleDownload}
             style={{
               backgroundColor: '#000000',
               color: '#FFFFFF',
@@ -157,35 +95,9 @@ export default function KindleReceiverPage() {
               marginBottom: '12px'
             }}
           >
-            {loading ? '⏳ ĐANG KHỞI TẠO...' : '📥 TẢI SÁCH NGAY'}
+            📥 TẢI SÁCH NGAY
           </button>
         </form>
-
-        {/* Nút Link tải file trực tiếp (Dự phòng cho máy đọc sách) */}
-        {cleanPin.length === 4 && (
-          <div style={{ marginTop: '10px', marginBottom: '20px' }}>
-            <a
-              href={directDownloadUrl}
-              target="_self"
-              download
-              style={{
-                display: 'inline-block',
-                backgroundColor: '#15803D',
-                color: '#FFFFFF',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                padding: '14px 24px',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                width: '85%',
-                boxSizing: 'border-box',
-                border: '2px solid #166534'
-              }}
-            >
-              🚀 CLICK ĐỂ TẢI TRỰC TIẾP FILE SÁCH
-            </a>
-          </div>
-        )}
 
         {/* Cấu hình Server IP dành cho sự cố (High Contrast) */}
         <div style={{ marginTop: '25px', paddingTop: '15px', borderTop: '1px solid #E5E7EB' }}>
@@ -213,10 +125,10 @@ export default function KindleReceiverPage() {
               </label>
               <input
                 type="text"
-                value={customBackend || currentBackend}
+                value={customBackend}
                 onInput={(e: any) => handleSaveBackend(e.target.value)}
                 onChange={(e) => handleSaveBackend(e.target.value)}
-                placeholder="http://192.168.1.X:8000 hoặc https://bookcase-api.onrender.com"
+                placeholder="Ví dụ: http://192.168.1.X:8000"
                 style={{
                   width: '100%',
                   padding: '8px',
@@ -224,7 +136,8 @@ export default function KindleReceiverPage() {
                   border: '1px solid #9CA3AF',
                   borderRadius: '4px',
                   boxSizing: 'border-box',
-                  marginBottom: '6px'
+                  marginBottom: '6px',
+                  color: '#000000'
                 }}
               />
               <span style={{ fontSize: '11px', color: '#6B7280' }}>
