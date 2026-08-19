@@ -161,8 +161,30 @@ def serialize_book_lightweight(b: models.Book) -> dict:
     }
 
 @app.get("/api/books", response_model=List[schemas.BookResponse])
-def get_books(db: Session = Depends(get_db)):
-    books = db.query(models.Book).options(defer(models.Book.cover_url)).order_by(models.Book.created_at.desc()).all()
+def get_books(
+    skip: int = 0,
+    limit: int = 1000,
+    search: Optional[str] = None,
+    sort_by: Optional[str] = "newest",
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Book).options(defer(models.Book.cover_url))
+    
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(models.Book.title.ilike(search_term) | models.Book.author.ilike(search_term))
+        
+    if sort_by == "a-z":
+        query = query.order_by(models.Book.title.asc())
+    elif sort_by == "z-a":
+        query = query.order_by(models.Book.title.desc())
+    elif sort_by == "author":
+        # Handle cases where author might be null to prevent them from sorting weirdly
+        query = query.order_by(models.Book.author.asc(), models.Book.created_at.desc())
+    else: # newest
+        query = query.order_by(models.Book.created_at.desc())
+        
+    books = query.offset(skip).limit(limit).all()
     return [serialize_book_lightweight(b) for b in books]
 
 @app.get("/api/books/{book_id}", response_model=schemas.BookResponse)
@@ -689,12 +711,22 @@ def get_collections(db: Session = Depends(get_db)):
     return collections
 
 @app.get("/api/collections/{collection_id}", response_model=schemas.CollectionDetailResponse)
-def get_collection(collection_id: str, db: Session = Depends(get_db)):
+def get_collection(
+    collection_id: str, 
+    skip: int = 0, 
+    limit: int = 1000, 
+    db: Session = Depends(get_db)
+):
     collection = db.query(models.Collection).filter(models.Collection.id == collection_id).first()
     if not collection:
         raise HTTPException(status_code=404, detail="Collection not found")
     
-    collection_books = db.query(models.CollectionBook).filter(models.CollectionBook.collection_id == collection_id).all()
+    total_books = db.query(models.CollectionBook).filter(models.CollectionBook.collection_id == collection_id).count()
+    
+    collection_books = db.query(models.CollectionBook)\
+        .filter(models.CollectionBook.collection_id == collection_id)\
+        .offset(skip).limit(limit).all()
+        
     books = [serialize_book_lightweight(cb.book) for cb in collection_books if cb.book]
         
     return {
@@ -702,7 +734,7 @@ def get_collection(collection_id: str, db: Session = Depends(get_db)):
         "name": collection.name,
         "description": collection.description,
         "created_at": collection.created_at,
-        "book_count": len(books),
+        "book_count": total_books,
         "books": books
     }
 

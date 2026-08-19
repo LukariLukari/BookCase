@@ -13,6 +13,10 @@ export default function ShareCollectionPage() {
   const [error, setError] = useState('');
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [isColdStart, setIsColdStart] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -22,15 +26,46 @@ export default function ShareCollectionPage() {
     }
   }, [id]);
 
-  const fetchCollection = async () => {
+  const fetchCollection = async (isLoadMore = false) => {
+    if (isLoadMore) {
+      setIsLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+    
+    const currentSkip = isLoadMore ? (page + 1) * 30 : 0;
+    
+    const coldStartTimer = setTimeout(() => {
+      if (!isLoadMore) setIsColdStart(true);
+    }, 5000);
+
     try {
-      const res = await axios.get(`${API_URL}/api/collections/${id}`);
-      setCollection(res.data);
-      setLoading(false);
+      const res = await axios.get(`${API_URL}/api/collections/${id}`, {
+        params: { skip: currentSkip, limit: 30 }
+      });
+      clearTimeout(coldStartTimer);
+      setIsColdStart(false);
+      
+      if (!isLoadMore) {
+        setCollection(res.data);
+        setPage(0);
+      } else {
+        setCollection((prev: any) => ({
+          ...prev,
+          books: [...prev.books, ...res.data.books]
+        }));
+        setPage(prev => prev + 1);
+      }
+      
+      setHasMore(res.data.books.length === 30);
     } catch (err) {
+      clearTimeout(coldStartTimer);
+      setIsColdStart(false);
       console.error(err);
-      setError('Tệp sách không tồn tại hoặc đã bị xóa.');
+      if (!isLoadMore) setError('Tệp sách không tồn tại hoặc đã bị xóa.');
+    } finally {
       setLoading(false);
+      setIsLoadingMore(false);
     }
   };
 
@@ -42,8 +77,14 @@ export default function ShareCollectionPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center" suppressHydrationWarning>
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent" suppressHydrationWarning></div>
+      <div className="min-h-screen bg-[#1F1D20] flex flex-col items-center justify-center p-4" suppressHydrationWarning>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent mb-6" suppressHydrationWarning></div>
+        {isColdStart && (
+          <div className="px-6 py-4 bg-orange-500/10 border border-orange-500/30 rounded-2xl flex flex-col items-center max-w-md text-center animate-fade-in shadow-lg">
+             <h3 className="text-orange-400 font-bold mb-1">Máy chủ đang thức dậy...</h3>
+             <p className="text-[#D7C9B2] text-sm">Hệ thống đang khởi động lại do đã lâu không có ai truy cập. Quá trình này có thể mất tới 60 giây, vui lòng kiên nhẫn nhé!</p>
+          </div>
+        )}
       </div>
     );
   }
@@ -125,53 +166,74 @@ export default function ShareCollectionPage() {
       {/* Books Grid */}
       <div className="w-full max-w-6xl px-4">
         {collection.books.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10">
-            {collection.books.map((book: any) => (
-              <div key={book.id} className="flex flex-col group relative">
-                {/* Cover Image */}
-                <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-[#4D4845]/40 group-hover:shadow-xl transition-all duration-300">
-                   <BookCoverImage 
-                     coverUrl={book.cover_url}
-                     bookId={book.id}
-                     title={book.title}
-                     author={book.author}
-                     className="w-full h-full object-cover"
-                   />
-                   
-                   {/* Source Tag */}
-                   <div className="absolute top-2 left-2 z-20">
-                     {book.external_url ? (
-                       <span className="flex items-center gap-1 text-orange-400 font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-500/30" title={book.external_url}>
-                         <LinkIcon size={12} /> Drive
-                       </span>
-                     ) : (
-                       <span className="flex items-center gap-1 text-[#D7C9B2] font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-[#4D4845]/40">
-                         <Upload size={12} /> Local
-                       </span>
-                     )}
-                   </div>
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10">
+              {collection.books.map((book: any, idx: number) => (
+                <div key={`${book.id}-${idx}`} className="flex flex-col group relative">
+                  {/* Cover Image */}
+                  <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-[#4D4845]/40 group-hover:shadow-xl transition-all duration-300">
+                     <BookCoverImage 
+                       coverUrl={book.cover_url}
+                       bookId={book.id}
+                       title={book.title}
+                       author={book.author}
+                       className="w-full h-full object-cover"
+                     />
+                     
+                     {/* Source Tag */}
+                     <div className="absolute top-2 left-2 z-20">
+                       {book.external_url ? (
+                         <span className="flex items-center gap-1 text-orange-400 font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-500/30" title={book.external_url}>
+                           <LinkIcon size={12} /> Drive
+                         </span>
+                       ) : (
+                         <span className="flex items-center gap-1 text-[#D7C9B2] font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-[#4D4845]/40">
+                           <Upload size={12} /> Local
+                         </span>
+                       )}
+                     </div>
 
-                   {/* Overlay Actions (Download) */}
-                   <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-[2px]">
-                       <button 
-                         onClick={() => handleDownload(book)}
-                         disabled={downloadingId === book.id} 
-                         className="btn-primary shadow-lg hover:scale-105 disabled:opacity-70 disabled:hover:scale-100"
-                       >
-                         {downloadingId === book.id ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                         <span>{downloadingId === book.id ? 'Đang tải...' : 'Tải Xuống'}</span>
-                       </button>
-                   </div>
+                     {/* Overlay Actions (Download) */}
+                     <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-[2px]">
+                         <button 
+                           onClick={() => handleDownload(book)}
+                           disabled={downloadingId === book.id} 
+                           className="btn-primary shadow-lg hover:scale-105 disabled:opacity-70 disabled:hover:scale-100"
+                         >
+                           {downloadingId === book.id ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                           <span>{downloadingId === book.id ? 'Đang tải...' : 'Tải Xuống'}</span>
+                         </button>
+                     </div>
+                  </div>
+                  
+                  {/* Text Info */}
+                  <div className="px-1">
+                    <h3 className="text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2">{book.title}</h3>
+                    <p className="text-xs text-[#D7C9B2] mt-1">{book.author || 'Unknown Author'}</p>
+                  </div>
                 </div>
-                
-                {/* Text Info */}
-                <div className="px-1">
-                  <h3 className="text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2">{book.title}</h3>
-                  <p className="text-xs text-[#D7C9B2] mt-1">{book.author || 'Unknown Author'}</p>
-                </div>
+              ))}
+            </div>
+            
+            {hasMore && (
+              <div className="mt-12 flex justify-center pb-8">
+                <button 
+                  onClick={() => fetchCollection(true)}
+                  disabled={isLoadingMore}
+                  className="bg-[#2A272A] hover:bg-[#3A373A] border border-[#4D4845] text-[#F5ECDC] font-bold py-3 px-8 rounded-full shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin text-[#F5ECDC]" />
+                      Đang tải...
+                    </>
+                  ) : (
+                    'Tải Thêm Sách'
+                  )}
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-24 bg-[#2A272A] rounded-3xl border border-[#4D4845]/50 shadow-sm">
             <Library size={48} className="text-[#7B7369] mx-auto mb-4" />

@@ -25,24 +25,69 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
   const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
   const [isLoadingBooks, setIsLoadingBooks] = useState(true);
   
+  // Pagination & Cold Start States
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isColdStart, setIsColdStart] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-  const refreshBooks = async () => {
+  const fetchBooks = async (isLoadMore = false) => {
     try {
-      setIsLoadingBooks(true);
-      const res = await axios.get(`${API_URL}/api/books`, { timeout: 15000 });
+      if (!isLoadMore) {
+        setIsLoadingBooks(true);
+        // We do NOT set page = 0 here synchronously because it can cause race conditions. We'll track skip directly.
+      } else {
+        setIsLoadingMore(true);
+      }
+      
+      const currentSkip = isLoadMore ? (page + 1) * 30 : 0;
+      
+      // If it takes more than 5 seconds, it's likely a cold start
+      const coldStartTimer = setTimeout(() => {
+        if (!isLoadMore) setIsColdStart(true);
+      }, 5000);
+
+      const res = await axios.get(`${API_URL}/api/books`, { 
+        params: {
+          skip: currentSkip,
+          limit: 30,
+          search: searchQuery,
+          sort_by: sortBy
+        }
+        // Removed strict 15000ms timeout so Render free tier can wake up (takes ~50s)
+      });
+      
+      clearTimeout(coldStartTimer);
+      setIsColdStart(false);
+
       if (res.data && Array.isArray(res.data)) {
-        setBooks(res.data);
-        try {
-          sessionStorage.setItem('cached_books', JSON.stringify(res.data));
-        } catch (e) {}
+        if (!isLoadMore) {
+          setBooks(res.data);
+          setPage(0);
+          try {
+            if (!searchQuery) sessionStorage.setItem('cached_books', JSON.stringify(res.data));
+          } catch (e) {}
+        } else {
+          setBooks(prev => {
+            // Lọc trùng lặp phòng trường hợp spam click
+            const existingIds = new Set(prev.map((b: any) => b.id));
+            const newBooks = res.data.filter((b: any) => !existingIds.has(b.id));
+            return [...prev, ...newBooks];
+          });
+          setPage(prev => prev + 1);
+        }
+        setHasMore(res.data.length === 30);
       }
     } catch (err) {
-      console.error('Lỗi sync danh sách sách client:', err);
+      console.error('Lỗi fetch sách:', err);
+      setIsColdStart(false);
     } finally {
       setIsLoadingBooks(false);
+      setIsLoadingMore(false);
     }
   };
 
@@ -50,26 +95,21 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
     if (!isLoading && !user) {
       router.push('/login');
     }
-    if (user) {
-      refreshBooks();
-    }
   }, [user, isLoading, router]);
+
+  // Refetch when search query or sort order changes (with debounce)
+  useEffect(() => {
+    if (user) {
+      const delayTimer = setTimeout(() => {
+        fetchBooks(false);
+      }, 400); // 400ms debounce
+      return () => clearTimeout(delayTimer);
+    }
+  }, [user, searchQuery, sortBy]);
 
   if (isLoading || !user) {
     return <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center font-bold text-[#D7C9B2]">Đang tải...</div>;
   }
-
-  let filteredBooks = books.filter((book: any) => 
-    book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (book.author && book.author.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
-  filteredBooks = [...filteredBooks].sort((a: any, b: any) => {
-    if (sortBy === 'a-z') return a.title.localeCompare(b.title);
-    if (sortBy === 'z-a') return b.title.localeCompare(a.title);
-    if (sortBy === 'author') return (a.author || '').localeCompare(b.author || '');
-    return 0;
-  });
 
   return (
     <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60 overflow-x-hidden">
@@ -128,28 +168,58 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
         {/* Content */}
         <main className="flex-1 px-4 md:px-10 pt-4 pb-12">
           {isLoadingBooks && books.length === 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10 pt-2 animate-pulse">
-              {[...Array(10)].map((_, i) => (
-                <div key={i} className="flex flex-col">
-                  <div className="w-full aspect-[2/3] bg-[#2A272A] rounded-2xl mb-4 border border-[#4D4845]/30"></div>
-                  <div className="h-4 bg-[#2A272A] rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-[#2A272A] rounded w-1/2"></div>
+            <div className="flex flex-col items-center pt-10">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10 w-full animate-pulse">
+                {[...Array(10)].map((_, i) => (
+                  <div key={i} className="flex flex-col">
+                    <div className="w-full aspect-[2/3] bg-[#2A272A] rounded-2xl mb-4 border border-[#4D4845]/30"></div>
+                    <div className="h-4 bg-[#2A272A] rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-[#2A272A] rounded w-1/2"></div>
+                  </div>
+                ))}
+              </div>
+              {isColdStart && (
+                <div className="mt-8 px-6 py-4 bg-orange-500/10 border border-orange-500/30 rounded-2xl flex flex-col items-center max-w-md text-center animate-fade-in shadow-lg">
+                   <div className="animate-spin rounded-full h-8 w-8 border-4 border-orange-500 border-t-transparent mb-3"></div>
+                   <h3 className="text-orange-400 font-bold mb-1">Máy chủ đang thức dậy...</h3>
+                   <p className="text-[#D7C9B2] text-sm">Hệ thống đang khởi động lại do đã lâu không có ai truy cập. Quá trình này có thể mất tới 60 giây, vui lòng kiên nhẫn nhé!</p>
                 </div>
-              ))}
+              )}
             </div>
           ) : books.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center bg-[#2A272A] rounded-3xl shadow-sm border border-[#4D4845]/40">
               <p className="text-[#D7C9B2] font-medium mb-4">Bookshelf is currently empty.</p>
             </div>
           ) : (
-            <Bookshelf books={filteredBooks} refresh={refreshBooks} sortBy={sortBy} />
+            <>
+              <Bookshelf books={books} refresh={() => fetchBooks(false)} sortBy={sortBy} />
+              
+              {hasMore && (
+                <div className="mt-10 flex justify-center pb-8">
+                  <button 
+                    onClick={() => fetchBooks(true)}
+                    disabled={isLoadingMore}
+                    className="bg-[#2A272A] hover:bg-[#3A373A] border border-[#4D4845] text-[#F5ECDC] font-bold py-3 px-8 rounded-full shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isLoadingMore ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#F5ECDC] border-t-transparent"></div>
+                        Đang tải...
+                      </>
+                    ) : (
+                      'Tải Thêm Sách'
+                    )}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </main>
 
         <SearchOnlineModal 
           isOpen={isSearchOnlineOpen} 
           onClose={() => setIsSearchOnlineOpen(false)} 
-          onImportSuccess={() => refreshBooks()} 
+          onImportSuccess={() => fetchBooks(false)} 
         />
 
       </div>
