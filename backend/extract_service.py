@@ -7,8 +7,8 @@ from bs4 import BeautifulSoup
 
 from PIL import Image
 
-def compress_cover_image(img_bytes: bytes, max_width: int = 400, quality: int = 80) -> str:
-    """Tối ưu và nén ảnh bìa thành chuỗi Data URI base64 nhẹ (~20KB-40KB) để lưu trực tiếp DB mà không bao giờ mất hay bị 404"""
+def compress_cover_image(img_bytes: bytes, max_width: int = 250, quality: int = 60) -> str:
+    """Tối ưu và nén ảnh bìa thành chuỗi Data URI base64 cực nhẹ (~10KB-20KB) để lưu trực tiếp DB, tối ưu hóa tốc độ tải."""
     try:
         img = Image.open(io.BytesIO(img_bytes))
         if img.mode in ("RGBA", "P"):

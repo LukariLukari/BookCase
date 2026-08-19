@@ -103,8 +103,36 @@ def repair_cover_for_book(book: models.Book, db: Session) -> str | None:
 
     return None
 
+def keep_alive_task():
+    """Chạy ngầm để ping server mỗi 14 phút, giúp server không bị ngủ trên Render."""
+    url = os.getenv("RENDER_EXTERNAL_URL")
+    if not url:
+        return
+    ping_url = f"{url}/api/ping"
+    print(f"[KeepAlive] Bắt đầu tự động ping tới: {ping_url}")
+    
+    import time
+    import urllib.request
+    while True:
+        try:
+            time.sleep(14 * 60) # Chờ 14 phút (Render tắt sau 15p)
+            req = urllib.request.Request(ping_url, headers={'User-Agent': 'KeepAlive'})
+            with urllib.request.urlopen(req, timeout=10) as response:
+                pass
+            print(f"[KeepAlive] Đã ping {ping_url} để giữ server thức.")
+        except Exception as e:
+            print(f"[KeepAlive] Lỗi ping: {e}")
+
+@app.get("/api/ping")
+def ping():
+    return {"status": "awake", "message": "Pong!"}
+
 @app.on_event("startup")
 def startup_event():
+    # Khởi động tiến trình chống ngủ
+    import threading
+    threading.Thread(target=keep_alive_task, daemon=True).start()
+    
     # Auto-migrate database to add email column if it's missing
     from database import SessionLocal
     from sqlalchemy import text
