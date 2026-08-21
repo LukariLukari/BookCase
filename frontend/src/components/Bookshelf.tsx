@@ -48,7 +48,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
     <motion.div
       key={book.id}
       layoutId={`book-container-${book.id}`}
-      className="flex flex-col cursor-pointer group"
+      className="flex flex-col cursor-pointer group h-full"
       onClick={() => setSelectedBook(book)}
       whileHover={{ y: -5 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -62,12 +62,12 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
           className="w-full h-full object-cover rounded-2xl shadow-md group-hover:shadow-xl transition-shadow duration-300"
         />
       </motion.div>
-      <div className="flex justify-between items-start gap-2">
-        <div className="flex-1 min-w-0">
-          <h3 className="text-base md:text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2 mb-1 group-hover:text-[#D7C9B2] transition-colors">{book.title}</h3>
-          <p className="text-sm md:text-xs text-[#D7C9B2] truncate mb-2">{book.author || "Unknown Author"}</p>
+      <div className="flex flex-col flex-1">
+        <div className="w-full mb-3 flex-1">
+          <h3 className="text-base md:text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2 mb-1 group-hover:text-[#D7C9B2] transition-colors" title={book.title}>{book.title}</h3>
+          <p className="text-sm md:text-xs text-[#D7C9B2] truncate" title={book.author || "Unknown Author"}>{book.author || "Unknown Author"}</p>
         </div>
-        <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-1.5 mt-auto" onClick={(e) => e.stopPropagation()}>
           <button 
             onClick={(e) => {
               e.stopPropagation();

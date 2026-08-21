@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Bookshelf from '@/components/Bookshelf';
 import Sidebar from '@/components/Sidebar';
 import SearchOnlineModal from '@/components/SearchOnlineModal';
+import UploadModal from '@/components/UploadModal';
 import { Search } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -23,6 +24,7 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('author');
   const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isLoadingBooks, setIsLoadingBooks] = useState(true);
   
   // Pagination & Cold Start States
@@ -138,6 +140,12 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
             >
               <span style={{ color: '#000000' }} className="!text-black font-black">Tìm Sách Online</span>
             </button>
+            <button
+              onClick={() => setIsUploadModalOpen(true)}
+              className="w-full md:w-auto bg-[#2A272A] hover:bg-[#3A373A] text-[#F5ECDC] border border-[#4D4845]/60 rounded-full py-3.5 md:py-2.5 px-5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-md transition-all cursor-pointer whitespace-nowrap"
+            >
+              <span className="font-black text-[#F5ECDC]">Tải Sách Lên</span>
+            </button>
 
             <div className="relative w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7B7369]" size={16} />
@@ -220,6 +228,12 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
           isOpen={isSearchOnlineOpen} 
           onClose={() => setIsSearchOnlineOpen(false)} 
           onImportSuccess={() => fetchBooks(false)} 
+        />
+
+        <UploadModal 
+          isOpen={isUploadModalOpen} 
+          onClose={() => setIsUploadModalOpen(false)} 
+          onUploadSuccess={() => fetchBooks(false)} 
         />
 
       </div>
