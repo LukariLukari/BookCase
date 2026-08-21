@@ -179,8 +179,8 @@ export default function AdminPage() {
         headers: getHeaders()
       });
       fetchBooks();
-      setError(res.data.message || "Đã khắc phục xong!");
-      setTimeout(() => setError(null), 5000);
+      setSuccessMsg(res.data.message || "Đã khắc phục xong!");
+      setTimeout(() => setSuccessMsg(null), 5000);
     } catch (err: any) {
       if (err.response?.status === 401) logout();
       else {
@@ -257,6 +257,7 @@ export default function AdminPage() {
   };
 
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
@@ -326,8 +327,8 @@ export default function AdminPage() {
         headers: getHeaders()
       });
       setIsSortMode(false);
-      setError("Đã lưu thứ tự sách thành công!");
-      setTimeout(() => setError(null), 3000);
+      setSuccessMsg("Đã lưu thứ tự sách thành công!");
+      setTimeout(() => setSuccessMsg(null), 3000);
       fetchBooks();
     } catch (err: any) {
       if (err.response?.status === 401) logout();
@@ -480,8 +481,8 @@ export default function AdminPage() {
     setUploadItems([]);
     fetchBooks();
     if (uploadedCount > 0) {
-       setError(`Đã tải lên thành công ${uploadedCount} sách!`);
-       setTimeout(() => setError(null), 3000);
+       setSuccessMsg(`Đã tải lên thành công ${uploadedCount} sách!`);
+       setTimeout(() => setSuccessMsg(null), 3000);
     }
   };
 
@@ -500,8 +501,8 @@ export default function AdminPage() {
        setIsAddModalOpen(false);
        setLinkForm({ title: '', author: '', genre: '', cover_url: '', external_url: '' });
        fetchBooks();
-       setError("Đã thêm sách thành công!");
-       setTimeout(() => setError(null), 3000);
+       setSuccessMsg("Đã thêm sách thành công!");
+       setTimeout(() => setSuccessMsg(null), 3000);
     } catch(err: any) {
        setIsUploading(false);
        if (err.response?.status === 401) {
@@ -622,6 +623,12 @@ export default function AdminPage() {
                 </div>
               </SortableContext>
             </DndContext>
+          )}
+
+          {successMsg && (
+            <div className="text-center bg-green-950/40 border border-green-500/30 text-green-400 p-4 rounded-xl text-sm font-bold mt-10">
+              {successMsg}
+            </div>
           )}
 
           {error && (
