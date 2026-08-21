@@ -22,9 +22,10 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
     return [];
   });
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('author');
+  const [sortBy, setSortBy] = useState('newest');
   const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isLoadingBooks, setIsLoadingBooks] = useState(true);
   
   // Pagination & Cold Start States
@@ -123,53 +124,70 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
       <div className="flex-1 ml-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen w-full max-w-full">
         
         {/* Topbar */}
-        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#4D4845]/30 gap-4 md:gap-0">
+        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex flex-col gap-4 border-b border-[#4D4845]/30">
           
-          {/* Menu links on topbar */}
-          <div className="flex items-center gap-6 md:gap-8 text-base md:text-sm font-bold text-[#D7C9B2] overflow-x-auto w-full md:w-auto no-scrollbar">
-             <a href="#" className="text-[#F5ECDC] border-b-2 border-[#F5ECDC] pb-1 whitespace-nowrap">New Release</a>
-             <a href="#" className="hover:text-[#F5ECDC] transition-colors pb-1 whitespace-nowrap">Featured</a>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+            {/* Menu links on topbar */}
+            <div className="flex items-center gap-6 md:gap-8 text-base md:text-sm font-bold text-[#D7C9B2] overflow-x-auto w-full md:w-auto no-scrollbar">
+               <a href="#" className="text-[#F5ECDC] border-b-2 border-[#F5ECDC] pb-1 whitespace-nowrap">New Release</a>
+               <a href="#" className="hover:text-[#F5ECDC] transition-colors pb-1 whitespace-nowrap">Featured</a>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center w-full md:w-auto gap-3">
+              <button
+                onClick={() => setIsSearchOnlineOpen(true)}
+                className="flex-1 md:flex-none bg-[#F5ECDC] hover:bg-white !text-black border border-[#F5ECDC] rounded-xl py-3.5 md:py-2.5 px-5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-md transition-all cursor-pointer whitespace-nowrap"
+                style={{ color: '#000000' }}
+              >
+                <span style={{ color: '#000000' }} className="!text-black font-black">Tìm Sách Online</span>
+              </button>
+              <button
+                onClick={() => setIsUploadModalOpen(true)}
+                className="flex-1 md:flex-none bg-[#2A272A] hover:bg-[#3A373A] text-[#F5ECDC] border border-[#4D4845]/60 rounded-xl py-3.5 md:py-2.5 px-5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-md transition-all cursor-pointer whitespace-nowrap"
+              >
+                <span className="font-black text-[#F5ECDC]">Tải Sách Lên</span>
+              </button>
+              <button
+                onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+                className="p-3.5 md:p-2.5 bg-[#2A272A] hover:bg-[#3A373A] text-[#F5ECDC] border border-[#4D4845]/60 rounded-xl focus:outline-none shadow-md transition-all cursor-pointer"
+              >
+                <Search size={20} />
+              </button>
+            </div>
           </div>
 
-          {/* Search & Actions */}
-          <div className="flex flex-col md:flex-row items-center w-full md:w-auto gap-3">
-            <button
-              onClick={() => setIsSearchOnlineOpen(true)}
-              className="w-full md:w-auto bg-[#F5ECDC] hover:bg-white !text-black border border-[#F5ECDC] rounded-full py-3.5 md:py-2.5 px-5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-md transition-all cursor-pointer whitespace-nowrap"
-              style={{ color: '#000000' }}
-            >
-              <span style={{ color: '#000000' }} className="!text-black font-black">Tìm Sách Online</span>
-            </button>
-            <button
-              onClick={() => setIsUploadModalOpen(true)}
-              className="w-full md:w-auto bg-[#2A272A] hover:bg-[#3A373A] text-[#F5ECDC] border border-[#4D4845]/60 rounded-full py-3.5 md:py-2.5 px-5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-md transition-all cursor-pointer whitespace-nowrap"
-            >
-              <span className="font-black text-[#F5ECDC]">Tải Sách Lên</span>
-            </button>
-
-            <div className="relative w-full">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7B7369]" size={16} />
-              <input 
-                type="text" 
-                placeholder="Search your books"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full md:w-72 bg-[#2A272A] border border-[#4D4845]/60 rounded-full py-3.5 md:py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-inner transition-all text-[#F5ECDC] placeholder-[#7B7369]"
-              />
+          {/* Search & Sort Row */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="w-full md:w-1/2 h-11">
+              {isSearchExpanded && (
+                <div className="relative w-full animate-in fade-in zoom-in-95 duration-200">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7B7369]" size={16} />
+                  <input 
+                    type="text" 
+                    placeholder="Search your books"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-3 md:py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-inner transition-all text-[#F5ECDC] placeholder-[#7B7369]"
+                    autoFocus
+                  />
+                </div>
+              )}
             </div>
             
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full md:w-auto bg-[#2A272A] border border-[#4D4845]/60 rounded-full py-3.5 md:py-2.5 px-5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-inner transition-all text-[#F5ECDC] cursor-pointer appearance-none pr-10"
-              style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23F5ECDC%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
-            >
-
-              <option value="author" className="bg-[#1F1D20] text-[#F5ECDC]">Phân loại: Theo Tác Giả</option>
-              <option value="newest" className="bg-[#1F1D20] text-[#F5ECDC]">Sắp xếp: Mới nhất</option>
-              <option value="a-z" className="bg-[#1F1D20] text-[#F5ECDC]">Tên sách: A ➔ Z</option>
-              <option value="z-a" className="bg-[#1F1D20] text-[#F5ECDC]">Tên sách: Z ➔ A</option>
-            </select>
+            <div className="w-full md:w-auto flex justify-end">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full md:w-auto bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-3 md:py-2.5 px-5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-inner transition-all text-[#F5ECDC] cursor-pointer appearance-none pr-10"
+                style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23F5ECDC%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
+              >
+                <option value="newest" className="bg-[#1F1D20] text-[#F5ECDC]">Sắp xếp: Mới nhất</option>
+                <option value="author" className="bg-[#1F1D20] text-[#F5ECDC]">Phân loại: Theo Tác Giả</option>
+                <option value="a-z" className="bg-[#1F1D20] text-[#F5ECDC]">Tên sách: A ➔ Z</option>
+                <option value="z-a" className="bg-[#1F1D20] text-[#F5ECDC]">Tên sách: Z ➔ A</option>
+              </select>
+            </div>
           </div>
         </header>
 
