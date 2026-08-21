@@ -34,7 +34,7 @@ export default function Sidebar() {
         <div className="flex items-center md:mb-10 flex-shrink-0 z-50">
           <Link href="/">
             <h1 className="text-2xl md:text-3xl font-extrabold text-[#F5ECDC] cursor-pointer hover:opacity-80 transition-opacity">
-              BookCase<span className="text-[#F5ECDC]">.</span>
+              BOOKCASE<span className="text-[#F5ECDC]">.</span>
             </h1>
           </Link>
         </div>
