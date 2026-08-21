@@ -225,8 +225,8 @@ def get_book(book_id: str, db: Session = Depends(get_db)):
 @app.post("/api/books/upload", response_model=schemas.BookResponse)
 async def upload_book(
     file: UploadFile = File(...),
-    title: str = Form(""),
-    external_url: str = Form(None),
+    title: Optional[str] = Form(""),
+    external_url: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin_user)
 ):

@@ -73,7 +73,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
     }, 350);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token') || localStorage.getItem('token');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       
       const res = await axios.post(`${API_URL}/api/external-import`, {
