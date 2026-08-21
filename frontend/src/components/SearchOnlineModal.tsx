@@ -105,7 +105,11 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
       }, 800);
     } catch (err: any) {
       clearInterval(interval);
-      setError(err.response?.data?.detail || 'Lỗi khi tải sách về máy chủ.');
+      if (err.response?.status === 401) {
+        setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng xuất ở menu bên trái và đăng nhập lại.');
+      } else {
+        setError(err.response?.data?.detail || 'Lỗi khi tải sách về máy chủ.');
+      }
       setImportingId(null);
       setImportProgress(0);
     }
