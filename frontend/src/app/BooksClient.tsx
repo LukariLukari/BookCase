@@ -159,9 +159,24 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
 
           {/* Search & Sort Row */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="w-full md:w-1/2 h-11">
+            
+            <div className="w-full md:w-auto flex justify-start">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full md:w-auto bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-3 md:py-2.5 px-5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-inner transition-all text-[#F5ECDC] cursor-pointer appearance-none pr-10"
+                style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23F5ECDC%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
+              >
+                <option value="newest" className="bg-[#1F1D20] text-[#F5ECDC]">Sắp xếp: Mới nhất</option>
+                <option value="author" className="bg-[#1F1D20] text-[#F5ECDC]">Phân loại: Theo Tác Giả</option>
+                <option value="a-z" className="bg-[#1F1D20] text-[#F5ECDC]">Tên sách: A ➔ Z</option>
+                <option value="z-a" className="bg-[#1F1D20] text-[#F5ECDC]">Tên sách: Z ➔ A</option>
+              </select>
+            </div>
+
+            <div className="w-full md:w-1/2 flex justify-end h-11">
               {isSearchExpanded && (
-                <div className="relative w-full animate-in fade-in zoom-in-95 duration-200">
+                <div className="relative w-full md:max-w-md animate-in fade-in zoom-in-95 duration-200 origin-top-right">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7B7369]" size={16} />
                   <input 
                     type="text" 
@@ -175,19 +190,6 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
               )}
             </div>
             
-            <div className="w-full md:w-auto flex justify-end">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full md:w-auto bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-3 md:py-2.5 px-5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-inner transition-all text-[#F5ECDC] cursor-pointer appearance-none pr-10"
-                style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23F5ECDC%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
-              >
-                <option value="newest" className="bg-[#1F1D20] text-[#F5ECDC]">Sắp xếp: Mới nhất</option>
-                <option value="author" className="bg-[#1F1D20] text-[#F5ECDC]">Phân loại: Theo Tác Giả</option>
-                <option value="a-z" className="bg-[#1F1D20] text-[#F5ECDC]">Tên sách: A ➔ Z</option>
-                <option value="z-a" className="bg-[#1F1D20] text-[#F5ECDC]">Tên sách: Z ➔ A</option>
-              </select>
-            </div>
           </div>
         </header>
 
