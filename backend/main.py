@@ -142,6 +142,27 @@ def startup_event():
         db.commit()
     except Exception:
         db.rollback() # Column already exists or error
+        
+    try:
+        db.execute(text("ALTER TABLE books ADD COLUMN display_order INTEGER DEFAULT 0;"))
+        db.commit()
+    except Exception:
+        db.rollback()
+
+    try:
+        # Initialize display_order if all are 0
+        count_zero = db.execute(text("SELECT COUNT(*) FROM books WHERE display_order = 0")).scalar()
+        total = db.execute(text("SELECT COUNT(*) FROM books")).scalar()
+        if count_zero == total and total > 0:
+            # Set display_order = row_number based on created_at DESC
+            # SQLite doesn't support UPDATE ... FROM easily in older versions, so we do it in Python
+            all_books = db.query(models.Book).order_by(models.Book.created_at.desc()).all()
+            for i, b in enumerate(all_books):
+                b.display_order = i + 1
+            db.commit()
+    except Exception as e:
+        print(f"Error initializing display_order: {e}")
+        db.rollback()
     finally:
         db.close()
         
@@ -208,9 +229,9 @@ def get_books(
         query = query.order_by(models.Book.title.desc())
     elif sort_by == "author":
         # Handle cases where author might be null to prevent them from sorting weirdly
-        query = query.order_by(models.Book.author.asc(), models.Book.created_at.desc())
+        query = query.order_by(models.Book.author.asc(), models.Book.display_order.asc(), models.Book.created_at.desc())
     else: # newest
-        query = query.order_by(models.Book.created_at.desc())
+        query = query.order_by(models.Book.display_order.asc(), models.Book.created_at.desc())
         
     books = query.offset(skip).limit(limit).all()
     return [serialize_book_lightweight(b) for b in books]
@@ -285,6 +306,31 @@ async def upload_book(
         return db_book
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/admin/books/reorder")
+def reorder_books(
+    req: schemas.BookReorderRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    # Lấy các sách trong danh sách
+    books = db.query(models.Book).filter(models.Book.id.in_(req.book_ids)).all()
+    if not books:
+        return {"message": "No books found"}
+        
+    # Tạo map id -> book
+    book_map = {b.id: b for b in books}
+    
+    # Lấy ra danh sách display_order hiện tại của các sách này và sắp xếp tăng dần
+    current_orders = sorted([b.display_order for b in books])
+    
+    # Gán lại display_order theo đúng thứ tự book_ids truyền lên
+    for i, book_id in enumerate(req.book_ids):
+        if book_id in book_map:
+            book_map[book_id].display_order = current_orders[i]
+            
+    db.commit()
+    return {"message": "Reordered successfully"}
 
 @app.post("/api/books/link", response_model=schemas.BookResponse)
 def create_book_from_link(book_in: schemas.BookLinkCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):

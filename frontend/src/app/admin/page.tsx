@@ -4,10 +4,115 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
-import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save } from 'lucide-react';
 
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 import BookCoverImage from '@/components/BookCoverImage';
+
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection, setDownloadingId, downloadingId, baseUrl, copyShareLink, copiedId, openEditModal, handleDelete }: any) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: book.id, disabled: !isSortMode });
+  
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 1,
+    opacity: isDragging ? 0.8 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className={`flex flex-col group relative ${isSortMode ? 'cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-[#D7C9B2] rounded-2xl' : ''}`}>
+      {isSortMode && (
+         <div {...attributes} {...listeners} className="absolute top-2 left-2 z-40 bg-black/60 p-1.5 rounded-lg text-white hover:bg-[#F5ECDC] hover:text-[#1F1D20] transition-colors backdrop-blur-sm cursor-grab">
+           <GripVertical size={16} />
+         </div>
+      )}
+      <div className={`w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-[#4D4845]/40 transition-all duration-300 ${!isSortMode ? 'group-hover:shadow-xl' : ''}`}>
+         <BookCoverImage 
+           coverUrl={book.cover_url}
+           bookId={book.id}
+           title={book.title}
+           author={book.author}
+           className="w-full h-full object-cover"
+         />
+         
+         {!isSortMode && (
+           <>
+             <div className="absolute top-2 right-2 z-30" onClick={(e) => e.stopPropagation()}>
+               <input 
+                 type="checkbox" 
+                 checked={selectedBooks.includes(book.id)}
+                 onChange={() => toggleBookSelection(book.id)}
+                 className="w-5 h-5 rounded-md border-2 border-white/80 bg-black/40 checked:bg-orange-500 checked:border-orange-500 cursor-pointer shadow-sm focus:ring-0 focus:ring-offset-0 transition-colors"
+               />
+             </div>
+             
+             <div className="absolute top-2 left-2 z-20">
+               {book.external_url ? (
+                 <span className="flex items-center gap-1 text-orange-400 font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-500/30" title={book.external_url}>
+                   <LinkIcon size={12} /> Drive
+                 </span>
+               ) : (
+                 <span className="flex items-center gap-1 text-[#D7C9B2] font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-[#4D4845]/40">
+                   <Upload size={12} /> Local
+                 </span>
+               )}
+             </div>
+
+             <div className="absolute bottom-2 right-2 flex items-center gap-1.5 z-20">
+                 <button 
+                   onClick={() => {
+                     setDownloadingId(book.id);
+                     const a = document.createElement('a');
+                     a.href = `${baseUrl}/api/books/${book.id}/download`;
+                     a.download = `${book.title}.pdf`;
+                     document.body.appendChild(a);
+                     a.click();
+                     a.remove();
+                     setTimeout(() => setDownloadingId(null), 1500);
+                   }} 
+                   disabled={downloadingId === book.id}
+                   className="p-1.5 md:p-2 bg-[#F97316] text-white hover:bg-[#EA580C] rounded-full shadow-lg border border-[#F97316] transition-all hover:scale-110 cursor-pointer disabled:opacity-50" 
+                   title="Tải sách xuống"
+                 >
+                   {downloadingId === book.id ? <Loader2 size={14} className="animate-spin text-white" /> : <Download size={14} className="text-white" />}
+                 </button>
+                 <button 
+                   onClick={() => copyShareLink(book.id)} 
+                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-green-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer" 
+                   title="Sao chép link chia sẻ"
+                 >
+                   {copiedId === book.id ? <Check size={14} className="text-green-400" /> : <Share2 size={14} className="text-[#D7C9B2] hover:text-green-400" />}
+                 </button>
+
+                 <button 
+                   onClick={() => openEditModal(book)} 
+                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-orange-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer"
+                   title="Sửa thông tin sách"
+                 >
+                   <Edit2 size={14} className="text-[#D7C9B2] hover:text-orange-400" />
+                 </button>
+                 <button 
+                   onClick={() => handleDelete(book.id)} 
+                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-red-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer"
+                   title="Xóa sách"
+                 >
+                   <Trash2 size={14} className="text-[#D7C9B2] hover:text-red-400" />
+                 </button>
+              </div>
+           </>
+         )}
+      </div>
+      
+      <div className="px-1">
+        <h3 className="text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2">{book.title}</h3>
+      </div>
+    </div>
+  );
+}
 
 interface Book {
   id: string;
@@ -35,6 +140,9 @@ export default function AdminPage() {
   const [isFetchingBooks, setIsFetchingBooks] = useState(true);
 
   const [downloadProgress, setDownloadProgress] = useState(0);
+  
+  const [isSortMode, setIsSortMode] = useState(false);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
   
   const { user, token, logout, isLoading } = useAuth();
   const router = useRouter();
@@ -192,6 +300,45 @@ export default function AdminPage() {
   useEffect(() => {
     fetchBooks();
   }, []);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setBooks((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id);
+        const newIndex = items.findIndex(item => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  const handleSaveOrder = async () => {
+    if (!isSortMode) return;
+    setIsSavingOrder(true);
+    try {
+      const bookIds = books.map(b => b.id);
+      await axios.put(`${API_URL}/api/admin/books/reorder`, { book_ids: bookIds }, {
+        headers: getHeaders()
+      });
+      setIsSortMode(false);
+      setError("Đã lưu thứ tự sách thành công!");
+      setTimeout(() => setError(null), 3000);
+      fetchBooks();
+    } catch (err: any) {
+      if (err.response?.status === 401) logout();
+      else {
+        setError('Lỗi khi lưu thứ tự sách!');
+        setTimeout(() => setError(null), 3000);
+      }
+    } finally {
+      setIsSavingOrder(false);
+    }
+  };
 
   const getHeaders = () => {
     const authToken = token || localStorage.getItem('access_token') || localStorage.getItem('token');
@@ -417,6 +564,24 @@ export default function AdminPage() {
               {isFixing ? <Loader2 size={16} className="animate-spin inline mr-1 text-[#F97316]" /> : <Settings size={16} className="inline mr-1 text-[#F97316]" />} 
               <span className="hidden sm:inline">{isFixing ? 'Đang sửa...' : 'Sửa bìa lỗi'}</span>
             </button>
+            {isSortMode ? (
+              <button 
+                onClick={handleSaveOrder}
+                disabled={isSavingOrder}
+                className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-6 md:!px-5 text-sm whitespace-nowrap mr-2 bg-[#F5ECDC] hover:bg-[#D7C9B2] border-none text-[#1F1D20] shadow-md font-bold"
+              >
+                {isSavingOrder ? <Loader2 size={16} className="animate-spin inline mr-1" /> : <Save size={16} className="inline mr-1" />}
+                <span className="hidden sm:inline">Lưu thứ tự</span>
+              </button>
+            ) : (
+              <button 
+                onClick={() => { setIsSortMode(true); setSearchQuery(''); }}
+                className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#D7C9B2] hover:text-[#D7C9B2] bg-[#2A272A]"
+              >
+                <GripVertical size={16} className="inline mr-1 text-[#D7C9B2]" /> 
+                <span className="hidden sm:inline">Sắp xếp</span>
+              </button>
+            )}
             <button 
               onClick={() => setIsAddModalOpen(true)}
               className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-6 md:!px-5 text-sm whitespace-nowrap"
@@ -435,93 +600,28 @@ export default function AdminPage() {
                <span className="text-sm font-bold text-[#D7C9B2] animate-pulse">Đang tải danh sách sách... {downloadProgress}%</span>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10">
-              {filteredBooks.map((book) => (
-                <div key={book.id} className="flex flex-col group relative">
-                  {/* Ảnh bìa */}
-                  <div className="w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-[#4D4845]/40 group-hover:shadow-xl transition-all duration-300">
-                     <BookCoverImage 
-                       coverUrl={book.cover_url}
-                       bookId={book.id}
-                       title={book.title}
-                       author={book.author}
-                       className="w-full h-full object-cover"
-                     />
-                     
-                     {/* Checkbox Select */}
-                     <div className="absolute top-2 right-2 z-30" onClick={(e) => e.stopPropagation()}>
-                       <input 
-                         type="checkbox" 
-                         checked={selectedBooks.includes(book.id)}
-                         onChange={() => toggleBookSelection(book.id)}
-                         className="w-5 h-5 rounded-md border-2 border-white/80 bg-black/40 checked:bg-orange-500 checked:border-orange-500 cursor-pointer shadow-sm focus:ring-0 focus:ring-offset-0 transition-colors"
-                       />
-                     </div>
-                     
-                     {/* Tag Nguồn (Source) */}
-                     <div className="absolute top-2 left-2 z-20">
-                       {book.external_url ? (
-                         <span className="flex items-center gap-1 text-orange-400 font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-500/30" title={book.external_url}>
-                           <LinkIcon size={12} /> Drive
-                         </span>
-                       ) : (
-                         <span className="flex items-center gap-1 text-[#D7C9B2] font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-[#4D4845]/40">
-                           <Upload size={12} /> Local
-                         </span>
-                       )}
-                     </div>
-
-                     {/* Action Icons */}
-                     <div className="absolute bottom-2 right-2 flex items-center gap-1.5 z-20">
-                         <button 
-                           onClick={() => {
-                             setDownloadingId(book.id);
-                             const a = document.createElement('a');
-                             a.href = `${baseUrl}/api/books/${book.id}/download`;
-                             a.download = `${book.title}.pdf`;
-                             document.body.appendChild(a);
-                             a.click();
-                             a.remove();
-                             setTimeout(() => setDownloadingId(null), 1500);
-                           }} 
-                           disabled={downloadingId === book.id}
-                           className="p-1.5 md:p-2 bg-[#F97316] text-white hover:bg-[#EA580C] rounded-full shadow-lg border border-[#F97316] transition-all hover:scale-110 cursor-pointer disabled:opacity-50" 
-                           title="Tải sách xuống"
-                         >
-                           {downloadingId === book.id ? <Loader2 size={14} className="animate-spin text-white" /> : <Download size={14} className="text-white" />}
-                         </button>
-                         <button 
-                           onClick={() => copyShareLink(book.id)} 
-                           className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-green-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer" 
-                           title="Sao chép link chia sẻ"
-                         >
-                           {copiedId === book.id ? <Check size={14} className="text-green-400" /> : <Share2 size={14} className="text-[#D7C9B2] hover:text-green-400" />}
-                         </button>
-
-                         <button 
-                           onClick={() => openEditModal(book)} 
-                           className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-orange-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer"
-                           title="Sửa thông tin sách"
-                         >
-                           <Edit2 size={14} className="text-[#D7C9B2] hover:text-orange-400" />
-                         </button>
-                         <button 
-                           onClick={() => handleDelete(book.id)} 
-                           className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-red-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer"
-                           title="Xóa sách"
-                         >
-                           <Trash2 size={14} className="text-[#D7C9B2] hover:text-red-400" />
-                         </button>
-                      </div>
-                  </div>
-                  
-                  {/* Thông tin Text */}
-                  <div className="px-1">
-                    <h3 className="text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2">{book.title}</h3>
-                  </div>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={filteredBooks.map(b => b.id)} strategy={rectSortingStrategy}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10">
+                  {filteredBooks.map((book) => (
+                    <SortableBookItem 
+                      key={book.id} 
+                      book={book} 
+                      isSortMode={isSortMode} 
+                      selectedBooks={selectedBooks} 
+                      toggleBookSelection={toggleBookSelection} 
+                      setDownloadingId={setDownloadingId} 
+                      downloadingId={downloadingId} 
+                      baseUrl={baseUrl} 
+                      copyShareLink={copyShareLink} 
+                      copiedId={copiedId} 
+                      openEditModal={openEditModal} 
+                      handleDelete={handleDelete} 
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
           )}
 
           {error && (

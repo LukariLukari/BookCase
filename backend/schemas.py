@@ -25,6 +25,9 @@ class BookUpdate(BaseModel):
 class BookBulkDelete(BaseModel):
     book_ids: list[str]
 
+class BookReorderRequest(BaseModel):
+    book_ids: list[str]
+
 class BookLinkCreate(BaseModel):
     title: str
     author: Optional[str] = "Unknown Author"
