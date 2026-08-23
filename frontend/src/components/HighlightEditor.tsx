@@ -115,7 +115,15 @@ export default function HighlightEditor({
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Layer 1: Blurred Background
+    const hasPaths = paths.length > 0 || currentPath.length > 0;
+
+    if (!hasPaths) {
+      // Nếu chưa vẽ gì, hiển thị ảnh gốc rõ nét
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      return;
+    }
+
+    // Layer 1: Blurred Background (khi đã bắt đầu bôi)
     ctx.save();
     ctx.filter = 'blur(6px) brightness(0.85)';
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -164,15 +172,19 @@ export default function HighlightEditor({
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
     
+    // Tính toán tỷ lệ bù trừ do CSS object-contain hoặc max-h-full
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
     if ('touches' in e) {
       return {
-        x: e.touches[0].clientX - rect.left,
-        y: e.touches[0].clientY - rect.top
+        x: (e.touches[0].clientX - rect.left) * scaleX,
+        y: (e.touches[0].clientY - rect.top) * scaleY
       };
     }
     return {
-      x: (e as React.MouseEvent).clientX - rect.left,
-      y: (e as React.MouseEvent).clientY - rect.top
+      x: ((e as React.MouseEvent).clientX - rect.left) * scaleX,
+      y: ((e as React.MouseEvent).clientY - rect.top) * scaleY
     };
   };
 
