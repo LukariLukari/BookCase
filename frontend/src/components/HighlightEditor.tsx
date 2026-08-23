@@ -22,6 +22,10 @@ export default function HighlightEditor({
   const [brushSize, setBrushSize] = useState(30);
   const [isSaving, setIsSaving] = useState(false);
   
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,6 +52,53 @@ export default function HighlightEditor({
       img.src = imageSrc;
     }
   }, [imageSrc, paths, currentPath]);
+
+  // Clean up camera stream on unmount
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } 
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      setIsCameraActive(true);
+    } catch (err) {
+      console.error("Camera access error:", err);
+      alert("Không thể truy cập Camera. Hãy đảm bảo bạn đã cấp quyền hoặc đang dùng HTTPS.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setIsCameraActive(false);
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current) {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        setImageSrc(canvas.toDataURL('image/jpeg', 0.9));
+        setPaths([]);
+        stopCamera();
+      }
+    }
+  };
 
   const redraw = () => {
     const canvas = canvasRef.current;
@@ -184,22 +235,59 @@ export default function HighlightEditor({
     <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col">
       <div className="flex items-center justify-between p-4 bg-[#1F1D20] border-b border-[#4D4845]/50">
         <h2 className="text-[#F5ECDC] font-bold">Tạo Trích Dẫn (Highlight)</h2>
-        <button onClick={onClose} className="p-2 text-[#D7C9B2] hover:text-white bg-[#2A272A] rounded-full">
+        <button onClick={() => { stopCamera(); onClose(); }} className="p-2 text-[#D7C9B2] hover:text-white bg-[#2A272A] rounded-full">
           <X size={20} />
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center p-4 relative w-full h-full">
-        {!imageSrc ? (
+        {isCameraActive ? (
+          <div className="flex flex-col items-center justify-center w-full h-full gap-4">
+            <div className="relative w-full max-w-2xl bg-black rounded-xl overflow-hidden border border-[#4D4845]">
+              <video 
+                ref={videoRef} 
+                className="w-full h-auto object-contain max-h-[70vh]" 
+                playsInline 
+                autoPlay 
+                muted 
+              />
+            </div>
+            <div className="flex gap-4">
+              <button 
+                onClick={stopCamera} 
+                className="px-6 py-3 bg-[#2A272A] text-[#F5ECDC] rounded-full font-bold border border-[#4D4845]"
+              >
+                Hủy
+              </button>
+              <button 
+                onClick={capturePhoto} 
+                className="px-8 py-3 bg-white text-black rounded-full font-bold shadow-lg"
+              >
+                Chụp Ảnh
+              </button>
+            </div>
+          </div>
+        ) : !imageSrc ? (
           <div className="flex flex-col gap-6 items-center w-full max-w-sm">
-            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-[#F5ECDC]/30 rounded-2xl cursor-pointer hover:bg-[#2A272A] transition-colors bg-[#1F1D20]">
-              <div className="flex flex-col items-center justify-center pt-5 pb-6 text-[#F5ECDC]">
-                <Camera size={48} className="mb-3 text-[#F5ECDC]" />
-                <p className="mb-2 text-sm font-bold text-center">Chụp trang sách</p>
-                <p className="text-xs text-[#D7C9B2]">Mở Camera trực tiếp</p>
-              </div>
-              <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageUpload} />
-            </label>
+            <div className="flex gap-3 w-full">
+              <button 
+                onClick={startCamera}
+                className="flex-1 flex flex-col items-center justify-center h-48 border-2 border-[#F5ECDC]/30 rounded-2xl cursor-pointer hover:bg-[#2A272A] transition-colors bg-[#2A272A]"
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-[#F5ECDC]">
+                  <Camera size={40} className="mb-3 text-[#F5ECDC]" />
+                  <p className="mb-2 text-sm font-bold text-center">Camera Trực Tiếp</p>
+                </div>
+              </button>
+              
+              <label className="flex-1 flex flex-col items-center justify-center h-48 border-2 border-dashed border-[#F5ECDC]/30 rounded-2xl cursor-pointer hover:bg-[#2A272A] transition-colors bg-[#1F1D20]">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-[#F5ECDC]">
+                  <Camera size={40} className="mb-3 text-[#D7C9B2]" />
+                  <p className="mb-2 text-sm font-bold text-center">App Camera</p>
+                </div>
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageUpload} />
+              </label>
+            </div>
 
             <div className="w-full text-center text-[#D7C9B2] text-sm font-bold">HOẶC</div>
 

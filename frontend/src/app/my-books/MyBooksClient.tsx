@@ -7,12 +7,15 @@ import { useRouter } from 'next/navigation';
 import { Loader2, Plus, Book as BookIcon, X, Trash2 } from 'lucide-react';
 import BookCoverImage from '@/components/BookCoverImage';
 import QuoteGallery from '@/components/QuoteGallery';
+import AddMyBookModal from '@/components/AddMyBookModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MyBooksClient() {
   const [userBooks, setUserBooks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedBook, setSelectedBook] = useState<any | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
   
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
@@ -69,6 +72,7 @@ export default function MyBooksClient() {
         <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 border-b border-[#4D4845]/30 flex justify-between items-center">
           <h1 className="text-xl md:text-2xl font-black text-[#F5ECDC]">Sách Cá Nhân</h1>
           <button 
+            onClick={() => setIsAddModalOpen(true)}
             className="bg-[#2A272A] hover:bg-[#3A373A] text-[#F5ECDC] border border-[#4D4845]/60 rounded-xl py-2 px-4 text-sm font-bold shadow-md transition-colors flex items-center gap-2"
           >
             <Plus size={16} /> Thêm Sách
@@ -170,6 +174,12 @@ export default function MyBooksClient() {
             </div>
           )}
         </AnimatePresence>
+        
+        <AddMyBookModal 
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onSuccess={fetchMyBooks}
+        />
       </div>
     </div>
   );
