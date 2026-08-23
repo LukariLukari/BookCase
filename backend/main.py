@@ -25,7 +25,12 @@ import string
 
 import sqlite3
 
-models.Base.metadata.create_all(bind=engine)
+import time
+try:
+    models.Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Warning: Database creation race condition handled: {e}")
+    time.sleep(1) # Give the primary worker a moment to finish creating tables
 
 app = FastAPI(title="Virtual Bookshelf API")
 
