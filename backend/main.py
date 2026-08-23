@@ -1256,5 +1256,14 @@ async def add_my_book_quote(user_book_id: str, quote_in: schemas.QuoteCreate, db
     db.refresh(new_quote)
     return new_quote
 
+@app.delete("/api/users/me/quotes/{quote_id}")
+def delete_my_quote(quote_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    quote = db.query(models.Quote).join(models.UserBook).filter(models.Quote.id == quote_id, models.UserBook.user_id == current_user.id).first()
+    if not quote:
+        raise HTTPException(status_code=404, detail="Quote not found")
+    db.delete(quote)
+    db.commit()
+    return {"message": "Deleted quote successfully"}
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
