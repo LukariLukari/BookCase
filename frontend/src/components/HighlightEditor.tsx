@@ -112,59 +112,50 @@ export default function HighlightEditor({
     canvas.width = containerWidth;
     canvas.height = img.height * scale;
 
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const width = canvas.width;
+    const height = canvas.height;
 
-    const hasPaths = paths.length > 0 || currentPath.length > 0;
+    // 1. Draw Base Layer: Original SHARP Image
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(img, 0, 0, width, height);
 
-    if (!hasPaths) {
-      // Nếu chưa vẽ gì, hiển thị ảnh gốc rõ nét
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      return;
+    // 2. Create Blurred Top Layer
+    const blurCanvas = document.createElement('canvas');
+    blurCanvas.width = width;
+    blurCanvas.height = height;
+    const blurCtx = blurCanvas.getContext('2d');
+    if (!blurCtx) return;
+
+    // Render blur and darkening on offscreen canvas
+    blurCtx.filter = 'blur(10px) brightness(0.65)';
+    blurCtx.drawImage(img, 0, 0, width, height);
+    blurCtx.filter = 'none';
+
+    // 3. Erase the drawn paths from the Blurred Top Layer using 'destination-out'
+    const allPaths = [...paths];
+    if (currentPath.length > 0) {
+      allPaths.push({ points: currentPath, size: brushSize });
     }
 
-    // Layer 1: Blurred Background (khi đã bắt đầu bôi)
-    ctx.save();
-    ctx.filter = 'blur(6px) brightness(0.85)';
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    ctx.restore();
-
-    // Layer 2: Draw the sharp cutout
-    // We create an offscreen canvas to create the mask
-    const maskCanvas = document.createElement('canvas');
-    maskCanvas.width = canvas.width;
-    maskCanvas.height = canvas.height;
-    const maskCtx = maskCanvas.getContext('2d');
-    
-    if (maskCtx) {
-      // Draw paths on mask canvas
-      maskCtx.lineCap = 'round';
-      maskCtx.lineJoin = 'round';
-      
-      const allPaths = [...paths];
-      if (currentPath.length > 0) {
-        allPaths.push({ points: currentPath, size: brushSize });
-      }
+    if (allPaths.length > 0) {
+      blurCtx.globalCompositeOperation = 'destination-out';
+      blurCtx.lineCap = 'round';
+      blurCtx.lineJoin = 'round';
 
       allPaths.forEach(path => {
         if (path.points.length === 0) return;
-        maskCtx.beginPath();
-        maskCtx.lineWidth = path.size;
-        maskCtx.strokeStyle = 'white'; // Color doesn't matter for masking
-        maskCtx.moveTo(path.points[0].x, path.points[0].y);
+        blurCtx.beginPath();
+        blurCtx.lineWidth = path.size;
+        blurCtx.moveTo(path.points[0].x, path.points[0].y);
         for (let i = 1; i < path.points.length; i++) {
-          maskCtx.lineTo(path.points[i].x, path.points[i].y);
+          blurCtx.lineTo(path.points[i].x, path.points[i].y);
         }
-        maskCtx.stroke();
+        blurCtx.stroke();
       });
-
-      // Now use destination-in to cut out the sharp image
-      maskCtx.globalCompositeOperation = 'source-in';
-      maskCtx.drawImage(img, 0, 0, maskCanvas.width, maskCanvas.height);
-
-      // Finally draw the mask on top of our blurred canvas
-      ctx.drawImage(maskCanvas, 0, 0);
     }
+
+    // 4. Draw processed Blurred Layer (with erased holes) over Base Layer
+    ctx.drawImage(blurCanvas, 0, 0);
   };
 
   const getCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
@@ -367,7 +358,7 @@ export default function HighlightEditor({
               {paths.length === 0 && !isDrawing && (
                 <div className="absolute inset-0 pointer-events-none flex items-center justify-center bg-black/40 text-center p-8">
                   <p className="text-white text-lg font-bold bg-black/60 px-4 py-2 rounded-xl backdrop-blur-sm">
-                    Dùng ngón tay bôi vùng chữ bạn muốn trích dẫn
+                    Dùng ngón tay bôi để lau mờ & làm hiện rõ vùng chữ trích dẫn
                   </p>
                 </div>
               )}
