@@ -1174,5 +1174,82 @@ def fix_all_covers(db: Session = Depends(get_db), current_user: models.User = De
             
     return {"message": f"Đã quét và khắc phục {fixed_count} bìa sách cũ thành công!", "fixed_count": fixed_count, "failed": failed}
 
+# --- MY BOOKS & QUOTES API ---
+
+@app.get("/api/users/me/books", response_model=List[schemas.UserBookResponse])
+def get_my_books(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    user_books = db.query(models.UserBook).filter(models.UserBook.user_id == current_user.id).order_by(models.UserBook.added_at.desc()).all()
+    # We may need to manually fetch book details for each user_book to comply with schema
+    for ub in user_books:
+        if ub.book_id:
+            ub.book = db.query(models.Book).options(defer(models.Book.cover_url)).filter(models.Book.id == ub.book_id).first()
+    return user_books
+
+@app.post("/api/users/me/books", response_model=schemas.UserBookResponse)
+def add_my_book(book_in: schemas.UserBookCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ub = models.UserBook(
+        user_id=current_user.id,
+        book_id=book_in.book_id,
+        custom_title=book_in.custom_title,
+        custom_author=book_in.custom_author,
+        custom_cover_url=book_in.custom_cover_url
+    )
+    db.add(ub)
+    db.commit()
+    db.refresh(ub)
+    if ub.book_id:
+        ub.book = db.query(models.Book).options(defer(models.Book.cover_url)).filter(models.Book.id == ub.book_id).first()
+    return ub
+
+@app.delete("/api/users/me/books/{user_book_id}")
+def delete_my_book(user_book_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ub = db.query(models.UserBook).filter(models.UserBook.id == user_book_id, models.UserBook.user_id == current_user.id).first()
+    if not ub:
+        raise HTTPException(status_code=404, detail="User book not found")
+    db.delete(ub)
+    db.commit()
+    return {"message": "Deleted successfully"}
+
+@app.get("/api/users/me/books/{user_book_id}/quotes", response_model=List[schemas.QuoteResponse])
+def get_my_book_quotes(user_book_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ub = db.query(models.UserBook).filter(models.UserBook.id == user_book_id, models.UserBook.user_id == current_user.id).first()
+    if not ub:
+        raise HTTPException(status_code=404, detail="User book not found")
+    quotes = db.query(models.Quote).filter(models.Quote.user_book_id == user_book_id).order_by(models.Quote.created_at.desc()).all()
+    return quotes
+
+@app.post("/api/users/me/books/{user_book_id}/quotes", response_model=schemas.QuoteResponse)
+async def add_my_book_quote(user_book_id: str, quote_in: schemas.QuoteCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ub = db.query(models.UserBook).filter(models.UserBook.id == user_book_id, models.UserBook.user_id == current_user.id).first()
+    if not ub:
+        raise HTTPException(status_code=404, detail="User book not found")
+    
+    # Store Base64 or ImgBB Url
+    image_url = quote_in.image_url
+    imgbb_key = os.getenv("IMGBB_API_KEY")
+    if imgbb_key and image_url.startswith("data:image"):
+        try:
+            b64_data = image_url.split(",")[1]
+            url = "https://api.imgbb.com/1/upload"
+            data = urllib.parse.urlencode({'key': imgbb_key, 'image': b64_data}).encode('utf-8')
+            req = urllib.request.Request(url, data=data)
+            with urllib.request.urlopen(req, timeout=10) as response:
+                res = json.loads(response.read().decode('utf-8'))
+                img_url = res.get("data", {}).get("url")
+                if img_url:
+                    image_url = img_url
+        except Exception as e:
+            print(f"ImgBB Upload Failed for Quote: {e}")
+
+    new_quote = models.Quote(
+        user_book_id=user_book_id,
+        image_url=image_url,
+        text_content=quote_in.text_content
+    )
+    db.add(new_quote)
+    db.commit()
+    db.refresh(new_quote)
+    return new_quote
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

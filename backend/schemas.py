@@ -135,3 +135,38 @@ class ExternalImportRequest(BaseModel):
     id: str
     title: str
     author: Optional[str] = None
+
+class QuoteCreate(BaseModel):
+    image_url: str
+    text_content: Optional[str] = None
+
+class QuoteResponse(BaseModel):
+    id: str
+    user_book_id: str
+    image_url: str
+    text_content: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+class UserBookCreate(BaseModel):
+    book_id: Optional[str] = None
+    custom_title: Optional[str] = None
+    custom_author: Optional[str] = None
+    custom_cover_url: Optional[str] = None
+
+class UserBookResponse(BaseModel):
+    id: str
+    user_id: str
+    book_id: Optional[str] = None
+    custom_title: Optional[str] = None
+    custom_author: Optional[str] = None
+    custom_cover_url: Optional[str] = None
+    added_at: datetime
+    book: Optional[BookResponse] = None
+
+    class Config:
+        orm_mode = True
+        from_attributes = True

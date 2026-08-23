@@ -18,7 +18,7 @@ export default function Sidebar() {
   const menuItems = [
     { icon: <LayoutDashboard size={20} />, label: 'My BookCase Board', href: '/' },
     { icon: <Library size={20} />, label: 'Collections', href: '#' },
-    { icon: <Bookmark size={20} />, label: 'Saved', href: '#' },
+    { icon: <Bookmark size={20} />, label: 'Sách Cá Nhân', href: '/my-books' },
   ];
 
   if (user?.role === 'admin') {

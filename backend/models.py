@@ -77,6 +77,32 @@ class RegistrationCode(Base):
     code = Column(String, unique=True, index=True)
     is_used = Column(Boolean, default=False)
     used_by_username = Column(String, nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(String, nullable=True)
+
+class UserBook(Base):
+    __tablename__ = "user_books"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    book_id = Column(String, ForeignKey("books.id"), nullable=True, index=True)
+    # Fields for custom books added by user that are not in global DB
+    custom_title = Column(String, nullable=True)
+    custom_author = Column(String, nullable=True)
+    custom_cover_url = Column(String, nullable=True)
+    added_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User")
+    book = relationship("Book")
+    quotes = relationship("Quote", back_populates="user_book", cascade="all, delete-orphan")
+
+class Quote(Base):
+    __tablename__ = "quotes"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    user_book_id = Column(String, ForeignKey("user_books.id"), index=True)
+    image_url = Column(String)  # Can store Base64 or ImgBB URL
+    text_content = Column(String, nullable=True) # Optional text
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user_book = relationship("UserBook", back_populates="quotes")
 
