@@ -112,7 +112,7 @@ export default function ShareCollectionPage() {
 
         <button
           onClick={() => setIsSubscriptionModalOpen(true)}
-          className="bg-[#2A272A] hover:bg-[#3A373A] border border-[#4D4845]/60 rounded-xl py-2 px-4 text-left shadow-md transition-all cursor-pointer flex items-center gap-2.5 whitespace-nowrap"
+          className="hidden bg-[#2A272A] hover:bg-[#3A373A] border border-[#4D4845]/60 rounded-xl py-2 px-4 text-left shadow-md transition-all cursor-pointer flex items-center gap-2.5 whitespace-nowrap"
           style={{ backgroundColor: '#2A272A', color: '#F5ECDC' }}
         >
           <div className="p-1.5 bg-[#F5ECDC] rounded-lg shrink-0" style={{ backgroundColor: '#F5ECDC', color: '#000000' }}>
@@ -146,7 +146,7 @@ export default function ShareCollectionPage() {
            <div className="z-10 shrink-0">
              <button
                 onClick={() => setIsSubscriptionModalOpen(true)}
-                className="bg-[#F5ECDC] hover:bg-white text-[#000000] border border-[#F5ECDC] rounded-2xl py-3.5 px-6 sm:px-8 text-left shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer flex items-center gap-3.5 shrink-0 max-w-full min-w-fit"
+                className="hidden bg-[#F5ECDC] hover:bg-white text-[#000000] border border-[#F5ECDC] rounded-2xl py-3.5 px-6 sm:px-8 text-left shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer flex items-center gap-3.5 shrink-0 max-w-full min-w-fit"
                 style={{ backgroundColor: '#F5ECDC', color: '#000000' }}
              >
                 <Sparkles size={20} style={{ color: '#000000' }} />

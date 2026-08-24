@@ -133,7 +133,7 @@ export default function ShareBookPage() {
              {/* Nút ĐĂNG KÍ */}
              <button
                 onClick={() => setIsSubscriptionModalOpen(true)}
-                className="w-full bg-[#1F1D20] hover:bg-[#2A272A] border border-[#4D4845]/40 rounded-2xl py-3 px-6 text-left shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer flex items-center gap-3.5"
+                className="hidden w-full bg-[#1F1D20] hover:bg-[#2A272A] border border-[#4D4845]/40 rounded-2xl py-3 px-6 text-left shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer flex items-center gap-3.5"
                 style={{ backgroundColor: '#1F1D20', color: '#F5ECDC' }}
              >
                 <div className="p-2 bg-[#F5ECDC] rounded-xl shrink-0" style={{ backgroundColor: '#F5ECDC', color: '#000000' }}>

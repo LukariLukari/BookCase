@@ -419,9 +419,9 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                       <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 border-b-2 border-r-2 border-white rounded-br" />
                       
                       {/* Center Guide Label */}
-                      <span className="text-[11px] font-bold text-[#F5ECDC] bg-black/70 px-3 py-1 rounded-full border border-white/20 tracking-wide pointer-events-none shadow-md">
+                      {/* <span className="text-[11px] font-bold text-[#F5ECDC] bg-black/70 px-3 py-1 rounded-full border border-white/20 tracking-wide pointer-events-none shadow-md">
                         ĐẶT ĐOẠN SÁCH CẦN LƯU VÀO ĐÂY
-                      </span>
+                      </span> */}
                     </div>
 
                     {/* Bottom Mask */}
@@ -592,13 +592,13 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                   className="flex flex-col items-center justify-center py-6 border border-dashed border-[#F5ECDC]/40 rounded-xl cursor-pointer hover:bg-[#3A373A] transition-all bg-[#1F1D20] group"
                 >
                   <Camera size={26} className="text-[#F5ECDC] mb-1.5 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-bold text-[#F5ECDC]">Mở Camera canh khung</span>
+                  <span className="text-xs font-bold text-[#F5ECDC]">Chụp</span>
                   <span className="text-[10px] text-[#8A817C] mt-0.5">Chụp đúng đoạn sách</span>
                 </button>
 
                 <label className="flex flex-col items-center justify-center py-6 border border-dashed border-[#4D4845] rounded-xl cursor-pointer hover:bg-[#3A373A] transition-all bg-[#1F1D20] group">
                   <Upload size={26} className="text-[#D7C9B2] mb-1.5 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-bold text-[#D7C9B2]">Tải ảnh từ máy</span>
+                  <span className="text-xs font-bold text-[#D7C9B2]">Tải lên</span>
                   <span className="text-[10px] text-[#8A817C] mt-0.5">Có công cụ cắt đoạn</span>
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                 </label>
@@ -616,7 +616,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="block text-sm font-bold text-[#F5ECDC]">
-                2. Nội dung các đoạn trích dẫn (Quote Cards)
+                2. Trích dẫn (Quote Cards)
               </label>
               
               <button 
@@ -635,7 +635,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                 className="relative bg-[#2A272A] border border-[#4D4845] rounded-2xl p-4 shadow-md focus-within:border-[#F5ECDC]/60 transition-colors space-y-3"
               >
                 <div className="relative">
-                  <span className="absolute top-2 left-2 text-3xl font-serif text-[#F5ECDC]/20 select-none pointer-events-none">“</span>
+                  <span className="absolute top-3 left-3 text-3xl font-serif text-[#F5ECDC]/20 select-none pointer-events-none leading-none">“</span>
                   
                   <textarea
                     id={`quote-textarea-${idx}`}
@@ -643,10 +643,10 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                     onChange={(e) => handleTextChange(idx, e.target.value)}
                     placeholder="Nhập hoặc dán nội dung trích dẫn vào đây..."
                     rows={3}
-                    className="w-full bg-transparent text-[#F5ECDC] placeholder-[#7B7369] text-sm font-medium focus:outline-none resize-none pt-4 px-3"
+                    className="w-full bg-transparent text-[#F5ECDC] placeholder-[#7B7369] text-sm font-medium focus:outline-none resize-none pt-6 pb-6 px-8"
                   />
 
-                  <span className="absolute bottom-2 right-3 text-3xl font-serif text-[#F5ECDC]/20 select-none pointer-events-none">”</span>
+                  <span className="absolute bottom-3 right-3 text-3xl font-serif text-[#F5ECDC]/20 select-none pointer-events-none leading-none">”</span>
                 </div>
 
                 {/* Bottom Row: Page Number + Paste + Remove */}
