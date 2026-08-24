@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2, Plus, X, Trash2, Quote as QuoteIcon, Image as ImageIcon } from 'lucide-react';
-import QuoteCollectorModal from './QuoteCollectorModal';
+import { Loader2, X, Trash2, Quote as QuoteIcon, Image as ImageIcon } from 'lucide-react';
 
 interface Quote {
   id: string;
@@ -11,10 +10,15 @@ interface Quote {
   created_at: string;
 }
 
-export default function QuoteGallery({ userBookId }: { userBookId: string }) {
+interface QuoteGalleryProps {
+  userBookId: string;
+  refreshTrigger?: number;
+  onQuotesLoaded?: (count: number) => void;
+}
+
+export default function QuoteGallery({ userBookId, refreshTrigger = 0, onQuotesLoaded }: QuoteGalleryProps) {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCollectorOpen, setIsCollectorOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -50,28 +54,16 @@ export default function QuoteGallery({ userBookId }: { userBookId: string }) {
 
   useEffect(() => {
     fetchQuotes();
-  }, [userBookId]);
+  }, [userBookId, refreshTrigger]);
+
+  useEffect(() => {
+    if (onQuotesLoaded) {
+      onQuotesLoaded(quotes.length);
+    }
+  }, [quotes, onQuotesLoaded]);
 
   return (
-    <div className="w-full mt-8">
-      <div className="flex items-center justify-between mb-6 border-b border-[#4D4845]/40 pb-4">
-        <div className="flex items-center gap-2">
-          <QuoteIcon size={20} className="text-[#F5ECDC]" />
-          <h3 className="text-xl font-bold text-[#F5ECDC]">Trích dẫn của tôi</h3>
-          <span className="text-xs font-bold bg-[#2A272A] text-[#D7C9B2] border border-[#4D4845]/60 px-2.5 py-0.5 rounded-full">
-            {quotes.length}
-          </span>
-        </div>
-        <button 
-          onClick={() => setIsCollectorOpen(true)}
-          className="bg-[#F5ECDC] hover:bg-white text-black font-black py-2 px-4 rounded-xl flex items-center gap-2 shadow-md transition-colors cursor-pointer"
-          style={{ color: '#000000' }}
-        >
-          <Plus size={18} className="text-black stroke-[3]" />
-          <span className="text-black font-black">Thêm Trích Dẫn</span>
-        </button>
-      </div>
-
+    <div className="w-full">
       {isLoading ? (
         <div className="flex justify-center p-12"><Loader2 className="animate-spin text-[#D7C9B2]" size={32} /></div>
       ) : quotes.length === 0 ? (
@@ -138,15 +130,6 @@ export default function QuoteGallery({ userBookId }: { userBookId: string }) {
             );
           })}
         </div>
-      )}
-
-      {/* Quote Collector Modal */}
-      {isCollectorOpen && (
-        <QuoteCollectorModal 
-          bookId={userBookId} 
-          onClose={() => setIsCollectorOpen(false)} 
-          onSaveSuccess={fetchQuotes} 
-        />
       )}
 
       {/* Image Viewer Modal */}

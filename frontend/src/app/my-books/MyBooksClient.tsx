@@ -4,10 +4,11 @@ import axios from 'axios';
 import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Loader2, Plus, Book as BookIcon, X, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Book as BookIcon, X, Trash2, Quote as QuoteIcon } from 'lucide-react';
 import BookCoverImage from '@/components/BookCoverImage';
 import QuoteGallery from '@/components/QuoteGallery';
 import AddMyBookModal from '@/components/AddMyBookModal';
+import QuoteCollectorModal from '@/components/QuoteCollectorModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MyBooksClient() {
@@ -15,6 +16,9 @@ export default function MyBooksClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedBook, setSelectedBook] = useState<any | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCollectorOpen, setIsCollectorOpen] = useState(false);
+  const [quoteCount, setQuoteCount] = useState(0);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   
   const { user, isLoading: authLoading } = useAuth();
@@ -136,7 +140,7 @@ export default function MyBooksClient() {
                 className="relative bg-[#1F1D20] border border-[#4D4845]/40 rounded-3xl p-6 md:p-8 max-w-4xl w-full shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
               >
                 <div className="flex justify-between items-start mb-6">
-                  <div className="flex gap-6">
+                  <div className="flex gap-6 w-full relative">
                     <div className="w-24 md:w-32 aspect-[2/3] flex-shrink-0">
                       <BookCoverImage 
                         coverUrl={selectedBook.custom_cover_url || selectedBook.book?.cover_url}
@@ -146,29 +150,52 @@ export default function MyBooksClient() {
                         className="w-full h-full object-cover rounded-xl shadow-lg"
                       />
                     </div>
-                    <div>
-                      <h2 className="text-2xl md:text-3xl font-black text-[#F5ECDC] leading-tight mb-2">
-                        {selectedBook.custom_title || selectedBook.book?.title || "Unknown"}
-                      </h2>
-                      <p className="text-base text-[#D7C9B2] font-semibold mb-4">
-                        {selectedBook.custom_author || selectedBook.book?.author || "Unknown"}
-                      </p>
-                      
-                      <button 
-                        onClick={() => handleDelete(selectedBook.id)}
-                        className="flex items-center gap-2 text-red-400 hover:text-red-300 text-sm font-medium bg-red-400/10 hover:bg-red-400/20 px-3 py-1.5 rounded-lg transition-colors"
-                      >
-                        <Trash2 size={16} /> Xóa khỏi thư viện
-                      </button>
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <h2 className="text-2xl md:text-3xl font-black text-[#F5ECDC] leading-tight mb-2 pr-10">
+                          {selectedBook.custom_title || selectedBook.book?.title || "Unknown"}
+                        </h2>
+                        <p className="text-base text-[#D7C9B2] font-semibold mb-4">
+                          {selectedBook.custom_author || selectedBook.book?.author || "Unknown"}
+                        </p>
+                        
+                        <button 
+                          onClick={() => handleDelete(selectedBook.id)}
+                          className="flex items-center gap-2 text-red-400 hover:text-red-300 text-sm font-medium bg-red-400/10 hover:bg-red-400/20 px-3 py-1.5 rounded-lg transition-colors w-fit"
+                        >
+                          <Trash2 size={16} /> Xóa khỏi thư viện
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-4 mt-6">
+                         <div className="flex items-center gap-2">
+                           <QuoteIcon size={18} className="text-[#F5ECDC]" />
+                           <h3 className="text-lg font-bold text-[#F5ECDC]">Trích dẫn</h3>
+                           <span className="text-xs font-bold bg-[#2A272A] text-[#D7C9B2] border border-[#4D4845]/60 px-2 py-0.5 rounded-full">
+                             {quoteCount}
+                           </span>
+                         </div>
+                         <button 
+                           onClick={() => setIsCollectorOpen(true)}
+                           className="bg-[#F5ECDC] hover:bg-white text-black font-bold py-1.5 px-3 rounded-lg flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer text-sm"
+                         >
+                           <Plus size={16} className="text-black stroke-[3]" />
+                           <span>Thêm Trích Dẫn</span>
+                         </button>
+                      </div>
                     </div>
                   </div>
-                  <button onClick={() => setSelectedBook(null)} className="p-2 text-[#D7C9B2] hover:text-[#F5ECDC] bg-[#2A272A] rounded-full transition-colors flex-shrink-0">
+                  <button onClick={() => setSelectedBook(null)} className="absolute top-6 right-6 md:top-8 md:right-8 p-2 text-[#D7C9B2] hover:text-[#F5ECDC] bg-[#2A272A] rounded-full transition-colors flex-shrink-0 z-20 shadow-md border border-[#4D4845]/40">
                     <X size={20} />
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto w-full border-t border-[#4D4845]/40 pt-2 pb-6">
-                  <QuoteGallery userBookId={selectedBook.id} />
+                <div className="flex-1 overflow-y-auto w-full border-t border-[#4D4845]/40 pt-4 pb-6">
+                  <QuoteGallery 
+                    userBookId={selectedBook.id} 
+                    refreshTrigger={refreshTrigger}
+                    onQuotesLoaded={setQuoteCount}
+                  />
                 </div>
               </motion.div>
             </div>
@@ -180,6 +207,15 @@ export default function MyBooksClient() {
           onClose={() => setIsAddModalOpen(false)}
           onSuccess={fetchMyBooks}
         />
+
+        {/* Quote Collector Modal */}
+        {isCollectorOpen && selectedBook && (
+          <QuoteCollectorModal 
+            bookId={selectedBook.id} 
+            onClose={() => setIsCollectorOpen(false)} 
+            onSaveSuccess={() => setRefreshTrigger(prev => prev + 1)} 
+          />
+        )}
       </div>
     </div>
   );
