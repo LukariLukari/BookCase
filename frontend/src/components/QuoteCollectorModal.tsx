@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { 
   X, Camera, Upload, Plus, Trash2, Clipboard, CheckCircle2, 
   Quote as QuoteIcon, Loader2, Maximize2, Minimize2, 
-  FileText, ArrowDownToLine, ScanLine
+  FileText, ArrowDownToLine, ScanLine, Copy, Check
 } from 'lucide-react';
 import axios from 'axios';
 import Tesseract from 'tesseract.js';
@@ -19,6 +19,68 @@ interface QuoteCollectorModalProps {
   onSaveSuccess?: () => void;
 }
 
+// Client-Side Canvas Pre-processing for High Accuracy Vietnamese OCR
+const preprocessImageForOcr = (imageSrc: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(imageSrc);
+        return;
+      }
+
+      // Optimal width for OCR text detection (around 1600-1800px)
+      const maxDim = 1800;
+      let width = img.width;
+      let height = img.height;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Draw base
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Grayscale & Adaptive Contrast Stretching
+      const imgData = ctx.getImageData(0, 0, width, height);
+      const data = imgData.data;
+
+      let totalGray = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        totalGray += gray;
+      }
+      const avgGray = totalGray / (data.length / 4);
+      const threshold = avgGray * 0.9;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        // Binarize text vs paper background
+        const enhanced = gray < threshold ? Math.max(0, gray - 50) : Math.min(255, gray + 40);
+        data[i] = enhanced;
+        data[i + 1] = enhanced;
+        data[i + 2] = enhanced;
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => resolve(imageSrc);
+    img.src = imageSrc;
+  });
+};
+
 export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: QuoteCollectorModalProps) {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<QuoteItem[]>([{ text: '', pageNumber: '' }]);
@@ -32,6 +94,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
   const [ocrStatus, setOcrStatus] = useState('');
   const [detectedSentences, setDetectedSentences] = useState<string[]>([]);
   const [detectedRawText, setDetectedRawText] = useState<string | null>(null);
+  const [copiedRaw, setCopiedRaw] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -47,52 +110,57 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
     }
   };
 
-  // OCR Scanning via Tesseract.js
+  // Enhanced Vietnamese OCR Scanning
   const handleRunOcr = async () => {
     if (!imageSrc) return;
     setIsOcrScanning(true);
-    setOcrProgress(0);
-    setOcrStatus('Đang chuẩn bị nhận diện...');
+    setOcrProgress(10);
+    setOcrStatus('Đang tối ưu độ nét & tương phản ảnh...');
 
     try {
+      // 1. Preprocess Image
+      const processedImage = await preprocessImageForOcr(imageSrc);
+      setOcrProgress(25);
+      setOcrStatus('Tải từ điển Tiếng Việt...');
+
+      // 2. Recognize using pure Vietnamese model 'vie'
       const { data } = await Tesseract.recognize(
-        imageSrc,
-        'vie+eng',
+        processedImage,
+        'vie',
         {
           logger: (m) => {
             if (m.status === 'recognizing text') {
-              setOcrStatus('Đang đọc chữ...');
-              setOcrProgress(Math.round(m.progress * 100));
-            } else if (m.status === 'loading tesseract core') {
-              setOcrStatus('Khởi tạo...');
-            } else if (m.status === 'loading language traineddata') {
-              setOcrStatus('Tải từ điển tiếng Việt...');
+              setOcrStatus('Đang đọc chữ Tiếng Việt...');
+              setOcrProgress(25 + Math.round(m.progress * 70));
             }
           }
         }
       );
 
-      const rawText = data.text || '';
+      const rawText = (data.text || '').trim();
       setDetectedRawText(rawText);
 
-      // Detect potential page number
+      // Detect potential page number (e.g. standalone "34" or "Trang 34")
       const pageMatch = rawText.match(/(?:trang|page|\b)\s*(\d{1,4})\b/i);
       const likelyPage = pageMatch ? pageMatch[1] : '';
 
-      // Segment sentences / paragraphs
+      // Clean & segment sentences / paragraphs
       const cleaned = rawText
         .split(/\n{2,}|\.\s+(?=[A-ZÀ-Ỹ])/)
         .map(s => s.replace(/\n/g, ' ').replace(/\s{2,}/g, ' ').trim())
-        .filter(s => s.length > 15);
+        .filter(s => s.length > 10);
 
       setDetectedSentences(cleaned);
 
-      if (likelyPage && quotes.length === 1 && !quotes[0].pageNumber) {
-        setQuotes(prev => [{ ...prev[0], pageNumber: likelyPage }]);
+      // Auto populate first empty quote box
+      if (cleaned.length > 0 && quotes.length === 1 && !quotes[0].text.trim()) {
+        setQuotes([{ text: cleaned[0], pageNumber: likelyPage }]);
+      } else if (likelyPage && quotes.length >= 1 && !quotes[0].pageNumber) {
+        setQuotes(prev => prev.map((q, i) => i === 0 ? { ...q, pageNumber: likelyPage } : q));
       }
     } catch (err) {
       console.error("OCR Scan failed:", err);
-      alert("Không thể nhận diện chữ từ ảnh này. Bạn có thể dán thủ công nhé!");
+      alert("Không thể quét chữ từ ảnh này. Bạn hãy dùng tính năng Dán trực tiếp nhé!");
     } finally {
       setIsOcrScanning(false);
       setOcrProgress(100);
@@ -117,11 +185,14 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
     setQuotes(prev => [...prev, { text: '', pageNumber: prev[prev.length - 1]?.pageNumber || '' }]);
   };
 
+  // Always delete or clear quote box
   const handleRemoveQuoteBox = (index: number) => {
     if (quotes.length === 1) {
+      // Clear current single box
       setQuotes([{ text: '', pageNumber: '' }]);
       return;
     }
+    // Delete item if multiple
     setQuotes(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -160,6 +231,15 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
     if (el) {
       el.focus();
     }
+  };
+
+  const handleCopyRawText = async () => {
+    if (!detectedRawText) return;
+    try {
+      await navigator.clipboard.writeText(detectedRawText);
+      setCopiedRaw(true);
+      setTimeout(() => setCopiedRaw(false), 2000);
+    } catch {}
   };
 
   const handleSaveAll = async () => {
@@ -279,11 +359,11 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                 </div>
 
                 {/* OCR Scanner Button & Progress Bar */}
-                <div className="bg-[#1F1D20] border border-[#4D4845]/60 rounded-xl p-3">
+                <div className="bg-[#1F1D20] border border-[#4D4845]/60 rounded-xl p-3.5">
                   {!isOcrScanning ? (
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                       <div className="text-xs text-[#D7C9B2]">
-                        Tự động nhận diện văn bản từ ảnh trang sách
+                        Tự động nhận diện văn bản tiếng Việt từ ảnh trang sách
                       </div>
                       <button
                         onClick={handleRunOcr}
@@ -314,10 +394,22 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
 
                   {/* OCR Smart Chips Section */}
                   {detectedSentences.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-[#4D4845]/40">
-                      <p className="text-xs font-bold text-[#D7C9B2] mb-2 flex items-center gap-1.5">
-                        <ArrowDownToLine size={13} /> Chạm vào đoạn văn để đưa vào Trích Dẫn:
-                      </p>
+                    <div className="mt-3.5 pt-3.5 border-t border-[#4D4845]/40 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-[#F5ECDC] flex items-center gap-1.5">
+                          <ArrowDownToLine size={13} /> Chạm vào đoạn văn để đưa vào ô trích dẫn:
+                        </p>
+                        {detectedRawText && (
+                          <button
+                            onClick={handleCopyRawText}
+                            className="text-[11px] font-bold text-[#D7C9B2] hover:text-[#F5ECDC] flex items-center gap-1 bg-[#2A272A] px-2 py-0.5 rounded-md border border-[#4D4845]/60 transition-colors"
+                          >
+                            {copiedRaw ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                            <span>{copiedRaw ? "Đã copy" : "Copy tất cả"}</span>
+                          </button>
+                        )}
+                      </div>
+
                       <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
                         {detectedSentences.map((sentence, sIdx) => (
                           <button
@@ -387,7 +479,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                   <span className="absolute bottom-2 right-3 text-3xl font-serif text-[#F5ECDC]/20 select-none pointer-events-none">”</span>
                 </div>
 
-                {/* Bottom Row: Page Number + Paste + Remove */}
+                {/* Bottom Row: Page Number + Paste + Remove (ALWAYS VISIBLE) */}
                 <div className="flex items-center justify-between pt-2 border-t border-[#4D4845]/40 gap-3">
                   
                   {/* Page Number Field */}
@@ -397,7 +489,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                       type="number"
                       value={item.pageNumber}
                       onChange={(e) => handlePageChange(idx, e.target.value)}
-                      placeholder="128"
+                      placeholder="34"
                       className="w-14 bg-transparent text-[#F5ECDC] text-xs font-bold focus:outline-none placeholder-[#5A534E]"
                     />
                   </div>
@@ -421,17 +513,16 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                       )}
                     </button>
 
-                    {quotes.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveQuoteBox(idx)}
-                        className="text-xs text-red-400 hover:text-red-300 p-1.5 hover:bg-red-950/40 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
-                        title="Xóa ô này"
-                      >
-                        <Trash2 size={13} />
-                        <span>Xóa</span>
-                      </button>
-                    )}
+                    {/* ALWAYS VISIBLE DELETE BUTTON */}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveQuoteBox(idx)}
+                      className="text-xs text-red-400 hover:text-red-300 hover:bg-red-950/40 border border-red-500/20 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                      title={quotes.length === 1 ? "Xóa nội dung ô này" : "Xóa ô này"}
+                    >
+                      <Trash2 size={13} />
+                      <span>{quotes.length === 1 ? "Xóa" : "Xóa ô"}</span>
+                    </button>
                   </div>
 
                 </div>
