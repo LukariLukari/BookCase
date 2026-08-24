@@ -137,9 +137,17 @@ class ExternalImportRequest(BaseModel):
     author: Optional[str] = None
 
 class QuoteCreate(BaseModel):
-    image_url: str
+    image_url: Optional[str] = ""
     text_content: Optional[str] = None
     page_number: Optional[int] = None
+
+class QuoteBatchItem(BaseModel):
+    text_content: Optional[str] = None
+    page_number: Optional[int] = None
+
+class QuoteBatchCreate(BaseModel):
+    image_url: Optional[str] = ""
+    quotes: List[QuoteBatchItem] = []
 
 class QuoteResponse(BaseModel):
     id: str

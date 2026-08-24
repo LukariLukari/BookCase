@@ -1261,8 +1261,7 @@ async def add_my_book_quote(user_book_id: str, quote_in: schemas.QuoteCreate, db
     if not ub:
         raise HTTPException(status_code=404, detail="User book not found")
     
-    # Store Base64 or ImgBB Url
-    image_url = quote_in.image_url
+    image_url = quote_in.image_url or ""
     imgbb_key = os.getenv("IMGBB_API_KEY")
     if imgbb_key and image_url.startswith("data:image"):
         try:
@@ -1270,7 +1269,7 @@ async def add_my_book_quote(user_book_id: str, quote_in: schemas.QuoteCreate, db
             url = "https://api.imgbb.com/1/upload"
             data = urllib.parse.urlencode({'key': imgbb_key, 'image': b64_data}).encode('utf-8')
             req = urllib.request.Request(url, data=data)
-            with urllib.request.urlopen(req, timeout=10) as response:
+            with urllib.request.urlopen(req, timeout=5) as response:
                 res = json.loads(response.read().decode('utf-8'))
                 img_url = res.get("data", {}).get("url")
                 if img_url:
@@ -1284,10 +1283,71 @@ async def add_my_book_quote(user_book_id: str, quote_in: schemas.QuoteCreate, db
         text_content=quote_in.text_content,
         page_number=quote_in.page_number
     )
-    db.add(new_quote)
-    db.commit()
-    db.refresh(new_quote)
-    return new_quote
+    try:
+        db.add(new_quote)
+        db.commit()
+        db.refresh(new_quote)
+        return new_quote
+    except Exception as e:
+        db.rollback()
+        print(f"Database error saving quote: {e}")
+        raise HTTPException(status_code=500, detail="Không thể lưu trích dẫn vào cơ sở dữ liệu.")
+
+@app.post("/api/users/me/books/{user_book_id}/quotes/batch", response_model=List[schemas.QuoteResponse])
+async def add_my_book_quotes_batch(user_book_id: str, payload: schemas.QuoteBatchCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ub = db.query(models.UserBook).filter(models.UserBook.id == user_book_id, models.UserBook.user_id == current_user.id).first()
+    if not ub:
+        raise HTTPException(status_code=404, detail="User book not found")
+    
+    image_url = payload.image_url or ""
+    imgbb_key = os.getenv("IMGBB_API_KEY")
+    if imgbb_key and image_url.startswith("data:image"):
+        try:
+            b64_data = image_url.split(",")[1]
+            url = "https://api.imgbb.com/1/upload"
+            data = urllib.parse.urlencode({'key': imgbb_key, 'image': b64_data}).encode('utf-8')
+            req = urllib.request.Request(url, data=data)
+            with urllib.request.urlopen(req, timeout=5) as response:
+                res = json.loads(response.read().decode('utf-8'))
+                img_url = res.get("data", {}).get("url")
+                if img_url:
+                    image_url = img_url
+        except Exception as e:
+            print(f"ImgBB Batch Upload Warning: {e}")
+
+    quote_entities = []
+    if payload.quotes:
+        for item in payload.quotes:
+            if item.text_content and item.text_content.strip():
+                quote_entities.append(models.Quote(
+                    user_book_id=user_book_id,
+                    image_url=image_url,
+                    text_content=item.text_content.strip(),
+                    page_number=item.page_number
+                ))
+    
+    # If no text quotes but there is an image, save one image quote
+    if not quote_entities and image_url:
+        quote_entities.append(models.Quote(
+            user_book_id=user_book_id,
+            image_url=image_url,
+            text_content="",
+            page_number=None
+        ))
+
+    if not quote_entities:
+        raise HTTPException(status_code=400, detail="Không có nội dung trích dẫn hợp lệ để lưu.")
+
+    try:
+        db.add_all(quote_entities)
+        db.commit()
+        for q in quote_entities:
+            db.refresh(q)
+        return quote_entities
+    except Exception as e:
+        db.rollback()
+        print(f"Database error saving batch quotes: {e}")
+        raise HTTPException(status_code=500, detail="Lỗi khi lưu danh sách trích dẫn vào cơ sở dữ liệu.")
 
 @app.post("/api/ocr/scan")
 async def scan_image_ocr(payload: dict, current_user: models.User = Depends(auth.get_current_user)):
