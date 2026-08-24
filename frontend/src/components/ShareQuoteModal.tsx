@@ -90,13 +90,16 @@ const THEMES: Record<ThemeId, ThemeConfig> = {
 };
 
 export default function ShareQuoteModal({
-  quoteText,
-  bookTitle = "Sách chưa đặt tên",
-  bookAuthor = "Tác giả ẩn danh",
+  quoteText: rawQuoteText,
+  bookTitle: rawBookTitle = "Sách chưa đặt tên",
+  bookAuthor: rawBookAuthor = "Tác giả ẩn danh",
   pageNumber,
   coverUrl,
   onClose
 }: ShareQuoteModalProps) {
+  const quoteText = (rawQuoteText || "").normalize('NFC');
+  const bookTitle = (rawBookTitle || "").normalize('NFC');
+  const bookAuthor = (rawBookAuthor || "").normalize('NFC');
   const [ratio, setRatio] = useState<AspectRatio>('story');
   const [currentTheme, setCurrentTheme] = useState<ThemeId>('obsidian');
   const [isExporting, setIsExporting] = useState(false);
