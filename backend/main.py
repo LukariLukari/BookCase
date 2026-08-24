@@ -25,9 +25,21 @@ import string
 
 import sqlite3
 
-import time
+from sqlalchemy import text
+
 try:
     models.Base.metadata.create_all(bind=engine)
+    with engine.connect() as conn:
+        # Auto-migrate quotes table for Postgres and SQLite
+        try:
+            conn.execute(text("ALTER TABLE quotes ADD COLUMN IF NOT EXISTS page_number INTEGER;"))
+            conn.commit()
+        except Exception:
+            try:
+                conn.execute(text("ALTER TABLE quotes ADD COLUMN page_number INTEGER;"))
+                conn.commit()
+            except Exception:
+                pass
 except Exception as e:
     print(f"Warning: Database creation race condition handled: {e}")
     time.sleep(1) # Give the primary worker a moment to finish creating tables
@@ -1278,9 +1290,10 @@ async def add_my_book_quote(user_book_id: str, quote_in: schemas.QuoteCreate, db
             print(f"ImgBB Upload Failed for Quote: {e}")
 
     new_quote = models.Quote(
+        id=models.generate_uuid(),
         user_book_id=user_book_id,
-        image_url=image_url,
-        text_content=quote_in.text_content,
+        image_url=image_url or None,
+        text_content=quote_in.text_content or "",
         page_number=quote_in.page_number
     )
     try:
@@ -1291,7 +1304,16 @@ async def add_my_book_quote(user_book_id: str, quote_in: schemas.QuoteCreate, db
     except Exception as e:
         db.rollback()
         print(f"Database error saving quote: {e}")
-        raise HTTPException(status_code=500, detail="Không thể lưu trích dẫn vào cơ sở dữ liệu.")
+        # Schema column fallback in case page_number column is missing in older remote DB
+        try:
+            new_quote.page_number = None
+            db.add(new_quote)
+            db.commit()
+            db.refresh(new_quote)
+            return new_quote
+        except Exception as e2:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=f"Không thể lưu trích dẫn vào cơ sở dữ liệu: {str(e2)}")
 
 @app.post("/api/users/me/books/{user_book_id}/quotes/batch", response_model=List[schemas.QuoteResponse])
 async def add_my_book_quotes_batch(user_book_id: str, payload: schemas.QuoteBatchCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
@@ -1299,9 +1321,9 @@ async def add_my_book_quotes_batch(user_book_id: str, payload: schemas.QuoteBatc
     if not ub:
         raise HTTPException(status_code=404, detail="User book not found")
     
-    image_url = payload.image_url or ""
+    image_url = payload.image_url or None
     imgbb_key = os.getenv("IMGBB_API_KEY")
-    if imgbb_key and image_url.startswith("data:image"):
+    if imgbb_key and image_url and image_url.startswith("data:image"):
         try:
             b64_data = image_url.split(",")[1]
             url = "https://api.imgbb.com/1/upload"
@@ -1320,6 +1342,7 @@ async def add_my_book_quotes_batch(user_book_id: str, payload: schemas.QuoteBatc
         for item in payload.quotes:
             if item.text_content and item.text_content.strip():
                 quote_entities.append(models.Quote(
+                    id=models.generate_uuid(),
                     user_book_id=user_book_id,
                     image_url=image_url,
                     text_content=item.text_content.strip(),
@@ -1329,6 +1352,7 @@ async def add_my_book_quotes_batch(user_book_id: str, payload: schemas.QuoteBatc
     # If no text quotes but there is an image, save one image quote
     if not quote_entities and image_url:
         quote_entities.append(models.Quote(
+            id=models.generate_uuid(),
             user_book_id=user_book_id,
             image_url=image_url,
             text_content="",
@@ -1347,7 +1371,17 @@ async def add_my_book_quotes_batch(user_book_id: str, payload: schemas.QuoteBatc
     except Exception as e:
         db.rollback()
         print(f"Database error saving batch quotes: {e}")
-        raise HTTPException(status_code=500, detail="Lỗi khi lưu danh sách trích dẫn vào cơ sở dữ liệu.")
+        try:
+            for q in quote_entities:
+                q.page_number = None
+            db.add_all(quote_entities)
+            db.commit()
+            for q in quote_entities:
+                db.refresh(q)
+            return quote_entities
+        except Exception as e2:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=f"Lỗi khi lưu danh sách trích dẫn vào cơ sở dữ liệu: {str(e2)}")
 
 @app.post("/api/ocr/scan")
 async def scan_image_ocr(payload: dict, current_user: models.User = Depends(auth.get_current_user)):

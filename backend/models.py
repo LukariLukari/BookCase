@@ -100,7 +100,7 @@ class Quote(Base):
 
     id = Column(String, primary_key=True, default=generate_uuid, index=True)
     user_book_id = Column(String, ForeignKey("user_books.id"), index=True)
-    image_url = Column(String)  # Can store Base64 or ImgBB URL
+    image_url = Column(String, nullable=True)  # Can store Base64, ImgBB URL, or None
     text_content = Column(String, nullable=True) # Optional text
     page_number = Column(Integer, nullable=True) # Optional page number
     created_at = Column(DateTime(timezone=True), server_default=func.now())
