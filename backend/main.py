@@ -1289,6 +1289,71 @@ async def add_my_book_quote(user_book_id: str, quote_in: schemas.QuoteCreate, db
     db.refresh(new_quote)
     return new_quote
 
+@app.post("/api/ocr/scan")
+async def scan_image_ocr(payload: dict, current_user: models.User = Depends(auth.get_current_user)):
+    image_base64 = payload.get("image_base64", "")
+    client_api_key = payload.get("api_key", "")
+    
+    gemini_key = client_api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    
+    if not gemini_key:
+        raise HTTPException(status_code=400, detail="Chưa có Google Gemini API Key. Bạn có thể nhập API Key miễn phí từ Google AI Studio.")
+
+    # Clean base64 data
+    clean_b64 = image_base64
+    mime_type = "image/jpeg"
+    if "," in image_base64:
+        header, clean_b64 = image_base64.split(",", 1)
+        if "png" in header:
+            mime_type = "image/png"
+        elif "webp" in header:
+            mime_type = "image/webp"
+
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+        prompt = (
+            "Bạn là công cụ OCR tiếng Việt siêu chính xác chuyên đọc sách. "
+            "Hãy đọc và trích xuất toàn bộ văn bản trong bức ảnh trang sách này. "
+            "Yêu cầu: "
+            "1. Giữ nguyên 100% từng từ ngữ, câu chữ, dấu câu tiếng Việt chuẩn ngữ pháp, không thêm bớt, không bịa đặt. "
+            "2. Tự động nhận diện số trang nếu có (thường ở đầu hoặc chân trang). "
+            "3. Tách các câu văn/đoạn văn thành mảng danh sách sentences. "
+            "4. Trả về DUY NHẤT một chuỗi JSON hợp lệ với cấu trúc: "
+            "{\"full_text\": \"toàn bộ nội dung văn bản\", \"page_number\": 34, \"sentences\": [\"câu 1\", \"câu 2\"]}. "
+            "Không kèm theo bất kỳ giải thích hay markdown code block nào."
+        )
+        
+        req_body = {
+            "contents": [{
+                "parts": [
+                    {"text": prompt},
+                    {"inline_data": {"mime_type": mime_type, "data": clean_b64}}
+                ]
+            }],
+            "generationConfig": {
+                "response_mime_type": "application/json",
+                "temperature": 0.1
+            }
+        }
+        
+        req_data = json.dumps(req_body).encode('utf-8')
+        req = urllib.request.Request(
+            url, 
+            data=req_data, 
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        
+        with urllib.request.urlopen(req, timeout=15) as response:
+            res_json = json.loads(response.read().decode('utf-8'))
+            text_result = res_json["candidates"][0]["content"]["parts"][0]["text"]
+            data = json.loads(text_result)
+            return data
+            
+    except Exception as e:
+        print(f"Gemini OCR Error: {e}")
+        raise HTTPException(status_code=500, detail=f"Lỗi khi quét bằng Gemini AI: {str(e)}")
+
 @app.delete("/api/users/me/quotes/{quote_id}")
 def delete_my_quote(quote_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     quote = db.query(models.Quote).join(models.UserBook).filter(models.Quote.id == quote_id, models.UserBook.user_id == current_user.id).first()
