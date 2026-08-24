@@ -139,13 +139,30 @@ class ExternalImportRequest(BaseModel):
 class QuoteCreate(BaseModel):
     image_url: str
     text_content: Optional[str] = None
+    page_number: Optional[int] = None
 
 class QuoteResponse(BaseModel):
     id: str
     user_book_id: str
     image_url: str
     text_content: Optional[str] = None
+    page_number: Optional[int] = None
     created_at: datetime
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+class GlobalQuoteResponse(BaseModel):
+    id: str
+    user_book_id: str
+    image_url: str
+    text_content: Optional[str] = None
+    page_number: Optional[int] = None
+    created_at: datetime
+    book_title: Optional[str] = None
+    book_author: Optional[str] = None
+    book_cover_url: Optional[str] = None
 
     class Config:
         orm_mode = True

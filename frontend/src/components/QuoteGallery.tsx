@@ -1,25 +1,38 @@
 'use client';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2, X, Trash2, Quote as QuoteIcon, Image as ImageIcon } from 'lucide-react';
+import { Loader2, X, Trash2, Quote as QuoteIcon, Image as ImageIcon, Share2, Hash } from 'lucide-react';
+import ShareQuoteModal from './ShareQuoteModal';
 
 interface Quote {
   id: string;
   image_url?: string;
   text_content?: string;
+  page_number?: number | null;
   created_at: string;
 }
 
 interface QuoteGalleryProps {
   userBookId: string;
+  bookTitle?: string;
+  bookAuthor?: string;
+  coverUrl?: string | null;
   refreshTrigger?: number;
   onQuotesLoaded?: (count: number) => void;
 }
 
-export default function QuoteGallery({ userBookId, refreshTrigger = 0, onQuotesLoaded }: QuoteGalleryProps) {
+export default function QuoteGallery({ 
+  userBookId, 
+  bookTitle = "Sách", 
+  bookAuthor = "Tác giả", 
+  coverUrl,
+  refreshTrigger = 0, 
+  onQuotesLoaded 
+}: QuoteGalleryProps) {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [sharingQuote, setSharingQuote] = useState<Quote | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -69,8 +82,8 @@ export default function QuoteGallery({ userBookId, refreshTrigger = 0, onQuotesL
       ) : quotes.length === 0 ? (
         <div className="bg-[#2A272A] rounded-2xl border border-[#4D4845]/50 p-10 text-center flex flex-col items-center">
           <QuoteIcon size={44} className="text-[#4D4845] mb-4" />
-          <p className="text-[#D7C9B2] font-bold text-base mb-1">Chưa có trích dẫn nào cho cuốn sách này.</p>
-          <p className="text-sm text-[#8A817C] max-w-md">Bấm vào nút "Thêm Trích Dẫn" để dán nhanh các câu nói hay hoặc lưu lại trang sách kỷ niệm nhé!</p>
+          <p className="text-[#F5ECDC] font-bold text-base mb-1">Chưa có trích dẫn nào cho cuốn sách này.</p>
+          <p className="text-sm text-[#8A817C] max-w-md">Bấm vào nút "Thêm Trích Dẫn" để quét chữ hoặc lưu lại trang sách kỷ niệm nhé!</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -83,27 +96,40 @@ export default function QuoteGallery({ userBookId, refreshTrigger = 0, onQuotesL
                 key={quote.id} 
                 className="relative bg-[#2A272A] border border-[#4D4845]/60 hover:border-[#F5ECDC]/40 rounded-2xl p-5 shadow-lg flex flex-col justify-between group transition-all"
               >
-                {/* Delete Button */}
-                <button
-                  onClick={() => handleDeleteQuote(quote.id)}
-                  className="absolute top-3 right-3 p-1.5 text-[#7B7369] hover:text-red-400 hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer opacity-80 group-hover:opacity-100"
-                  title="Xóa trích dẫn này"
-                >
-                  <Trash2 size={16} />
-                </button>
+                {/* Action Buttons Top Right */}
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+                  {hasText && (
+                    <button
+                      onClick={() => setSharingQuote(quote)}
+                      className="p-1.5 text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#3A373A] bg-[#1F1D20] border border-[#4D4845]/60 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-bold shadow-sm"
+                      title="Xuất ảnh trích dẫn"
+                    >
+                      <Share2 size={12} />
+                      <span>Xuất ảnh</span>
+                    </button>
+                  )}
+                  
+                  <button
+                    onClick={() => handleDeleteQuote(quote.id)}
+                    className="p-1.5 text-[#7B7369] hover:text-red-400 hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer opacity-80 group-hover:opacity-100"
+                    title="Xóa trích dẫn này"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
 
                 {/* Quote Content */}
                 <div>
                   {hasText ? (
                     <div className="relative pt-2 pb-3 px-2">
                       <span className="text-4xl font-serif text-[#F5ECDC]/25 leading-none block -mb-3 select-none">“</span>
-                      <p className="text-[#F5ECDC] text-base md:text-sm font-medium leading-relaxed italic whitespace-pre-wrap pl-2 pr-4">
+                      <p className="text-[#F5ECDC] text-base md:text-sm font-medium leading-relaxed italic whitespace-pre-wrap pl-2 pr-4 font-serif">
                         {quote.text_content}
                       </p>
                       <span className="text-4xl font-serif text-[#F5ECDC]/25 leading-none text-right block -mt-2 select-none">”</span>
                     </div>
                   ) : (
-                    <div className="py-2 text-xs text-[#8A817C] font-semibold italic">Trích dẫn bằng ảnh</div>
+                    <div className="py-2 text-xs text-[#8A817C] font-semibold italic">Trích dẫn bằng ảnh chụp</div>
                   )}
 
                   {/* Reference Image Thumbnail */}
@@ -121,10 +147,18 @@ export default function QuoteGallery({ userBookId, refreshTrigger = 0, onQuotesL
                   )}
                 </div>
 
-                {/* Footer Timestamp */}
+                {/* Footer Metadata */}
                 <div className="mt-4 pt-3 border-t border-[#4D4845]/30 flex justify-between items-center text-[11px] text-[#7B7369]">
-                  <span>{new Date(quote.created_at).toLocaleDateString('vi-VN')}</span>
-                  {hasImage && <span className="flex items-center gap-1 text-[#D7C9B2] font-semibold"><ImageIcon size={12} /> Có ảnh đính kèm</span>}
+                  <div className="flex items-center gap-2">
+                    <span>{new Date(quote.created_at).toLocaleDateString('vi-VN')}</span>
+                    {hasImage && <span className="flex items-center gap-1 text-[#D7C9B2] font-semibold"><ImageIcon size={12} /> Ảnh</span>}
+                  </div>
+                  
+                  {quote.page_number && (
+                    <span className="flex items-center gap-1 text-xs font-bold bg-[#1F1D20] text-amber-300/90 border border-amber-400/20 px-2 py-0.5 rounded-md">
+                      <Hash size={11} /> Trang {quote.page_number}
+                    </span>
+                  )}
                 </div>
               </div>
             );
@@ -140,6 +174,18 @@ export default function QuoteGallery({ userBookId, refreshTrigger = 0, onQuotesL
           </button>
           <img src={selectedImage} alt="Quote Full" className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl" onClick={e => e.stopPropagation()} />
         </div>
+      )}
+
+      {/* Share Quote Modal */}
+      {sharingQuote && sharingQuote.text_content && (
+        <ShareQuoteModal
+          quoteText={sharingQuote.text_content}
+          bookTitle={bookTitle}
+          bookAuthor={bookAuthor}
+          pageNumber={sharingQuote.page_number}
+          coverUrl={coverUrl}
+          onClose={() => setSharingQuote(null)}
+        />
       )}
     </div>
   );

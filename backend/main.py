@@ -1215,6 +1215,38 @@ def delete_my_book(user_book_id: str, db: Session = Depends(get_db), current_use
     db.commit()
     return {"message": "Deleted successfully"}
 
+@app.get("/api/users/me/quotes", response_model=List[schemas.GlobalQuoteResponse])
+def get_all_my_quotes(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    user_books = db.query(models.UserBook).filter(models.UserBook.user_id == current_user.id).all()
+    user_book_ids = [ub.id for ub in user_books]
+    
+    if not user_book_ids:
+        return []
+        
+    quotes = db.query(models.Quote).filter(models.Quote.user_book_id.in_(user_book_ids)).order_by(models.Quote.created_at.desc()).all()
+    
+    # Map quotes with book details
+    ub_map = {ub.id: ub for ub in user_books}
+    results = []
+    for q in quotes:
+        ub = ub_map.get(q.user_book_id)
+        book_title = ub.custom_title or (ub.book.title if ub and ub.book else "Unknown Book")
+        book_author = ub.custom_author or (ub.book.author if ub and ub.book else "Unknown Author")
+        book_cover = ub.custom_cover_url or (ub.book.cover_url if ub and ub.book else None)
+        
+        results.append(schemas.GlobalQuoteResponse(
+            id=q.id,
+            user_book_id=q.user_book_id,
+            image_url=q.image_url,
+            text_content=q.text_content,
+            page_number=q.page_number,
+            created_at=q.created_at,
+            book_title=book_title,
+            book_author=book_author,
+            book_cover_url=book_cover
+        ))
+    return results
+
 @app.get("/api/users/me/books/{user_book_id}/quotes", response_model=List[schemas.QuoteResponse])
 def get_my_book_quotes(user_book_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     ub = db.query(models.UserBook).filter(models.UserBook.id == user_book_id, models.UserBook.user_id == current_user.id).first()
@@ -1249,7 +1281,8 @@ async def add_my_book_quote(user_book_id: str, quote_in: schemas.QuoteCreate, db
     new_quote = models.Quote(
         user_book_id=user_book_id,
         image_url=image_url,
-        text_content=quote_in.text_content
+        text_content=quote_in.text_content,
+        page_number=quote_in.page_number
     )
     db.add(new_quote)
     db.commit()

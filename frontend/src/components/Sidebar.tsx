@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Library, LayoutDashboard, Bookmark, User, LogOut, Settings, Menu, X, LogIn, Loader2, KeyRound } from 'lucide-react';
+import { Library, LayoutDashboard, Bookmark, User, LogOut, Settings, Menu, X, LogIn, Loader2, KeyRound, Quote as QuoteIcon } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 export default function Sidebar() {
@@ -19,6 +19,7 @@ export default function Sidebar() {
     { icon: <LayoutDashboard size={20} />, label: 'My BookCase Board', href: '/' },
     { icon: <Library size={20} />, label: 'Collections', href: '#' },
     { icon: <Bookmark size={20} />, label: 'Sách Cá Nhân', href: '/my-books' },
+    { icon: <QuoteIcon size={20} />, label: 'Trích Dẫn (Quotes)', href: '/quotes' },
   ];
 
   if (user?.role === 'admin') {

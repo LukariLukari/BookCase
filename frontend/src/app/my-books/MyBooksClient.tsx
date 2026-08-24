@@ -177,9 +177,10 @@ export default function MyBooksClient() {
                          </div>
                          <button 
                            onClick={() => setIsCollectorOpen(true)}
-                           className="bg-[#F5ECDC] hover:bg-white text-black font-bold py-1.5 px-3 rounded-lg flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer text-sm"
+                           className="bg-[#F5ECDC] hover:bg-white font-bold py-1.5 px-3 rounded-lg flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer text-sm"
+                           style={{ color: '#1F1D20' }}
                          >
-                           <Plus size={16} className="text-black stroke-[3]" />
+                           <Plus size={14} />
                            <span>Thêm Trích Dẫn</span>
                          </button>
                       </div>
@@ -193,6 +194,9 @@ export default function MyBooksClient() {
                 <div className="flex-1 overflow-y-auto w-full border-t border-[#4D4845]/40 pt-4 pb-6">
                   <QuoteGallery 
                     userBookId={selectedBook.id} 
+                    bookTitle={selectedBook.custom_title || selectedBook.book?.title || "Unknown Book"}
+                    bookAuthor={selectedBook.custom_author || selectedBook.book?.author || "Unknown Author"}
+                    coverUrl={selectedBook.custom_cover_url || selectedBook.book?.cover_url}
                     refreshTrigger={refreshTrigger}
                     onQuotesLoaded={setQuoteCount}
                   />
