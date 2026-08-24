@@ -136,12 +136,16 @@ export default function QuoteGallery({
                   {hasImage && (
                     <div 
                       onClick={() => setSelectedImage(quote.image_url!)}
-                      className="mt-3 relative w-full h-36 rounded-xl overflow-hidden bg-black/40 border border-[#4D4845]/50 cursor-pointer group/img flex items-center justify-center"
+                      className="mt-3 relative w-full rounded-xl overflow-hidden bg-black/60 border border-[#4D4845]/50 cursor-pointer group/img flex items-center justify-center p-1.5"
                     >
-                      <img src={quote.image_url} alt="Reference photo" className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-300" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white text-xs font-bold">
+                      <img 
+                        src={quote.image_url} 
+                        alt="Reference snippet" 
+                        className="w-full h-auto max-h-56 object-contain rounded-lg group-hover/img:scale-[1.02] transition-transform duration-300" 
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white text-xs font-bold rounded-xl backdrop-blur-[2px]">
                         <ImageIcon size={16} />
-                        <span>Xem ảnh gốc</span>
+                        <span>Xem ảnh đoạn sách</span>
                       </div>
                     </div>
                   )}

@@ -351,8 +351,8 @@ export default function QuotesPage() {
 
                       {/* Attached Photo Thumbnail */}
                       {hasImage && (
-                        <div className="mt-3 relative w-full h-32 rounded-xl overflow-hidden bg-black/40 border border-[#4D4845]/50">
-                          <img src={quote.image_url} alt="Attached page" className="w-full h-full object-cover" />
+                        <div className="mt-3 relative w-full rounded-xl overflow-hidden bg-black/60 border border-[#4D4845]/50 p-1 flex items-center justify-center">
+                          <img src={quote.image_url} alt="Attached snippet" className="w-full h-auto max-h-48 object-contain rounded-lg" />
                         </div>
                       )}
                     </div>
