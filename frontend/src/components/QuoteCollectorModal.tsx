@@ -279,7 +279,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
     setIsSaving(true);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('access_token');
 
       const batchPayload = {
         image_url: imageSrc || "",

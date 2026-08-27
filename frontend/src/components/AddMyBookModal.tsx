@@ -144,7 +144,7 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('access_token');
       const headers = { Authorization: `Bearer ${token}` };
 
       if (activeTab === 'library') {

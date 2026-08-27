@@ -34,20 +34,27 @@ export default function QuotesPage() {
   const [sharingQuote, setSharingQuote] = useState<GlobalQuote | null>(null);
   const [copiedQuoteId, setCopiedQuoteId] = useState<string | null>(null);
 
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, token: authToken, isLoading: authLoading, logout } = useAuth();
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   const fetchAllQuotes = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('token');
+      const token = authToken || localStorage.getItem('token') || localStorage.getItem('access_token');
+      if (!token) {
+        logout();
+        return;
+      }
       const res = await axios.get(`${API_URL}/api/users/me/quotes`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setQuotes(res.data);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Fetch all quotes error:", err);
+      if (err.response?.status === 401) {
+        logout();
+      }
     } finally {
       setIsLoading(false);
     }

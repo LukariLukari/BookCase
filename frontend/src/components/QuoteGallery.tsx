@@ -39,7 +39,7 @@ export default function QuoteGallery({
   const fetchQuotes = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('access_token');
       const res = await axios.get(`${API_URL}/api/users/me/books/${userBookId}/quotes`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -54,7 +54,7 @@ export default function QuoteGallery({
   const handleDeleteQuote = async (quoteId: string) => {
     if (!confirm("Bạn có chắc muốn xóa trích dẫn này?")) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('access_token');
       await axios.delete(`${API_URL}/api/users/me/quotes/${quoteId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
