@@ -198,10 +198,10 @@ export default function ShareCollectionPage() {
                          <button 
                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDownload(book); }}
                            disabled={downloadingId === book.id} 
-                           className="p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 disabled:opacity-70 flex items-center justify-center"
+                           className="p-2 bg-[#2A272A] hover:bg-[#3A373A] text-[#F5ECDC] border border-[#4D4845] rounded-full shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-70 flex items-center justify-center"
                            title="Tải Xuống"
                          >
-                           {downloadingId === book.id ? <Loader2 size={18} className="animate-spin text-white" /> : <Download size={18} className="text-white stroke-[2.5]" />}
+                           {downloadingId === book.id ? <Loader2 size={18} className="animate-spin text-[#F5ECDC]" /> : <Download size={18} className="text-[#F5ECDC] stroke-[2.5]" />}
                          </button>
                      </div>
                   </div>
