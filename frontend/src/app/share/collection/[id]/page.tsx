@@ -193,15 +193,15 @@ export default function ShareCollectionPage() {
                        )}
                      </div>
 
-                     {/* Overlay Actions (Download) */}
-                     <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-[2px]">
+                     {/* Always-visible Download Action */}
+                     <div className="absolute bottom-2 right-2 z-20">
                          <button 
-                           onClick={() => handleDownload(book)}
+                           onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDownload(book); }}
                            disabled={downloadingId === book.id} 
-                           className="btn-primary shadow-lg hover:scale-105 disabled:opacity-70 disabled:hover:scale-100"
+                           className="p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 disabled:opacity-70 flex items-center justify-center"
+                           title="Tải Xuống"
                          >
-                           {downloadingId === book.id ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                           <span>{downloadingId === book.id ? 'Đang tải...' : 'Tải Xuống'}</span>
+                           {downloadingId === book.id ? <Loader2 size={18} className="animate-spin text-white" /> : <Download size={18} className="text-white stroke-[2.5]" />}
                          </button>
                      </div>
                   </div>
