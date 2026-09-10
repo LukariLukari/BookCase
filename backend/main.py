@@ -473,6 +473,35 @@ def update_book(book_id: str, book_in: schemas.BookUpdate, db: Session = Depends
     db.refresh(book)
     return serialize_book_lightweight(book)
 
+@app.post("/api/books/{book_id}/re-extract", response_model=schemas.BookResponse)
+def re_extract_book_info(book_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    
+    file_bytes = None
+    if book.drive_file_id:
+        file_bytes = drive_service.download_file_bytes(book.drive_file_id)
+        
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="Không tìm thấy file nguồn để trích xuất lại")
+        
+    is_pdf = True if (book.mime_type == 'application/pdf' or file_bytes.startswith(b'%PDF')) else False
+    extracted = extract_pdf_info(file_bytes) if is_pdf else extract_epub_info(file_bytes)
+    
+    if extracted.get('cover_b64'):
+        book.cover_url = extracted.get('cover_b64')
+    if extracted.get('title'):
+        book.title = extracted.get('title')
+    if extracted.get('author') and extracted.get('author') != 'Unknown Author':
+        book.author = extracted.get('author')
+    if extracted.get('summary'):
+        book.summary = extracted.get('summary')
+        
+    db.commit()
+    db.refresh(book)
+    return serialize_book_lightweight(book)
+
 
 @app.get("/api/books/{book_id}/download")
 def download_book(book_id: str, db: Session = Depends(get_db)):
