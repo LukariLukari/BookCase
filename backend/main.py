@@ -266,19 +266,32 @@ async def upload_book(
     title: Optional[str] = Form(""),
     external_url: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_admin_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     try:
         contents = await file.read()
-        mime_type = file.content_type
+        filename = file.filename or "uploaded_book"
+        filename_lower = filename.lower()
         
-        extracted = {}
-        if mime_type == 'application/pdf':
+        # Nhận diện mime_type chính xác dựa trên Header + Magic Bytes + Đuôi file
+        mime_type = file.content_type
+        if filename_lower.endswith('.pdf') or contents.startswith(b'%PDF'):
+            mime_type = 'application/pdf'
+            extracted = extract_pdf_info(contents)
+        elif filename_lower.endswith('.epub') or contents.startswith(b'PK') or 'epub' in (mime_type or '').lower():
+            mime_type = 'application/epub+zip'
+            extracted = extract_epub_info(contents)
+        elif mime_type == 'application/pdf':
             extracted = extract_pdf_info(contents)
         elif mime_type in ['application/epub+zip', 'application/epub']:
+            mime_type = 'application/epub+zip'
             extracted = extract_epub_info(contents)
+        else:
+            mime_type = mime_type or 'application/octet-stream'
+            extracted = {}
             
-        final_title = extracted.get('title') or title
+        raw_name = filename.rsplit('.', 1)[0] if '.' in filename else filename
+        final_title = extracted.get('title') or (title.strip() if title and title.strip() else None) or raw_name or "Sách chưa đặt tên"
         final_author = extracted.get('author') or "Unknown Author"
         final_summary = extracted.get('summary') or ""
         cover_b64 = extracted.get('cover_b64')
@@ -299,11 +312,10 @@ async def upload_book(
             except Exception as e:
                 print(f"ImgBB Upload Failed: {e}")
                 
-        # Giữ nguyên cover_b64 dạng data:image/jpeg;base64,... nhẹ trong DB để không bao giờ bị 404 khi Vercel/Render redeploy hay reload trang
         drive_file_id = None
         if not external_url or not external_url.strip():
             file_stream = io.BytesIO(contents)
-            drive_file_id = drive_service.upload_file(file_stream, file.filename, mime_type)
+            drive_file_id = drive_service.upload_file(file_stream, filename, mime_type)
         
         db_book = models.Book(
             title=final_title,
@@ -322,7 +334,9 @@ async def upload_book(
         
         return db_book
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Lỗi khi tải sách lên: {str(e)}")
 
 @app.put("/api/admin/books/reorder")
 def reorder_books(

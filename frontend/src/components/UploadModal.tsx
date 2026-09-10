@@ -1,8 +1,10 @@
 'use client';
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, File as FileIcon, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Upload, X, File as FileIcon, Loader2, CheckCircle2, AlertCircle, LogIn } from 'lucide-react';
 import axios from 'axios';
+import { useAuth } from '@/app/contexts/AuthContext';
+import Link from 'next/link';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ interface FileStatus {
 }
 
 export default function UploadModal({ isOpen, onClose, onUploadSuccess }: UploadModalProps) {
+  const { user, token, isLoading: isAuthLoading } = useAuth();
   const [fileStatuses, setFileStatuses] = useState<FileStatus[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,6 +48,16 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
     const pendingFiles = fileStatuses.filter(f => f.status === 'pending' || f.status === 'error');
     if (pendingFiles.length === 0) return;
 
+    const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+    if (!token) {
+      setFileStatuses(prev => prev.map(f => ({
+        ...f,
+        status: f.status === 'success' ? 'success' : 'error',
+        errorMessage: 'Vui lòng đăng nhập trước khi tải sách lên'
+      })));
+      return;
+    }
+
     setIsUploading(true);
     let allSuccess = true;
 
@@ -64,13 +77,12 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
       formData.append('title', title);
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const token = localStorage.getItem('access_token') || localStorage.getItem('token');
 
       try {
         await axios.post(`${API_URL}/api/books/upload`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
-            ...(token ? { Authorization: `Bearer ${token}` } : {})
+            Authorization: `Bearer ${token}`
           },
           onUploadProgress: (progressEvent) => {
             if (progressEvent.total) {
@@ -93,9 +105,25 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
       } catch (error: any) {
         console.error(`Lỗi upload file ${file.name}:`, error);
         allSuccess = false;
+        
+        let errMsg = 'Tải lên thất bại';
+        if (error.response?.status === 401) {
+          errMsg = 'Chưa đăng nhập / Phiên hết hạn (401)';
+        } else if (error.response?.status === 403) {
+          errMsg = 'Không đủ quyền tải sách (403)';
+        } else if (error.response?.status === 413) {
+          errMsg = 'File quá dung lượng giới hạn';
+        } else if (error.response?.data?.detail) {
+          errMsg = typeof error.response.data.detail === 'string' 
+            ? error.response.data.detail 
+            : 'Lỗi xử lý file từ máy chủ';
+        } else if (error.code === 'ERR_NETWORK') {
+          errMsg = 'Không kết nối được tới máy chủ';
+        }
+        
         setFileStatuses(prev => {
           const newStatuses = [...prev];
-          newStatuses[i] = { ...newStatuses[i], status: 'error', errorMessage: 'Tải lên thất bại' };
+          newStatuses[i] = { ...newStatuses[i], status: 'error', errorMessage: errMsg };
           return newStatuses;
         });
       }
@@ -141,7 +169,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="relative bg-white rounded-3xl w-full max-w-lg p-6 md:p-8 shadow-2xl z-10 flex flex-col max-h-[85vh]"
           >
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold text-black">Upload Books</h3>
               <button 
                 onClick={handleModalClose}
@@ -151,6 +179,22 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
                 <X size={18} />
               </button>
             </div>
+
+            {!isAuthLoading && !token && (
+              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-800">
+                <div className="flex items-center gap-2">
+                  <AlertCircle size={16} className="text-amber-600 shrink-0" />
+                  <span>Bạn cần đăng nhập để tải sách lên thư viện.</span>
+                </div>
+                <Link 
+                  href="/login" 
+                  onClick={handleModalClose}
+                  className="font-bold underline text-amber-900 flex items-center gap-1 hover:text-black"
+                >
+                  <LogIn size={13} /> Đăng nhập
+                </Link>
+              </div>
+            )}
 
             <div 
               className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-colors ${

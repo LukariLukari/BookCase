@@ -45,26 +45,43 @@ class DriveService:
             os.makedirs(self.upload_dir, exist_ok=True)
 
     def upload_file(self, file_stream, filename, mime_type):
+        safe_mime = mime_type if mime_type else 'application/octet-stream'
+        
+        # Tạo ASCII key an toàn cho S3/R2 và Local storage tránh lỗi encoding tiếng Việt
+        import re
+        name, ext = os.path.splitext(filename or "book")
+        clean_name = re.sub(r'[^a-zA-Z0-9_-]', '_', name)
+        clean_ext = re.sub(r'[^a-zA-Z0-9.]', '', ext)
+        if not clean_ext:
+            if safe_mime == 'application/pdf':
+                clean_ext = '.pdf'
+            elif 'epub' in safe_mime:
+                clean_ext = '.epub'
+
+        file_key = f"{uuid.uuid4().hex}_{clean_name[:40]}{clean_ext}"
+
         if self.use_r2:
-            file_id = f"{uuid.uuid4().hex}_{filename}"
+            file_stream.seek(0)
             self.s3.upload_fileobj(
                 file_stream,
                 self.r2_bucket,
-                file_id,
-                ExtraArgs={'ContentType': mime_type}
+                file_key,
+                ExtraArgs={'ContentType': safe_mime}
             )
-            return f"r2_{file_id}"
+            return f"r2_{file_key}"
 
         if self.mock_mode:
             # Sinh ID ngẫu nhiên và lưu file vào thư mục local
-            local_id = f"local_{uuid.uuid4().hex}"
+            local_id = f"local_{file_key}"
             file_path = os.path.join(self.upload_dir, local_id)
+            file_stream.seek(0)
             with open(file_path, "wb") as f:
                 f.write(file_stream.read())
             return local_id
 
         file_metadata = {'name': filename, 'parents': [self.folder_id]}
-        media = MediaIoBaseUpload(file_stream, mimetype=mime_type, resumable=True)
+        file_stream.seek(0)
+        media = MediaIoBaseUpload(file_stream, mimetype=safe_mime, resumable=True)
         file = self.service.files().create(body=file_metadata, media_body=media, fields='id').execute()
         return file.get('id')
 
