@@ -40,9 +40,13 @@ export default function Sidebar() {
       <li key={key} className="w-full">
         <Link 
           href={item.href} 
+          style={{
+            backgroundColor: active ? '#F5ECDC' : undefined,
+            color: active ? '#181618' : undefined,
+          }}
           className={`flex items-center gap-3 p-3 md:px-3.5 md:py-2.5 rounded-xl transition-all font-extrabold text-sm w-full ${
             active 
-              ? 'bg-[#F5ECDC] text-black shadow-md' 
+              ? 'shadow-md text-[#181618]' 
               : 'text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#2A272A]'
           }`}
           title={item.label}
@@ -53,10 +57,10 @@ export default function Sidebar() {
             }
           }}
         >
-          <span className="flex-shrink-0">
+          <span className="flex-shrink-0" style={{ color: active ? '#181618' : undefined }}>
             {navigatingTo === item.href ? <Loader2 size={20} className="animate-spin" /> : item.icon}
           </span>
-          <span className="truncate">{item.label}</span>
+          <span className="truncate" style={{ color: active ? '#181618' : undefined }}>{item.label}</span>
         </Link>
       </li>
     );

@@ -672,17 +672,17 @@ export default function AdminPage() {
       <Sidebar />
       <div className="flex-1 min-w-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen">
         {/* Top Header */}
-        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/95 backdrop-blur-md px-4 py-4 md:px-8 md:py-5 flex flex-col lg:flex-row justify-between items-stretch lg:items-center border-b border-[#4D4845]/40 gap-4">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/95 backdrop-blur-md px-4 py-3.5 md:px-6 md:py-4 flex flex-col xl:flex-row justify-between items-start xl:items-center border-b border-[#4D4845]/40 gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <h1 className="text-xl md:text-2xl font-black text-[#F5ECDC] tracking-tight">Admin Dashboard</h1>
             <span className="text-xs font-bold px-2.5 py-1 bg-[#2A272A] border border-[#4D4845]/50 text-[#D7C9B2] rounded-full">
               {books.length} cuốn sách
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto">
             {/* Search */}
-            <div className="relative flex-1 sm:flex-initial sm:w-60">
+            <div className="relative flex-1 sm:flex-initial sm:w-48 lg:w-56">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7B7369]" size={15} />
               <input 
                 type="text" 
@@ -707,21 +707,24 @@ export default function AdminPage() {
                   setIsSortMode(false);
                 }
               }}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border ${
-                isDuplicateFilterActive
-                  ? 'bg-[#F5ECDC] text-black border-[#F5ECDC] shadow-md'
-                  : duplicateGroups.length > 0
-                    ? 'bg-[#2A272A] text-[#F5ECDC] border-[#4D4845] hover:border-[#F5ECDC]'
-                    : 'bg-[#2A272A] text-[#7B7369] border-[#4D4845]/40 hover:text-[#D7C9B2]'
-              }`}
+              style={{
+                backgroundColor: isDuplicateFilterActive ? '#F5ECDC' : '#2A272A',
+                color: isDuplicateFilterActive ? '#181618' : (duplicateGroups.length > 0 ? '#F5ECDC' : '#7B7369'),
+                borderColor: isDuplicateFilterActive ? '#F5ECDC' : '#4D4845',
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border shadow-sm"
               title="Lọc các cuốn sách bị trùng lặp tên & tác giả (ví dụ: Higashino Keigo = Keigo Higashino)"
             >
-              <Copy size={15} />
-              <span>Lọc Sách Trùng</span>
+              <Copy size={15} style={{ color: isDuplicateFilterActive ? '#181618' : 'currentColor' }} />
+              <span style={{ color: isDuplicateFilterActive ? '#181618' : 'currentColor' }}>Lọc Sách Trùng</span>
               {duplicateRedundantCount > 0 && (
-                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
-                  isDuplicateFilterActive ? 'bg-black text-[#F5ECDC]' : 'bg-[#4D4845] text-[#F5ECDC]'
-                }`}>
+                <span 
+                  style={{
+                    backgroundColor: isDuplicateFilterActive ? '#181618' : '#4D4845',
+                    color: '#F5ECDC',
+                  }}
+                  className="px-1.5 py-0.5 rounded-full text-[10px] font-black"
+                >
                   {duplicateRedundantCount}
                 </span>
               )}
@@ -731,10 +734,11 @@ export default function AdminPage() {
             {selectedBooks.length > 0 && (
               <button 
                 onClick={handleBulkDelete}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold bg-red-600 hover:bg-red-700 text-white transition-all shadow-md cursor-pointer"
+                style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black hover:bg-red-700 text-white transition-all shadow-md cursor-pointer border border-red-600"
               >
-                <Trash2 size={15} />
-                <span>Xóa {selectedBooks.length} mục</span>
+                <Trash2 size={15} style={{ color: '#FFFFFF' }} />
+                <span style={{ color: '#FFFFFF' }}>Xóa {selectedBooks.length} mục</span>
               </button>
             )}
 
@@ -742,10 +746,11 @@ export default function AdminPage() {
             <button 
               onClick={handleFixCovers}
               disabled={isFixing}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold bg-[#2A272A] text-[#F5ECDC] border border-[#4D4845] hover:border-[#D7C9B2] transition-all cursor-pointer disabled:opacity-50"
+              style={{ backgroundColor: '#2A272A', color: '#F5ECDC', borderColor: '#4D4845' }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer disabled:opacity-50"
             >
-              {isFixing ? <Loader2 size={15} className="animate-spin" /> : <Settings size={15} />}
-              <span className="hidden sm:inline">{isFixing ? 'Đang sửa...' : 'Sửa bìa lỗi'}</span>
+              {isFixing ? <Loader2 size={15} className="animate-spin text-[#F5ECDC]" /> : <Settings size={15} style={{ color: '#F5ECDC' }} />}
+              <span className="hidden sm:inline" style={{ color: '#F5ECDC' }}>{isFixing ? 'Đang sửa...' : 'Sửa bìa lỗi'}</span>
             </button>
 
             {/* Sắp xếp */}
@@ -753,28 +758,31 @@ export default function AdminPage() {
               <button 
                 onClick={handleSaveOrder}
                 disabled={isSavingOrder}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold bg-[#F5ECDC] text-black hover:bg-white transition-all shadow-md cursor-pointer"
+                style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black hover:bg-white transition-all shadow-md cursor-pointer border"
               >
-                {isSavingOrder ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-                <span>Lưu thứ tự</span>
+                {isSavingOrder ? <Loader2 size={15} className="animate-spin text-[#181618]" /> : <Save size={15} style={{ color: '#181618' }} />}
+                <span style={{ color: '#181618' }}>Lưu thứ tự</span>
               </button>
             ) : (
               <button 
                 onClick={() => { setIsSortMode(true); setSearchQuery(''); setIsDuplicateFilterActive(false); }}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold bg-[#2A272A] text-[#F5ECDC] border border-[#4D4845] hover:border-[#D7C9B2] transition-all cursor-pointer"
+                style={{ backgroundColor: '#2A272A', color: '#F5ECDC', borderColor: '#4D4845' }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer"
               >
-                <GripVertical size={15} />
-                <span>Sắp xếp</span>
+                <GripVertical size={15} style={{ color: '#F5ECDC' }} />
+                <span style={{ color: '#F5ECDC' }}>Sắp xếp</span>
               </button>
             )}
 
             {/* Add Books */}
             <button 
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black bg-[#F5ECDC] hover:bg-white text-black transition-all shadow-md cursor-pointer"
+              style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black hover:bg-white transition-all shadow-md cursor-pointer border"
             >
-              <Plus size={16} />
-              <span>Thêm Sách</span>
+              <Plus size={16} style={{ color: '#181618' }} />
+              <span style={{ color: '#181618' }}>Thêm Sách</span>
             </button>
           </div>
         </header>
@@ -791,9 +799,10 @@ export default function AdminPage() {
                 </p>
                 <button 
                   onClick={() => setIsDuplicateFilterActive(false)}
-                  className="mt-4 px-4 py-2 bg-[#F5ECDC] text-black font-extrabold text-xs rounded-xl hover:bg-white cursor-pointer"
+                  style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
+                  className="mt-4 px-5 py-2.5 font-black text-xs rounded-xl hover:bg-white cursor-pointer transition-all shadow-md border inline-flex items-center justify-center gap-2"
                 >
-                  Quay lại xem tất cả sách
+                  <span style={{ color: '#181618' }}>Quay lại xem tất cả sách</span>
                 </button>
               </div>
             ) : (
