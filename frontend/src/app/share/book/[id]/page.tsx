@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Download, AlertCircle, Loader2, Sparkles, Smartphone } from 'lucide-react';
+import { Download, AlertCircle, Loader2, Sparkles, Smartphone, Star, Award } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import BookCoverImage from '@/components/BookCoverImage';
 import SubscriptionModal from '@/components/SubscriptionModal';
@@ -10,6 +10,7 @@ import KindleTransferModal from '@/components/KindleTransferModal';
 export default function ShareBookPage() {
   const { id } = useParams();
   const [book, setBook] = useState<any>(null);
+  const [ratingSummary, setRatingSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
@@ -21,6 +22,7 @@ export default function ShareBookPage() {
   useEffect(() => {
     if (id) {
       fetchBook();
+      fetchRatingSummary();
     }
   }, [id]);
 
@@ -32,6 +34,15 @@ export default function ShareBookPage() {
       setError('Không tìm thấy thông tin sách hoặc liên kết đã hết hạn.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRatingSummary = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/books/${id}/rating-summary`);
+      setRatingSummary(res.data);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -80,14 +91,35 @@ export default function ShareBookPage() {
                 className="w-full h-full object-cover"
               />
            </div>
+
+           {/* Rating display under cover */}
+           {ratingSummary && ratingSummary.total_reviews > 0 && (
+             <div className="mt-4 bg-[#1F1D20] border border-amber-500/40 rounded-xl py-2 px-4 flex items-center gap-2 text-center shadow-md">
+               <Star size={16} className="fill-amber-400 text-amber-400" />
+               <span className="text-sm font-black text-[#F5ECDC]">
+                 {ratingSummary.average_rating.toFixed(1)} / 5
+               </span>
+               <span className="text-xs text-[#7B7369]">
+                 ({ratingSummary.total_reviews} đánh giá)
+               </span>
+             </div>
+           )}
         </div>
 
         {/* Content Section */}
         <div className="w-full md:w-7/12 flex flex-col justify-between">
           <div>
-             <span className="text-xs font-bold uppercase tracking-wider text-[#8A817C] bg-[#1F1D20] px-3 py-1 rounded-full border border-[#4D4845]/40">
-                {book.genre || 'General'}
-             </span>
+             <div className="flex items-center gap-2">
+               <span className="text-xs font-bold uppercase tracking-wider text-[#8A817C] bg-[#1F1D20] px-3 py-1 rounded-full border border-[#4D4845]/40">
+                  {book.genre || 'General'}
+               </span>
+               {ratingSummary && ratingSummary.total_reviews > 0 && (
+                 <span className="text-xs font-extrabold text-amber-300 bg-amber-950/40 border border-amber-500/30 px-2.5 py-1 rounded-full flex items-center gap-1">
+                   <Star size={11} className="fill-amber-400 text-amber-400" /> {ratingSummary.average_rating.toFixed(1)}
+                 </span>
+               )}
+             </div>
+
              <h1 className="text-2xl sm:text-3xl font-black text-[#F5ECDC] leading-tight mt-3">
                 {book.title}
              </h1>
@@ -98,10 +130,27 @@ export default function ShareBookPage() {
              {book.summary && (
                 <div className="mt-5 pt-4 border-t border-[#4D4845]/30">
                    <h2 className="text-xs font-bold text-[#8A817C] uppercase tracking-wider mb-2">Tóm tắt nội dung</h2>
-                   <p className="text-sm text-[#D7C9B2] leading-relaxed line-clamp-6 whitespace-pre-wrap">
+                   <p className="text-sm text-[#D7C9B2] leading-relaxed line-clamp-4 whitespace-pre-wrap">
                       {book.summary}
                    </p>
                 </div>
+             )}
+
+             {/* Reader Insights & Takeaways Preview */}
+             {ratingSummary && ratingSummary.reviews && ratingSummary.reviews.length > 0 && (
+               <div className="mt-4 pt-4 border-t border-[#4D4845]/30">
+                  <h2 className="text-xs font-bold text-amber-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                     <Award size={13} /> Độc giả chiêm nghiệm gì từ cuốn sách này?
+                  </h2>
+                  <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                     {ratingSummary.reviews.filter((r: any) => r.key_takeaway).slice(0, 2).map((r: any) => (
+                       <div key={r.id} className="bg-[#1F1D20] p-2.5 rounded-xl border border-[#4D4845]/40 text-xs">
+                          <p className="italic text-[#F5ECDC]">&ldquo;{r.key_takeaway}&rdquo;</p>
+                          <p className="text-[10px] text-[#7B7369] mt-1 text-right font-medium">— Độc giả {r.username}</p>
+                       </div>
+                     ))}
+                  </div>
+               </div>
              )}
           </div>
 

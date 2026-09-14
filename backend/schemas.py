@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List, Dict
 from datetime import datetime
 
 class BookBase(BaseModel):
@@ -195,3 +195,85 @@ class UserBookResponse(BaseModel):
     class Config:
         orm_mode = True
         from_attributes = True
+
+
+class BookReviewCreate(BaseModel):
+    rating: int = 5
+    reading_status: Optional[str] = "completed"
+    progress_percent: Optional[int] = 100
+    review_title: Optional[str] = None
+    review_text: Optional[str] = None
+    key_takeaway: Optional[str] = None
+    favorite_quote: Optional[str] = None
+    tags: Optional[str] = None
+
+class BookReviewResponse(BaseModel):
+    id: str
+    user_id: str
+    book_id: Optional[str] = None
+    user_book_id: Optional[str] = None
+    rating: int
+    reading_status: str
+    progress_percent: int
+    review_title: Optional[str] = None
+    review_text: Optional[str] = None
+    key_takeaway: Optional[str] = None
+    favorite_quote: Optional[str] = None
+    tags: Optional[str] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    username: Optional[str] = None
+    book_title: Optional[str] = None
+    book_author: Optional[str] = None
+    book_cover_url: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+class BookRatingSummaryResponse(BaseModel):
+    book_id: str
+    average_rating: float = 0.0
+    total_reviews: int = 0
+    rating_distribution: dict = {}
+    reviews: list[BookReviewResponse] = []
+
+class KeyTakeawayItem(BaseModel):
+    id: str
+    book_id: Optional[str] = None
+    book_title: str
+    book_author: Optional[str] = None
+    book_cover_url: Optional[str] = None
+    rating: int
+    key_takeaway: str
+    favorite_quote: Optional[str] = None
+    tags: Optional[str] = None
+    created_at: datetime
+
+class ActiveReadItem(BaseModel):
+    id: str
+    book_id: Optional[str] = None
+    book_title: str
+    book_author: Optional[str] = None
+    book_cover_url: Optional[str] = None
+    progress_percent: int
+    rating: Optional[int] = None
+    reading_status: str
+    key_takeaway: Optional[str] = None
+    updated_at: Optional[datetime] = None
+
+class ReaderDashboardResponse(BaseModel):
+    total_completed: int = 0
+    currently_reading: int = 0
+    want_to_read: int = 0
+    total_reviews: int = 0
+    average_rating: float = 0.0
+    total_quotes: int = 0
+    reading_streak_days: int = 1
+    yearly_goal: int = 24
+    yearly_goal_progress: int = 0
+    genre_distribution: dict = {}
+    rating_distribution: dict = {}
+    key_takeaways: list[KeyTakeawayItem] = []
+    current_reads: list[ActiveReadItem] = []
+    recent_reviews: list[BookReviewResponse] = []

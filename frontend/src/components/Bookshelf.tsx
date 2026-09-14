@@ -1,11 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, X, Loader2, Share2, Check, Smartphone } from 'lucide-react';
+import { Download, X, Loader2, Share2, Check, Smartphone, Star, Sparkles, Award, Quote } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import BookCoverImage from '@/components/BookCoverImage';
 import KindleTransferModal from '@/components/KindleTransferModal';
+import BookRatingModal from '@/components/BookRatingModal';
 
 interface Book {
   id: string;
@@ -22,11 +23,47 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [kindleBook, setKindleBook] = useState<{ id: string; title: string } | null>(null);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [ratingsMap, setRatingsMap] = useState<Record<string, { average_rating: number; count: number }>>({});
+  const [ratingSummary, setRatingSummary] = useState<any>(null);
+  const [isLoadingRatingSummary, setIsLoadingRatingSummary] = useState(false);
+
   const router = useRouter();
 
-  if (books.length === 0) return null;
-
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+  const fetchRatings = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/books/ratings/batch`);
+      if (res.data) setRatingsMap(res.data);
+    } catch (e) {
+      console.error('Lỗi tải batch ratings:', e);
+    }
+  };
+
+  useEffect(() => {
+    fetchRatings();
+  }, [books]);
+
+  useEffect(() => {
+    if (selectedBook) {
+      fetchRatingSummary(selectedBook.id);
+    } else {
+      setRatingSummary(null);
+    }
+  }, [selectedBook]);
+
+  const fetchRatingSummary = async (bookId: string) => {
+    try {
+      setIsLoadingRatingSummary(true);
+      const res = await axios.get(`${API_URL}/api/books/${bookId}/rating-summary`);
+      setRatingSummary(res.data);
+    } catch (e) {
+      console.error('Lỗi tải rating summary:', e);
+    } finally {
+      setIsLoadingRatingSummary(false);
+    }
+  };
 
   const handleDownload = (id: string, title: string) => {
     setDownloadingId(id);
@@ -44,68 +81,89 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
   };
 
   // Render Book Card
-  const renderBookCard = (book: Book) => (
-    <motion.div
-      key={book.id}
-      layoutId={`book-container-${book.id}`}
-      className="flex flex-col cursor-pointer group h-full"
-      onClick={() => setSelectedBook(book)}
-      whileHover={{ y: -5 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-    >
-      <motion.div layoutId={`book-cover-${book.id}`} className="w-full aspect-[2/3] relative z-10 mb-4">
-        <BookCoverImage 
-          coverUrl={book.cover_url}
-          bookId={book.id}
-          title={book.title}
-          author={book.author}
-          className="w-full h-full object-cover rounded-2xl shadow-md group-hover:shadow-xl transition-shadow duration-300"
-        />
-      </motion.div>
-      <div className="flex flex-col flex-1">
-        <div className="w-full mb-3 flex-1">
-          <h3 className="text-base md:text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2 mb-1 group-hover:text-[#D7C9B2] transition-colors" title={book.title}>{book.title}</h3>
-          <p className="text-sm md:text-xs text-[#D7C9B2] truncate" title={book.author || "Unknown Author"}>{book.author || "Unknown Author"}</p>
-        </div>
-        <div className="flex items-center gap-1.5 mt-auto" onClick={(e) => e.stopPropagation()}>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDownload(book.id, book.title);
-            }}
-            disabled={downloadingId === book.id}
-            className="p-1.5 md:p-2 text-black bg-[#F5ECDC] hover:bg-white rounded-full border border-[#F5ECDC] transition-all flex-shrink-0 cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
-            title="Tải Sách Xuống"
-          >
-            {downloadingId === book.id ? (
-              <Loader2 size={16} className="animate-spin text-black" />
+  const renderBookCard = (book: Book) => {
+    const ratingInfo = ratingsMap[book.id];
+    return (
+      <motion.div
+        key={book.id}
+        layoutId={`book-container-${book.id}`}
+        className="flex flex-col cursor-pointer group h-full"
+        onClick={() => setSelectedBook(book)}
+        whileHover={{ y: -5 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      >
+        <motion.div layoutId={`book-cover-${book.id}`} className="w-full aspect-[2/3] relative z-10 mb-3">
+          <BookCoverImage 
+            coverUrl={book.cover_url}
+            bookId={book.id}
+            title={book.title}
+            author={book.author}
+            className="w-full h-full object-cover rounded-2xl shadow-md group-hover:shadow-xl transition-shadow duration-300"
+          />
+          {ratingInfo && ratingInfo.count > 0 && (
+            <div className="absolute top-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded-full text-[11px] font-black flex items-center gap-1 shadow-lg z-20">
+              <Star size={11} className="fill-amber-400 text-amber-400" />
+              <span>{ratingInfo.average_rating.toFixed(1)}</span>
+            </div>
+          )}
+        </motion.div>
+        <div className="flex flex-col flex-1">
+          <div className="w-full mb-3 flex-1">
+            <h3 className="text-base md:text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2 mb-1 group-hover:text-[#D7C9B2] transition-colors" title={book.title}>{book.title}</h3>
+            <p className="text-sm md:text-xs text-[#D7C9B2] truncate" title={book.author || "Unknown Author"}>{book.author || "Unknown Author"}</p>
+            {ratingInfo && ratingInfo.count > 0 ? (
+              <div className="flex items-center gap-1 text-xs font-bold text-amber-400 mt-1">
+                <Star size={11} className="fill-amber-400" />
+                <span>{ratingInfo.average_rating.toFixed(1)}</span>
+                <span className="text-[11px] text-[#7B7369]">({ratingInfo.count} đánh giá)</span>
+              </div>
             ) : (
-              <Download size={16} className="text-black stroke-[2.5]" />
+              <div className="flex items-center gap-1 text-[11px] text-[#7B7369] mt-1">
+                <Star size={11} className="text-[#4D4845]" />
+                <span>Chưa có đánh giá</span>
+              </div>
             )}
-          </button>
+          </div>
+          <div className="flex items-center gap-1.5 mt-auto" onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDownload(book.id, book.title);
+              }}
+              disabled={downloadingId === book.id}
+              className="p-1.5 md:p-2 text-black bg-[#F5ECDC] hover:bg-white rounded-full border border-[#F5ECDC] transition-all flex-shrink-0 cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
+              title="Tải Sách Xuống"
+            >
+              {downloadingId === book.id ? (
+                <Loader2 size={16} className="animate-spin text-black" />
+              ) : (
+                <Download size={16} className="text-black stroke-[2.5]" />
+              )}
+            </button>
 
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              setKindleBook({ id: book.id, title: book.title });
-            }}
-            className="p-1.5 md:p-2 text-[#D7C9B2] bg-[#2A272A] hover:bg-[#F5ECDC] hover:text-black rounded-full border border-[#4D4845]/50 transition-colors flex-shrink-0 cursor-pointer shadow-sm"
-            title="Gửi sang Kindle (Wi-Fi)"
-          >
-            <Smartphone size={16} />
-          </button>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setKindleBook({ id: book.id, title: book.title });
+              }}
+              className="p-1.5 md:p-2 text-[#D7C9B2] bg-[#2A272A] hover:bg-[#F5ECDC] hover:text-black rounded-full border border-[#4D4845]/50 transition-colors flex-shrink-0 cursor-pointer shadow-sm"
+              title="Gửi sang Kindle (Wi-Fi)"
+            >
+              <Smartphone size={16} />
+            </button>
 
-          <button 
-            onClick={(e) => copyShareLink(e, book.id)} 
-            className="p-1.5 md:p-2 text-[#D7C9B2] bg-[#2A272A] hover:bg-green-600 hover:text-white rounded-full border border-[#4D4845]/50 transition-colors flex-shrink-0 cursor-pointer shadow-sm"
-            title="Chia sẻ sách"
-          >
-            {copiedId === book.id ? <Check size={16} className="text-green-400" /> : <Share2 size={16} />}
-          </button>
+            <button 
+              onClick={(e) => copyShareLink(e, book.id)} 
+              className="p-1.5 md:p-2 text-[#D7C9B2] bg-[#2A272A] hover:bg-green-600 hover:text-white rounded-full border border-[#4D4845]/50 transition-colors flex-shrink-0 cursor-pointer shadow-sm"
+              title="Chia sẻ sách"
+            >
+              {copiedId === book.id ? <Check size={16} className="text-green-400" /> : <Share2 size={16} />}
+            </button>
+          </div>
         </div>
-      </div>
-    </motion.div>
-  );
+      </motion.div>
+    );
+  };
 
   // Handle Grouping by Author
   let groupedBooks: Record<string, Book[]> = {};
@@ -176,6 +234,31 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                       className="w-full h-full object-cover rounded-2xl shadow-lg"
                     />
                   </motion.div>
+
+                  {/* Rating Badge under cover */}
+                  {ratingSummary && (
+                    <div className="w-full bg-[#2A272A] border border-[#4D4845]/40 rounded-xl p-3 text-center mb-3">
+                      <div className="flex items-center justify-center gap-1.5 text-amber-400 mb-1">
+                        <Star size={18} className="fill-amber-400" />
+                        <span className="text-xl font-black text-[#F5ECDC]">
+                          {ratingSummary.average_rating ? ratingSummary.average_rating.toFixed(1) : '5.0'}
+                        </span>
+                        <span className="text-xs text-[#7B7369]">/ 5</span>
+                      </div>
+                      <p className="text-[11px] text-[#D7C9B2] font-semibold">
+                        {ratingSummary.total_reviews} lượt độc giả đánh giá
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Rate & Add Insight Button */}
+                  <button
+                    onClick={() => setIsRatingModalOpen(true)}
+                    className="w-full py-2.5 px-3 bg-gradient-to-r from-amber-400 to-amber-300 hover:from-white hover:to-amber-100 text-black font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                  >
+                    <Sparkles size={14} />
+                    <span>Đánh Giá & Ghi Insight</span>
+                  </button>
                 </div>
 
                 <div className="w-full md:w-2/3 flex flex-col justify-between overflow-y-auto">
@@ -195,11 +278,45 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                     </div>
                   </div>
                   
-                  <div className="flex-grow mt-6">
-                    <h3 className="text-sm font-bold mb-2 text-[#F5ECDC] border-b border-[#4D4845]/40 pb-2">Tóm tắt nội dung</h3>
-                    <p className="text-[#D7C9B2] leading-relaxed text-sm whitespace-pre-wrap">
-                      {selectedBook.summary || "Chưa có tóm tắt cho cuốn sách này."}
-                    </p>
+                  <div className="flex-grow mt-6 space-y-5">
+                    {/* Tóm tắt */}
+                    <div>
+                      <h3 className="text-sm font-bold mb-2 text-[#F5ECDC] border-b border-[#4D4845]/40 pb-2">Tóm tắt nội dung</h3>
+                      <p className="text-[#D7C9B2] leading-relaxed text-sm whitespace-pre-wrap">
+                        {selectedBook.summary || "Chưa có tóm tắt cho cuốn sách này."}
+                      </p>
+                    </div>
+
+                    {/* Reader Insights & Reviews Section */}
+                    {ratingSummary && ratingSummary.reviews && ratingSummary.reviews.length > 0 && (
+                      <div className="pt-2">
+                        <h3 className="text-xs font-black uppercase tracking-wider text-amber-300 mb-3 flex items-center gap-1.5">
+                          <Award size={14} /> Góc Nhìn & Bài Học Từ Độc Giả ({ratingSummary.reviews.length})
+                        </h3>
+                        <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
+                          {ratingSummary.reviews.map((rev: any) => (
+                            <div key={rev.id} className="bg-[#2A272A] border border-[#4D4845]/40 rounded-xl p-3">
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-xs font-bold text-[#F5ECDC]">{rev.username || 'Độc giả'}</span>
+                                <div className="flex items-center gap-0.5 text-amber-400">
+                                  {[...Array(rev.rating)].map((_, i) => (
+                                    <Star key={i} size={11} className="fill-amber-400" />
+                                  ))}
+                                </div>
+                              </div>
+                              {rev.key_takeaway && (
+                                <p className="text-xs text-amber-200/90 font-medium italic border-l-2 border-amber-400 pl-2 my-1.5">
+                                  &ldquo;{rev.key_takeaway}&rdquo;
+                                </p>
+                              )}
+                              {rev.review_text && (
+                                <p className="text-xs text-[#D7C9B2] line-clamp-2">{rev.review_text}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-8 pt-4 border-t border-[#4D4845]/40 flex flex-col sm:flex-row gap-3">
@@ -225,6 +342,22 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
           </div>
         )}
       </AnimatePresence>
+
+      {/* Book Rating Modal */}
+      {isRatingModalOpen && selectedBook && (
+        <BookRatingModal
+          isOpen={isRatingModalOpen}
+          onClose={() => setIsRatingModalOpen(false)}
+          bookId={selectedBook.id}
+          bookTitle={selectedBook.title}
+          bookAuthor={selectedBook.author}
+          coverUrl={selectedBook.cover_url}
+          onSuccess={() => {
+            fetchRatings();
+            fetchRatingSummary(selectedBook.id);
+          }}
+        />
+      )}
 
       {/* Kindle Transfer Modal */}
       <KindleTransferModal 

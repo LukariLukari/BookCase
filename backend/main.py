@@ -22,6 +22,7 @@ from email_service import send_otp_email
 from datetime import datetime, timezone
 import random
 import string
+import time
 
 import sqlite3
 
@@ -1499,6 +1500,295 @@ def delete_my_quote(quote_id: str, db: Session = Depends(get_db), current_user: 
     db.delete(quote)
     db.commit()
     return {"message": "Deleted quote successfully"}
+
+
+# ==========================================
+# --- BOOK REVIEWS, RATINGS & READER INSIGHTS API ---
+# ==========================================
+
+def serialize_review(review: models.BookReview, db: Session) -> dict:
+    username = review.user.username if review.user else "Độc giả"
+    book_title = None
+    book_author = None
+    book_cover_url = None
+    
+    if review.book:
+        book_title = review.book.title
+        book_author = review.book.author
+        book_cover_url = f"/api/books/cover/{review.book.id}"
+    elif review.user_book:
+        book_title = review.user_book.custom_title or (review.user_book.book.title if review.user_book.book else "Sách cá nhân")
+        book_author = review.user_book.custom_author or (review.user_book.book.author if review.user_book.book else "Chưa rõ")
+        book_cover_url = review.user_book.custom_cover_url or (f"/api/books/cover/{review.user_book.book.id}" if review.user_book.book else None)
+
+    return {
+        "id": review.id,
+        "user_id": review.user_id,
+        "book_id": review.book_id,
+        "user_book_id": review.user_book_id,
+        "rating": review.rating,
+        "reading_status": review.reading_status or "completed",
+        "progress_percent": review.progress_percent if review.progress_percent is not None else 100,
+        "review_title": review.review_title,
+        "review_text": review.review_text,
+        "key_takeaway": review.key_takeaway,
+        "favorite_quote": review.favorite_quote,
+        "tags": review.tags,
+        "created_at": review.created_at,
+        "updated_at": review.updated_at,
+        "username": username,
+        "book_title": book_title,
+        "book_author": book_author,
+        "book_cover_url": book_cover_url
+    }
+
+@app.get("/api/books/ratings/batch")
+def get_books_ratings_batch(db: Session = Depends(get_db)):
+    """Lấy điểm đánh giá trung bình và số lượt review cho tất cả sách theo batch gọn nhẹ"""
+    reviews = db.query(models.BookReview.book_id, models.BookReview.rating).filter(models.BookReview.book_id.isnot(None)).all()
+    stats = {}
+    for book_id, rating in reviews:
+        if not book_id:
+            continue
+        if book_id not in stats:
+            stats[book_id] = {"sum": 0, "count": 0}
+        stats[book_id]["sum"] += rating
+        stats[book_id]["count"] += 1
+    
+    result = {}
+    for b_id, s in stats.items():
+        result[b_id] = {
+            "average_rating": round(s["sum"] / s["count"], 1) if s["count"] > 0 else 0.0,
+            "count": s["count"]
+        }
+    return result
+
+@app.get("/api/books/{book_id}/rating-summary", response_model=schemas.BookRatingSummaryResponse)
+def get_book_rating_summary(book_id: str, db: Session = Depends(get_db)):
+    """Lấy chi tiết thống kê rating và danh sách nhận xét, insight của một cuốn sách (Public)"""
+    reviews = db.query(models.BookReview).filter(models.BookReview.book_id == book_id).order_by(models.BookReview.created_at.desc()).all()
+    total = len(reviews)
+    avg = round(sum(r.rating for r in reviews) / total, 1) if total > 0 else 0.0
+    dist = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0}
+    for r in reviews:
+        star_key = str(r.rating)
+        dist[star_key] = dist.get(star_key, 0) + 1
+    
+    serialized_reviews = [serialize_review(r, db) for r in reviews]
+    return {
+        "book_id": book_id,
+        "average_rating": avg,
+        "total_reviews": total,
+        "rating_distribution": dist,
+        "reviews": serialized_reviews
+    }
+
+@app.get("/api/books/{book_id}/my-review")
+def get_my_review_for_book(book_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    """Lấy review & insight của chính người dùng hiện tại đối với cuốn sách này"""
+    review = db.query(models.BookReview).filter(
+        models.BookReview.book_id == book_id,
+        models.BookReview.user_id == current_user.id
+    ).first()
+    if not review:
+        return None
+    return serialize_review(review, db)
+
+@app.post("/api/books/{book_id}/reviews", response_model=schemas.BookReviewResponse)
+def create_or_update_book_review(
+    book_id: str, 
+    review_in: schemas.BookReviewCreate, 
+    db: Session = Depends(get_db), 
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Đánh giá sách & đúc kết Insight cốt lõi (Upsert)"""
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Không tìm thấy sách")
+    
+    existing = db.query(models.BookReview).filter(
+        models.BookReview.book_id == book_id,
+        models.BookReview.user_id == current_user.id
+    ).first()
+
+    valid_rating = max(1, min(5, review_in.rating))
+    valid_progress = max(0, min(100, review_in.progress_percent if review_in.progress_percent is not None else 100))
+    status = review_in.reading_status or ("completed" if valid_progress >= 100 else "reading")
+
+    if existing:
+        existing.rating = valid_rating
+        existing.reading_status = status
+        existing.progress_percent = valid_progress
+        existing.review_title = review_in.review_title
+        existing.review_text = review_in.review_text
+        existing.key_takeaway = review_in.key_takeaway
+        existing.favorite_quote = review_in.favorite_quote
+        existing.tags = review_in.tags
+        db.commit()
+        db.refresh(existing)
+        return serialize_review(existing, db)
+    else:
+        new_review = models.BookReview(
+            id=models.generate_uuid(),
+            user_id=current_user.id,
+            book_id=book_id,
+            rating=valid_rating,
+            reading_status=status,
+            progress_percent=valid_progress,
+            review_title=review_in.review_title,
+            review_text=review_in.review_text,
+            key_takeaway=review_in.key_takeaway,
+            favorite_quote=review_in.favorite_quote,
+            tags=review_in.tags
+        )
+        db.add(new_review)
+        db.commit()
+        db.refresh(new_review)
+        return serialize_review(new_review, db)
+
+@app.get("/api/users/me/insights", response_model=schemas.ReaderDashboardResponse)
+def get_my_reader_insights(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    """Lấy toàn bộ chỉ số, thống kê thói quen, bài học cốt lõi cho Không Gian Đọc Sách của User"""
+    reviews = db.query(models.BookReview).filter(models.BookReview.user_id == current_user.id).order_by(models.BookReview.created_at.desc()).all()
+    
+    total_completed = 0
+    currently_reading = 0
+    want_to_read = 0
+    ratings = []
+    rating_dist = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0}
+    genre_dist = {}
+    key_takeaways = []
+    current_reads = []
+    
+    for r in reviews:
+        ratings.append(r.rating)
+        star_key = str(r.rating)
+        rating_dist[star_key] = rating_dist.get(star_key, 0) + 1
+        
+        status = r.reading_status or "completed"
+        if status == "completed" or (r.progress_percent and r.progress_percent >= 100):
+            total_completed += 1
+        elif status == "reading":
+            currently_reading += 1
+        elif status == "want_to_read":
+            want_to_read += 1
+        
+        book_title = "Unknown Book"
+        book_author = "Unknown Author"
+        book_cover = None
+        book_genre = "Tổng hợp"
+        
+        if r.book:
+            book_title = r.book.title
+            book_author = r.book.author or "Unknown Author"
+            book_cover = f"/api/books/cover/{r.book.id}"
+            book_genre = r.book.genre or "Khác"
+        elif r.user_book:
+            book_title = r.user_book.custom_title or (r.user_book.book.title if r.user_book.book else "Sách cá nhân")
+            book_author = r.user_book.custom_author or (r.user_book.book.author if r.user_book.book else "Unknown")
+            book_cover = r.user_book.custom_cover_url or (f"/api/books/cover/{r.user_book.book.id}" if r.user_book.book else None)
+            book_genre = (r.user_book.book.genre if r.user_book.book else None) or "Cá nhân"
+            
+        genre_dist[book_genre] = genre_dist.get(book_genre, 0) + 1
+
+        if r.key_takeaway and r.key_takeaway.strip():
+            key_takeaways.append({
+                "id": r.id,
+                "book_id": r.book_id,
+                "book_title": book_title,
+                "book_author": book_author,
+                "book_cover_url": book_cover,
+                "rating": r.rating,
+                "key_takeaway": r.key_takeaway.strip(),
+                "favorite_quote": r.favorite_quote,
+                "tags": r.tags,
+                "created_at": r.created_at or datetime.now(timezone.utc)
+            })
+            
+        if status == "reading" or (r.progress_percent is not None and 0 < r.progress_percent < 100):
+            current_reads.append({
+                "id": r.id,
+                "book_id": r.book_id,
+                "book_title": book_title,
+                "book_author": book_author,
+                "book_cover_url": book_cover,
+                "progress_percent": r.progress_percent or 0,
+                "rating": r.rating,
+                "reading_status": status,
+                "key_takeaway": r.key_takeaway,
+                "updated_at": r.updated_at or r.created_at
+            })
+
+    user_books = db.query(models.UserBook).filter(models.UserBook.user_id == current_user.id).all()
+    user_book_ids = [ub.id for ub in user_books]
+    total_quotes = 0
+    if user_book_ids:
+        total_quotes = db.query(models.Quote).filter(models.Quote.user_book_id.in_(user_book_ids)).count()
+
+    avg_rating = round(sum(ratings) / len(ratings), 1) if ratings else 0.0
+    yearly_goal = 24
+    goal_progress = min(100, int((total_completed / yearly_goal) * 100))
+    streak_days = max(1, len(set(r.created_at.date() for r in reviews if r.created_at))) if reviews else 1
+
+    serialized_reviews = [serialize_review(r, db) for r in reviews]
+
+    return {
+        "total_completed": total_completed,
+        "currently_reading": currently_reading,
+        "want_to_read": want_to_read,
+        "total_reviews": len(reviews),
+        "average_rating": avg_rating,
+        "total_quotes": total_quotes,
+        "reading_streak_days": streak_days,
+        "yearly_goal": yearly_goal,
+        "yearly_goal_progress": goal_progress,
+        "genre_distribution": genre_dist,
+        "rating_distribution": rating_dist,
+        "key_takeaways": key_takeaways,
+        "current_reads": current_reads,
+        "recent_reviews": serialized_reviews
+    }
+
+@app.delete("/api/users/me/reviews/{review_id}")
+def delete_my_review(review_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    """Xóa bài review / insight của user"""
+    review = db.query(models.BookReview).filter(models.BookReview.id == review_id, models.BookReview.user_id == current_user.id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Không tìm thấy đánh giá")
+    db.delete(review)
+    db.commit()
+    return {"message": "Đã xóa đánh giá thành công"}
+
+@app.patch("/api/users/me/reading-progress")
+def update_reading_progress(
+    book_id: str, 
+    progress_percent: int,
+    reading_status: Optional[str] = None,
+    db: Session = Depends(get_db), 
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Cập nhật nhanh tiến độ đọc & trạng thái (ví dụ trượt thanh % hoặc đổi trạng thái)"""
+    review = db.query(models.BookReview).filter(models.BookReview.book_id == book_id, models.BookReview.user_id == current_user.id).first()
+    val_percent = max(0, min(100, progress_percent))
+    status = reading_status or ("completed" if val_percent >= 100 else "reading")
+    
+    if not review:
+        review = models.BookReview(
+            id=models.generate_uuid(),
+            user_id=current_user.id,
+            book_id=book_id,
+            rating=5,
+            reading_status=status,
+            progress_percent=val_percent
+        )
+        db.add(review)
+    else:
+        review.progress_percent = val_percent
+        review.reading_status = status
+        
+    db.commit()
+    db.refresh(review)
+    return serialize_review(review, db)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
