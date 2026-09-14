@@ -2,9 +2,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
-import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, KeyRound, Library } from 'lucide-react';
 
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 import BookCoverImage from '@/components/BookCoverImage';
@@ -583,9 +584,25 @@ export default function AdminPage() {
                 <span className="hidden sm:inline">Sắp xếp</span>
               </button>
             )}
+            <Link 
+              href="/admin/registration-codes"
+              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-orange-500/50 text-orange-400 hover:border-orange-400 hover:bg-orange-500/10 bg-[#2A272A] flex items-center gap-1.5 font-bold cursor-pointer"
+              title="Quản lý và tạo mã đăng ký tài khoản cho thành viên mới"
+            >
+              <KeyRound size={16} className="text-orange-400" />
+              <span className="hidden sm:inline">Mã Đăng Ký</span>
+            </Link>
+            <Link 
+              href="/admin/collections"
+              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#F97316] hover:text-[#F97316] bg-[#2A272A] flex items-center gap-1.5 font-bold cursor-pointer"
+              title="Quản lý bộ sưu tập sách"
+            >
+              <Library size={16} className="text-[#D7C9B2]" />
+              <span className="hidden sm:inline">Bộ Sưu Tập</span>
+            </Link>
             <button 
               onClick={() => setIsAddModalOpen(true)}
-              className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-6 md:!px-5 text-sm whitespace-nowrap"
+              className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-6 md:!px-5 text-sm whitespace-nowrap cursor-pointer"
             >
               <Plus size={16} /> <span className="hidden sm:inline">Add Books</span>
             </button>

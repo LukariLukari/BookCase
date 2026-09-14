@@ -15,18 +15,26 @@ export default function Sidebar() {
     setNavigatingTo(null);
   }, [pathname]);
 
-  const menuItems = [
+  // Reader / User menu items (accessible by all users, including admin)
+  const userMenuItems = [
     { icon: <LayoutDashboard size={20} />, label: 'My BookCase Board', href: '/' },
     { icon: <Sparkles size={20} className="text-amber-400" />, label: 'Không Gian Insight', href: '/reader' },
-    { icon: <Library size={20} />, label: 'Collections', href: '#' },
     { icon: <Bookmark size={20} />, label: 'Sách Cá Nhân', href: '/my-books' },
     { icon: <QuoteIcon size={20} />, label: 'Trích Dẫn (Quotes)', href: '/quotes' },
   ];
 
-  if (user?.role === 'admin') {
-    menuItems.splice(1, 1, { icon: <Library size={20} />, label: 'Collections', href: '/admin/collections' });
-    menuItems.push({ icon: <Settings size={20} />, label: 'Admin Dashboard', href: '/admin' });
-  }
+  // Dedicated Admin tools (only visible when role === 'admin')
+  const adminMenuItems = [
+    { icon: <Settings size={20} />, label: 'Admin Dashboard', href: '/admin' },
+    { icon: <Library size={20} />, label: 'Bộ Sưu Tập (Collections)', href: '/admin/collections' },
+    { icon: <KeyRound size={20} className="text-orange-400" />, label: 'Quản Lý Mã Đăng Ký', href: '/admin/registration-codes' },
+  ];
+
+  const isItemActive = (href: string) => {
+    if (href === '/') return pathname === '/';
+    if (href === '/admin') return pathname === '/admin';
+    return pathname === href || pathname.startsWith(href + '/');
+  };
 
   return (
     <>
@@ -42,12 +50,21 @@ export default function Sidebar() {
 
         {/* User Profile Card - Hide on Mobile */}
         {user ? (
-          <div className="hidden md:block bg-[#2A272A] p-5 rounded-2xl mb-10 shadow-md border border-[#4D4845]/40 w-full">
+          <div className="hidden md:block bg-[#2A272A] p-5 rounded-2xl mb-8 shadow-md border border-[#4D4845]/40 w-full">
             <div className="w-12 h-12 bg-[#4D4845] rounded-full flex items-center justify-center mb-3 shadow-inner overflow-hidden border border-[#7B7369]/40">
                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} alt="Avatar" className="w-full h-full object-cover" />
             </div>
-            <p className="text-xs text-[#D7C9B2] font-medium mb-0.5">Welcome Back</p>
-            <p className="text-lg font-bold text-[#F5ECDC] truncate">{user.username}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-[#D7C9B2] font-medium mb-0.5">Xin chào</p>
+                <p className="text-base font-bold text-[#F5ECDC] truncate max-w-[130px]">{user.username}</p>
+              </div>
+              {user.role === 'admin' && (
+                <span className="text-[10px] font-black uppercase tracking-wider bg-orange-500/20 text-orange-400 border border-orange-500/40 px-2 py-0.5 rounded-full">
+                  Admin
+                </span>
+              )}
+            </div>
           </div>
         ) : (
           <div className="hidden md:block mb-10 w-full">
@@ -67,35 +84,71 @@ export default function Sidebar() {
         </button>
 
         {/* Navigation */}
-        <nav className={`absolute md:static top-16 left-0 w-full md:w-full bg-[#181618] md:bg-transparent border-b md:border-0 border-[#4D4845]/40 shadow-xl md:shadow-none transition-all duration-300 origin-top flex-1 md:flex justify-start ${isMobileMenuOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 md:scale-y-100 md:opacity-100'} overflow-hidden md:overflow-visible`}>
+        <nav className={`absolute md:static top-16 left-0 w-full md:w-full bg-[#181618] md:bg-transparent border-b md:border-0 border-[#4D4845]/40 shadow-xl md:shadow-none transition-all duration-300 origin-top flex-1 md:flex justify-start ${isMobileMenuOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 md:scale-y-100 md:opacity-100'} overflow-y-auto md:overflow-visible`}>
           <ul className="flex flex-col p-4 md:p-0 md:space-y-2 md:w-full w-full gap-2 md:gap-0">
-            {menuItems.map((item, index) => {
-              const isActive = item.href === '/admin' 
-                ? pathname === '/admin' 
-                : (item.href === pathname || (item.href !== '/' && item.href !== '#' && pathname.startsWith(item.href)));
+            
+            {/* User Navigation Items */}
+            {userMenuItems.map((item, index) => {
+              const active = isItemActive(item.href);
               return (
                 <li key={index} className="w-full">
                   <Link 
                     href={item.href} 
-                    className={`flex items-center justify-start gap-4 p-3 md:px-4 md:py-3 rounded-xl transition-all font-extrabold text-sm w-full ${
-                      isActive 
+                    className={`flex items-center justify-start gap-3.5 p-3 md:px-4 md:py-2.5 rounded-xl transition-all font-extrabold text-sm w-full ${
+                      active 
                         ? 'bg-[#F5ECDC] text-black shadow-md' 
                         : 'text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#2A272A]'
                     }`}
                     title={item.label}
                     onClick={() => {
                       setIsMobileMenuOpen(false);
-                      if (item.href !== pathname && item.href !== '#') {
+                      if (item.href !== pathname) {
                         setNavigatingTo(item.href);
                       }
                     }}
                   >
-                    <span>{navigatingTo === item.href ? <Loader2 size={20} className="animate-spin" /> : item.icon}</span>
+                    <span>{navigatingTo === item.href ? <Loader2 size={18} className="animate-spin" /> : item.icon}</span>
                     <span>{item.label}</span>
                   </Link>
                 </li>
               );
             })}
+
+            {/* Admin Section Header & Items */}
+            {user?.role === 'admin' && (
+              <>
+                <li className="pt-3 pb-1 px-2">
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-[#7B7369] border-t border-[#4D4845]/40 pt-3">
+                    <span>Khu Vực Quản Trị</span>
+                  </div>
+                </li>
+                {adminMenuItems.map((item, index) => {
+                  const active = isItemActive(item.href);
+                  return (
+                    <li key={`admin-${index}`} className="w-full">
+                      <Link 
+                        href={item.href} 
+                        className={`flex items-center justify-start gap-3.5 p-3 md:px-4 md:py-2.5 rounded-xl transition-all font-extrabold text-sm w-full ${
+                          active 
+                            ? 'bg-orange-500 text-white shadow-md' 
+                            : 'text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#2A272A]'
+                        }`}
+                        title={item.label}
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          if (item.href !== pathname) {
+                            setNavigatingTo(item.href);
+                          }
+                        }}
+                      >
+                        <span>{navigatingTo === item.href ? <Loader2 size={18} className="animate-spin" /> : item.icon}</span>
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </>
+            )}
             
             {/* Mobile User Info & Logout/Login (inside menu) */}
             <li className="md:hidden mt-4 pt-4 border-t border-[#4D4845]/40 w-full">
