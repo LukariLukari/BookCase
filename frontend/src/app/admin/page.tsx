@@ -586,15 +586,15 @@ export default function AdminPage() {
             )}
             <Link 
               href="/admin/registration-codes"
-              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-orange-500/50 text-orange-400 hover:border-orange-400 hover:bg-orange-500/10 bg-[#2A272A] flex items-center gap-1.5 font-bold cursor-pointer"
+              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#D7C9B2] hover:text-[#D7C9B2] bg-[#2A272A] flex items-center gap-1.5 font-bold cursor-pointer"
               title="Quản lý và tạo mã đăng ký tài khoản cho thành viên mới"
             >
-              <KeyRound size={16} className="text-orange-400" />
+              <KeyRound size={16} className="text-[#D7C9B2]" />
               <span className="hidden sm:inline">Mã Đăng Ký</span>
             </Link>
             <Link 
               href="/admin/collections"
-              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#F97316] hover:text-[#F97316] bg-[#2A272A] flex items-center gap-1.5 font-bold cursor-pointer"
+              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#D7C9B2] hover:text-[#D7C9B2] bg-[#2A272A] flex items-center gap-1.5 font-bold cursor-pointer"
               title="Quản lý bộ sưu tập sách"
             >
               <Library size={16} className="text-[#D7C9B2]" />

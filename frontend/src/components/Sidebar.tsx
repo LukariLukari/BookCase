@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Library, LayoutDashboard, Bookmark, User, LogOut, Settings, Menu, X, LogIn, Loader2, KeyRound, Quote as QuoteIcon, Sparkles } from 'lucide-react';
+import { Library, LayoutDashboard, Bookmark, LogOut, Settings, Menu, X, LogIn, Loader2, KeyRound, Quote as QuoteIcon, Sparkles } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 export default function Sidebar() {
@@ -15,25 +15,51 @@ export default function Sidebar() {
     setNavigatingTo(null);
   }, [pathname]);
 
-  // Reader / User menu items (accessible by all users, including admin)
-  const userMenuItems = [
+  const mainMenuItems = [
     { icon: <LayoutDashboard size={20} />, label: 'My BookCase Board', href: '/' },
-    { icon: <Sparkles size={20} className="text-amber-400" />, label: 'Không Gian Insight', href: '/reader' },
+    { icon: <Sparkles size={20} />, label: 'Không Gian Đọc', href: '/reader' },
     { icon: <Bookmark size={20} />, label: 'Sách Cá Nhân', href: '/my-books' },
-    { icon: <QuoteIcon size={20} />, label: 'Trích Dẫn (Quotes)', href: '/quotes' },
+    { icon: <QuoteIcon size={20} />, label: 'Trích Dẫn', href: '/quotes' },
   ];
 
-  // Dedicated Admin tools (only visible when role === 'admin')
   const adminMenuItems = [
     { icon: <Settings size={20} />, label: 'Admin Dashboard', href: '/admin' },
-    { icon: <Library size={20} />, label: 'Bộ Sưu Tập (Collections)', href: '/admin/collections' },
-    { icon: <KeyRound size={20} className="text-orange-400" />, label: 'Quản Lý Mã Đăng Ký', href: '/admin/registration-codes' },
+    { icon: <Library size={20} />, label: 'Bộ Sưu Tập', href: '/admin/collections' },
+    { icon: <KeyRound size={20} />, label: 'Mã Đăng Ký', href: '/admin/registration-codes' },
   ];
 
   const isItemActive = (href: string) => {
     if (href === '/') return pathname === '/';
     if (href === '/admin') return pathname === '/admin';
-    return pathname === href || pathname.startsWith(href + '/');
+    return pathname === href || (href !== '/' && pathname.startsWith(href));
+  };
+
+  const renderLinkItem = (item: { icon: React.ReactNode; label: string; href: string }, key: string | number) => {
+    const active = isItemActive(item.href);
+    return (
+      <li key={key} className="w-full">
+        <Link 
+          href={item.href} 
+          className={`flex items-center gap-4 p-3 md:px-4 md:py-3 rounded-xl transition-all font-extrabold text-sm w-full ${
+            active 
+              ? 'bg-[#F5ECDC] text-black shadow-md' 
+              : 'text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#2A272A]'
+          }`}
+          title={item.label}
+          onClick={() => {
+            setIsMobileMenuOpen(false);
+            if (item.href !== pathname) {
+              setNavigatingTo(item.href);
+            }
+          }}
+        >
+          <span className="flex-shrink-0">
+            {navigatingTo === item.href ? <Loader2 size={20} className="animate-spin" /> : item.icon}
+          </span>
+          <span className="truncate">{item.label}</span>
+        </Link>
+      </li>
+    );
   };
 
   return (
@@ -42,7 +68,7 @@ export default function Sidebar() {
         {/* Logo */}
         <div className="flex items-center md:mb-10 flex-shrink-0 z-50">
           <Link href="/">
-            <h1 className="text-2xl md:text-3xl font-extrabold text-[#F5ECDC] cursor-pointer hover:opacity-80 transition-opacity">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-[#F5ECDC] cursor-pointer hover:opacity-80 transition-opacity tracking-tight">
               BOOKCASE<span className="text-[#F5ECDC]">.</span>
             </h1>
           </Link>
@@ -54,17 +80,8 @@ export default function Sidebar() {
             <div className="w-12 h-12 bg-[#4D4845] rounded-full flex items-center justify-center mb-3 shadow-inner overflow-hidden border border-[#7B7369]/40">
                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} alt="Avatar" className="w-full h-full object-cover" />
             </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-[#D7C9B2] font-medium mb-0.5">Xin chào</p>
-                <p className="text-base font-bold text-[#F5ECDC] truncate max-w-[130px]">{user.username}</p>
-              </div>
-              {user.role === 'admin' && (
-                <span className="text-[10px] font-black uppercase tracking-wider bg-orange-500/20 text-orange-400 border border-orange-500/40 px-2 py-0.5 rounded-full">
-                  Admin
-                </span>
-              )}
-            </div>
+            <p className="text-xs text-[#D7C9B2] font-medium mb-0.5">Welcome Back</p>
+            <p className="text-lg font-bold text-[#F5ECDC] truncate">{user.username}</p>
           </div>
         ) : (
           <div className="hidden md:block mb-10 w-full">
@@ -86,67 +103,14 @@ export default function Sidebar() {
         {/* Navigation */}
         <nav className={`absolute md:static top-16 left-0 w-full md:w-full bg-[#181618] md:bg-transparent border-b md:border-0 border-[#4D4845]/40 shadow-xl md:shadow-none transition-all duration-300 origin-top flex-1 md:flex justify-start ${isMobileMenuOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 md:scale-y-100 md:opacity-100'} overflow-y-auto md:overflow-visible`}>
           <ul className="flex flex-col p-4 md:p-0 md:space-y-2 md:w-full w-full gap-2 md:gap-0">
-            
-            {/* User Navigation Items */}
-            {userMenuItems.map((item, index) => {
-              const active = isItemActive(item.href);
-              return (
-                <li key={index} className="w-full">
-                  <Link 
-                    href={item.href} 
-                    className={`flex items-center justify-start gap-3.5 p-3 md:px-4 md:py-2.5 rounded-xl transition-all font-extrabold text-sm w-full ${
-                      active 
-                        ? 'bg-[#F5ECDC] text-black shadow-md' 
-                        : 'text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#2A272A]'
-                    }`}
-                    title={item.label}
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      if (item.href !== pathname) {
-                        setNavigatingTo(item.href);
-                      }
-                    }}
-                  >
-                    <span>{navigatingTo === item.href ? <Loader2 size={18} className="animate-spin" /> : item.icon}</span>
-                    <span>{item.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
+            {/* Main Menu Items */}
+            {mainMenuItems.map((item, idx) => renderLinkItem(item, idx))}
 
-            {/* Admin Section Header & Items */}
+            {/* Admin Items (separated by clean border) */}
             {user?.role === 'admin' && (
               <>
-                <li className="pt-3 pb-1 px-2">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-[#7B7369] border-t border-[#4D4845]/40 pt-3">
-                    <span>Khu Vực Quản Trị</span>
-                  </div>
-                </li>
-                {adminMenuItems.map((item, index) => {
-                  const active = isItemActive(item.href);
-                  return (
-                    <li key={`admin-${index}`} className="w-full">
-                      <Link 
-                        href={item.href} 
-                        className={`flex items-center justify-start gap-3.5 p-3 md:px-4 md:py-2.5 rounded-xl transition-all font-extrabold text-sm w-full ${
-                          active 
-                            ? 'bg-orange-500 text-white shadow-md' 
-                            : 'text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#2A272A]'
-                        }`}
-                        title={item.label}
-                        onClick={() => {
-                          setIsMobileMenuOpen(false);
-                          if (item.href !== pathname) {
-                            setNavigatingTo(item.href);
-                          }
-                        }}
-                      >
-                        <span>{navigatingTo === item.href ? <Loader2 size={18} className="animate-spin" /> : item.icon}</span>
-                        <span>{item.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
+                <li className="my-2 border-t border-[#4D4845]/40" />
+                {adminMenuItems.map((item, idx) => renderLinkItem(item, `admin-${idx}`))}
               </>
             )}
             
@@ -181,7 +145,7 @@ export default function Sidebar() {
         {/* Logout - Desktop */}
         {user && (
           <div className="hidden md:flex mt-auto pt-6 border-t border-[#4D4845]/40 w-full">
-            <button onClick={logout} className="flex items-center gap-4 px-4 py-2 text-[#D7C9B2] hover:text-red-400 transition-colors font-medium text-sm w-full">
+            <button onClick={logout} className="flex items-center gap-4 px-4 py-2 text-[#D7C9B2] hover:text-red-400 transition-colors font-medium text-sm w-full cursor-pointer">
               <LogOut size={20} />
               <span>Logout</span>
             </button>

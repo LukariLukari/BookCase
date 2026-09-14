@@ -94,8 +94,8 @@ export default function ShareBookPage() {
 
            {/* Rating display under cover */}
            {ratingSummary && ratingSummary.total_reviews > 0 && (
-             <div className="mt-4 bg-[#1F1D20] border border-amber-500/40 rounded-xl py-2 px-4 flex items-center gap-2 text-center shadow-md">
-               <Star size={16} className="fill-amber-400 text-amber-400" />
+             <div className="mt-4 bg-[#1F1D20] border border-[#4D4845]/60 rounded-xl py-2 px-4 flex items-center gap-2 text-center shadow-md">
+               <Star size={16} className="fill-[#F5ECDC] text-[#F5ECDC]" />
                <span className="text-sm font-black text-[#F5ECDC]">
                  {ratingSummary.average_rating.toFixed(1)} / 5
                </span>
@@ -114,8 +114,8 @@ export default function ShareBookPage() {
                   {book.genre || 'General'}
                </span>
                {ratingSummary && ratingSummary.total_reviews > 0 && (
-                 <span className="text-xs font-extrabold text-amber-300 bg-amber-950/40 border border-amber-500/30 px-2.5 py-1 rounded-full flex items-center gap-1">
-                   <Star size={11} className="fill-amber-400 text-amber-400" /> {ratingSummary.average_rating.toFixed(1)}
+                 <span className="text-xs font-extrabold text-[#F5ECDC] bg-[#1F1D20] border border-[#4D4845]/60 px-2.5 py-1 rounded-full flex items-center gap-1">
+                   <Star size={11} className="fill-[#F5ECDC] text-[#F5ECDC]" /> {ratingSummary.average_rating.toFixed(1)}
                  </span>
                )}
              </div>
@@ -139,7 +139,7 @@ export default function ShareBookPage() {
              {/* Reader Insights & Takeaways Preview */}
              {ratingSummary && ratingSummary.reviews && ratingSummary.reviews.length > 0 && (
                <div className="mt-4 pt-4 border-t border-[#4D4845]/30">
-                  <h2 className="text-xs font-bold text-amber-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <h2 className="text-xs font-bold text-[#F5ECDC] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                      <Award size={13} /> Độc giả chiêm nghiệm gì từ cuốn sách này?
                   </h2>
                   <div className="space-y-2 max-h-36 overflow-y-auto pr-1">

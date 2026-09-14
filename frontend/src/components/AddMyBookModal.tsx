@@ -361,7 +361,7 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
               </div>
 
               {/* Info notice about file saving strategy */}
-              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-200/90 leading-relaxed">
+              <div className="p-3 bg-[#1F1D20] border border-[#4D4845]/60 rounded-xl text-xs text-[#D7C9B2] leading-relaxed">
                 💡 <strong>Tiết kiệm dung lượng:</strong> Hệ thống chỉ trích xuất thông tin tên sách & nén ảnh bìa xuống mức thấp nhất (15-30KB) để hiển thị, <strong>không lưu trữ toàn bộ file nặng</strong> lên máy chủ.
               </div>
 

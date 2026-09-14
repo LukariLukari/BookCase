@@ -159,7 +159,7 @@ export default function QuoteGallery({
                   </div>
                   
                   {quote.page_number && (
-                    <span className="flex items-center gap-1 text-xs font-bold bg-[#1F1D20] text-amber-300/90 border border-amber-400/20 px-2 py-0.5 rounded-md">
+                    <span className="flex items-center gap-1 text-xs font-bold bg-[#1F1D20] text-[#D7C9B2] border border-[#4D4845]/60 px-2 py-0.5 rounded-md">
                       <Hash size={11} /> Trang {quote.page_number}
                     </span>
                   )}

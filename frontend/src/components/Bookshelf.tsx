@@ -101,8 +101,8 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
             className="w-full h-full object-cover rounded-2xl shadow-md group-hover:shadow-xl transition-shadow duration-300"
           />
           {ratingInfo && ratingInfo.count > 0 && (
-            <div className="absolute top-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded-full text-[11px] font-black flex items-center gap-1 shadow-lg z-20">
-              <Star size={11} className="fill-amber-400 text-amber-400" />
+            <div className="absolute top-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-[#4D4845]/60 text-[#F5ECDC] px-2 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 shadow-lg z-20">
+              <Star size={11} className="fill-[#F5ECDC] text-[#F5ECDC]" />
               <span>{ratingInfo.average_rating.toFixed(1)}</span>
             </div>
           )}
@@ -112,8 +112,8 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
             <h3 className="text-base md:text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2 mb-1 group-hover:text-[#D7C9B2] transition-colors" title={book.title}>{book.title}</h3>
             <p className="text-sm md:text-xs text-[#D7C9B2] truncate" title={book.author || "Unknown Author"}>{book.author || "Unknown Author"}</p>
             {ratingInfo && ratingInfo.count > 0 ? (
-              <div className="flex items-center gap-1 text-xs font-bold text-amber-400 mt-1">
-                <Star size={11} className="fill-amber-400" />
+              <div className="flex items-center gap-1 text-xs font-bold text-[#F5ECDC] mt-1">
+                <Star size={11} className="fill-[#F5ECDC]" />
                 <span>{ratingInfo.average_rating.toFixed(1)}</span>
                 <span className="text-[11px] text-[#7B7369]">({ratingInfo.count} đánh giá)</span>
               </div>
@@ -238,8 +238,8 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   {/* Rating Badge under cover */}
                   {ratingSummary && (
                     <div className="w-full bg-[#2A272A] border border-[#4D4845]/40 rounded-xl p-3 text-center mb-3">
-                      <div className="flex items-center justify-center gap-1.5 text-amber-400 mb-1">
-                        <Star size={18} className="fill-amber-400" />
+                      <div className="flex items-center justify-center gap-1.5 text-[#F5ECDC] mb-1">
+                        <Star size={18} className="fill-[#F5ECDC] text-[#F5ECDC]" />
                         <span className="text-xl font-black text-[#F5ECDC]">
                           {ratingSummary.average_rating ? ratingSummary.average_rating.toFixed(1) : '5.0'}
                         </span>
@@ -254,7 +254,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   {/* Rate & Add Insight Button */}
                   <button
                     onClick={() => setIsRatingModalOpen(true)}
-                    className="w-full py-2.5 px-3 bg-gradient-to-r from-amber-400 to-amber-300 hover:from-white hover:to-amber-100 text-black font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                    className="w-full py-2.5 px-3 bg-[#F5ECDC] hover:bg-white text-black font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
                   >
                     <Sparkles size={14} />
                     <span>Đánh Giá & Ghi Insight</span>
@@ -290,7 +290,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                     {/* Reader Insights & Reviews Section */}
                     {ratingSummary && ratingSummary.reviews && ratingSummary.reviews.length > 0 && (
                       <div className="pt-2">
-                        <h3 className="text-xs font-black uppercase tracking-wider text-amber-300 mb-3 flex items-center gap-1.5">
+                        <h3 className="text-xs font-black uppercase tracking-wider text-[#F5ECDC] mb-3 flex items-center gap-1.5">
                           <Award size={14} /> Góc Nhìn & Bài Học Từ Độc Giả ({ratingSummary.reviews.length})
                         </h3>
                         <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
@@ -298,14 +298,14 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                             <div key={rev.id} className="bg-[#2A272A] border border-[#4D4845]/40 rounded-xl p-3">
                               <div className="flex justify-between items-center mb-1">
                                 <span className="text-xs font-bold text-[#F5ECDC]">{rev.username || 'Độc giả'}</span>
-                                <div className="flex items-center gap-0.5 text-amber-400">
+                                <div className="flex items-center gap-0.5 text-[#F5ECDC]">
                                   {[...Array(rev.rating)].map((_, i) => (
-                                    <Star key={i} size={11} className="fill-amber-400" />
+                                    <Star key={i} size={11} className="fill-[#F5ECDC] text-[#F5ECDC]" />
                                   ))}
                                 </div>
                               </div>
                               {rev.key_takeaway && (
-                                <p className="text-xs text-amber-200/90 font-medium italic border-l-2 border-amber-400 pl-2 my-1.5">
+                                <p className="text-xs text-[#F5ECDC] font-medium italic border-l-2 border-[#D7C9B2] pl-2 my-1.5">
                                   &ldquo;{rev.key_takeaway}&rdquo;
                                 </p>
                               )}
