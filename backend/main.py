@@ -364,6 +364,61 @@ def reorder_books(
     db.commit()
     return {"message": "Reordered successfully"}
 
+def normalize_author_py(author: Optional[str]) -> str:
+    if not author:
+        return ""
+    s = author.lower().strip()
+    s = re.sub(r"[.,\/#!$%\^&\*;:{}=\-_`~()\[\]\"\']", " ", s)
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    s = s.replace("đ", "d").replace("Đ", "d")
+    tokens = sorted(list(set([w for w in s.split() if w])))
+    return " ".join(tokens)
+
+def normalize_title_py(title: Optional[str]) -> str:
+    if not title:
+        return ""
+    s = title.lower().strip()
+    s = re.sub(r"[.,\/#!$%\^&\*;:{}=\-_`~()\[\]\"\']", " ", s)
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    s = s.replace("đ", "d").replace("Đ", "d")
+    return " ".join([w for w in s.split() if w])
+
+@app.get("/api/admin/books/duplicates")
+def get_duplicate_books(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    books = db.query(models.Book).options(defer(models.Book.cover_url)).all()
+    groups = {}
+    for b in books:
+        n_title = normalize_title_py(b.title)
+        if not n_title:
+            continue
+        n_author = normalize_author_py(b.author)
+        key = f"{n_title}:::{n_author}"
+        if key not in groups:
+            groups[key] = []
+        groups[key].append(serialize_book_lightweight(b))
+    
+    dup_groups = [
+        {
+            "key": k,
+            "title": g[0]["title"],
+            "author": g[0].get("author") or "Chưa rõ tác giả",
+            "count": len(g),
+            "books": g
+        }
+        for k, g in groups.items() if len(g) >= 2
+    ]
+    total_redundant = sum(len(g["books"]) - 1 for g in dup_groups)
+    return {
+        "groups": dup_groups,
+        "total_groups": len(dup_groups),
+        "total_redundant": total_redundant
+    }
+
 @app.post("/api/books/link", response_model=schemas.BookResponse)
 def create_book_from_link(book_in: schemas.BookLinkCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
     db_book = models.Book(

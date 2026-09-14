@@ -16,7 +16,7 @@ export default function Sidebar() {
   }, [pathname]);
 
   const mainMenuItems = [
-    { icon: <LayoutDashboard size={20} />, label: 'My BookCase Board', href: '/' },
+    { icon: <LayoutDashboard size={20} />, label: 'BookCase Board', href: '/' },
     { icon: <Sparkles size={20} />, label: 'Không Gian Đọc', href: '/reader' },
     { icon: <Bookmark size={20} />, label: 'Sách Cá Nhân', href: '/my-books' },
     { icon: <QuoteIcon size={20} />, label: 'Trích Dẫn', href: '/quotes' },
@@ -40,7 +40,7 @@ export default function Sidebar() {
       <li key={key} className="w-full">
         <Link 
           href={item.href} 
-          className={`flex items-center gap-4 p-3 md:px-4 md:py-3 rounded-xl transition-all font-extrabold text-sm w-full ${
+          className={`flex items-center gap-3 p-3 md:px-3.5 md:py-2.5 rounded-xl transition-all font-extrabold text-sm w-full ${
             active 
               ? 'bg-[#F5ECDC] text-black shadow-md' 
               : 'text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#2A272A]'
@@ -64,9 +64,9 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className="w-full h-16 fixed left-0 top-0 flex flex-row items-center justify-between bg-[#1F1D20]/90 backdrop-blur-md border-b border-[#4D4845]/40 px-4 z-50 md:w-64 md:h-screen md:flex-col md:justify-start md:border-r md:border-b-0 md:p-6 md:bg-[#181618]">
+      <div className="w-full h-16 fixed left-0 top-0 flex flex-row items-center justify-between bg-[#1F1D20]/90 backdrop-blur-md border-b border-[#4D4845]/40 px-4 z-50 md:w-64 md:h-screen md:flex-col md:justify-start md:border-r md:border-b-0 md:px-4 md:py-6 md:bg-[#181618]">
         {/* Logo */}
-        <div className="flex items-center md:mb-10 flex-shrink-0 z-50">
+        <div className="flex items-center md:mb-8 md:px-2 flex-shrink-0 z-50">
           <Link href="/">
             <h1 className="text-2xl md:text-3xl font-extrabold text-[#F5ECDC] cursor-pointer hover:opacity-80 transition-opacity tracking-tight">
               BOOKCASE<span className="text-[#F5ECDC]">.</span>
@@ -76,12 +76,12 @@ export default function Sidebar() {
 
         {/* User Profile Card - Hide on Mobile */}
         {user ? (
-          <div className="hidden md:block bg-[#2A272A] p-5 rounded-2xl mb-8 shadow-md border border-[#4D4845]/40 w-full">
-            <div className="w-12 h-12 bg-[#4D4845] rounded-full flex items-center justify-center mb-3 shadow-inner overflow-hidden border border-[#7B7369]/40">
+          <div className="hidden md:block bg-[#2A272A] p-4 rounded-2xl mb-6 shadow-md border border-[#4D4845]/40 w-full">
+            <div className="w-11 h-11 bg-[#4D4845] rounded-full flex items-center justify-center mb-2.5 shadow-inner overflow-hidden border border-[#7B7369]/40">
                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} alt="Avatar" className="w-full h-full object-cover" />
             </div>
-            <p className="text-xs text-[#D7C9B2] font-medium mb-0.5">Welcome Back</p>
-            <p className="text-lg font-bold text-[#F5ECDC] truncate">{user.username}</p>
+            <p className="text-[11px] text-[#D7C9B2] font-medium mb-0.5">Welcome Back</p>
+            <p className="text-base font-bold text-[#F5ECDC] truncate">{user.username}</p>
           </div>
         ) : (
           <div className="hidden md:block mb-10 w-full">

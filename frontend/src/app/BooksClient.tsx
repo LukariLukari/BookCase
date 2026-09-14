@@ -121,7 +121,7 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
       <Sidebar />
 
       {/* Main Content Area - Shifted Right */}
-      <div className="flex-1 ml-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen w-full max-w-full">
+      <div className="flex-1 min-w-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen">
         
         {/* Topbar */}
         <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex flex-col gap-4 border-b border-[#4D4845]/30">

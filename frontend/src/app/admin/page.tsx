@@ -1,11 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
-import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, KeyRound, Library } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, Copy } from 'lucide-react';
 
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 import BookCoverImage from '@/components/BookCoverImage';
@@ -14,7 +14,45 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection, setDownloadingId, downloadingId, baseUrl, copyShareLink, copiedId, openEditModal, handleDelete }: any) {
+/**
+ * Chuẩn hóa tên tác giả:
+ * - Chữ thường, bỏ dấu câu và ký tự lạ
+ * - Bỏ dấu tiếng Việt (đ -> d, é -> e)
+ * - Tách thành mảng từ đơn, sắp xếp theo thứ tự chữ cái rồi nối lại
+ * Giúp "Higashino Keigo" và "Keigo Higashino " có cùng một chuỗi chuẩn hóa: "higashino keigo"
+ */
+export function normalizeAuthor(author: string | null | undefined): string {
+  if (!author) return '';
+  let str = author.toLowerCase().trim();
+  str = str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]"'`]/g, ' ');
+  str = str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'd');
+  const tokens = Array.from(new Set(str.split(/\s+/).filter(Boolean)));
+  tokens.sort();
+  return tokens.join(' ');
+}
+
+/**
+ * Chuẩn hóa tên sách:
+ * - Chữ thường, bỏ dấu câu và dấu tiếng Việt
+ * Giúp nhận diện chính xác sách trùng lặp
+ */
+export function normalizeTitle(title: string | null | undefined): string {
+  if (!title) return '';
+  let str = title.toLowerCase().trim();
+  str = str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]"'`]/g, ' ');
+  str = str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'd');
+  return str.split(/\s+/).filter(Boolean).join(' ');
+}
+
+function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection, setDownloadingId, downloadingId, baseUrl, copyShareLink, copiedId, openEditModal, handleDelete, duplicateInfo }: any) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: book.id, disabled: !isSortMode });
   
   const style = {
@@ -31,7 +69,11 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
            <GripVertical size={16} />
          </div>
       )}
-      <div className={`w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-[#4D4845]/40 transition-all duration-300 ${!isSortMode ? 'group-hover:shadow-xl' : ''}`}>
+      <div className={`w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border ${
+        duplicateInfo && duplicateInfo.isRedundant 
+          ? 'border-red-500/50 shadow-red-950/20' 
+          : 'border-[#4D4845]/40'
+      } transition-all duration-300 ${!isSortMode ? 'group-hover:shadow-xl' : ''}`}>
          <BookCoverImage 
            coverUrl={book.cover_url}
            bookId={book.id}
@@ -50,6 +92,18 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
                  className="w-5 h-5 rounded-md border-2 border-white/80 bg-black/40 checked:bg-orange-500 checked:border-orange-500 cursor-pointer shadow-sm focus:ring-0 focus:ring-offset-0 transition-colors"
                />
              </div>
+
+             {duplicateInfo && (
+               <div className="absolute top-2 right-9 z-20">
+                 <span className={`text-[10px] font-black px-2 py-0.5 rounded-md backdrop-blur-md shadow-sm border ${
+                   duplicateInfo.isRedundant 
+                     ? 'bg-red-950/90 text-red-200 border-red-700/60' 
+                     : 'bg-[#1F1D20]/90 text-[#F5ECDC] border-[#4D4845]/80'
+                 }`}>
+                   {duplicateInfo.isRedundant ? `Bản thừa #${duplicateInfo.copyIndex}` : 'Bản gốc'}
+                 </span>
+               </div>
+             )}
              
              <div className="absolute top-2 left-2 z-20">
                {book.external_url ? (
@@ -91,14 +145,14 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
 
                  <button 
                    onClick={() => openEditModal(book)} 
-                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-orange-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer"
+                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-orange-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer" 
                    title="Sửa thông tin sách"
                  >
                    <Edit2 size={14} className="text-[#D7C9B2] hover:text-orange-400" />
                  </button>
                  <button 
                    onClick={() => handleDelete(book.id)} 
-                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-red-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer"
+                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-red-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer" 
                    title="Xóa sách"
                  >
                    <Trash2 size={14} className="text-[#D7C9B2] hover:text-red-400" />
@@ -110,6 +164,12 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
       
       <div className="px-1">
         <h3 className="text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2">{book.title}</h3>
+        <p className="text-xs text-[#D7C9B2] font-semibold mt-1 truncate">{book.author || 'Chưa rõ tác giả'}</p>
+        {duplicateInfo && (
+          <p className="text-[10px] font-bold text-[#7B7369] mt-0.5">
+            Nhóm trùng #{duplicateInfo.groupIndex} ({duplicateInfo.totalInGroup} bản)
+          </p>
+        )}
       </div>
     </div>
   );
@@ -522,94 +582,265 @@ export default function AdminPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const filteredBooks = books.filter(book => 
-    book.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Quản lý trạng thái lọc sách trùng
+  const [isDuplicateFilterActive, setIsDuplicateFilterActive] = useState(false);
+
+  // Nhóm các sách trùng lặp theo (Tên sách chuẩn hóa + Tác giả chuẩn hóa)
+  const duplicateGroups = useMemo(() => {
+    const map: { [key: string]: Book[] } = {};
+    
+    books.forEach(book => {
+      const normTitle = normalizeTitle(book.title);
+      if (!normTitle) return;
+      const normAuthor = normalizeAuthor(book.author);
+      const key = `${normTitle}:::${normAuthor}`;
+      if (!map[key]) {
+        map[key] = [];
+      }
+      map[key].push(book);
+    });
+
+    return Object.entries(map)
+      .filter(([_, group]) => group.length >= 2)
+      .map(([key, groupBooks], groupIdx) => ({
+        key,
+        groupIndex: groupIdx + 1,
+        displayTitle: groupBooks[0].title,
+        displayAuthor: groupBooks[0].author || 'Chưa rõ tác giả',
+        books: groupBooks,
+      }));
+  }, [books]);
+
+  const totalDuplicateBooks = useMemo(() => {
+    return duplicateGroups.reduce((acc, g) => acc + g.books.length, 0);
+  }, [duplicateGroups]);
+
+  const duplicateRedundantCount = useMemo(() => {
+    return duplicateGroups.reduce((acc, g) => acc + (g.books.length - 1), 0);
+  }, [duplicateGroups]);
+
+  // Danh sách các sách trùng kèm thông tin nhóm để hiển thị cạnh nhau
+  const duplicateBooksWithInfo = useMemo(() => {
+    const list: { book: Book; duplicateInfo: any }[] = [];
+    duplicateGroups.forEach((group) => {
+      group.books.forEach((b, bIdx) => {
+        list.push({
+          book: b,
+          duplicateInfo: {
+            groupIndex: group.groupIndex,
+            copyIndex: bIdx + 1,
+            totalInGroup: group.books.length,
+            isRedundant: bIdx > 0, // Quy ước bản đầu tiên (index 0) là bản giữ lại, các bản sau là thừa
+          }
+        });
+      });
+    });
+    return list;
+  }, [duplicateGroups]);
+
+  // Chọn toàn bộ các bản sao thừa (tất cả các bản từ vị trí thứ 2 trở đi trong mỗi nhóm trùng)
+  const handleSelectAllDuplicates = () => {
+    const redundantIds = duplicateBooksWithInfo
+      .filter(item => item.duplicateInfo.isRedundant)
+      .map(item => item.book.id);
+    setSelectedBooks(redundantIds);
+  };
+
+  // Danh sách sách hiển thị trên grid
+  const displayItems = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (isDuplicateFilterActive) {
+      if (!q) return duplicateBooksWithInfo;
+      return duplicateBooksWithInfo.filter(item => 
+        item.book.title.toLowerCase().includes(q) || 
+        (item.book.author && item.book.author.toLowerCase().includes(q))
+      );
+    } else {
+      const filtered = q
+        ? books.filter(b => b.title.toLowerCase().includes(q) || (b.author && b.author.toLowerCase().includes(q)))
+        : books;
+      return filtered.map(b => ({ book: b, duplicateInfo: null }));
+    }
+  }, [isDuplicateFilterActive, duplicateBooksWithInfo, books, searchQuery]);
 
   if (isLoading || !user || user.role !== 'admin') {
     return <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center font-bold text-[#D7C9B2]">Loading...</div>;
   }
 
   return (
-    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60 overflow-x-hidden">
+    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60">
       <Sidebar />
-      <div className="flex-1 ml-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen w-full max-w-full">
-        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#4D4845]/30 gap-4 md:gap-0">
-          <div className="flex items-center gap-8 text-sm font-bold text-[#D7C9B2]">
-             <span className="text-[#F5ECDC] border-b-2 border-[#F97316] pb-1 text-xl whitespace-nowrap">Admin Dashboard</span>
+      <div className="flex-1 min-w-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen">
+        {/* Top Header */}
+        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/95 backdrop-blur-md px-4 py-4 md:px-8 md:py-5 flex flex-col lg:flex-row justify-between items-stretch lg:items-center border-b border-[#4D4845]/40 gap-4">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl md:text-2xl font-black text-[#F5ECDC] tracking-tight">Admin Dashboard</h1>
+            <span className="text-xs font-bold px-2.5 py-1 bg-[#2A272A] border border-[#4D4845]/50 text-[#D7C9B2] rounded-full">
+              {books.length} cuốn sách
+            </span>
           </div>
-          <div className="flex items-center w-full md:w-auto gap-4">
-            <div className="relative flex-1 md:w-72">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7B7369]" size={16} />
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Search */}
+            <div className="relative flex-1 sm:flex-initial sm:w-60">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7B7369]" size={15} />
               <input 
                 type="text" 
-                placeholder="Search books..."
+                placeholder="Tìm tên, tác giả..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#2A272A] border border-[#4D4845]/60 rounded-full py-3.5 md:py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#F97316]/50 shadow-inner transition-all text-[#F5ECDC] placeholder-[#7B7369]"
+                className="w-full bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-2 pl-10 pr-8 text-xs font-medium text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none focus:border-[#F5ECDC]"
               />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7B7369] hover:text-[#F5ECDC] cursor-pointer">
+                  <X size={14} />
+                </button>
+              )}
             </div>
+
+            {/* Nút Lọc Sách Trùng */}
+            <button
+              onClick={() => {
+                setIsDuplicateFilterActive(!isDuplicateFilterActive);
+                if (!isDuplicateFilterActive) {
+                  setSearchQuery('');
+                  setIsSortMode(false);
+                }
+              }}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border ${
+                isDuplicateFilterActive
+                  ? 'bg-[#F5ECDC] text-black border-[#F5ECDC] shadow-md'
+                  : duplicateGroups.length > 0
+                    ? 'bg-[#2A272A] text-[#F5ECDC] border-[#4D4845] hover:border-[#F5ECDC]'
+                    : 'bg-[#2A272A] text-[#7B7369] border-[#4D4845]/40 hover:text-[#D7C9B2]'
+              }`}
+              title="Lọc các cuốn sách bị trùng lặp tên & tác giả (ví dụ: Higashino Keigo = Keigo Higashino)"
+            >
+              <Copy size={15} />
+              <span>Lọc Sách Trùng</span>
+              {duplicateRedundantCount > 0 && (
+                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
+                  isDuplicateFilterActive ? 'bg-black text-[#F5ECDC]' : 'bg-[#4D4845] text-[#F5ECDC]'
+                }`}>
+                  {duplicateRedundantCount}
+                </span>
+              )}
+            </button>
+
+            {/* Bulk Delete button when items selected */}
             {selectedBooks.length > 0 && (
               <button 
                 onClick={handleBulkDelete}
-                className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 !bg-red-600 !text-white hover:!bg-red-700 border-none shadow-md shadow-red-950/40"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold bg-red-600 hover:bg-red-700 text-white transition-all shadow-md cursor-pointer"
               >
-                <Trash2 size={16} className="inline mr-1 text-white" />
-                <span className="hidden sm:inline">Xóa {selectedBooks.length} mục</span>
+                <Trash2 size={15} />
+                <span>Xóa {selectedBooks.length} mục</span>
               </button>
             )}
+
+            {/* Sửa bìa lỗi */}
             <button 
               onClick={handleFixCovers}
               disabled={isFixing}
-              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#F97316] hover:text-[#F97316] bg-[#2A272A]"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold bg-[#2A272A] text-[#F5ECDC] border border-[#4D4845] hover:border-[#D7C9B2] transition-all cursor-pointer disabled:opacity-50"
             >
-              {isFixing ? <Loader2 size={16} className="animate-spin inline mr-1 text-[#F97316]" /> : <Settings size={16} className="inline mr-1 text-[#F97316]" />} 
+              {isFixing ? <Loader2 size={15} className="animate-spin" /> : <Settings size={15} />}
               <span className="hidden sm:inline">{isFixing ? 'Đang sửa...' : 'Sửa bìa lỗi'}</span>
             </button>
+
+            {/* Sắp xếp */}
             {isSortMode ? (
               <button 
                 onClick={handleSaveOrder}
                 disabled={isSavingOrder}
-                className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-6 md:!px-5 text-sm whitespace-nowrap mr-2 bg-[#F5ECDC] hover:bg-[#D7C9B2] border-none text-[#1F1D20] shadow-md font-bold"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold bg-[#F5ECDC] text-black hover:bg-white transition-all shadow-md cursor-pointer"
               >
-                {isSavingOrder ? <Loader2 size={16} className="animate-spin inline mr-1" /> : <Save size={16} className="inline mr-1" />}
-                <span className="hidden sm:inline">Lưu thứ tự</span>
+                {isSavingOrder ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+                <span>Lưu thứ tự</span>
               </button>
             ) : (
               <button 
-                onClick={() => { setIsSortMode(true); setSearchQuery(''); }}
-                className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#D7C9B2] hover:text-[#D7C9B2] bg-[#2A272A]"
+                onClick={() => { setIsSortMode(true); setSearchQuery(''); setIsDuplicateFilterActive(false); }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold bg-[#2A272A] text-[#F5ECDC] border border-[#4D4845] hover:border-[#D7C9B2] transition-all cursor-pointer"
               >
-                <GripVertical size={16} className="inline mr-1 text-[#D7C9B2]" /> 
-                <span className="hidden sm:inline">Sắp xếp</span>
+                <GripVertical size={15} />
+                <span>Sắp xếp</span>
               </button>
             )}
-            <Link 
-              href="/admin/registration-codes"
-              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#D7C9B2] hover:text-[#D7C9B2] bg-[#2A272A] flex items-center gap-1.5 font-bold cursor-pointer"
-              title="Quản lý và tạo mã đăng ký tài khoản cho thành viên mới"
-            >
-              <KeyRound size={16} className="text-[#D7C9B2]" />
-              <span className="hidden sm:inline">Mã Đăng Ký</span>
-            </Link>
-            <Link 
-              href="/admin/collections"
-              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#D7C9B2] hover:text-[#D7C9B2] bg-[#2A272A] flex items-center gap-1.5 font-bold cursor-pointer"
-              title="Quản lý bộ sưu tập sách"
-            >
-              <Library size={16} className="text-[#D7C9B2]" />
-              <span className="hidden sm:inline">Bộ Sưu Tập</span>
-            </Link>
+
+            {/* Add Books */}
             <button 
               onClick={() => setIsAddModalOpen(true)}
-              className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-6 md:!px-5 text-sm whitespace-nowrap cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black bg-[#F5ECDC] hover:bg-white text-black transition-all shadow-md cursor-pointer"
             >
-              <Plus size={16} /> <span className="hidden sm:inline">Add Books</span>
+              <Plus size={16} />
+              <span>Thêm Sách</span>
             </button>
           </div>
         </header>
 
-        <main className="flex-1 px-4 md:px-10 pt-8 pb-12">
+        <main className="flex-1 px-4 md:px-8 pt-6 pb-12">
+          {/* Banner hướng dẫn và xử lý trùng lặp */}
+          {isDuplicateFilterActive && (
+            duplicateGroups.length === 0 ? (
+              <div className="bg-[#2A272A] border border-[#4D4845]/50 rounded-2xl p-8 text-center my-4">
+                <Check size={32} className="mx-auto text-[#F5ECDC] mb-3" />
+                <h3 className="text-base font-bold text-[#F5ECDC]">Không phát hiện cuốn sách nào bị trùng lặp</h3>
+                <p className="text-xs text-[#D7C9B2] mt-1 max-w-md mx-auto">
+                  Hệ thống đã đối soát toàn bộ {books.length} cuốn sách theo tên & tác giả (đã hỗ trợ đảo họ tên và bỏ dấu tiếng Việt).
+                </p>
+                <button 
+                  onClick={() => setIsDuplicateFilterActive(false)}
+                  className="mt-4 px-4 py-2 bg-[#F5ECDC] text-black font-extrabold text-xs rounded-xl hover:bg-white cursor-pointer"
+                >
+                  Quay lại xem tất cả sách
+                </button>
+              </div>
+            ) : (
+              <div className="bg-[#2A272A] border border-[#4D4845]/70 rounded-2xl p-4 md:p-5 mb-6 shadow-lg">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2.5 bg-[#1F1D20] border border-[#4D4845]/60 rounded-xl text-[#F5ECDC] shrink-0">
+                      <Copy size={20} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm md:text-base font-black text-[#F5ECDC]">
+                          Phát hiện {duplicateGroups.length} nhóm sách trùng lặp ({totalDuplicateBooks} cuốn)
+                        </h3>
+                        <span className="text-[11px] font-bold px-2 py-0.5 bg-red-950/60 text-red-300 border border-red-800/40 rounded-full">
+                          {duplicateRedundantCount} bản sao thừa
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#D7C9B2] mt-1">
+                        Hệ thống đã nhận diện thông minh tên sách và họ tên tác giả (ví dụ: &ldquo;Higashino Keigo&rdquo; = &ldquo;Keigo Higashino&rdquo;).
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <button
+                      onClick={handleSelectAllDuplicates}
+                      className="flex-1 md:flex-initial px-3.5 py-2 bg-[#1F1D20] hover:bg-[#3A373A] border border-[#4D4845] text-[#F5ECDC] text-xs font-black rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Check size={14} />
+                      <span>Chọn {duplicateRedundantCount} bản thừa để xóa</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsDuplicateFilterActive(false);
+                        setSelectedBooks([]);
+                      }}
+                      className="px-3 py-2 text-xs font-bold text-[#D7C9B2] hover:text-[#F5ECDC] cursor-pointer"
+                    >
+                      Thoát lọc
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          )}
+
           {isFetchingBooks ? (
             <div className="flex flex-col items-center justify-center mt-32 max-w-md mx-auto w-full px-4">
                <div className="w-full bg-[#2A272A] border border-[#4D4845]/50 rounded-full h-3 mb-3 shadow-inner overflow-hidden">
@@ -619,9 +850,9 @@ export default function AdminPage() {
             </div>
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={filteredBooks.map(b => b.id)} strategy={rectSortingStrategy}>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10">
-                  {filteredBooks.map((book) => (
+              <SortableContext items={displayItems.map(item => item.book.id)} strategy={rectSortingStrategy}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-4 md:gap-x-5 gap-y-6 md:gap-y-8">
+                  {displayItems.map(({ book, duplicateInfo }) => (
                     <SortableBookItem 
                       key={book.id} 
                       book={book} 
@@ -634,7 +865,8 @@ export default function AdminPage() {
                       copyShareLink={copyShareLink} 
                       copiedId={copiedId} 
                       openEditModal={openEditModal} 
-                      handleDelete={handleDelete} 
+                      handleDelete={handleDelete}
+                      duplicateInfo={duplicateInfo}
                     />
                   ))}
                 </div>
@@ -654,7 +886,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          {!isFetchingBooks && filteredBooks.length === 0 && !error && (
+          {!isFetchingBooks && displayItems.length === 0 && !error && (
             <div className="text-center text-[#D7C9B2] text-sm mt-10">No books found.</div>
           )}
         </main>
