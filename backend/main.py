@@ -350,6 +350,56 @@ def normalize_match_str(s: str) -> str:
     s = re.sub(r'[^a-zA-Z0-9]+', ' ', s).lower().strip()
     return s
 
+@app.get("/api/admin/books/check-files")
+def check_book_files(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """
+    Kiểm tra toàn bộ sách xem cuốn nào bị mất file hoặc chưa có file liên kết.
+    """
+    books = db.query(models.Book).all()
+    broken_books = []
+    
+    # Lấy danh sách file_keys và book_ids đã lưu trong bảng BookFile
+    existing_file_keys = set(k[0] for k in db.query(models.BookFile.file_key).all() if k[0])
+    existing_book_file_ids = set(k[0] for k in db.query(models.BookFile.book_id).all() if k[0])
+    
+    upload_dir = drive_service.upload_dir
+    
+    for b in books:
+        # Nếu có link ngoài (external_url) hợp lệ thì coi như đã liên kết
+        if b.external_url and b.external_url.strip():
+            continue
+            
+        # Không có drive_file_id
+        if not b.drive_file_id:
+            broken_books.append({
+                "id": b.id,
+                "title": b.title,
+                "author": b.author,
+                "reason": "Chưa có file hoặc liên kết"
+            })
+            continue
+            
+        # Nếu là local file
+        if b.drive_file_id.startswith("local_"):
+            has_db_file = (b.drive_file_id in existing_file_keys) or (b.id in existing_book_file_ids)
+            has_disk_file = os.path.exists(os.path.join(upload_dir, b.drive_file_id))
+            if not has_db_file and not has_disk_file:
+                broken_books.append({
+                    "id": b.id,
+                    "title": b.title,
+                    "author": b.author,
+                    "reason": "Mất liên kết file do server tạm khởi động lại"
+                })
+                
+    return {
+        "total_books": len(books),
+        "broken_count": len(broken_books),
+        "broken_books": broken_books
+    }
+
 @app.post("/api/admin/books/sync-files")
 async def sync_book_files(
     files: List[UploadFile] = File(...),

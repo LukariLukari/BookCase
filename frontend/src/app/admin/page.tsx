@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
-import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, Copy } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, Copy, Unlink2, AlertTriangle } from 'lucide-react';
 
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 import BookCoverImage from '@/components/BookCoverImage';
@@ -232,11 +232,14 @@ export default function AdminPage() {
   // Add State (Direct Link)
   const [linkForm, setLinkForm] = useState({ title: '', author: '', genre: '', cover_url: '', external_url: '' });
 
-  // Sync / Restore 67 Files State
+  // File Health / Broken Links Check & Sync State
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [syncFiles, setSyncFiles] = useState<File[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncProgress, setSyncProgress] = useState<string | null>(null);
+  const [brokenFileCount, setBrokenFileCount] = useState<number | null>(null);
+  const [brokenBooksList, setBrokenBooksList] = useState<{ id: string; title: string; author?: string; reason?: string }[]>([]);
+  const [isCheckingFiles, setIsCheckingFiles] = useState(false);
   const [syncResult, setSyncResult] = useState<{
     success: boolean;
     total_files: number;
@@ -373,8 +376,24 @@ export default function AdminPage() {
     }
   };
 
+  const fetchBrokenFiles = async () => {
+    try {
+      setIsCheckingFiles(true);
+      const res = await axios.get(`${baseUrl}/api/admin/books/check-files`, {
+        headers: getHeaders()
+      });
+      setBrokenFileCount(res.data.broken_count ?? 0);
+      setBrokenBooksList(res.data.broken_books || []);
+    } catch (e) {
+      console.error('Lỗi khi kiểm tra liên kết file:', e);
+    } finally {
+      setIsCheckingFiles(false);
+    }
+  };
+
   useEffect(() => {
     fetchBooks();
+    fetchBrokenFiles();
   }, []);
 
   const sensors = useSensors(
@@ -656,6 +675,7 @@ export default function AdminPage() {
       created_books: allCreated
     });
     fetchBooks();
+    fetchBrokenFiles();
   };
 
   const copyShareLink = (id: string) => {
@@ -763,122 +783,143 @@ export default function AdminPage() {
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto">
+          <div className="flex flex-wrap lg:flex-nowrap items-center justify-end gap-2 w-full xl:w-auto">
             {/* Search */}
-            <div className="relative flex-1 sm:flex-initial sm:w-48 lg:w-56">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7B7369]" size={15} />
+            <div className="relative flex-1 sm:flex-initial sm:w-40 lg:w-48">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7B7369]" size={14} />
               <input 
                 type="text" 
                 placeholder="Tìm tên, tác giả..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-2 pl-10 pr-8 text-xs font-medium text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none focus:border-[#F5ECDC]"
+                className="w-full bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-2 pl-9 pr-7 text-xs font-medium text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none focus:border-[#F5ECDC]"
               />
               {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7B7369] hover:text-[#F5ECDC] cursor-pointer">
-                  <X size={14} />
+                <button onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#7B7369] hover:text-[#F5ECDC] cursor-pointer">
+                  <X size={13} />
                 </button>
               )}
             </div>
 
-            {/* Nút Lọc Sách Trùng */}
-            <button
-              onClick={() => {
-                setIsDuplicateFilterActive(!isDuplicateFilterActive);
-                if (!isDuplicateFilterActive) {
-                  setSearchQuery('');
-                  setIsSortMode(false);
-                }
-              }}
-              style={{
-                backgroundColor: isDuplicateFilterActive ? '#F5ECDC' : '#2A272A',
-                color: isDuplicateFilterActive ? '#181618' : (duplicateGroups.length > 0 ? '#F5ECDC' : '#7B7369'),
-                borderColor: isDuplicateFilterActive ? '#F5ECDC' : '#4D4845',
-              }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border shadow-sm"
-              title="Lọc các cuốn sách bị trùng lặp tên & tác giả (ví dụ: Higashino Keigo = Keigo Higashino)"
-            >
-              <Copy size={15} style={{ color: isDuplicateFilterActive ? '#181618' : 'currentColor' }} />
-              <span style={{ color: isDuplicateFilterActive ? '#181618' : 'currentColor' }}>Lọc Sách Trùng</span>
-              {duplicateRedundantCount > 0 && (
-                <span 
-                  style={{
-                    backgroundColor: isDuplicateFilterActive ? '#181618' : '#4D4845',
-                    color: '#F5ECDC',
-                  }}
-                  className="px-1.5 py-0.5 rounded-full text-[10px] font-black"
+            {/* Nhóm công cụ kiểm tra & quản trị */}
+            <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+              {/* Nút Kiểm tra file bị lỗi / mất liên kết */}
+              <button 
+                onClick={() => {
+                  setIsSyncModalOpen(true);
+                  setSyncFiles([]);
+                  setSyncResult(null);
+                  setSyncProgress(null);
+                  fetchBrokenFiles();
+                }}
+                style={{ 
+                  backgroundColor: '#2A272A', 
+                  color: '#F5ECDC', 
+                  borderColor: brokenFileCount && brokenFileCount > 0 ? '#F59E0B' : '#4D4845' 
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer shadow-sm"
+                title="Kiểm tra các cuốn sách chưa có file hoặc bị mất liên kết tải về"
+              >
+                <Unlink2 size={15} style={{ color: brokenFileCount && brokenFileCount > 0 ? '#F59E0B' : '#D7C9B2' }} />
+                <span>Kiểm tra file</span>
+                {brokenFileCount !== null && brokenFileCount > 0 && (
+                  <span 
+                    style={{ backgroundColor: '#D97706', color: '#FFFFFF' }}
+                    className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none"
+                  >
+                    {brokenFileCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Nút Lọc Sách Trùng */}
+              <button
+                onClick={() => {
+                  setIsDuplicateFilterActive(!isDuplicateFilterActive);
+                  if (!isDuplicateFilterActive) {
+                    setSearchQuery('');
+                    setIsSortMode(false);
+                  }
+                }}
+                style={{
+                  backgroundColor: isDuplicateFilterActive ? '#F5ECDC' : '#2A272A',
+                  color: isDuplicateFilterActive ? '#181618' : (duplicateGroups.length > 0 ? '#F5ECDC' : '#7B7369'),
+                  borderColor: isDuplicateFilterActive ? '#F5ECDC' : '#4D4845',
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border shadow-sm"
+                title="Lọc các cuốn sách bị trùng lặp tên & tác giả"
+              >
+                <Copy size={15} style={{ color: isDuplicateFilterActive ? '#181618' : 'currentColor' }} />
+                <span style={{ color: isDuplicateFilterActive ? '#181618' : 'currentColor' }}>Lọc trùng</span>
+                {duplicateRedundantCount > 0 && (
+                  <span 
+                    style={{
+                      backgroundColor: isDuplicateFilterActive ? '#181618' : '#4D4845',
+                      color: '#F5ECDC',
+                    }}
+                    className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none"
+                  >
+                    {duplicateRedundantCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Bulk Delete button when items selected */}
+              {selectedBooks.length > 0 && (
+                <button 
+                  onClick={handleBulkDelete}
+                  style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black hover:bg-red-700 text-white transition-all shadow-md cursor-pointer border border-red-600"
                 >
-                  {duplicateRedundantCount}
-                </span>
+                  <Trash2 size={15} style={{ color: '#FFFFFF' }} />
+                  <span>Xóa {selectedBooks.length}</span>
+                </button>
               )}
-            </button>
 
-            {/* Bulk Delete button when items selected */}
-            {selectedBooks.length > 0 && (
+              {/* Sửa bìa */}
               <button 
-                onClick={handleBulkDelete}
-                style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black hover:bg-red-700 text-white transition-all shadow-md cursor-pointer border border-red-600"
-              >
-                <Trash2 size={15} style={{ color: '#FFFFFF' }} />
-                <span style={{ color: '#FFFFFF' }}>Xóa {selectedBooks.length} mục</span>
-              </button>
-            )}
-
-            {/* Sửa bìa lỗi */}
-            <button 
-              onClick={handleFixCovers}
-              disabled={isFixing}
-              style={{ backgroundColor: '#2A272A', color: '#F5ECDC', borderColor: '#4D4845' }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer disabled:opacity-50"
-            >
-              {isFixing ? <Loader2 size={15} className="animate-spin text-[#F5ECDC]" /> : <Settings size={15} style={{ color: '#F5ECDC' }} />}
-              <span className="hidden sm:inline" style={{ color: '#F5ECDC' }}>{isFixing ? 'Đang sửa...' : 'Sửa bìa lỗi'}</span>
-            </button>
-
-            {/* Sắp xếp */}
-            {isSortMode ? (
-              <button 
-                onClick={handleSaveOrder}
-                disabled={isSavingOrder}
-                style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black hover:bg-white transition-all shadow-md cursor-pointer border"
-              >
-                {isSavingOrder ? <Loader2 size={15} className="animate-spin text-[#181618]" /> : <Save size={15} style={{ color: '#181618' }} />}
-                <span style={{ color: '#181618' }}>Lưu thứ tự</span>
-              </button>
-            ) : (
-              <button 
-                onClick={() => { setIsSortMode(true); setSearchQuery(''); setIsDuplicateFilterActive(false); }}
+                onClick={handleFixCovers}
+                disabled={isFixing}
                 style={{ backgroundColor: '#2A272A', color: '#F5ECDC', borderColor: '#4D4845' }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                title="Tự động sửa ảnh bìa bị lỗi"
               >
-                <GripVertical size={15} style={{ color: '#F5ECDC' }} />
-                <span style={{ color: '#F5ECDC' }}>Sắp xếp</span>
+                {isFixing ? <Loader2 size={15} className="animate-spin text-[#F5ECDC]" /> : <Settings size={15} style={{ color: '#F5ECDC' }} />}
+                <span className="hidden sm:inline" style={{ color: '#F5ECDC' }}>{isFixing ? 'Đang sửa...' : 'Sửa bìa'}</span>
               </button>
-            )}
 
-            {/* Khôi phục 67 File Sách */}
-            <button 
-              onClick={() => {
-                setIsSyncModalOpen(true);
-                setSyncFiles([]);
-                setSyncResult(null);
-                setSyncProgress(null);
-              }}
-              style={{ backgroundColor: '#D97706', color: '#FFFFFF', borderColor: '#F59E0B' }}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black hover:bg-amber-600 transition-all shadow-md cursor-pointer border"
-              title="Khôi phục và lưu vĩnh viễn 67 file sách vào Database PostgreSQL (chống mất file)"
-            >
-              <Upload size={15} style={{ color: '#FFFFFF' }} />
-              <span style={{ color: '#FFFFFF' }}>⚡ Khôi phục 67 File Sách</span>
-            </button>
+              {/* Sắp xếp */}
+              {isSortMode ? (
+                <button 
+                  onClick={handleSaveOrder}
+                  disabled={isSavingOrder}
+                  style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black hover:bg-white transition-all shadow-md cursor-pointer border"
+                >
+                  {isSavingOrder ? <Loader2 size={15} className="animate-spin text-[#181618]" /> : <Save size={15} style={{ color: '#181618' }} />}
+                  <span style={{ color: '#181618' }}>Lưu thứ tự</span>
+                </button>
+              ) : (
+                <button 
+                  onClick={() => { setIsSortMode(true); setSearchQuery(''); setIsDuplicateFilterActive(false); }}
+                  style={{ backgroundColor: '#2A272A', color: '#F5ECDC', borderColor: '#4D4845' }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer shadow-sm"
+                  title="Thay đổi thứ tự sắp xếp sách"
+                >
+                  <GripVertical size={15} style={{ color: '#F5ECDC' }} />
+                  <span style={{ color: '#F5ECDC' }}>Sắp xếp</span>
+                </button>
+              )}
+            </div>
 
-            {/* Add Books */}
+            {/* Đường phân cách thẩm mỹ */}
+            <div className="h-6 w-px bg-[#4D4845]/50 mx-1 hidden sm:block shrink-0" />
+
+            {/* Nút Hành Động Chính: Thêm Sách */}
             <button 
               onClick={() => setIsAddModalOpen(true)}
               style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black hover:bg-white transition-all shadow-md cursor-pointer border"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black hover:bg-white transition-all shadow-md cursor-pointer border shrink-0"
             >
               <Plus size={16} style={{ color: '#181618' }} />
               <span style={{ color: '#181618' }}>Thêm Sách</span>
@@ -1235,19 +1276,60 @@ export default function AdminPage() {
 
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
-                <Upload size={20} />
+                <Unlink2 size={20} />
               </div>
               <div>
-                <h3 className="text-lg font-black text-[#F5ECDC]">⚡ Khôi Phục & Đồng Bộ File Sách</h3>
-                <p className="text-xs text-[#D7C9B2]">Lưu file sách vĩnh viễn vào Database PostgreSQL</p>
+                <h3 className="text-lg font-black text-[#F5ECDC]">Kiểm Tra & Khắc Phục Liên Kết File Sách</h3>
+                <p className="text-xs text-[#D7C9B2]">Rà soát toàn bộ sách xem cuốn nào chưa có file hoặc bị mất liên kết tải về</p>
               </div>
             </div>
 
-            {/* Hộp giải thích nguyên nhân và giải pháp */}
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 mb-5 text-xs text-amber-200/90 leading-relaxed">
-              <span className="font-bold text-amber-300 block mb-1">💡 Vì sao có hiện tượng mất file vừa tải lên?</span>
-              Máy chủ Render sử dụng ổ cứng tạm thời (ephemeral disk) nên khi restart container hoặc redeploy, thư mục lưu file tạm trên đĩa bị xoá. 
-              Thuật toán thông minh bên dưới sẽ tự động so khớp tên 67 file sách từ máy tính của bạn với các bản ghi đang có và <strong>lưu vĩnh viễn nhị phân (Binary) vào Database PostgreSQL</strong>. Từ nay trở đi không bao giờ bị mất nữa!
+            {/* Thẻ Báo cáo Kiểm tra File Sách */}
+            <div className="mb-4">
+              {isCheckingFiles ? (
+                <div className="flex items-center gap-2 p-3.5 bg-[#2A272A] rounded-2xl border border-[#4D4845]/50 text-xs text-[#D7C9B2]">
+                  <Loader2 size={16} className="animate-spin text-amber-400" />
+                  <span>Đang rà soát trạng thái file của {books.length} cuốn sách...</span>
+                </div>
+              ) : brokenFileCount !== null && brokenFileCount > 0 ? (
+                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs text-amber-200">
+                  <div className="flex items-center justify-between mb-2 pb-2 border-b border-amber-500/20">
+                    <div className="flex items-center gap-2 font-black text-amber-300">
+                      <AlertTriangle size={16} className="text-amber-400" />
+                      <span>Phát hiện {brokenFileCount} cuốn sách chưa có file / mất liên kết:</span>
+                    </div>
+                    <button 
+                      onClick={fetchBrokenFiles} 
+                      className="text-[11px] font-bold text-amber-400 hover:underline cursor-pointer"
+                    >
+                      Quét lại
+                    </button>
+                  </div>
+                  <div className="max-h-28 overflow-y-auto space-y-1 pr-1 font-mono text-[11px] text-amber-100/90">
+                    {brokenBooksList.map((b, i) => (
+                      <div key={i} className="truncate">
+                        • {b.title} {b.author ? `— ${b.author}` : ''}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-[11px] text-amber-300/80">
+                    💡 Hãy kéo thả hoặc chọn các file sách tương ứng vào ô bên dưới. Hệ thống sẽ tự động đối chiếu, ghép nối và lưu vĩnh viễn vào Database PostgreSQL.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-xs text-emerald-300">
+                  <div className="flex items-center gap-2.5 font-bold">
+                    <Check size={18} className="text-emerald-400 shrink-0" />
+                    <span>Toàn bộ {books.length} cuốn sách đều đã được liên kết file đầy đủ và an toàn trong Database.</span>
+                  </div>
+                  <button 
+                    onClick={fetchBrokenFiles} 
+                    className="text-[11px] font-bold text-emerald-400 hover:underline cursor-pointer"
+                  >
+                    Quét lại
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="flex-1 overflow-y-auto pr-1 space-y-4">
@@ -1266,7 +1348,7 @@ export default function AdminPage() {
                   className="hidden" 
                   onChange={handleSyncFilesSelect} 
                 />
-                <Upload size={32} className="mx-auto text-amber-400/70 group-hover:text-amber-400 transition-colors mb-2" />
+                <Unlink2 size={32} className="mx-auto text-amber-400/70 group-hover:text-amber-400 transition-colors mb-2" />
                 <p className="text-sm font-bold text-[#F5ECDC]">
                   Kéo thả toàn bộ file sách (.epub, .pdf) vào đây
                 </p>
@@ -1350,16 +1432,16 @@ export default function AdminPage() {
               <button
                 onClick={handleSyncFilesSubmit}
                 disabled={isSyncing || syncFiles.length === 0}
-                style={{ backgroundColor: '#D97706', color: '#FFFFFF' }}
-                className="w-full py-3 px-6 rounded-2xl text-sm font-black transition-all shadow-lg cursor-pointer hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                style={{ backgroundColor: syncFiles.length > 0 ? '#D97706' : '#2A272A', color: syncFiles.length > 0 ? '#FFFFFF' : '#7B7369' }}
+                className="w-full py-3 px-6 rounded-2xl text-sm font-black transition-all shadow-lg cursor-pointer hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-[#4D4845]"
               >
                 {isSyncing ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
-                    <span>Đang Khôi Phục & Đồng Bộ Dữ Liệu...</span>
+                    <span>Đang Khôi Phục & Gắn File Vào Database...</span>
                   </>
                 ) : (
-                  <span>Bắt Đầu Khôi Phục & Lưu Vĩnh Viễn ({syncFiles.length} file)</span>
+                  <span>Khôi Phục & Gắn File Vào Database ({syncFiles.length} file đã chọn)</span>
                 )}
               </button>
             </div>
