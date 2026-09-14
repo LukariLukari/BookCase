@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 import random
 import string
 import time
+import unicodedata
 
 import sqlite3
 
@@ -92,7 +93,7 @@ def repair_cover_for_book(book: models.Book, db: Session) -> str | None:
     file_bytes = None
     if file_id:
         try:
-            file_bytes = drive_service.download_file_bytes(file_id)
+            file_bytes = drive_service.download_file_bytes(file_id, db=db, book_id=book.id)
         except Exception as e:
             print(f"[Cover Repair] Service account download failed for {book.title}: {e}")
 
@@ -313,23 +314,25 @@ async def upload_book(
             except Exception as e:
                 print(f"ImgBB Upload Failed: {e}")
                 
-        drive_file_id = None
-        if not external_url or not external_url.strip():
-            file_stream = io.BytesIO(contents)
-            drive_file_id = drive_service.upload_file(file_stream, filename, mime_type)
-        
         db_book = models.Book(
             title=final_title,
             author=final_author,
             summary=final_summary,
             cover_url=cover_b64,
-            drive_file_id=drive_file_id,
             external_url=external_url,
             mime_type=mime_type,
             file_size=len(contents),
             progress=0
         )
         db.add(db_book)
+        db.flush()
+
+        drive_file_id = None
+        if not external_url or not external_url.strip():
+            file_stream = io.BytesIO(contents)
+            drive_file_id = drive_service.upload_file(file_stream, filename, mime_type, db=db, book_id=db_book.id)
+            db_book.drive_file_id = drive_file_id
+
         db.commit()
         db.refresh(db_book)
         
@@ -338,6 +341,170 @@ async def upload_book(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Lỗi khi tải sách lên: {str(e)}")
+
+def normalize_match_str(s: str) -> str:
+    if not s:
+        return ""
+    s = unicodedata.normalize('NFD', str(s))
+    s = ''.join(c for c in s if unicodedata.category(c) != 'Mn')
+    s = re.sub(r'[^a-zA-Z0-9]+', ' ', s).lower().strip()
+    return s
+
+@app.post("/api/admin/books/sync-files")
+async def sync_book_files(
+    files: List[UploadFile] = File(...),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """
+    Thuật toán tự động đối chiếu và phục hồi file sách vĩnh viễn vào Database PostgreSQL.
+    Giải quyết triệt để vấn đề mất file khi Render restart / redeploy.
+    """
+    if not files:
+        raise HTTPException(status_code=400, detail="Không có file nào được gửi lên")
+
+    all_books = db.query(models.Book).all()
+    matched_books = []
+    created_books = []
+    already_matched_book_ids = set()
+
+    for file in files:
+        contents = await file.read()
+        if not contents or len(contents) < 50:
+            continue
+
+        filename = file.filename or "book"
+        name_no_ext, ext = os.path.splitext(filename)
+        filename_clean = normalize_match_str(name_no_ext)
+        mime_type = file.content_type or 'application/octet-stream'
+
+        is_pdf = filename.lower().endswith('.pdf') or mime_type == 'application/pdf' or contents.startswith(b'%PDF')
+        if is_pdf:
+            mime_type = 'application/pdf'
+            extracted = extract_pdf_info(contents)
+        else:
+            mime_type = 'application/epub+zip'
+            extracted = extract_epub_info(contents)
+
+        meta_title = extracted.get('title') or ""
+        meta_author = extracted.get('author') or ""
+        meta_cover = extracted.get('cover_b64')
+        meta_summary = extracted.get('summary') or ""
+
+        meta_title_clean = normalize_match_str(meta_title)
+        meta_author_clean = normalize_match_str(meta_author)
+
+        # Tìm kiếm cuốn sách phù hợp nhất trong cơ sở dữ liệu
+        best_book = None
+        best_score = 0
+
+        for book in all_books:
+            if book.id in already_matched_book_ids:
+                continue
+
+            book_title_clean = normalize_match_str(book.title)
+            book_drive_clean = normalize_match_str(book.drive_file_id or '')
+            book_author_clean = normalize_match_str(book.author or '')
+
+            score = 0
+            # 1. Khớp chính xác hoặc gần như chính xác với drive_file_id cũ
+            if book_drive_clean and (filename_clean in book_drive_clean or book_drive_clean in filename_clean):
+                score = max(score, 100)
+
+            # 2. Khớp chính xác tiêu đề từ metadata EPUB/PDF
+            if meta_title_clean and book_title_clean == meta_title_clean:
+                score = max(score, 95)
+
+            # 3. Khớp chính xác tên file và tiêu đề trong DB
+            if filename_clean and book_title_clean == filename_clean:
+                score = max(score, 90)
+
+            # 4. Tên sách là chuỗi con của tên file hoặc ngược lại
+            if book_title_clean and (book_title_clean in filename_clean or filename_clean in book_title_clean):
+                score = max(score, 85)
+
+            # 5. Khớp từ khóa tác giả + tên sách
+            combined_file = f"{filename_clean} {meta_title_clean} {meta_author_clean}"
+            combined_book = f"{book_title_clean} {book_author_clean}"
+            file_tokens = set(combined_file.split())
+            book_tokens = set(combined_book.split())
+            if file_tokens and book_tokens:
+                overlap = len(file_tokens.intersection(book_tokens))
+                ratio = overlap / max(len(book_tokens), 1)
+                if ratio >= 0.5:
+                    score = max(score, int(60 + 35 * ratio))
+
+            if score > best_score:
+                best_score = score
+                best_book = book
+
+        # Nếu độ tin cậy >= 60, liên kết file với cuốn sách đã có
+        if best_book and best_score >= 60:
+            already_matched_book_ids.add(best_book.id)
+            file_stream = io.BytesIO(contents)
+            file_key = drive_service.upload_file(file_stream, filename, mime_type, db=db, book_id=best_book.id)
+
+            best_book.drive_file_id = file_key
+            best_book.file_size = len(contents)
+            best_book.mime_type = mime_type
+
+            # Cập nhật bìa nếu sách chưa có bìa hoặc bìa bị lỗi
+            if meta_cover and (not best_book.cover_url or len(best_book.cover_url) < 100):
+                best_book.cover_url = meta_cover
+
+            # Cập nhật tác giả nếu chưa có
+            if meta_author and meta_author != "Unknown Author" and (not best_book.author or best_book.author == "Unknown Author"):
+                best_book.author = meta_author
+
+            # Cập nhật tóm tắt nếu chưa có
+            if meta_summary and not best_book.summary:
+                best_book.summary = meta_summary
+
+            matched_books.append({
+                "id": best_book.id,
+                "title": best_book.title,
+                "author": best_book.author,
+                "score": best_score,
+                "filename": filename
+            })
+        else:
+            # Không có sách nào trong DB khớp, tạo mới cuốn sách
+            final_title = meta_title if meta_title.strip() else name_no_ext.replace("_", " ")
+            final_author = meta_author if meta_author.strip() else "Unknown Author"
+
+            new_book = models.Book(
+                title=final_title,
+                author=final_author,
+                summary=meta_summary,
+                cover_url=meta_cover,
+                mime_type=mime_type,
+                file_size=len(contents),
+                progress=0
+            )
+            db.add(new_book)
+            db.flush()
+
+            file_stream = io.BytesIO(contents)
+            file_key = drive_service.upload_file(file_stream, filename, mime_type, db=db, book_id=new_book.id)
+            new_book.drive_file_id = file_key
+
+            created_books.append({
+                "id": new_book.id,
+                "title": final_title,
+                "author": final_author,
+                "filename": filename
+            })
+
+    db.commit()
+
+    return {
+        "success": True,
+        "total_files": len(files),
+        "matched_count": len(matched_books),
+        "created_count": len(created_books),
+        "matched_books": matched_books,
+        "created_books": created_books
+    }
 
 @app.put("/api/admin/books/reorder")
 def reorder_books(
@@ -481,20 +648,22 @@ async def external_import(
         final_author = extracted.get('author') or request.author or "Unknown Author"
         cover_b64 = extracted.get('cover_b64')
         
-        file_stream = io.BytesIO(file_bytes)
-        drive_file_id = drive_service.upload_file(file_stream, filename, mime_type)
-        
         db_book = models.Book(
             title=final_title,
             author=final_author,
             summary="",
             cover_url=cover_b64,
-            drive_file_id=drive_file_id,
             mime_type=mime_type,
             file_size=len(file_bytes),
             progress=0
         )
         db.add(db_book)
+        db.flush()
+
+        file_stream = io.BytesIO(file_bytes)
+        drive_file_id = drive_service.upload_file(file_stream, filename, mime_type, db=db, book_id=db_book.id)
+        db_book.drive_file_id = drive_file_id
+        
         db.commit()
         db.refresh(db_book)
         
@@ -537,7 +706,7 @@ def re_extract_book_info(book_id: str, db: Session = Depends(get_db), current_us
     
     file_bytes = None
     if book.drive_file_id:
-        file_bytes = drive_service.download_file_bytes(book.drive_file_id)
+        file_bytes = drive_service.download_file_bytes(book.drive_file_id, db=db, book_id=book.id)
         
     if not file_bytes:
         raise HTTPException(status_code=400, detail="Không tìm thấy file nguồn để trích xuất lại")
@@ -590,7 +759,7 @@ def download_book(book_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="No file associated with this book")
 
     filename = f"{book.title}.pdf" if book.mime_type == 'application/pdf' else f"{book.title}.epub"
-    return drive_service.stream_download(book.drive_file_id, filename, book.mime_type)
+    return drive_service.stream_download(book.drive_file_id, filename, book.mime_type, file_size=book.file_size, db=db, book_id=book.id)
 
 import socket
 import random
@@ -708,7 +877,7 @@ def download_by_pin(pin: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Sách này không có file đính kèm để tải về.")
     
     filename = f"{book.title}.pdf" if book.mime_type == 'application/pdf' else f"{book.title}.epub"
-    return drive_service.stream_download(book.drive_file_id, filename, book.mime_type, file_size=book.file_size)
+    return drive_service.stream_download(book.drive_file_id, filename, book.mime_type, file_size=book.file_size, db=db, book_id=book.id)
 
 @app.get("/k", response_class=HTMLResponse)
 def kindle_receiver_html():
@@ -1237,8 +1406,8 @@ def fix_all_covers(db: Session = Depends(get_db), current_user: models.User = De
         file_bytes = None
         if file_id:
             try:
-                # Cố gắng dùng Service Account
-                file_bytes = drive_service.download_file_bytes(file_id)
+                # Cố gắng dùng Service Account / Local DB
+                file_bytes = drive_service.download_file_bytes(file_id, db=db, book_id=book.id)
             except Exception as e:
                 print(f"Service account download failed for {book.title}: {e}")
                 

@@ -2,11 +2,27 @@ from sqlalchemy import Column, String, Integer, DateTime
 from sqlalchemy.sql import func
 import uuid
 from database import Base
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey, LargeBinary
 from sqlalchemy.orm import relationship
 
 def generate_uuid():
     return str(uuid.uuid4())
+
+class BookFile(Base):
+    """
+    Lưu trữ file sách vĩnh viễn trong cơ sở dữ liệu (PostgreSQL/SQLite)
+    để chống mất file khi Render restart hoặc redeploy (do ổ đĩa của Render là tạm thời).
+    """
+    __tablename__ = "book_files"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    file_key = Column(String, unique=True, index=True) # e.g. "local_bc78f54f...epub"
+    book_id = Column(String, ForeignKey("books.id", ondelete="CASCADE"), nullable=True, index=True)
+    filename = Column(String, nullable=True)
+    mime_type = Column(String, nullable=True)
+    file_data = Column(LargeBinary, nullable=False)
+    file_size = Column(Integer, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class Book(Base):
     __tablename__ = "books"

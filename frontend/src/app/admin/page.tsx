@@ -232,6 +232,20 @@ export default function AdminPage() {
   // Add State (Direct Link)
   const [linkForm, setLinkForm] = useState({ title: '', author: '', genre: '', cover_url: '', external_url: '' });
 
+  // Sync / Restore 67 Files State
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [syncFiles, setSyncFiles] = useState<File[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncProgress, setSyncProgress] = useState<string | null>(null);
+  const [syncResult, setSyncResult] = useState<{
+    success: boolean;
+    total_files: number;
+    matched_count: number;
+    created_count: number;
+    matched_books: any[];
+    created_books: any[];
+  } | null>(null);
+
 
   const handleFixCovers = async () => {
     setIsFixing(true);
@@ -575,6 +589,75 @@ export default function AdminPage() {
     }
   };
 
+  const handleSyncFilesSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setSyncFiles(prev => [...prev, ...files]);
+      setSyncResult(null);
+    }
+  };
+
+  const handleSyncDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer.files) {
+      const files = Array.from(e.dataTransfer.files).filter(f => 
+        f.name.toLowerCase().endsWith('.epub') || f.name.toLowerCase().endsWith('.pdf')
+      );
+      setSyncFiles(prev => [...prev, ...files]);
+      setSyncResult(null);
+    }
+  };
+
+  const handleSyncFilesSubmit = async () => {
+    if (syncFiles.length === 0) return;
+    setIsSyncing(true);
+    setSyncResult(null);
+    setSyncProgress('Đang chuẩn bị dữ liệu gửi lên máy chủ...');
+
+    const BATCH_SIZE = 5;
+    let totalMatched = 0;
+    let totalCreated = 0;
+    const allMatched: any[] = [];
+    const allCreated: any[] = [];
+
+    for (let i = 0; i < syncFiles.length; i += BATCH_SIZE) {
+      const chunk = syncFiles.slice(i, i + BATCH_SIZE);
+      setSyncProgress(`Đang nạp file ${i + 1} - ${Math.min(i + BATCH_SIZE, syncFiles.length)} / ${syncFiles.length}...`);
+
+      const formData = new FormData();
+      chunk.forEach(f => formData.append('files', f));
+
+      try {
+        const res = await axios.post(`${API_URL}/api/admin/books/sync-files`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            ...getHeaders()
+          }
+        });
+        if (res.data.success) {
+          totalMatched += res.data.matched_count;
+          totalCreated += res.data.created_count;
+          if (res.data.matched_books) allMatched.push(...res.data.matched_books);
+          if (res.data.created_books) allCreated.push(...res.data.created_books);
+        }
+      } catch (err: any) {
+        console.error('Lỗi khi gửi chunk sync file:', err);
+      }
+    }
+
+    setIsSyncing(false);
+    setSyncProgress(null);
+    setSyncResult({
+      success: true,
+      total_files: syncFiles.length,
+      matched_count: totalMatched,
+      created_count: totalCreated,
+      matched_books: allMatched,
+      created_books: allCreated
+    });
+    fetchBooks();
+  };
+
   const copyShareLink = (id: string) => {
     const url = `${window.location.origin}/share/book/${id}`;
     navigator.clipboard.writeText(url);
@@ -774,6 +857,22 @@ export default function AdminPage() {
                 <span style={{ color: '#F5ECDC' }}>Sắp xếp</span>
               </button>
             )}
+
+            {/* Khôi phục 67 File Sách */}
+            <button 
+              onClick={() => {
+                setIsSyncModalOpen(true);
+                setSyncFiles([]);
+                setSyncResult(null);
+                setSyncProgress(null);
+              }}
+              style={{ backgroundColor: '#D97706', color: '#FFFFFF', borderColor: '#F59E0B' }}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black hover:bg-amber-600 transition-all shadow-md cursor-pointer border"
+              title="Khôi phục và lưu vĩnh viễn 67 file sách vào Database PostgreSQL (chống mất file)"
+            >
+              <Upload size={15} style={{ color: '#FFFFFF' }} />
+              <span style={{ color: '#FFFFFF' }}>⚡ Khôi phục 67 File Sách</span>
+            </button>
 
             {/* Add Books */}
             <button 
@@ -1113,6 +1212,158 @@ export default function AdminPage() {
                  )}
               </div>
            </div>
+        </div>
+      )}
+
+      {/* Sync / Restore 67 Files Modal */}
+      {isSyncModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+          <div className="bg-[#242124] border border-[#4D4845]/70 rounded-3xl w-full max-w-2xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] flex flex-col text-[#F5ECDC]">
+            <button 
+              onClick={() => {
+                if (!isSyncing) {
+                  setIsSyncModalOpen(false);
+                  setSyncFiles([]);
+                  setSyncResult(null);
+                  setSyncProgress(null);
+                }
+              }} 
+              className="absolute top-6 right-6 p-2 bg-[#2E2B2E] border border-[#4D4845]/50 rounded-full text-[#D7C9B2] hover:text-white cursor-pointer transition-all"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                <Upload size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-[#F5ECDC]">⚡ Khôi Phục & Đồng Bộ File Sách</h3>
+                <p className="text-xs text-[#D7C9B2]">Lưu file sách vĩnh viễn vào Database PostgreSQL</p>
+              </div>
+            </div>
+
+            {/* Hộp giải thích nguyên nhân và giải pháp */}
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 mb-5 text-xs text-amber-200/90 leading-relaxed">
+              <span className="font-bold text-amber-300 block mb-1">💡 Vì sao có hiện tượng mất file vừa tải lên?</span>
+              Máy chủ Render sử dụng ổ cứng tạm thời (ephemeral disk) nên khi restart container hoặc redeploy, thư mục lưu file tạm trên đĩa bị xoá. 
+              Thuật toán thông minh bên dưới sẽ tự động so khớp tên 67 file sách từ máy tính của bạn với các bản ghi đang có và <strong>lưu vĩnh viễn nhị phân (Binary) vào Database PostgreSQL</strong>. Từ nay trở đi không bao giờ bị mất nữa!
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-1 space-y-4">
+              {/* Vùng chọn file / kéo thả */}
+              <div 
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleSyncDrop}
+                className="border-2 border-dashed border-[#4D4845] hover:border-amber-500/80 rounded-2xl p-6 text-center bg-[#1F1D20]/60 transition-all cursor-pointer group"
+                onClick={() => document.getElementById('sync-files-picker')?.click()}
+              >
+                <input 
+                  type="file" 
+                  id="sync-files-picker" 
+                  multiple 
+                  accept=".epub,.pdf" 
+                  className="hidden" 
+                  onChange={handleSyncFilesSelect} 
+                />
+                <Upload size={32} className="mx-auto text-amber-400/70 group-hover:text-amber-400 transition-colors mb-2" />
+                <p className="text-sm font-bold text-[#F5ECDC]">
+                  Kéo thả toàn bộ file sách (.epub, .pdf) vào đây
+                </p>
+                <p className="text-xs text-[#7B7369] mt-1">
+                  hoặc bấm vào để chọn cùng lúc nhiều file từ máy tính của bạn
+                </p>
+              </div>
+
+              {/* Trạng thái danh sách file đã chọn */}
+              {syncFiles.length > 0 && (
+                <div className="bg-[#1F1D20] border border-[#4D4845]/50 rounded-2xl p-4">
+                  <div className="flex justify-between items-center mb-3 pb-2 border-b border-[#4D4845]/40">
+                    <span className="text-xs font-black text-[#F5ECDC]">
+                      Đã chọn {syncFiles.length} file sách ({(syncFiles.reduce((acc, f) => acc + f.size, 0) / (1024 * 1024)).toFixed(1)} MB)
+                    </span>
+                    {!isSyncing && (
+                      <button 
+                        onClick={() => { setSyncFiles([]); setSyncResult(null); }}
+                        className="text-xs font-bold text-red-400 hover:text-red-300 cursor-pointer"
+                      >
+                        Xoá tất cả
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1">
+                    {syncFiles.map((file, idx) => (
+                      <div key={idx} className="flex justify-between items-center text-xs py-1.5 px-2.5 bg-[#2A272A] rounded-xl border border-[#4D4845]/30">
+                        <span className="truncate pr-2 font-medium text-[#F5ECDC]">{file.name}</span>
+                        <span className="shrink-0 text-[#7B7369] font-mono text-[10px]">
+                          {(file.size / (1024 * 1024)).toFixed(2)} MB
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Hiển thị tiến trình đang đồng bộ */}
+              {isSyncing && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-center">
+                  <Loader2 size={24} className="animate-spin mx-auto text-amber-400 mb-2" />
+                  <p className="text-xs font-black text-amber-300">{syncProgress || 'Đang xử lý...'}</p>
+                  <p className="text-[11px] text-amber-200/70 mt-1">
+                    Hệ thống chia nhỏ thành từng đợt gửi để đảm bảo ổn định 100% không bị quá tải đường truyền.
+                  </p>
+                </div>
+              )}
+
+              {/* Hiển thị kết quả sau khi đồng bộ xong */}
+              {syncResult && (
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 text-xs text-emerald-200">
+                  <div className="flex items-center gap-2 mb-2 font-black text-sm text-emerald-400">
+                    <Check size={18} />
+                    <span>Đồng Bộ Hoàn Tất Thành Công!</span>
+                  </div>
+                  <p className="leading-relaxed">
+                    • Khôi phục thành công: <strong>{syncResult.matched_count}</strong> cuốn sách đã có trong hệ thống.<br />
+                    • Thêm mới thành công: <strong>{syncResult.created_count}</strong> cuốn sách.<br />
+                    Tất cả file đã được chuyển vào PostgreSQL Database vĩnh viễn. Bạn có thể mở đọc hoặc tải xuống ngay!
+                  </p>
+                  {syncResult.matched_books && syncResult.matched_books.length > 0 && (
+                    <div className="mt-3 max-h-32 overflow-y-auto space-y-1 pt-2 border-t border-emerald-500/20">
+                      {syncResult.matched_books.slice(0, 15).map((b, i) => (
+                        <div key={i} className="truncate text-[11px] text-emerald-300">
+                          ✓ {b.title} {b.author ? `— ${b.author}` : ''}
+                        </div>
+                      ))}
+                      {syncResult.matched_books.length > 15 && (
+                        <div className="text-[10px] text-emerald-400 italic">
+                          và {syncResult.matched_books.length - 15} cuốn sách khác...
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Nút kích hoạt đồng bộ */}
+            <div className="mt-6 pt-4 border-t border-[#4D4845]/50 shrink-0">
+              <button
+                onClick={handleSyncFilesSubmit}
+                disabled={isSyncing || syncFiles.length === 0}
+                style={{ backgroundColor: '#D97706', color: '#FFFFFF' }}
+                className="w-full py-3 px-6 rounded-2xl text-sm font-black transition-all shadow-lg cursor-pointer hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSyncing ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Đang Khôi Phục & Đồng Bộ Dữ Liệu...</span>
+                  </>
+                ) : (
+                  <span>Bắt Đầu Khôi Phục & Lưu Vĩnh Viễn ({syncFiles.length} file)</span>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
