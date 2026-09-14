@@ -775,34 +775,13 @@ export default function AdminPage() {
       <Sidebar />
       <div className="flex-1 min-w-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen">
         {/* Top Header */}
-        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/95 backdrop-blur-md px-4 py-3.5 md:px-6 md:py-4 flex flex-col xl:flex-row justify-between items-start xl:items-center border-b border-[#4D4845]/40 gap-3">
-          <div className="flex items-center gap-3 shrink-0">
+        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/95 backdrop-blur-md px-4 py-3.5 md:px-6 md:py-4 border-b border-[#4D4845]/40 flex flex-col gap-3">
+          {/* Dòng 1: Tiêu đề Dashboard & Các nút công cụ + Thêm sách */}
+          <div className="flex flex-wrap items-center justify-between gap-3 w-full">
             <h1 className="text-xl md:text-2xl font-black text-[#F5ECDC] tracking-tight">Admin Dashboard</h1>
-            <span className="text-xs font-bold px-2.5 py-1 bg-[#2A272A] border border-[#4D4845]/50 text-[#D7C9B2] rounded-full">
-              {books.length} cuốn sách
-            </span>
-          </div>
 
-          <div className="flex flex-wrap lg:flex-nowrap items-center justify-end gap-2 w-full xl:w-auto">
-            {/* Search */}
-            <div className="relative flex-1 sm:flex-initial sm:w-40 lg:w-48">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7B7369]" size={14} />
-              <input 
-                type="text" 
-                placeholder="Tìm tên, tác giả..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-2 pl-9 pr-7 text-xs font-medium text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none focus:border-[#F5ECDC]"
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#7B7369] hover:text-[#F5ECDC] cursor-pointer">
-                  <X size={13} />
-                </button>
-              )}
-            </div>
-
-            {/* Nhóm công cụ kiểm tra & quản trị */}
-            <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+            {/* Nhóm công cụ kiểm tra, quản trị & Thêm sách */}
+            <div className="flex items-center gap-1.5 flex-wrap">
               {/* Nút Kiểm tra file bị lỗi / mất liên kết */}
               <button 
                 onClick={() => {
@@ -910,20 +889,47 @@ export default function AdminPage() {
                   <span style={{ color: '#F5ECDC' }}>Sắp xếp</span>
                 </button>
               )}
+
+              {/* Đường phân cách thẩm mỹ */}
+              <div className="h-6 w-px bg-[#4D4845]/50 mx-1 hidden sm:block shrink-0" />
+
+              {/* Nút Hành Động Chính: Thêm Sách */}
+              <button 
+                onClick={() => setIsAddModalOpen(true)}
+                style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black hover:bg-white transition-all shadow-md cursor-pointer border shrink-0"
+              >
+                <Plus size={16} style={{ color: '#181618' }} />
+                <span style={{ color: '#181618' }}>Thêm Sách</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Dòng 2 riêng biệt: Số lượng sách & Ô tìm kiếm (Không bao giờ bị đè) */}
+          <div className="flex items-center justify-between gap-3 w-full pt-1 border-t border-[#4D4845]/25">
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-xs font-bold px-3 py-1.5 bg-[#2A272A] border border-[#4D4845]/50 text-[#D7C9B2] rounded-xl flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                <span>{books.length} cuốn sách</span>
+              </span>
             </div>
 
-            {/* Đường phân cách thẩm mỹ */}
-            <div className="h-6 w-px bg-[#4D4845]/50 mx-1 hidden sm:block shrink-0" />
-
-            {/* Nút Hành Động Chính: Thêm Sách */}
-            <button 
-              onClick={() => setIsAddModalOpen(true)}
-              style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black hover:bg-white transition-all shadow-md cursor-pointer border shrink-0"
-            >
-              <Plus size={16} style={{ color: '#181618' }} />
-              <span style={{ color: '#181618' }}>Thêm Sách</span>
-            </button>
+            {/* Search Input rộng rãi, độc lập */}
+            <div className="relative w-full max-w-xs sm:max-w-sm">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7B7369]" size={14} />
+              <input 
+                type="text" 
+                placeholder="Tìm tên sách, tác giả..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-2 pl-9 pr-8 text-xs font-medium text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none focus:border-[#F5ECDC] transition-all"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7B7369] hover:text-[#F5ECDC] cursor-pointer">
+                  <X size={13} />
+                </button>
+              )}
+            </div>
           </div>
         </header>
 
