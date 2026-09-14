@@ -135,6 +135,7 @@ class ExternalImportRequest(BaseModel):
     id: str
     title: str
     author: Optional[str] = None
+    target_book_id: Optional[str] = None
 
 class QuoteCreate(BaseModel):
     image_url: Optional[str] = ""

@@ -9,6 +9,7 @@ import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check
 
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 import BookCoverImage from '@/components/BookCoverImage';
+import SearchOnlineModal from '@/components/SearchOnlineModal';
 
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -248,6 +249,11 @@ export default function AdminPage() {
     matched_books: any[];
     created_books: any[];
   } | null>(null);
+
+  // Online Search Modal State
+  const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
+  const [searchOnlineQuery, setSearchOnlineQuery] = useState('');
+  const [searchOnlineTargetBookId, setSearchOnlineTargetBookId] = useState<string | null>(null);
 
 
   const handleFixCovers = async () => {
@@ -1299,27 +1305,59 @@ export default function AdminPage() {
                 </div>
               ) : brokenFileCount !== null && brokenFileCount > 0 ? (
                 <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs text-amber-200">
-                  <div className="flex items-center justify-between mb-2 pb-2 border-b border-amber-500/20">
+                  <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-amber-500/20">
                     <div className="flex items-center gap-2 font-black text-amber-300">
-                      <AlertTriangle size={16} className="text-amber-400" />
+                      <AlertTriangle size={16} className="text-amber-400 shrink-0" />
                       <span>Phát hiện {brokenFileCount} cuốn sách chưa có file / mất liên kết:</span>
                     </div>
-                    <button 
-                      onClick={fetchBrokenFiles} 
-                      className="text-[11px] font-bold text-amber-400 hover:underline cursor-pointer"
-                    >
-                      Quét lại
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => {
+                          setSearchOnlineQuery('');
+                          setSearchOnlineTargetBookId(null);
+                          setIsSearchOnlineOpen(true);
+                        }}
+                        className="text-[11px] font-black text-amber-200 hover:text-white flex items-center gap-1.5 bg-amber-500/25 hover:bg-amber-500/40 px-2.5 py-1 rounded-lg border border-amber-500/40 cursor-pointer transition-all shadow-sm active:scale-95"
+                        title="Mở bảng tìm kiếm và tải sách online từ Z-Library / LibGen"
+                      >
+                        <Search size={12} />
+                        <span>Tìm sách online</span>
+                      </button>
+                      <button 
+                        onClick={fetchBrokenFiles} 
+                        className="text-[11px] font-bold text-amber-400 hover:underline cursor-pointer px-1"
+                      >
+                        Quét lại
+                      </button>
+                    </div>
                   </div>
-                  <div className="max-h-28 overflow-y-auto space-y-1 pr-1 font-mono text-[11px] text-amber-100/90">
+                  <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs">
                     {brokenBooksList.map((b, i) => (
-                      <div key={i} className="truncate">
-                        • {b.title} {b.author ? `— ${b.author}` : ''}
+                      <div 
+                        key={i} 
+                        className="flex items-center justify-between gap-3 p-2 bg-[#1F1D20]/90 hover:bg-[#2A272A] rounded-xl border border-amber-500/20 transition-colors"
+                      >
+                        <div className="truncate flex-1 min-w-0">
+                          <span className="font-bold text-[#F5ECDC]">• {b.title}</span>
+                          {b.author && <span className="text-[#D7C9B2]/80 font-normal"> — {b.author}</span>}
+                        </div>
+                        <button
+                          onClick={() => {
+                            setSearchOnlineQuery(b.title);
+                            setSearchOnlineTargetBookId(b.id);
+                            setIsSearchOnlineOpen(true);
+                          }}
+                          className="shrink-0 px-2.5 py-1 text-[11px] font-black bg-amber-500/25 hover:bg-amber-500/40 text-amber-300 hover:text-white border border-amber-500/50 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                          title={`Tìm và tải bù file online cho: ${b.title}`}
+                        >
+                          <Search size={11} />
+                          <span>Tìm online</span>
+                        </button>
                       </div>
                     ))}
                   </div>
-                  <p className="mt-2 text-[11px] text-amber-300/80">
-                    💡 Hãy kéo thả hoặc chọn các file sách tương ứng vào ô bên dưới. Hệ thống sẽ tự động đối chiếu, ghép nối và lưu vĩnh viễn vào Database PostgreSQL.
+                  <p className="mt-2.5 text-[11px] text-amber-300/85 leading-relaxed">
+                    💡 Bấm <b>"Tìm online"</b> cạnh từng cuốn sách để tải trực tiếp từ Z-Library/LibGen, hoặc kéo thả file từ máy tính vào ô bên dưới. Hệ thống sẽ tự động ghép nối và lưu vĩnh viễn vào Database PostgreSQL.
                   </p>
                 </div>
               ) : (
@@ -1454,6 +1492,22 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      {/* Online Book Search Modal */}
+      <SearchOnlineModal
+        isOpen={isSearchOnlineOpen}
+        onClose={() => {
+          setIsSearchOnlineOpen(false);
+          setSearchOnlineTargetBookId(null);
+          setSearchOnlineQuery('');
+        }}
+        onImportSuccess={() => {
+          fetchBooks();
+          fetchBrokenFiles();
+        }}
+        initialQuery={searchOnlineQuery}
+        targetBookId={searchOnlineTargetBookId}
+      />
     </div>
   );
 }

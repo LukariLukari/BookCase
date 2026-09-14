@@ -698,17 +698,38 @@ async def external_import(
         final_author = extracted.get('author') or request.author or "Unknown Author"
         cover_b64 = extracted.get('cover_b64')
         
-        db_book = models.Book(
-            title=final_title,
-            author=final_author,
-            summary="",
-            cover_url=cover_b64,
-            mime_type=mime_type,
-            file_size=len(file_bytes),
-            progress=0
-        )
-        db.add(db_book)
-        db.flush()
+        db_book = None
+        if hasattr(request, 'target_book_id') and request.target_book_id:
+            db_book = db.query(models.Book).filter(models.Book.id == request.target_book_id).first()
+            
+        if not db_book:
+            # Kiểm tra xem có sách nào trong thư viện đang bị mất file trùng tên không
+            target_title_norm = normalize_match_str(final_title)
+            candidates = db.query(models.Book).all()
+            for cand in candidates:
+                if normalize_match_str(cand.title) == target_title_norm:
+                    db_book = cand
+                    break
+
+        if db_book:
+            db_book.file_size = len(file_bytes)
+            db_book.mime_type = mime_type
+            if cover_b64 and (not db_book.cover_url or len(db_book.cover_url) < 100):
+                db_book.cover_url = cover_b64
+            if final_author != "Unknown Author" and (not db_book.author or db_book.author == "Unknown Author"):
+                db_book.author = final_author
+        else:
+            db_book = models.Book(
+                title=final_title,
+                author=final_author,
+                summary="",
+                cover_url=cover_b64,
+                mime_type=mime_type,
+                file_size=len(file_bytes),
+                progress=0
+            )
+            db.add(db_book)
+            db.flush()
 
         file_stream = io.BytesIO(file_bytes)
         drive_file_id = drive_service.upload_file(file_stream, filename, mime_type, db=db, book_id=db_book.id)
