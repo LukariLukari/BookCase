@@ -149,6 +149,23 @@ class DriveService:
                 try:
                     with open(file_path, "rb") as f:
                         content_bytes = f.read()
+                    # Tự động đẩy file lên Database PostgreSQL nếu chưa có
+                    if content_bytes and db:
+                        import models
+                        existing_bf = db.query(models.BookFile).filter(
+                            (models.BookFile.file_key == file_id) | (models.BookFile.book_id == book_id)
+                        ).first() if (file_id or book_id) else None
+                        if not existing_bf:
+                            new_bf = models.BookFile(
+                                file_key=file_id,
+                                book_id=book_id,
+                                filename=filename,
+                                mime_type=mime_type,
+                                file_data=content_bytes,
+                                file_size=len(content_bytes)
+                            )
+                            db.add(new_bf)
+                            db.commit()
                 except Exception:
                     content_bytes = None
 

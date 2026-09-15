@@ -14,7 +14,7 @@ import json
 
 import models
 import schemas
-from database import engine, get_db
+from database import engine, get_db, SessionLocal
 import auth
 from drive_service import drive_service
 from extract_service import extract_pdf_info, extract_epub_info, compress_cover_image
@@ -53,6 +53,49 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 from create_admin import create_default_admin
 from migrate_to_pg import migrate_sqlite_to_target_db
+
+def sync_local_disk_files_to_db():
+    """
+    Rà soát toàn bộ file trong thư mục uploads cục bộ.
+    Nếu file có trên đĩa nhưng chưa được lưu vào bảng BookFile của Database,
+    tự động nạp vào Database PostgreSQL vĩnh viễn ngay khi khởi động.
+    """
+    try:
+        db = SessionLocal()
+        existing_book_file_ids = set(k[0] for k in db.query(models.BookFile.book_id).all() if k[0])
+        existing_file_keys = set(k[0] for k in db.query(models.BookFile.file_key).all() if k[0])
+        upload_dir = drive_service.upload_dir if hasattr(drive_service, 'upload_dir') else os.path.join(os.path.dirname(__file__), 'uploads')
+        
+        books = db.query(models.Book).filter(models.Book.drive_file_id.like("local_%")).all()
+        synced_count = 0
+        for b in books:
+            if b.id in existing_book_file_ids or b.drive_file_id in existing_file_keys:
+                continue
+            file_path = os.path.join(upload_dir, b.drive_file_id)
+            if os.path.exists(file_path):
+                try:
+                    with open(file_path, "rb") as f:
+                        f_bytes = f.read()
+                    bf = models.BookFile(
+                        file_key=b.drive_file_id,
+                        book_id=b.id,
+                        filename=f"{b.title}.epub" if "epub" in (b.mime_type or "") else f"{b.title}.pdf",
+                        mime_type=b.mime_type or "application/octet-stream",
+                        file_data=f_bytes,
+                        file_size=len(f_bytes)
+                    )
+                    db.add(bf)
+                    existing_book_file_ids.add(b.id)
+                    existing_file_keys.add(b.drive_file_id)
+                    synced_count += 1
+                except Exception as err:
+                    print(f"[Startup Sync] Lỗi nạp file cho '{b.title}': {err}")
+        if synced_count > 0:
+            db.commit()
+            print(f"[Startup Sync] Đã tự động đẩy {synced_count} file từ ổ đĩa vào Database PostgreSQL!")
+        db.close()
+    except Exception as e:
+        print(f"[Startup Sync Error]: {e}")
 
 def repair_cover_for_book(book: models.Book, db: Session) -> str | None:
     if not book:
@@ -187,6 +230,7 @@ def startup_event():
         
     create_default_admin()
     migrate_sqlite_to_target_db()
+    sync_local_disk_files_to_db()
 
     # Auto-repair books with missing covers on startup
     try:
@@ -385,13 +429,40 @@ def check_book_files(
         # Nếu là local file
         if b.drive_file_id.startswith("local_"):
             has_db_file = (b.drive_file_id in existing_file_keys) or (b.id in existing_book_file_ids)
-            has_disk_file = os.path.exists(os.path.join(upload_dir, b.drive_file_id))
-            if not has_db_file and not has_disk_file:
+            file_path = os.path.join(upload_dir, b.drive_file_id) if upload_dir else ""
+            has_disk_file = os.path.exists(file_path) if file_path else False
+
+            # TỰ ĐỘNG ĐẨY LÊN DATABASE: Nếu file có trên đĩa cục bộ nhưng chưa có trong Database
+            if has_disk_file and not has_db_file:
+                try:
+                    with open(file_path, "rb") as f:
+                        f_bytes = f.read()
+                    bf = models.BookFile(
+                        file_key=b.drive_file_id,
+                        book_id=b.id,
+                        filename=f"{b.title}.epub" if "epub" in (b.mime_type or "") else f"{b.title}.pdf",
+                        mime_type=b.mime_type or "application/octet-stream",
+                        file_data=f_bytes,
+                        file_size=len(f_bytes)
+                    )
+                    db.add(bf)
+                    db.commit()
+                    has_db_file = True
+                    existing_file_keys.add(b.drive_file_id)
+                    existing_book_file_ids.add(b.id)
+                    print(f"[Auto-Migrate] Đã tự động đẩy file '{b.title}' từ đĩa cục bộ vào Database ({len(f_bytes)} bytes)")
+                except Exception as sync_err:
+                    db.rollback()
+                    print(f"[Auto-Migrate Error] Lỗi đẩy file '{b.title}' vào Database: {sync_err}")
+
+            # TIÊU CHUẨN DUY NHẤT: Bắt buộc file phải có trong Database PostgreSQL!
+            # Không được xem file chỉ có ở đĩa tạm local là an toàn, vì khi đổi thiết bị (iPhone/PC) hoặc Render restart sẽ mất.
+            if not has_db_file:
                 broken_books.append({
                     "id": b.id,
                     "title": b.title,
                     "author": b.author,
-                    "reason": "Mất liên kết file do server tạm khởi động lại"
+                    "reason": "Chưa được lưu vào Database PostgreSQL (chỉ có ở local hoặc mất liên kết)"
                 })
                 
     return {
