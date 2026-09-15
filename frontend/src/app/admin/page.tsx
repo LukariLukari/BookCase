@@ -4,10 +4,12 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
-import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, Link2 } from 'lucide-react';
 
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 import BookCoverImage from '@/components/BookCoverImage';
+import CheckFileLinksModal from '@/components/CheckFileLinksModal';
+import SearchOnlineModal from '@/components/SearchOnlineModal';
 
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -156,6 +158,9 @@ export default function AdminPage() {
   // Modals state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCheckLinksOpen, setIsCheckLinksOpen] = useState(false);
+  const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
+  const [searchOnlineQuery, setSearchOnlineQuery] = useState('');
   
   // Edit State
   const [editingBook, setEditingBook] = useState<Book | null>(null);
@@ -558,6 +563,13 @@ export default function AdminPage() {
               </button>
             )}
             <button 
+              onClick={() => setIsCheckLinksOpen(true)}
+              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#D97706]/60 text-[#F59E0B] hover:bg-[#D97706]/20 bg-[#2A272A]"
+            >
+              <Link2 size={16} className="inline mr-1 text-[#F59E0B]" /> 
+              <span className="hidden sm:inline">Kiểm Tra File Sách</span>
+            </button>
+            <button 
               onClick={handleFixCovers}
               disabled={isFixing}
               className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#F97316] hover:text-[#F97316] bg-[#2A272A]"
@@ -857,6 +869,23 @@ export default function AdminPage() {
            </div>
         </div>
       )}
+      {/* Check File Links Modal */}
+      <CheckFileLinksModal
+        isOpen={isCheckLinksOpen}
+        onClose={() => setIsCheckLinksOpen(false)}
+        onOpenSearchOnline={(q) => {
+          setSearchOnlineQuery(q);
+          setIsSearchOnlineOpen(true);
+        }}
+        onSuccess={fetchBooks}
+      />
+
+      {/* Search Online Modal */}
+      <SearchOnlineModal 
+        isOpen={isSearchOnlineOpen}
+        onClose={() => setIsSearchOnlineOpen(false)}
+        onImportSuccess={fetchBooks}
+      />
     </div>
   );
 }

@@ -1191,6 +1191,87 @@ def fix_all_covers(db: Session = Depends(get_db), current_user: models.User = De
             
     return {"message": f"Đã quét và khắc phục {fixed_count} bìa sách cũ thành công!", "fixed_count": fixed_count, "failed": failed}
 
+@app.get("/api/admin/check-file-links", response_model=schemas.FileCheckResponse)
+def check_file_links(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    all_books = db.query(models.Book).all()
+    total_books = len(all_books)
+    unlinked_items = []
+    healthy_count = 0
+    
+    for book in all_books:
+        has_file = False
+        if book.drive_file_id and str(book.drive_file_id).strip():
+            has_file = True
+        elif book.external_url and str(book.external_url).strip():
+            has_file = True
+            
+        if has_file:
+            healthy_count += 1
+        else:
+            cover = f"/api/books/cover/{book.id}" if book.cover_url else None
+            unlinked_items.append(schemas.UnlinkedBookItem(
+                id=book.id,
+                title=book.title,
+                author=book.author,
+                cover_url=cover
+            ))
+            
+    return schemas.FileCheckResponse(
+        total_books=total_books,
+        healthy_count=healthy_count,
+        unlinked_count=len(unlinked_items),
+        unlinked_books=unlinked_items
+    )
+
+@app.post("/api/admin/repair-file-links")
+async def repair_file_links(
+    files: List[UploadFile] = File(...),
+    book_ids: Optional[List[str]] = Form(None),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    repaired_count = 0
+    matched_books = []
+    
+    all_books = db.query(models.Book).all()
+    unlinked_books = [b for b in all_books if (not b.drive_file_id or not str(b.drive_file_id).strip()) and (not b.external_url or not str(b.external_url).strip())]
+    unlinked_map = {b.id: b for b in unlinked_books}
+    
+    for idx, file in enumerate(files):
+        try:
+            contents = await file.read()
+            mime_type = file.content_type or 'application/octet-stream'
+            if '.pdf' in file.filename.lower(): mime_type = 'application/pdf'
+            elif '.epub' in file.filename.lower(): mime_type = 'application/epub+zip'
+            
+            target_book = None
+            if book_ids and idx < len(book_ids) and book_ids[idx] in unlinked_map:
+                target_book = unlinked_map[book_ids[idx]]
+            else:
+                # Auto-match filename with book title
+                raw_fname = file.filename.rsplit('.', 1)[0].lower().strip()
+                for b in unlinked_books:
+                    clean_title = b.title.lower().strip()
+                    if clean_title in raw_fname or raw_fname in clean_title:
+                        target_book = b
+                        break
+            
+            if target_book:
+                file_stream = io.BytesIO(contents)
+                drive_file_id = drive_service.upload_file(file_stream, file.filename, mime_type)
+                
+                target_book.drive_file_id = drive_file_id
+                target_book.mime_type = mime_type
+                target_book.file_size = len(contents)
+                db.commit()
+                repaired_count += 1
+                matched_books.append(target_book.title)
+        except Exception as e:
+            print(f"Lỗi ghép nối file {file.filename}: {e}")
+            
+    return {"message": f"Đã ghép nối và lưu vĩnh viễn {repaired_count} file vào Database PostgreSQL!", "repaired_count": repaired_count, "matched_books": matched_books}
+
+
 # --- MY BOOKS & QUOTES API ---
 
 @app.get("/api/users/me/books", response_model=List[schemas.UserBookResponse])

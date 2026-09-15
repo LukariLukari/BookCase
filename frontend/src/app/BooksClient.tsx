@@ -72,6 +72,7 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
           setBooks(res.data);
           setPage(0);
           try {
+            sessionStorage.removeItem('cached_books');
             if (!searchQuery) sessionStorage.setItem('cached_books', JSON.stringify(res.data));
           } catch (e) {}
         } else {

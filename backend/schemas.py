@@ -195,3 +195,16 @@ class UserBookResponse(BaseModel):
     class Config:
         orm_mode = True
         from_attributes = True
+
+class UnlinkedBookItem(BaseModel):
+    id: str
+    title: str
+    author: Optional[str] = None
+    cover_url: Optional[str] = None
+
+class FileCheckResponse(BaseModel):
+    total_books: int
+    healthy_count: int
+    unlinked_count: int
+    unlinked_books: list[UnlinkedBookItem] = []
+
