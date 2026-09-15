@@ -197,6 +197,20 @@ class UserBookResponse(BaseModel):
         orm_mode = True
         from_attributes = True
 
+<<<<<<< HEAD
+class UnlinkedBookItem(BaseModel):
+    id: str
+    title: str
+    author: Optional[str] = None
+    cover_url: Optional[str] = None
+
+class FileCheckResponse(BaseModel):
+    total_books: int
+    healthy_count: int
+    unlinked_count: int
+    unlinked_books: list[UnlinkedBookItem] = []
+
+=======
 
 class BookReviewCreate(BaseModel):
     rating: int = 5
@@ -278,3 +292,4 @@ class ReaderDashboardResponse(BaseModel):
     key_takeaways: list[KeyTakeawayItem] = []
     current_reads: list[ActiveReadItem] = []
     recent_reviews: list[BookReviewResponse] = []
+>>>>>>> 04ef1a449922d653bf835c2fa62e0e114f3e0d74

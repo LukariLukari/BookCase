@@ -5,10 +5,18 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
+<<<<<<< HEAD
+import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, Link2 } from 'lucide-react';
+
+import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
+import BookCoverImage from '@/components/BookCoverImage';
+import CheckFileLinksModal from '@/components/CheckFileLinksModal';
+=======
 import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, Copy, Unlink2, AlertTriangle } from 'lucide-react';
 
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 import BookCoverImage from '@/components/BookCoverImage';
+>>>>>>> 04ef1a449922d653bf835c2fa62e0e114f3e0d74
 import SearchOnlineModal from '@/components/SearchOnlineModal';
 
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
@@ -218,6 +226,9 @@ export default function AdminPage() {
   // Modals state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCheckLinksOpen, setIsCheckLinksOpen] = useState(false);
+  const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
+  const [searchOnlineQuery, setSearchOnlineQuery] = useState('');
   
   // Edit State
   const [editingBook, setEditingBook] = useState<Book | null>(null);
@@ -936,6 +947,57 @@ export default function AdminPage() {
                 </button>
               )}
             </div>
+<<<<<<< HEAD
+            {selectedBooks.length > 0 && (
+              <button 
+                onClick={handleBulkDelete}
+                className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 !bg-red-600 !text-white hover:!bg-red-700 border-none shadow-md shadow-red-950/40"
+              >
+                <Trash2 size={16} className="inline mr-1 text-white" />
+                <span className="hidden sm:inline">Xóa {selectedBooks.length} mục</span>
+              </button>
+            )}
+            <button 
+              onClick={() => setIsCheckLinksOpen(true)}
+              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#D97706]/60 text-[#F59E0B] hover:bg-[#D97706]/20 bg-[#2A272A]"
+            >
+              <Link2 size={16} className="inline mr-1 text-[#F59E0B]" /> 
+              <span className="hidden sm:inline">Kiểm Tra File Sách</span>
+            </button>
+            <button 
+              onClick={handleFixCovers}
+              disabled={isFixing}
+              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#F97316] hover:text-[#F97316] bg-[#2A272A]"
+            >
+              {isFixing ? <Loader2 size={16} className="animate-spin inline mr-1 text-[#F97316]" /> : <Settings size={16} className="inline mr-1 text-[#F97316]" />} 
+              <span className="hidden sm:inline">{isFixing ? 'Đang sửa...' : 'Sửa bìa lỗi'}</span>
+            </button>
+            {isSortMode ? (
+              <button 
+                onClick={handleSaveOrder}
+                disabled={isSavingOrder}
+                className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-6 md:!px-5 text-sm whitespace-nowrap mr-2 bg-[#F5ECDC] hover:bg-[#D7C9B2] border-none text-[#1F1D20] shadow-md font-bold"
+              >
+                {isSavingOrder ? <Loader2 size={16} className="animate-spin inline mr-1" /> : <Save size={16} className="inline mr-1" />}
+                <span className="hidden sm:inline">Lưu thứ tự</span>
+              </button>
+            ) : (
+              <button 
+                onClick={() => { setIsSortMode(true); setSearchQuery(''); }}
+                className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#D7C9B2] hover:text-[#D7C9B2] bg-[#2A272A]"
+              >
+                <GripVertical size={16} className="inline mr-1 text-[#D7C9B2]" /> 
+                <span className="hidden sm:inline">Sắp xếp</span>
+              </button>
+            )}
+            <button 
+              onClick={() => setIsAddModalOpen(true)}
+              className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-6 md:!px-5 text-sm whitespace-nowrap"
+            >
+              <Plus size={16} /> <span className="hidden sm:inline">Add Books</span>
+            </button>
+=======
+>>>>>>> 04ef1a449922d653bf835c2fa62e0e114f3e0d74
           </div>
         </header>
 
@@ -1267,6 +1329,24 @@ export default function AdminPage() {
            </div>
         </div>
       )}
+<<<<<<< HEAD
+      {/* Check File Links Modal */}
+      <CheckFileLinksModal
+        isOpen={isCheckLinksOpen}
+        onClose={() => setIsCheckLinksOpen(false)}
+        onOpenSearchOnline={(q) => {
+          setSearchOnlineQuery(q);
+          setIsSearchOnlineOpen(true);
+        }}
+        onSuccess={fetchBooks}
+      />
+
+      {/* Search Online Modal */}
+      <SearchOnlineModal 
+        isOpen={isSearchOnlineOpen}
+        onClose={() => setIsSearchOnlineOpen(false)}
+        onImportSuccess={fetchBooks}
+=======
 
       {/* Sync / Restore 67 Files Modal */}
       {isSyncModalOpen && (
@@ -1507,6 +1587,7 @@ export default function AdminPage() {
         }}
         initialQuery={searchOnlineQuery}
         targetBookId={searchOnlineTargetBookId}
+>>>>>>> 04ef1a449922d653bf835c2fa62e0e114f3e0d74
       />
     </div>
   );
