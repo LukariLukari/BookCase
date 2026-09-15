@@ -1,21 +1,67 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
+<<<<<<< HEAD
 import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, Link2 } from 'lucide-react';
 
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 import BookCoverImage from '@/components/BookCoverImage';
 import CheckFileLinksModal from '@/components/CheckFileLinksModal';
+=======
+import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, Copy, Unlink2, AlertTriangle } from 'lucide-react';
+
+import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
+import BookCoverImage from '@/components/BookCoverImage';
+>>>>>>> 04ef1a449922d653bf835c2fa62e0e114f3e0d74
 import SearchOnlineModal from '@/components/SearchOnlineModal';
 
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection, setDownloadingId, downloadingId, baseUrl, copyShareLink, copiedId, openEditModal, handleDelete }: any) {
+/**
+ * Chuẩn hóa tên tác giả:
+ * - Chữ thường, bỏ dấu câu và ký tự lạ
+ * - Bỏ dấu tiếng Việt (đ -> d, é -> e)
+ * - Tách thành mảng từ đơn, sắp xếp theo thứ tự chữ cái rồi nối lại
+ * Giúp "Higashino Keigo" và "Keigo Higashino " có cùng một chuỗi chuẩn hóa: "higashino keigo"
+ */
+export function normalizeAuthor(author: string | null | undefined): string {
+  if (!author) return '';
+  let str = author.toLowerCase().trim();
+  str = str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]"'`]/g, ' ');
+  str = str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'd');
+  const tokens = Array.from(new Set(str.split(/\s+/).filter(Boolean)));
+  tokens.sort();
+  return tokens.join(' ');
+}
+
+/**
+ * Chuẩn hóa tên sách:
+ * - Chữ thường, bỏ dấu câu và dấu tiếng Việt
+ * Giúp nhận diện chính xác sách trùng lặp
+ */
+export function normalizeTitle(title: string | null | undefined): string {
+  if (!title) return '';
+  let str = title.toLowerCase().trim();
+  str = str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]"'`]/g, ' ');
+  str = str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'd');
+  return str.split(/\s+/).filter(Boolean).join(' ');
+}
+
+function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection, setDownloadingId, downloadingId, baseUrl, copyShareLink, copiedId, openEditModal, handleDelete, duplicateInfo }: any) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: book.id, disabled: !isSortMode });
   
   const style = {
@@ -32,7 +78,11 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
            <GripVertical size={16} />
          </div>
       )}
-      <div className={`w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border border-[#4D4845]/40 transition-all duration-300 ${!isSortMode ? 'group-hover:shadow-xl' : ''}`}>
+      <div className={`w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border ${
+        duplicateInfo && duplicateInfo.isRedundant 
+          ? 'border-red-500/50 shadow-red-950/20' 
+          : 'border-[#4D4845]/40'
+      } transition-all duration-300 ${!isSortMode ? 'group-hover:shadow-xl' : ''}`}>
          <BookCoverImage 
            coverUrl={book.cover_url}
            bookId={book.id}
@@ -51,6 +101,18 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
                  className="w-5 h-5 rounded-md border-2 border-white/80 bg-black/40 checked:bg-orange-500 checked:border-orange-500 cursor-pointer shadow-sm focus:ring-0 focus:ring-offset-0 transition-colors"
                />
              </div>
+
+             {duplicateInfo && (
+               <div className="absolute top-2 right-9 z-20">
+                 <span className={`text-[10px] font-black px-2 py-0.5 rounded-md backdrop-blur-md shadow-sm border ${
+                   duplicateInfo.isRedundant 
+                     ? 'bg-red-950/90 text-red-200 border-red-700/60' 
+                     : 'bg-[#1F1D20]/90 text-[#F5ECDC] border-[#4D4845]/80'
+                 }`}>
+                   {duplicateInfo.isRedundant ? `Bản thừa #${duplicateInfo.copyIndex}` : 'Bản gốc'}
+                 </span>
+               </div>
+             )}
              
              <div className="absolute top-2 left-2 z-20">
                {book.external_url ? (
@@ -92,14 +154,14 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
 
                  <button 
                    onClick={() => openEditModal(book)} 
-                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-orange-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer"
+                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-orange-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer" 
                    title="Sửa thông tin sách"
                  >
                    <Edit2 size={14} className="text-[#D7C9B2] hover:text-orange-400" />
                  </button>
                  <button 
                    onClick={() => handleDelete(book.id)} 
-                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-red-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer"
+                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-red-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer" 
                    title="Xóa sách"
                  >
                    <Trash2 size={14} className="text-[#D7C9B2] hover:text-red-400" />
@@ -111,6 +173,12 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
       
       <div className="px-1">
         <h3 className="text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2">{book.title}</h3>
+        <p className="text-xs text-[#D7C9B2] font-semibold mt-1 truncate">{book.author || 'Chưa rõ tác giả'}</p>
+        {duplicateInfo && (
+          <p className="text-[10px] font-bold text-[#7B7369] mt-0.5">
+            Nhóm trùng #{duplicateInfo.groupIndex} ({duplicateInfo.totalInGroup} bản)
+          </p>
+        )}
       </div>
     </div>
   );
@@ -175,6 +243,28 @@ export default function AdminPage() {
   
   // Add State (Direct Link)
   const [linkForm, setLinkForm] = useState({ title: '', author: '', genre: '', cover_url: '', external_url: '' });
+
+  // File Health / Broken Links Check & Sync State
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [syncFiles, setSyncFiles] = useState<File[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncProgress, setSyncProgress] = useState<string | null>(null);
+  const [brokenFileCount, setBrokenFileCount] = useState<number | null>(null);
+  const [brokenBooksList, setBrokenBooksList] = useState<{ id: string; title: string; author?: string; reason?: string }[]>([]);
+  const [isCheckingFiles, setIsCheckingFiles] = useState(false);
+  const [syncResult, setSyncResult] = useState<{
+    success: boolean;
+    total_files: number;
+    matched_count: number;
+    created_count: number;
+    matched_books: any[];
+    created_books: any[];
+  } | null>(null);
+
+  // Online Search Modal State
+  const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
+  const [searchOnlineQuery, setSearchOnlineQuery] = useState('');
+  const [searchOnlineTargetBookId, setSearchOnlineTargetBookId] = useState<string | null>(null);
 
 
   const handleFixCovers = async () => {
@@ -303,8 +393,24 @@ export default function AdminPage() {
     }
   };
 
+  const fetchBrokenFiles = async () => {
+    try {
+      setIsCheckingFiles(true);
+      const res = await axios.get(`${baseUrl}/api/admin/books/check-files`, {
+        headers: getHeaders()
+      });
+      setBrokenFileCount(res.data.broken_count ?? 0);
+      setBrokenBooksList(res.data.broken_books || []);
+    } catch (e) {
+      console.error('Lỗi khi kiểm tra liên kết file:', e);
+    } finally {
+      setIsCheckingFiles(false);
+    }
+  };
+
   useEffect(() => {
     fetchBooks();
+    fetchBrokenFiles();
   }, []);
 
   const sensors = useSensors(
@@ -519,6 +625,76 @@ export default function AdminPage() {
     }
   };
 
+  const handleSyncFilesSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setSyncFiles(prev => [...prev, ...files]);
+      setSyncResult(null);
+    }
+  };
+
+  const handleSyncDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer.files) {
+      const files = Array.from(e.dataTransfer.files).filter(f => 
+        f.name.toLowerCase().endsWith('.epub') || f.name.toLowerCase().endsWith('.pdf')
+      );
+      setSyncFiles(prev => [...prev, ...files]);
+      setSyncResult(null);
+    }
+  };
+
+  const handleSyncFilesSubmit = async () => {
+    if (syncFiles.length === 0) return;
+    setIsSyncing(true);
+    setSyncResult(null);
+    setSyncProgress('Đang chuẩn bị dữ liệu gửi lên máy chủ...');
+
+    const BATCH_SIZE = 5;
+    let totalMatched = 0;
+    let totalCreated = 0;
+    const allMatched: any[] = [];
+    const allCreated: any[] = [];
+
+    for (let i = 0; i < syncFiles.length; i += BATCH_SIZE) {
+      const chunk = syncFiles.slice(i, i + BATCH_SIZE);
+      setSyncProgress(`Đang nạp file ${i + 1} - ${Math.min(i + BATCH_SIZE, syncFiles.length)} / ${syncFiles.length}...`);
+
+      const formData = new FormData();
+      chunk.forEach(f => formData.append('files', f));
+
+      try {
+        const res = await axios.post(`${API_URL}/api/admin/books/sync-files`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            ...getHeaders()
+          }
+        });
+        if (res.data.success) {
+          totalMatched += res.data.matched_count;
+          totalCreated += res.data.created_count;
+          if (res.data.matched_books) allMatched.push(...res.data.matched_books);
+          if (res.data.created_books) allCreated.push(...res.data.created_books);
+        }
+      } catch (err: any) {
+        console.error('Lỗi khi gửi chunk sync file:', err);
+      }
+    }
+
+    setIsSyncing(false);
+    setSyncProgress(null);
+    setSyncResult({
+      success: true,
+      total_files: syncFiles.length,
+      matched_count: totalMatched,
+      created_count: totalCreated,
+      matched_books: allMatched,
+      created_books: allCreated
+    });
+    fetchBooks();
+    fetchBrokenFiles();
+  };
+
   const copyShareLink = (id: string) => {
     const url = `${window.location.origin}/share/book/${id}`;
     navigator.clipboard.writeText(url);
@@ -526,33 +702,252 @@ export default function AdminPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const filteredBooks = books.filter(book => 
-    book.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Quản lý trạng thái lọc sách trùng
+  const [isDuplicateFilterActive, setIsDuplicateFilterActive] = useState(false);
+
+  // Nhóm các sách trùng lặp theo (Tên sách chuẩn hóa + Tác giả chuẩn hóa)
+  const duplicateGroups = useMemo(() => {
+    const map: { [key: string]: Book[] } = {};
+    
+    books.forEach(book => {
+      const normTitle = normalizeTitle(book.title);
+      if (!normTitle) return;
+      const normAuthor = normalizeAuthor(book.author);
+      const key = `${normTitle}:::${normAuthor}`;
+      if (!map[key]) {
+        map[key] = [];
+      }
+      map[key].push(book);
+    });
+
+    return Object.entries(map)
+      .filter(([_, group]) => group.length >= 2)
+      .map(([key, groupBooks], groupIdx) => ({
+        key,
+        groupIndex: groupIdx + 1,
+        displayTitle: groupBooks[0].title,
+        displayAuthor: groupBooks[0].author || 'Chưa rõ tác giả',
+        books: groupBooks,
+      }));
+  }, [books]);
+
+  const totalDuplicateBooks = useMemo(() => {
+    return duplicateGroups.reduce((acc, g) => acc + g.books.length, 0);
+  }, [duplicateGroups]);
+
+  const duplicateRedundantCount = useMemo(() => {
+    return duplicateGroups.reduce((acc, g) => acc + (g.books.length - 1), 0);
+  }, [duplicateGroups]);
+
+  // Danh sách các sách trùng kèm thông tin nhóm để hiển thị cạnh nhau
+  const duplicateBooksWithInfo = useMemo(() => {
+    const list: { book: Book; duplicateInfo: any }[] = [];
+    duplicateGroups.forEach((group) => {
+      group.books.forEach((b, bIdx) => {
+        list.push({
+          book: b,
+          duplicateInfo: {
+            groupIndex: group.groupIndex,
+            copyIndex: bIdx + 1,
+            totalInGroup: group.books.length,
+            isRedundant: bIdx > 0, // Quy ước bản đầu tiên (index 0) là bản giữ lại, các bản sau là thừa
+          }
+        });
+      });
+    });
+    return list;
+  }, [duplicateGroups]);
+
+  // Chọn toàn bộ các bản sao thừa (tất cả các bản từ vị trí thứ 2 trở đi trong mỗi nhóm trùng)
+  const handleSelectAllDuplicates = () => {
+    const redundantIds = duplicateBooksWithInfo
+      .filter(item => item.duplicateInfo.isRedundant)
+      .map(item => item.book.id);
+    setSelectedBooks(redundantIds);
+  };
+
+  // Danh sách sách hiển thị trên grid
+  const displayItems = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (isDuplicateFilterActive) {
+      if (!q) return duplicateBooksWithInfo;
+      return duplicateBooksWithInfo.filter(item => 
+        item.book.title.toLowerCase().includes(q) || 
+        (item.book.author && item.book.author.toLowerCase().includes(q))
+      );
+    } else {
+      const filtered = q
+        ? books.filter(b => b.title.toLowerCase().includes(q) || (b.author && b.author.toLowerCase().includes(q)))
+        : books;
+      return filtered.map(b => ({ book: b, duplicateInfo: null }));
+    }
+  }, [isDuplicateFilterActive, duplicateBooksWithInfo, books, searchQuery]);
 
   if (isLoading || !user || user.role !== 'admin') {
     return <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center font-bold text-[#D7C9B2]">Loading...</div>;
   }
 
   return (
-    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60 overflow-x-hidden">
+    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60">
       <Sidebar />
-      <div className="flex-1 ml-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen w-full max-w-full">
-        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#4D4845]/30 gap-4 md:gap-0">
-          <div className="flex items-center gap-8 text-sm font-bold text-[#D7C9B2]">
-             <span className="text-[#F5ECDC] border-b-2 border-[#F97316] pb-1 text-xl whitespace-nowrap">Admin Dashboard</span>
+      <div className="flex-1 min-w-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen">
+        {/* Top Header */}
+        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/95 backdrop-blur-md px-4 py-3.5 md:px-6 md:py-4 border-b border-[#4D4845]/40 flex flex-col gap-3">
+          {/* Dòng 1: Tiêu đề Dashboard & Các nút công cụ + Thêm sách */}
+          <div className="flex flex-wrap items-center justify-between gap-3 w-full">
+            <h1 className="text-xl md:text-2xl font-black text-[#F5ECDC] tracking-tight">Admin Dashboard</h1>
+
+            {/* Nhóm công cụ kiểm tra, quản trị & Thêm sách */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {/* Nút Kiểm tra file bị lỗi / mất liên kết */}
+              <button 
+                onClick={() => {
+                  setIsSyncModalOpen(true);
+                  setSyncFiles([]);
+                  setSyncResult(null);
+                  setSyncProgress(null);
+                  fetchBrokenFiles();
+                }}
+                style={{ 
+                  backgroundColor: '#2A272A', 
+                  color: '#F5ECDC', 
+                  borderColor: brokenFileCount && brokenFileCount > 0 ? '#F59E0B' : '#4D4845' 
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer shadow-sm"
+                title="Kiểm tra các cuốn sách chưa có file hoặc bị mất liên kết tải về"
+              >
+                <Unlink2 size={15} style={{ color: brokenFileCount && brokenFileCount > 0 ? '#F59E0B' : '#D7C9B2' }} />
+                <span>Kiểm tra file</span>
+                {brokenFileCount !== null && brokenFileCount > 0 && (
+                  <span 
+                    style={{ backgroundColor: '#D97706', color: '#FFFFFF' }}
+                    className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none"
+                  >
+                    {brokenFileCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Nút Lọc Sách Trùng */}
+              <button
+                onClick={() => {
+                  setIsDuplicateFilterActive(!isDuplicateFilterActive);
+                  if (!isDuplicateFilterActive) {
+                    setSearchQuery('');
+                    setIsSortMode(false);
+                  }
+                }}
+                style={{
+                  backgroundColor: isDuplicateFilterActive ? '#F5ECDC' : '#2A272A',
+                  color: isDuplicateFilterActive ? '#181618' : (duplicateGroups.length > 0 ? '#F5ECDC' : '#7B7369'),
+                  borderColor: isDuplicateFilterActive ? '#F5ECDC' : '#4D4845',
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border shadow-sm"
+                title="Lọc các cuốn sách bị trùng lặp tên & tác giả"
+              >
+                <Copy size={15} style={{ color: isDuplicateFilterActive ? '#181618' : 'currentColor' }} />
+                <span style={{ color: isDuplicateFilterActive ? '#181618' : 'currentColor' }}>Lọc trùng</span>
+                {duplicateRedundantCount > 0 && (
+                  <span 
+                    style={{
+                      backgroundColor: isDuplicateFilterActive ? '#181618' : '#4D4845',
+                      color: '#F5ECDC',
+                    }}
+                    className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none"
+                  >
+                    {duplicateRedundantCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Bulk Delete button when items selected */}
+              {selectedBooks.length > 0 && (
+                <button 
+                  onClick={handleBulkDelete}
+                  style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black hover:bg-red-700 text-white transition-all shadow-md cursor-pointer border border-red-600"
+                >
+                  <Trash2 size={15} style={{ color: '#FFFFFF' }} />
+                  <span>Xóa {selectedBooks.length}</span>
+                </button>
+              )}
+
+              {/* Sửa bìa */}
+              <button 
+                onClick={handleFixCovers}
+                disabled={isFixing}
+                style={{ backgroundColor: '#2A272A', color: '#F5ECDC', borderColor: '#4D4845' }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                title="Tự động sửa ảnh bìa bị lỗi"
+              >
+                {isFixing ? <Loader2 size={15} className="animate-spin text-[#F5ECDC]" /> : <Settings size={15} style={{ color: '#F5ECDC' }} />}
+                <span className="hidden sm:inline" style={{ color: '#F5ECDC' }}>{isFixing ? 'Đang sửa...' : 'Sửa bìa'}</span>
+              </button>
+
+              {/* Sắp xếp */}
+              {isSortMode ? (
+                <button 
+                  onClick={handleSaveOrder}
+                  disabled={isSavingOrder}
+                  style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black hover:bg-white transition-all shadow-md cursor-pointer border"
+                >
+                  {isSavingOrder ? <Loader2 size={15} className="animate-spin text-[#181618]" /> : <Save size={15} style={{ color: '#181618' }} />}
+                  <span style={{ color: '#181618' }}>Lưu thứ tự</span>
+                </button>
+              ) : (
+                <button 
+                  onClick={() => { setIsSortMode(true); setSearchQuery(''); setIsDuplicateFilterActive(false); }}
+                  style={{ backgroundColor: '#2A272A', color: '#F5ECDC', borderColor: '#4D4845' }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer shadow-sm"
+                  title="Thay đổi thứ tự sắp xếp sách"
+                >
+                  <GripVertical size={15} style={{ color: '#F5ECDC' }} />
+                  <span style={{ color: '#F5ECDC' }}>Sắp xếp</span>
+                </button>
+              )}
+
+              {/* Đường phân cách thẩm mỹ */}
+              <div className="h-6 w-px bg-[#4D4845]/50 mx-1 hidden sm:block shrink-0" />
+
+              {/* Nút Hành Động Chính: Thêm Sách */}
+              <button 
+                onClick={() => setIsAddModalOpen(true)}
+                style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black hover:bg-white transition-all shadow-md cursor-pointer border shrink-0"
+              >
+                <Plus size={16} style={{ color: '#181618' }} />
+                <span style={{ color: '#181618' }}>Thêm Sách</span>
+              </button>
+            </div>
           </div>
-          <div className="flex items-center w-full md:w-auto gap-4">
-            <div className="relative flex-1 md:w-72">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7B7369]" size={16} />
+
+          {/* Dòng 2 riêng biệt: Số lượng sách & Ô tìm kiếm (Không bao giờ bị đè) */}
+          <div className="flex items-center justify-between gap-3 w-full pt-1 border-t border-[#4D4845]/25">
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-xs font-bold px-3 py-1.5 bg-[#2A272A] border border-[#4D4845]/50 text-[#D7C9B2] rounded-xl flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                <span>{books.length} cuốn sách</span>
+              </span>
+            </div>
+
+            {/* Search Input rộng rãi, độc lập */}
+            <div className="relative w-full max-w-xs sm:max-w-sm">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7B7369]" size={14} />
               <input 
                 type="text" 
-                placeholder="Search books..."
+                placeholder="Tìm tên sách, tác giả..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#2A272A] border border-[#4D4845]/60 rounded-full py-3.5 md:py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#F97316]/50 shadow-inner transition-all text-[#F5ECDC] placeholder-[#7B7369]"
+                className="w-full bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-2 pl-9 pr-8 text-xs font-medium text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none focus:border-[#F5ECDC] transition-all"
               />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7B7369] hover:text-[#F5ECDC] cursor-pointer">
+                  <X size={13} />
+                </button>
+              )}
             </div>
+<<<<<<< HEAD
             {selectedBooks.length > 0 && (
               <button 
                 onClick={handleBulkDelete}
@@ -601,10 +996,74 @@ export default function AdminPage() {
             >
               <Plus size={16} /> <span className="hidden sm:inline">Add Books</span>
             </button>
+=======
+>>>>>>> 04ef1a449922d653bf835c2fa62e0e114f3e0d74
           </div>
         </header>
 
-        <main className="flex-1 px-4 md:px-10 pt-8 pb-12">
+        <main className="flex-1 px-4 md:px-8 pt-6 pb-12">
+          {/* Banner hướng dẫn và xử lý trùng lặp */}
+          {isDuplicateFilterActive && (
+            duplicateGroups.length === 0 ? (
+              <div className="bg-[#2A272A] border border-[#4D4845]/50 rounded-2xl p-8 text-center my-4">
+                <Check size={32} className="mx-auto text-[#F5ECDC] mb-3" />
+                <h3 className="text-base font-bold text-[#F5ECDC]">Không phát hiện cuốn sách nào bị trùng lặp</h3>
+                <p className="text-xs text-[#D7C9B2] mt-1 max-w-md mx-auto">
+                  Hệ thống đã đối soát toàn bộ {books.length} cuốn sách theo tên & tác giả (đã hỗ trợ đảo họ tên và bỏ dấu tiếng Việt).
+                </p>
+                <button 
+                  onClick={() => setIsDuplicateFilterActive(false)}
+                  style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
+                  className="mt-4 px-5 py-2.5 font-black text-xs rounded-xl hover:bg-white cursor-pointer transition-all shadow-md border inline-flex items-center justify-center gap-2"
+                >
+                  <span style={{ color: '#181618' }}>Quay lại xem tất cả sách</span>
+                </button>
+              </div>
+            ) : (
+              <div className="bg-[#2A272A] border border-[#4D4845]/70 rounded-2xl p-4 md:p-5 mb-6 shadow-lg">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2.5 bg-[#1F1D20] border border-[#4D4845]/60 rounded-xl text-[#F5ECDC] shrink-0">
+                      <Copy size={20} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm md:text-base font-black text-[#F5ECDC]">
+                          Phát hiện {duplicateGroups.length} nhóm sách trùng lặp ({totalDuplicateBooks} cuốn)
+                        </h3>
+                        <span className="text-[11px] font-bold px-2 py-0.5 bg-red-950/60 text-red-300 border border-red-800/40 rounded-full">
+                          {duplicateRedundantCount} bản sao thừa
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#D7C9B2] mt-1">
+                        Hệ thống đã nhận diện thông minh tên sách và họ tên tác giả (ví dụ: &ldquo;Higashino Keigo&rdquo; = &ldquo;Keigo Higashino&rdquo;).
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <button
+                      onClick={handleSelectAllDuplicates}
+                      className="flex-1 md:flex-initial px-3.5 py-2 bg-[#1F1D20] hover:bg-[#3A373A] border border-[#4D4845] text-[#F5ECDC] text-xs font-black rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Check size={14} />
+                      <span>Chọn {duplicateRedundantCount} bản thừa để xóa</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsDuplicateFilterActive(false);
+                        setSelectedBooks([]);
+                      }}
+                      className="px-3 py-2 text-xs font-bold text-[#D7C9B2] hover:text-[#F5ECDC] cursor-pointer"
+                    >
+                      Thoát lọc
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          )}
+
           {isFetchingBooks ? (
             <div className="flex flex-col items-center justify-center mt-32 max-w-md mx-auto w-full px-4">
                <div className="w-full bg-[#2A272A] border border-[#4D4845]/50 rounded-full h-3 mb-3 shadow-inner overflow-hidden">
@@ -614,9 +1073,9 @@ export default function AdminPage() {
             </div>
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={filteredBooks.map(b => b.id)} strategy={rectSortingStrategy}>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10">
-                  {filteredBooks.map((book) => (
+              <SortableContext items={displayItems.map(item => item.book.id)} strategy={rectSortingStrategy}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-4 md:gap-x-5 gap-y-6 md:gap-y-8">
+                  {displayItems.map(({ book, duplicateInfo }) => (
                     <SortableBookItem 
                       key={book.id} 
                       book={book} 
@@ -629,7 +1088,8 @@ export default function AdminPage() {
                       copyShareLink={copyShareLink} 
                       copiedId={copiedId} 
                       openEditModal={openEditModal} 
-                      handleDelete={handleDelete} 
+                      handleDelete={handleDelete}
+                      duplicateInfo={duplicateInfo}
                     />
                   ))}
                 </div>
@@ -649,7 +1109,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          {!isFetchingBooks && filteredBooks.length === 0 && !error && (
+          {!isFetchingBooks && displayItems.length === 0 && !error && (
             <div className="text-center text-[#D7C9B2] text-sm mt-10">No books found.</div>
           )}
         </main>
@@ -869,6 +1329,7 @@ export default function AdminPage() {
            </div>
         </div>
       )}
+<<<<<<< HEAD
       {/* Check File Links Modal */}
       <CheckFileLinksModal
         isOpen={isCheckLinksOpen}
@@ -885,6 +1346,248 @@ export default function AdminPage() {
         isOpen={isSearchOnlineOpen}
         onClose={() => setIsSearchOnlineOpen(false)}
         onImportSuccess={fetchBooks}
+=======
+
+      {/* Sync / Restore 67 Files Modal */}
+      {isSyncModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+          <div className="bg-[#242124] border border-[#4D4845]/70 rounded-3xl w-full max-w-2xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] flex flex-col text-[#F5ECDC]">
+            <button 
+              onClick={() => {
+                if (!isSyncing) {
+                  setIsSyncModalOpen(false);
+                  setSyncFiles([]);
+                  setSyncResult(null);
+                  setSyncProgress(null);
+                }
+              }} 
+              className="absolute top-6 right-6 p-2 bg-[#2E2B2E] border border-[#4D4845]/50 rounded-full text-[#D7C9B2] hover:text-white cursor-pointer transition-all"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                <Unlink2 size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-[#F5ECDC]">Kiểm Tra & Khắc Phục Liên Kết File Sách</h3>
+                <p className="text-xs text-[#D7C9B2]">Rà soát toàn bộ sách xem cuốn nào chưa có file hoặc bị mất liên kết tải về</p>
+              </div>
+            </div>
+
+            {/* Thẻ Báo cáo Kiểm tra File Sách */}
+            <div className="mb-4">
+              {isCheckingFiles ? (
+                <div className="flex items-center gap-2 p-3.5 bg-[#2A272A] rounded-2xl border border-[#4D4845]/50 text-xs text-[#D7C9B2]">
+                  <Loader2 size={16} className="animate-spin text-amber-400" />
+                  <span>Đang rà soát trạng thái file của {books.length} cuốn sách...</span>
+                </div>
+              ) : brokenFileCount !== null && brokenFileCount > 0 ? (
+                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs text-amber-200">
+                  <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-amber-500/20">
+                    <div className="flex items-center gap-2 font-black text-amber-300">
+                      <AlertTriangle size={16} className="text-amber-400 shrink-0" />
+                      <span>Phát hiện {brokenFileCount} cuốn sách chưa có file / mất liên kết:</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => {
+                          setSearchOnlineQuery('');
+                          setSearchOnlineTargetBookId(null);
+                          setIsSearchOnlineOpen(true);
+                        }}
+                        className="text-[11px] font-black text-amber-200 hover:text-white flex items-center gap-1.5 bg-amber-500/25 hover:bg-amber-500/40 px-2.5 py-1 rounded-lg border border-amber-500/40 cursor-pointer transition-all shadow-sm active:scale-95"
+                        title="Mở bảng tìm kiếm và tải sách online từ Z-Library / LibGen"
+                      >
+                        <Search size={12} />
+                        <span>Tìm sách online</span>
+                      </button>
+                      <button 
+                        onClick={fetchBrokenFiles} 
+                        className="text-[11px] font-bold text-amber-400 hover:underline cursor-pointer px-1"
+                      >
+                        Quét lại
+                      </button>
+                    </div>
+                  </div>
+                  <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs">
+                    {brokenBooksList.map((b, i) => (
+                      <div 
+                        key={i} 
+                        className="flex items-center justify-between gap-3 p-2 bg-[#1F1D20]/90 hover:bg-[#2A272A] rounded-xl border border-amber-500/20 transition-colors"
+                      >
+                        <div className="truncate flex-1 min-w-0">
+                          <span className="font-bold text-[#F5ECDC]">• {b.title}</span>
+                          {b.author && <span className="text-[#D7C9B2]/80 font-normal"> — {b.author}</span>}
+                        </div>
+                        <button
+                          onClick={() => {
+                            setSearchOnlineQuery(b.title);
+                            setSearchOnlineTargetBookId(b.id);
+                            setIsSearchOnlineOpen(true);
+                          }}
+                          className="shrink-0 px-2.5 py-1 text-[11px] font-black bg-amber-500/25 hover:bg-amber-500/40 text-amber-300 hover:text-white border border-amber-500/50 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                          title={`Tìm và tải bù file online cho: ${b.title}`}
+                        >
+                          <Search size={11} />
+                          <span>Tìm online</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-2.5 text-[11px] text-amber-300/85 leading-relaxed">
+                    💡 Bấm <b>"Tìm online"</b> cạnh từng cuốn sách để tải trực tiếp từ Z-Library/LibGen, hoặc kéo thả file từ máy tính vào ô bên dưới. Hệ thống sẽ tự động ghép nối và lưu vĩnh viễn vào Database PostgreSQL.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-xs text-emerald-300">
+                  <div className="flex items-center gap-2.5 font-bold">
+                    <Check size={18} className="text-emerald-400 shrink-0" />
+                    <span>Toàn bộ {books.length} cuốn sách đều đã được liên kết file đầy đủ và an toàn trong Database.</span>
+                  </div>
+                  <button 
+                    onClick={fetchBrokenFiles} 
+                    className="text-[11px] font-bold text-emerald-400 hover:underline cursor-pointer"
+                  >
+                    Quét lại
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-1 space-y-4">
+              {/* Vùng chọn file / kéo thả */}
+              <div 
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleSyncDrop}
+                className="border-2 border-dashed border-[#4D4845] hover:border-amber-500/80 rounded-2xl p-6 text-center bg-[#1F1D20]/60 transition-all cursor-pointer group"
+                onClick={() => document.getElementById('sync-files-picker')?.click()}
+              >
+                <input 
+                  type="file" 
+                  id="sync-files-picker" 
+                  multiple 
+                  accept=".epub,.pdf" 
+                  className="hidden" 
+                  onChange={handleSyncFilesSelect} 
+                />
+                <Unlink2 size={32} className="mx-auto text-amber-400/70 group-hover:text-amber-400 transition-colors mb-2" />
+                <p className="text-sm font-bold text-[#F5ECDC]">
+                  Kéo thả toàn bộ file sách (.epub, .pdf) vào đây
+                </p>
+                <p className="text-xs text-[#7B7369] mt-1">
+                  hoặc bấm vào để chọn cùng lúc nhiều file từ máy tính của bạn
+                </p>
+              </div>
+
+              {/* Trạng thái danh sách file đã chọn */}
+              {syncFiles.length > 0 && (
+                <div className="bg-[#1F1D20] border border-[#4D4845]/50 rounded-2xl p-4">
+                  <div className="flex justify-between items-center mb-3 pb-2 border-b border-[#4D4845]/40">
+                    <span className="text-xs font-black text-[#F5ECDC]">
+                      Đã chọn {syncFiles.length} file sách ({(syncFiles.reduce((acc, f) => acc + f.size, 0) / (1024 * 1024)).toFixed(1)} MB)
+                    </span>
+                    {!isSyncing && (
+                      <button 
+                        onClick={() => { setSyncFiles([]); setSyncResult(null); }}
+                        className="text-xs font-bold text-red-400 hover:text-red-300 cursor-pointer"
+                      >
+                        Xoá tất cả
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1">
+                    {syncFiles.map((file, idx) => (
+                      <div key={idx} className="flex justify-between items-center text-xs py-1.5 px-2.5 bg-[#2A272A] rounded-xl border border-[#4D4845]/30">
+                        <span className="truncate pr-2 font-medium text-[#F5ECDC]">{file.name}</span>
+                        <span className="shrink-0 text-[#7B7369] font-mono text-[10px]">
+                          {(file.size / (1024 * 1024)).toFixed(2)} MB
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Hiển thị tiến trình đang đồng bộ */}
+              {isSyncing && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-center">
+                  <Loader2 size={24} className="animate-spin mx-auto text-amber-400 mb-2" />
+                  <p className="text-xs font-black text-amber-300">{syncProgress || 'Đang xử lý...'}</p>
+                  <p className="text-[11px] text-amber-200/70 mt-1">
+                    Hệ thống chia nhỏ thành từng đợt gửi để đảm bảo ổn định 100% không bị quá tải đường truyền.
+                  </p>
+                </div>
+              )}
+
+              {/* Hiển thị kết quả sau khi đồng bộ xong */}
+              {syncResult && (
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 text-xs text-emerald-200">
+                  <div className="flex items-center gap-2 mb-2 font-black text-sm text-emerald-400">
+                    <Check size={18} />
+                    <span>Đồng Bộ Hoàn Tất Thành Công!</span>
+                  </div>
+                  <p className="leading-relaxed">
+                    • Khôi phục thành công: <strong>{syncResult.matched_count}</strong> cuốn sách đã có trong hệ thống.<br />
+                    • Thêm mới thành công: <strong>{syncResult.created_count}</strong> cuốn sách.<br />
+                    Tất cả file đã được chuyển vào PostgreSQL Database vĩnh viễn. Bạn có thể mở đọc hoặc tải xuống ngay!
+                  </p>
+                  {syncResult.matched_books && syncResult.matched_books.length > 0 && (
+                    <div className="mt-3 max-h-32 overflow-y-auto space-y-1 pt-2 border-t border-emerald-500/20">
+                      {syncResult.matched_books.slice(0, 15).map((b, i) => (
+                        <div key={i} className="truncate text-[11px] text-emerald-300">
+                          ✓ {b.title} {b.author ? `— ${b.author}` : ''}
+                        </div>
+                      ))}
+                      {syncResult.matched_books.length > 15 && (
+                        <div className="text-[10px] text-emerald-400 italic">
+                          và {syncResult.matched_books.length - 15} cuốn sách khác...
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Nút kích hoạt đồng bộ */}
+            <div className="mt-6 pt-4 border-t border-[#4D4845]/50 shrink-0">
+              <button
+                onClick={handleSyncFilesSubmit}
+                disabled={isSyncing || syncFiles.length === 0}
+                style={{ backgroundColor: syncFiles.length > 0 ? '#D97706' : '#2A272A', color: syncFiles.length > 0 ? '#FFFFFF' : '#7B7369' }}
+                className="w-full py-3 px-6 rounded-2xl text-sm font-black transition-all shadow-lg cursor-pointer hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-[#4D4845]"
+              >
+                {isSyncing ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Đang Khôi Phục & Gắn File Vào Database...</span>
+                  </>
+                ) : (
+                  <span>Khôi Phục & Gắn File Vào Database ({syncFiles.length} file đã chọn)</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Online Book Search Modal */}
+      <SearchOnlineModal
+        isOpen={isSearchOnlineOpen}
+        onClose={() => {
+          setIsSearchOnlineOpen(false);
+          setSearchOnlineTargetBookId(null);
+          setSearchOnlineQuery('');
+        }}
+        onImportSuccess={() => {
+          fetchBooks();
+          fetchBrokenFiles();
+        }}
+        initialQuery={searchOnlineQuery}
+        targetBookId={searchOnlineTargetBookId}
+>>>>>>> 04ef1a449922d653bf835c2fa62e0e114f3e0d74
       />
     </div>
   );

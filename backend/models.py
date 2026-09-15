@@ -2,11 +2,27 @@ from sqlalchemy import Column, String, Integer, DateTime
 from sqlalchemy.sql import func
 import uuid
 from database import Base
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey, LargeBinary
 from sqlalchemy.orm import relationship
 
 def generate_uuid():
     return str(uuid.uuid4())
+
+class BookFile(Base):
+    """
+    Lưu trữ file sách vĩnh viễn trong cơ sở dữ liệu (PostgreSQL/SQLite)
+    để chống mất file khi Render restart hoặc redeploy (do ổ đĩa của Render là tạm thời).
+    """
+    __tablename__ = "book_files"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    file_key = Column(String, unique=True, index=True) # e.g. "local_bc78f54f...epub"
+    book_id = Column(String, ForeignKey("books.id", ondelete="CASCADE"), nullable=True, index=True)
+    filename = Column(String, nullable=True)
+    mime_type = Column(String, nullable=True)
+    file_data = Column(LargeBinary, nullable=False)
+    file_size = Column(Integer, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class Book(Base):
     __tablename__ = "books"
@@ -106,4 +122,30 @@ class Quote(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user_book = relationship("UserBook", back_populates="quotes")
+
+
+class BookReview(Base):
+    __tablename__ = "book_reviews"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    book_id = Column(String, ForeignKey("books.id"), nullable=True, index=True)
+    user_book_id = Column(String, ForeignKey("user_books.id"), nullable=True, index=True)
+    
+    rating = Column(Integer, nullable=False, default=5) # 1 to 5 stars
+    reading_status = Column(String, default="completed") # "want_to_read", "reading", "completed", "on_hold"
+    progress_percent = Column(Integer, default=100) # 0 to 100
+    
+    review_title = Column(String, nullable=True)
+    review_text = Column(String, nullable=True)
+    key_takeaway = Column(String, nullable=True) # Bài học cốt lõi / Insight đắt giá
+    favorite_quote = Column(String, nullable=True) # Câu trích dẫn tâm đắc
+    tags = Column(String, nullable=True) # Nhãn chủ đề: "Tư duy, Kỷ luật, Tài chính"
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    user = relationship("User")
+    book = relationship("Book")
+    user_book = relationship("UserBook")
 

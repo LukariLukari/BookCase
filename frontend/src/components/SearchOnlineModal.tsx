@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Download, Loader2, BookOpen, Globe, Pencil, PenTool } from 'lucide-react';
 import axios from 'axios';
@@ -17,9 +17,11 @@ interface SearchOnlineModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImportSuccess: () => void;
+  initialQuery?: string;
+  targetBookId?: string | null;
 }
 
-export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: SearchOnlineModalProps) {
+export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, initialQuery, targetBookId }: SearchOnlineModalProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ExternalSearchItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -29,16 +31,15 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-  const handleSearch = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!query.trim()) return;
+  const handleSearchWithQuery = async (searchQuery: string) => {
+    if (!searchQuery.trim()) return;
 
     setIsSearching(true);
     setError(null);
     setResults([]);
 
     try {
-      let url = `${API_URL}/api/external-search?q=${encodeURIComponent(query)}&source=zlib`;
+      let url = `${API_URL}/api/external-search?q=${encodeURIComponent(searchQuery)}&source=zlib`;
       const res = await axios.get(url);
       setResults(res.data);
       if (res.data.length === 0) {
@@ -54,6 +55,24 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
       setIsSearching(false);
     }
   };
+
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    handleSearchWithQuery(query);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialQuery) {
+        setQuery(initialQuery);
+        handleSearchWithQuery(initialQuery);
+      } else {
+        setQuery('');
+        setResults([]);
+        setError(null);
+      }
+    }
+  }, [isOpen, initialQuery]);
 
   const filteredResults = results;
 
@@ -79,7 +98,8 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
       const res = await axios.post(`${API_URL}/api/external-import`, {
         id: item.id,
         title: item.title,
-        author: item.author
+        author: item.author,
+        target_book_id: targetBookId || undefined
       }, { headers });
       
       clearInterval(interval);
@@ -125,7 +145,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -142,10 +162,17 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
         >
           {/* Header */}
           <div className="p-6 border-b border-[#4D4845]/50 flex justify-between items-center bg-[#2A272A]">
-            <h2 className="text-xl font-bold text-[#F5ECDC] flex items-center gap-2">
-              <BookOpen className="text-[#F5ECDC]" size={22} />
-              Tìm & Tải Sách Online
-            </h2>
+            <div>
+              <h2 className="text-xl font-bold text-[#F5ECDC] flex items-center gap-2">
+                <BookOpen className="text-[#F5ECDC]" size={22} />
+                Tìm & Tải Sách Online
+              </h2>
+              {targetBookId && (
+                <p className="text-xs text-amber-300 font-semibold mt-1">
+                  🎯 Đang tìm kiếm file để gắn bù vào cuốn sách bị mất liên kết
+                </p>
+              )}
+            </div>
             <button 
               onClick={handleModalClose}
               className="p-2 bg-[#1F1D20] hover:bg-[#F5ECDC] hover:text-black text-[#F5ECDC] rounded-full transition-colors cursor-pointer"
@@ -248,7 +275,9 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess }: 
                         }}
                       >
                         <Download size={16} className="stroke-[2.5]" style={{ color: importingId !== null ? '#8A817C' : '#000000' }} />
-                        <span className="font-black" style={{ color: importingId !== null ? '#8A817C' : '#000000' }}>Tải về máy & Thêm vào web</span>
+                        <span className="font-black" style={{ color: importingId !== null ? '#8A817C' : '#000000' }}>
+                          {targetBookId ? 'Tải & Gắn Bù Vào Sách' : 'Tải về máy & Thêm vào web'}
+                        </span>
                       </button>
                     )}
 

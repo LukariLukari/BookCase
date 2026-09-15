@@ -22,6 +22,8 @@ from email_service import send_otp_email
 from datetime import datetime, timezone
 import random
 import string
+import time
+import unicodedata
 
 import sqlite3
 
@@ -91,7 +93,7 @@ def repair_cover_for_book(book: models.Book, db: Session) -> str | None:
     file_bytes = None
     if file_id:
         try:
-            file_bytes = drive_service.download_file_bytes(file_id)
+            file_bytes = drive_service.download_file_bytes(file_id, db=db, book_id=book.id)
         except Exception as e:
             print(f"[Cover Repair] Service account download failed for {book.title}: {e}")
 
@@ -266,19 +268,32 @@ async def upload_book(
     title: Optional[str] = Form(""),
     external_url: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_admin_user)
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     try:
         contents = await file.read()
-        mime_type = file.content_type
+        filename = file.filename or "uploaded_book"
+        filename_lower = filename.lower()
         
-        extracted = {}
-        if mime_type == 'application/pdf':
+        # Nhận diện mime_type chính xác dựa trên Header + Magic Bytes + Đuôi file
+        mime_type = file.content_type
+        if filename_lower.endswith('.pdf') or contents.startswith(b'%PDF'):
+            mime_type = 'application/pdf'
+            extracted = extract_pdf_info(contents)
+        elif filename_lower.endswith('.epub') or contents.startswith(b'PK') or 'epub' in (mime_type or '').lower():
+            mime_type = 'application/epub+zip'
+            extracted = extract_epub_info(contents)
+        elif mime_type == 'application/pdf':
             extracted = extract_pdf_info(contents)
         elif mime_type in ['application/epub+zip', 'application/epub']:
+            mime_type = 'application/epub+zip'
             extracted = extract_epub_info(contents)
+        else:
+            mime_type = mime_type or 'application/octet-stream'
+            extracted = {}
             
-        final_title = extracted.get('title') or title
+        raw_name = filename.rsplit('.', 1)[0] if '.' in filename else filename
+        final_title = extracted.get('title') or (title.strip() if title and title.strip() else None) or raw_name or "Sách chưa đặt tên"
         final_author = extracted.get('author') or "Unknown Author"
         final_summary = extracted.get('summary') or ""
         cover_b64 = extracted.get('cover_b64')
@@ -299,30 +314,247 @@ async def upload_book(
             except Exception as e:
                 print(f"ImgBB Upload Failed: {e}")
                 
-        # Giữ nguyên cover_b64 dạng data:image/jpeg;base64,... nhẹ trong DB để không bao giờ bị 404 khi Vercel/Render redeploy hay reload trang
-        drive_file_id = None
-        if not external_url or not external_url.strip():
-            file_stream = io.BytesIO(contents)
-            drive_file_id = drive_service.upload_file(file_stream, file.filename, mime_type)
-        
         db_book = models.Book(
             title=final_title,
             author=final_author,
             summary=final_summary,
             cover_url=cover_b64,
-            drive_file_id=drive_file_id,
             external_url=external_url,
             mime_type=mime_type,
             file_size=len(contents),
             progress=0
         )
         db.add(db_book)
+        db.flush()
+
+        drive_file_id = None
+        if not external_url or not external_url.strip():
+            file_stream = io.BytesIO(contents)
+            drive_file_id = drive_service.upload_file(file_stream, filename, mime_type, db=db, book_id=db_book.id)
+            db_book.drive_file_id = drive_file_id
+
         db.commit()
         db.refresh(db_book)
         
         return db_book
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Lỗi khi tải sách lên: {str(e)}")
+
+def normalize_match_str(s: str) -> str:
+    if not s:
+        return ""
+    s = unicodedata.normalize('NFD', str(s))
+    s = ''.join(c for c in s if unicodedata.category(c) != 'Mn')
+    s = re.sub(r'[^a-zA-Z0-9]+', ' ', s).lower().strip()
+    return s
+
+@app.get("/api/admin/books/check-files")
+def check_book_files(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """
+    Kiểm tra toàn bộ sách xem cuốn nào bị mất file hoặc chưa có file liên kết.
+    """
+    books = db.query(models.Book).all()
+    broken_books = []
+    
+    # Lấy danh sách file_keys và book_ids đã lưu trong bảng BookFile
+    existing_file_keys = set(k[0] for k in db.query(models.BookFile.file_key).all() if k[0])
+    existing_book_file_ids = set(k[0] for k in db.query(models.BookFile.book_id).all() if k[0])
+    
+    upload_dir = drive_service.upload_dir
+    
+    for b in books:
+        # Nếu có link ngoài (external_url) hợp lệ thì coi như đã liên kết
+        if b.external_url and b.external_url.strip():
+            continue
+            
+        # Không có drive_file_id
+        if not b.drive_file_id:
+            broken_books.append({
+                "id": b.id,
+                "title": b.title,
+                "author": b.author,
+                "reason": "Chưa có file hoặc liên kết"
+            })
+            continue
+            
+        # Nếu là local file
+        if b.drive_file_id.startswith("local_"):
+            has_db_file = (b.drive_file_id in existing_file_keys) or (b.id in existing_book_file_ids)
+            has_disk_file = os.path.exists(os.path.join(upload_dir, b.drive_file_id))
+            if not has_db_file and not has_disk_file:
+                broken_books.append({
+                    "id": b.id,
+                    "title": b.title,
+                    "author": b.author,
+                    "reason": "Mất liên kết file do server tạm khởi động lại"
+                })
+                
+    return {
+        "total_books": len(books),
+        "broken_count": len(broken_books),
+        "broken_books": broken_books
+    }
+
+@app.post("/api/admin/books/sync-files")
+async def sync_book_files(
+    files: List[UploadFile] = File(...),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """
+    Thuật toán tự động đối chiếu và phục hồi file sách vĩnh viễn vào Database PostgreSQL.
+    Giải quyết triệt để vấn đề mất file khi Render restart / redeploy.
+    """
+    if not files:
+        raise HTTPException(status_code=400, detail="Không có file nào được gửi lên")
+
+    all_books = db.query(models.Book).all()
+    matched_books = []
+    created_books = []
+    already_matched_book_ids = set()
+
+    for file in files:
+        contents = await file.read()
+        if not contents or len(contents) < 50:
+            continue
+
+        filename = file.filename or "book"
+        name_no_ext, ext = os.path.splitext(filename)
+        filename_clean = normalize_match_str(name_no_ext)
+        mime_type = file.content_type or 'application/octet-stream'
+
+        is_pdf = filename.lower().endswith('.pdf') or mime_type == 'application/pdf' or contents.startswith(b'%PDF')
+        if is_pdf:
+            mime_type = 'application/pdf'
+            extracted = extract_pdf_info(contents)
+        else:
+            mime_type = 'application/epub+zip'
+            extracted = extract_epub_info(contents)
+
+        meta_title = extracted.get('title') or ""
+        meta_author = extracted.get('author') or ""
+        meta_cover = extracted.get('cover_b64')
+        meta_summary = extracted.get('summary') or ""
+
+        meta_title_clean = normalize_match_str(meta_title)
+        meta_author_clean = normalize_match_str(meta_author)
+
+        # Tìm kiếm cuốn sách phù hợp nhất trong cơ sở dữ liệu
+        best_book = None
+        best_score = 0
+
+        for book in all_books:
+            if book.id in already_matched_book_ids:
+                continue
+
+            book_title_clean = normalize_match_str(book.title)
+            book_drive_clean = normalize_match_str(book.drive_file_id or '')
+            book_author_clean = normalize_match_str(book.author or '')
+
+            score = 0
+            # 1. Khớp chính xác hoặc gần như chính xác với drive_file_id cũ
+            if book_drive_clean and (filename_clean in book_drive_clean or book_drive_clean in filename_clean):
+                score = max(score, 100)
+
+            # 2. Khớp chính xác tiêu đề từ metadata EPUB/PDF
+            if meta_title_clean and book_title_clean == meta_title_clean:
+                score = max(score, 95)
+
+            # 3. Khớp chính xác tên file và tiêu đề trong DB
+            if filename_clean and book_title_clean == filename_clean:
+                score = max(score, 90)
+
+            # 4. Tên sách là chuỗi con của tên file hoặc ngược lại
+            if book_title_clean and (book_title_clean in filename_clean or filename_clean in book_title_clean):
+                score = max(score, 85)
+
+            # 5. Khớp từ khóa tác giả + tên sách
+            combined_file = f"{filename_clean} {meta_title_clean} {meta_author_clean}"
+            combined_book = f"{book_title_clean} {book_author_clean}"
+            file_tokens = set(combined_file.split())
+            book_tokens = set(combined_book.split())
+            if file_tokens and book_tokens:
+                overlap = len(file_tokens.intersection(book_tokens))
+                ratio = overlap / max(len(book_tokens), 1)
+                if ratio >= 0.5:
+                    score = max(score, int(60 + 35 * ratio))
+
+            if score > best_score:
+                best_score = score
+                best_book = book
+
+        # Nếu độ tin cậy >= 60, liên kết file với cuốn sách đã có
+        if best_book and best_score >= 60:
+            already_matched_book_ids.add(best_book.id)
+            file_stream = io.BytesIO(contents)
+            file_key = drive_service.upload_file(file_stream, filename, mime_type, db=db, book_id=best_book.id)
+
+            best_book.drive_file_id = file_key
+            best_book.file_size = len(contents)
+            best_book.mime_type = mime_type
+
+            # Cập nhật bìa nếu sách chưa có bìa hoặc bìa bị lỗi
+            if meta_cover and (not best_book.cover_url or len(best_book.cover_url) < 100):
+                best_book.cover_url = meta_cover
+
+            # Cập nhật tác giả nếu chưa có
+            if meta_author and meta_author != "Unknown Author" and (not best_book.author or best_book.author == "Unknown Author"):
+                best_book.author = meta_author
+
+            # Cập nhật tóm tắt nếu chưa có
+            if meta_summary and not best_book.summary:
+                best_book.summary = meta_summary
+
+            matched_books.append({
+                "id": best_book.id,
+                "title": best_book.title,
+                "author": best_book.author,
+                "score": best_score,
+                "filename": filename
+            })
+        else:
+            # Không có sách nào trong DB khớp, tạo mới cuốn sách
+            final_title = meta_title if meta_title.strip() else name_no_ext.replace("_", " ")
+            final_author = meta_author if meta_author.strip() else "Unknown Author"
+
+            new_book = models.Book(
+                title=final_title,
+                author=final_author,
+                summary=meta_summary,
+                cover_url=meta_cover,
+                mime_type=mime_type,
+                file_size=len(contents),
+                progress=0
+            )
+            db.add(new_book)
+            db.flush()
+
+            file_stream = io.BytesIO(contents)
+            file_key = drive_service.upload_file(file_stream, filename, mime_type, db=db, book_id=new_book.id)
+            new_book.drive_file_id = file_key
+
+            created_books.append({
+                "id": new_book.id,
+                "title": final_title,
+                "author": final_author,
+                "filename": filename
+            })
+
+    db.commit()
+
+    return {
+        "success": True,
+        "total_files": len(files),
+        "matched_count": len(matched_books),
+        "created_count": len(created_books),
+        "matched_books": matched_books,
+        "created_books": created_books
+    }
 
 @app.put("/api/admin/books/reorder")
 def reorder_books(
@@ -348,6 +580,61 @@ def reorder_books(
             
     db.commit()
     return {"message": "Reordered successfully"}
+
+def normalize_author_py(author: Optional[str]) -> str:
+    if not author:
+        return ""
+    s = author.lower().strip()
+    s = re.sub(r"[.,\/#!$%\^&\*;:{}=\-_`~()\[\]\"\']", " ", s)
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    s = s.replace("đ", "d").replace("Đ", "d")
+    tokens = sorted(list(set([w for w in s.split() if w])))
+    return " ".join(tokens)
+
+def normalize_title_py(title: Optional[str]) -> str:
+    if not title:
+        return ""
+    s = title.lower().strip()
+    s = re.sub(r"[.,\/#!$%\^&\*;:{}=\-_`~()\[\]\"\']", " ", s)
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    s = s.replace("đ", "d").replace("Đ", "d")
+    return " ".join([w for w in s.split() if w])
+
+@app.get("/api/admin/books/duplicates")
+def get_duplicate_books(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    books = db.query(models.Book).options(defer(models.Book.cover_url)).all()
+    groups = {}
+    for b in books:
+        n_title = normalize_title_py(b.title)
+        if not n_title:
+            continue
+        n_author = normalize_author_py(b.author)
+        key = f"{n_title}:::{n_author}"
+        if key not in groups:
+            groups[key] = []
+        groups[key].append(serialize_book_lightweight(b))
+    
+    dup_groups = [
+        {
+            "key": k,
+            "title": g[0]["title"],
+            "author": g[0].get("author") or "Chưa rõ tác giả",
+            "count": len(g),
+            "books": g
+        }
+        for k, g in groups.items() if len(g) >= 2
+    ]
+    total_redundant = sum(len(g["books"]) - 1 for g in dup_groups)
+    return {
+        "groups": dup_groups,
+        "total_groups": len(dup_groups),
+        "total_redundant": total_redundant
+    }
 
 @app.post("/api/books/link", response_model=schemas.BookResponse)
 def create_book_from_link(book_in: schemas.BookLinkCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
@@ -411,20 +698,43 @@ async def external_import(
         final_author = extracted.get('author') or request.author or "Unknown Author"
         cover_b64 = extracted.get('cover_b64')
         
+        db_book = None
+        if hasattr(request, 'target_book_id') and request.target_book_id:
+            db_book = db.query(models.Book).filter(models.Book.id == request.target_book_id).first()
+            
+        if not db_book:
+            # Kiểm tra xem có sách nào trong thư viện đang bị mất file trùng tên không
+            target_title_norm = normalize_match_str(final_title)
+            candidates = db.query(models.Book).all()
+            for cand in candidates:
+                if normalize_match_str(cand.title) == target_title_norm:
+                    db_book = cand
+                    break
+
+        if db_book:
+            db_book.file_size = len(file_bytes)
+            db_book.mime_type = mime_type
+            if cover_b64 and (not db_book.cover_url or len(db_book.cover_url) < 100):
+                db_book.cover_url = cover_b64
+            if final_author != "Unknown Author" and (not db_book.author or db_book.author == "Unknown Author"):
+                db_book.author = final_author
+        else:
+            db_book = models.Book(
+                title=final_title,
+                author=final_author,
+                summary="",
+                cover_url=cover_b64,
+                mime_type=mime_type,
+                file_size=len(file_bytes),
+                progress=0
+            )
+            db.add(db_book)
+            db.flush()
+
         file_stream = io.BytesIO(file_bytes)
-        drive_file_id = drive_service.upload_file(file_stream, filename, mime_type)
+        drive_file_id = drive_service.upload_file(file_stream, filename, mime_type, db=db, book_id=db_book.id)
+        db_book.drive_file_id = drive_file_id
         
-        db_book = models.Book(
-            title=final_title,
-            author=final_author,
-            summary="",
-            cover_url=cover_b64,
-            drive_file_id=drive_file_id,
-            mime_type=mime_type,
-            file_size=len(file_bytes),
-            progress=0
-        )
-        db.add(db_book)
         db.commit()
         db.refresh(db_book)
         
@@ -455,6 +765,35 @@ def update_book(book_id: str, book_in: schemas.BookUpdate, db: Session = Depends
     if not book.cover_url or book.cover_url.startswith("/api/books/cover/") or book.cover_url.startswith("api/books/cover/"):
         repair_cover_for_book(book, db)
     
+    db.commit()
+    db.refresh(book)
+    return serialize_book_lightweight(book)
+
+@app.post("/api/books/{book_id}/re-extract", response_model=schemas.BookResponse)
+def re_extract_book_info(book_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    
+    file_bytes = None
+    if book.drive_file_id:
+        file_bytes = drive_service.download_file_bytes(book.drive_file_id, db=db, book_id=book.id)
+        
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="Không tìm thấy file nguồn để trích xuất lại")
+        
+    is_pdf = True if (book.mime_type == 'application/pdf' or file_bytes.startswith(b'%PDF')) else False
+    extracted = extract_pdf_info(file_bytes) if is_pdf else extract_epub_info(file_bytes)
+    
+    if extracted.get('cover_b64'):
+        book.cover_url = extracted.get('cover_b64')
+    if extracted.get('title'):
+        book.title = extracted.get('title')
+    if extracted.get('author') and extracted.get('author') != 'Unknown Author':
+        book.author = extracted.get('author')
+    if extracted.get('summary'):
+        book.summary = extracted.get('summary')
+        
     db.commit()
     db.refresh(book)
     return serialize_book_lightweight(book)
@@ -491,7 +830,7 @@ def download_book(book_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="No file associated with this book")
 
     filename = f"{book.title}.pdf" if book.mime_type == 'application/pdf' else f"{book.title}.epub"
-    return drive_service.stream_download(book.drive_file_id, filename, book.mime_type)
+    return drive_service.stream_download(book.drive_file_id, filename, book.mime_type, file_size=book.file_size, db=db, book_id=book.id)
 
 import socket
 import random
@@ -609,7 +948,7 @@ def download_by_pin(pin: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Sách này không có file đính kèm để tải về.")
     
     filename = f"{book.title}.pdf" if book.mime_type == 'application/pdf' else f"{book.title}.epub"
-    return drive_service.stream_download(book.drive_file_id, filename, book.mime_type, file_size=book.file_size)
+    return drive_service.stream_download(book.drive_file_id, filename, book.mime_type, file_size=book.file_size, db=db, book_id=book.id)
 
 @app.get("/k", response_class=HTMLResponse)
 def kindle_receiver_html():
@@ -1138,8 +1477,8 @@ def fix_all_covers(db: Session = Depends(get_db), current_user: models.User = De
         file_bytes = None
         if file_id:
             try:
-                # Cố gắng dùng Service Account
-                file_bytes = drive_service.download_file_bytes(file_id)
+                # Cố gắng dùng Service Account / Local DB
+                file_bytes = drive_service.download_file_bytes(file_id, db=db, book_id=book.id)
             except Exception as e:
                 print(f"Service account download failed for {book.title}: {e}")
                 
@@ -1537,6 +1876,295 @@ def delete_my_quote(quote_id: str, db: Session = Depends(get_db), current_user: 
     db.delete(quote)
     db.commit()
     return {"message": "Deleted quote successfully"}
+
+
+# ==========================================
+# --- BOOK REVIEWS, RATINGS & READER INSIGHTS API ---
+# ==========================================
+
+def serialize_review(review: models.BookReview, db: Session) -> dict:
+    username = review.user.username if review.user else "Độc giả"
+    book_title = None
+    book_author = None
+    book_cover_url = None
+    
+    if review.book:
+        book_title = review.book.title
+        book_author = review.book.author
+        book_cover_url = f"/api/books/cover/{review.book.id}"
+    elif review.user_book:
+        book_title = review.user_book.custom_title or (review.user_book.book.title if review.user_book.book else "Sách cá nhân")
+        book_author = review.user_book.custom_author or (review.user_book.book.author if review.user_book.book else "Chưa rõ")
+        book_cover_url = review.user_book.custom_cover_url or (f"/api/books/cover/{review.user_book.book.id}" if review.user_book.book else None)
+
+    return {
+        "id": review.id,
+        "user_id": review.user_id,
+        "book_id": review.book_id,
+        "user_book_id": review.user_book_id,
+        "rating": review.rating,
+        "reading_status": review.reading_status or "completed",
+        "progress_percent": review.progress_percent if review.progress_percent is not None else 100,
+        "review_title": review.review_title,
+        "review_text": review.review_text,
+        "key_takeaway": review.key_takeaway,
+        "favorite_quote": review.favorite_quote,
+        "tags": review.tags,
+        "created_at": review.created_at,
+        "updated_at": review.updated_at,
+        "username": username,
+        "book_title": book_title,
+        "book_author": book_author,
+        "book_cover_url": book_cover_url
+    }
+
+@app.get("/api/books/ratings/batch")
+def get_books_ratings_batch(db: Session = Depends(get_db)):
+    """Lấy điểm đánh giá trung bình và số lượt review cho tất cả sách theo batch gọn nhẹ"""
+    reviews = db.query(models.BookReview.book_id, models.BookReview.rating).filter(models.BookReview.book_id.isnot(None)).all()
+    stats = {}
+    for book_id, rating in reviews:
+        if not book_id:
+            continue
+        if book_id not in stats:
+            stats[book_id] = {"sum": 0, "count": 0}
+        stats[book_id]["sum"] += rating
+        stats[book_id]["count"] += 1
+    
+    result = {}
+    for b_id, s in stats.items():
+        result[b_id] = {
+            "average_rating": round(s["sum"] / s["count"], 1) if s["count"] > 0 else 0.0,
+            "count": s["count"]
+        }
+    return result
+
+@app.get("/api/books/{book_id}/rating-summary", response_model=schemas.BookRatingSummaryResponse)
+def get_book_rating_summary(book_id: str, db: Session = Depends(get_db)):
+    """Lấy chi tiết thống kê rating và danh sách nhận xét, insight của một cuốn sách (Public)"""
+    reviews = db.query(models.BookReview).filter(models.BookReview.book_id == book_id).order_by(models.BookReview.created_at.desc()).all()
+    total = len(reviews)
+    avg = round(sum(r.rating for r in reviews) / total, 1) if total > 0 else 0.0
+    dist = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0}
+    for r in reviews:
+        star_key = str(r.rating)
+        dist[star_key] = dist.get(star_key, 0) + 1
+    
+    serialized_reviews = [serialize_review(r, db) for r in reviews]
+    return {
+        "book_id": book_id,
+        "average_rating": avg,
+        "total_reviews": total,
+        "rating_distribution": dist,
+        "reviews": serialized_reviews
+    }
+
+@app.get("/api/books/{book_id}/my-review")
+def get_my_review_for_book(book_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    """Lấy review & insight của chính người dùng hiện tại đối với cuốn sách này"""
+    review = db.query(models.BookReview).filter(
+        models.BookReview.book_id == book_id,
+        models.BookReview.user_id == current_user.id
+    ).first()
+    if not review:
+        return None
+    return serialize_review(review, db)
+
+@app.post("/api/books/{book_id}/reviews", response_model=schemas.BookReviewResponse)
+def create_or_update_book_review(
+    book_id: str, 
+    review_in: schemas.BookReviewCreate, 
+    db: Session = Depends(get_db), 
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Đánh giá sách & đúc kết Insight cốt lõi (Upsert)"""
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Không tìm thấy sách")
+    
+    existing = db.query(models.BookReview).filter(
+        models.BookReview.book_id == book_id,
+        models.BookReview.user_id == current_user.id
+    ).first()
+
+    valid_rating = max(1, min(5, review_in.rating))
+    valid_progress = max(0, min(100, review_in.progress_percent if review_in.progress_percent is not None else 100))
+    status = review_in.reading_status or ("completed" if valid_progress >= 100 else "reading")
+
+    if existing:
+        existing.rating = valid_rating
+        existing.reading_status = status
+        existing.progress_percent = valid_progress
+        existing.review_title = review_in.review_title
+        existing.review_text = review_in.review_text
+        existing.key_takeaway = review_in.key_takeaway
+        existing.favorite_quote = review_in.favorite_quote
+        existing.tags = review_in.tags
+        db.commit()
+        db.refresh(existing)
+        return serialize_review(existing, db)
+    else:
+        new_review = models.BookReview(
+            id=models.generate_uuid(),
+            user_id=current_user.id,
+            book_id=book_id,
+            rating=valid_rating,
+            reading_status=status,
+            progress_percent=valid_progress,
+            review_title=review_in.review_title,
+            review_text=review_in.review_text,
+            key_takeaway=review_in.key_takeaway,
+            favorite_quote=review_in.favorite_quote,
+            tags=review_in.tags
+        )
+        db.add(new_review)
+        db.commit()
+        db.refresh(new_review)
+        return serialize_review(new_review, db)
+
+@app.get("/api/users/me/insights", response_model=schemas.ReaderDashboardResponse)
+def get_my_reader_insights(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    """Lấy toàn bộ chỉ số, thống kê thói quen, bài học cốt lõi cho Không Gian Đọc Sách của User"""
+    reviews = db.query(models.BookReview).filter(models.BookReview.user_id == current_user.id).order_by(models.BookReview.created_at.desc()).all()
+    
+    total_completed = 0
+    currently_reading = 0
+    want_to_read = 0
+    ratings = []
+    rating_dist = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0}
+    genre_dist = {}
+    key_takeaways = []
+    current_reads = []
+    
+    for r in reviews:
+        ratings.append(r.rating)
+        star_key = str(r.rating)
+        rating_dist[star_key] = rating_dist.get(star_key, 0) + 1
+        
+        status = r.reading_status or "completed"
+        if status == "completed" or (r.progress_percent and r.progress_percent >= 100):
+            total_completed += 1
+        elif status == "reading":
+            currently_reading += 1
+        elif status == "want_to_read":
+            want_to_read += 1
+        
+        book_title = "Unknown Book"
+        book_author = "Unknown Author"
+        book_cover = None
+        book_genre = "Tổng hợp"
+        
+        if r.book:
+            book_title = r.book.title
+            book_author = r.book.author or "Unknown Author"
+            book_cover = f"/api/books/cover/{r.book.id}"
+            book_genre = r.book.genre or "Khác"
+        elif r.user_book:
+            book_title = r.user_book.custom_title or (r.user_book.book.title if r.user_book.book else "Sách cá nhân")
+            book_author = r.user_book.custom_author or (r.user_book.book.author if r.user_book.book else "Unknown")
+            book_cover = r.user_book.custom_cover_url or (f"/api/books/cover/{r.user_book.book.id}" if r.user_book.book else None)
+            book_genre = (r.user_book.book.genre if r.user_book.book else None) or "Cá nhân"
+            
+        genre_dist[book_genre] = genre_dist.get(book_genre, 0) + 1
+
+        if r.key_takeaway and r.key_takeaway.strip():
+            key_takeaways.append({
+                "id": r.id,
+                "book_id": r.book_id,
+                "book_title": book_title,
+                "book_author": book_author,
+                "book_cover_url": book_cover,
+                "rating": r.rating,
+                "key_takeaway": r.key_takeaway.strip(),
+                "favorite_quote": r.favorite_quote,
+                "tags": r.tags,
+                "created_at": r.created_at or datetime.now(timezone.utc)
+            })
+            
+        if status == "reading" or (r.progress_percent is not None and 0 < r.progress_percent < 100):
+            current_reads.append({
+                "id": r.id,
+                "book_id": r.book_id,
+                "book_title": book_title,
+                "book_author": book_author,
+                "book_cover_url": book_cover,
+                "progress_percent": r.progress_percent or 0,
+                "rating": r.rating,
+                "reading_status": status,
+                "key_takeaway": r.key_takeaway,
+                "updated_at": r.updated_at or r.created_at
+            })
+
+    user_books = db.query(models.UserBook).filter(models.UserBook.user_id == current_user.id).all()
+    user_book_ids = [ub.id for ub in user_books]
+    total_quotes = 0
+    if user_book_ids:
+        total_quotes = db.query(models.Quote).filter(models.Quote.user_book_id.in_(user_book_ids)).count()
+
+    avg_rating = round(sum(ratings) / len(ratings), 1) if ratings else 0.0
+    yearly_goal = 24
+    goal_progress = min(100, int((total_completed / yearly_goal) * 100))
+    streak_days = max(1, len(set(r.created_at.date() for r in reviews if r.created_at))) if reviews else 1
+
+    serialized_reviews = [serialize_review(r, db) for r in reviews]
+
+    return {
+        "total_completed": total_completed,
+        "currently_reading": currently_reading,
+        "want_to_read": want_to_read,
+        "total_reviews": len(reviews),
+        "average_rating": avg_rating,
+        "total_quotes": total_quotes,
+        "reading_streak_days": streak_days,
+        "yearly_goal": yearly_goal,
+        "yearly_goal_progress": goal_progress,
+        "genre_distribution": genre_dist,
+        "rating_distribution": rating_dist,
+        "key_takeaways": key_takeaways,
+        "current_reads": current_reads,
+        "recent_reviews": serialized_reviews
+    }
+
+@app.delete("/api/users/me/reviews/{review_id}")
+def delete_my_review(review_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    """Xóa bài review / insight của user"""
+    review = db.query(models.BookReview).filter(models.BookReview.id == review_id, models.BookReview.user_id == current_user.id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Không tìm thấy đánh giá")
+    db.delete(review)
+    db.commit()
+    return {"message": "Đã xóa đánh giá thành công"}
+
+@app.patch("/api/users/me/reading-progress")
+def update_reading_progress(
+    book_id: str, 
+    progress_percent: int,
+    reading_status: Optional[str] = None,
+    db: Session = Depends(get_db), 
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Cập nhật nhanh tiến độ đọc & trạng thái (ví dụ trượt thanh % hoặc đổi trạng thái)"""
+    review = db.query(models.BookReview).filter(models.BookReview.book_id == book_id, models.BookReview.user_id == current_user.id).first()
+    val_percent = max(0, min(100, progress_percent))
+    status = reading_status or ("completed" if val_percent >= 100 else "reading")
+    
+    if not review:
+        review = models.BookReview(
+            id=models.generate_uuid(),
+            user_id=current_user.id,
+            book_id=book_id,
+            rating=5,
+            reading_status=status,
+            progress_percent=val_percent
+        )
+        db.add(review)
+    else:
+        review.progress_percent = val_percent
+        review.reading_status = status
+        
+    db.commit()
+    db.refresh(review)
+    return serialize_review(review, db)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

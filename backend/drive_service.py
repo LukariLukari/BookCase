@@ -44,31 +44,86 @@ class DriveService:
             self.upload_dir = os.path.join(os.path.dirname(__file__), 'uploads')
             os.makedirs(self.upload_dir, exist_ok=True)
 
-    def upload_file(self, file_stream, filename, mime_type):
+    def upload_file(self, file_stream, filename, mime_type, db=None, book_id=None):
+        safe_mime = mime_type if mime_type else 'application/octet-stream'
+        
+        # Tạo ASCII key an toàn cho S3/R2 và Local storage tránh lỗi encoding tiếng Việt
+        import re
+        name, ext = os.path.splitext(filename or "book")
+        clean_name = re.sub(r'[^a-zA-Z0-9_-]', '_', name)
+        clean_ext = re.sub(r'[^a-zA-Z0-9.]', '', ext)
+        if not clean_ext:
+            if safe_mime == 'application/pdf':
+                clean_ext = '.pdf'
+            elif 'epub' in safe_mime:
+                clean_ext = '.epub'
+
+        file_key = f"{uuid.uuid4().hex}_{clean_name[:40]}{clean_ext}"
+
         if self.use_r2:
-            file_id = f"{uuid.uuid4().hex}_{filename}"
+            file_stream.seek(0)
             self.s3.upload_fileobj(
                 file_stream,
                 self.r2_bucket,
-                file_id,
-                ExtraArgs={'ContentType': mime_type}
+                file_key,
+                ExtraArgs={'ContentType': safe_mime}
             )
-            return f"r2_{file_id}"
+            return f"r2_{file_key}"
 
         if self.mock_mode:
-            # Sinh ID ngẫu nhiên và lưu file vào thư mục local
-            local_id = f"local_{uuid.uuid4().hex}"
+            # 1. Lưu vào thư mục uploads cục bộ (cache)
+            local_id = f"local_{file_key}"
             file_path = os.path.join(self.upload_dir, local_id)
-            with open(file_path, "wb") as f:
-                f.write(file_stream.read())
+            file_stream.seek(0)
+            file_bytes = file_stream.read()
+            try:
+                with open(file_path, "wb") as f:
+                    f.write(file_bytes)
+            except Exception as e:
+                print(f"[DriveService] Warning: Could not write to local cache {file_path}: {e}")
+
+            # 2. LƯU VĨNH VIỄN VÀO CƠ SỞ DỮ LIỆU POSTGRESQL (Chống mất file khi Render restart/redeploy)
+            if db:
+                try:
+                    import models
+                    bf = None
+                    if book_id:
+                        bf = db.query(models.BookFile).filter(models.BookFile.book_id == book_id).first()
+                    if not bf:
+                        bf = db.query(models.BookFile).filter(models.BookFile.file_key == local_id).first()
+                    
+                    if not bf:
+                        bf = models.BookFile(
+                            file_key=local_id,
+                            book_id=book_id,
+                            filename=filename,
+                            mime_type=safe_mime,
+                            file_data=file_bytes,
+                            file_size=len(file_bytes)
+                        )
+                        db.add(bf)
+                    else:
+                        bf.file_key = local_id
+                        if book_id:
+                            bf.book_id = book_id
+                        bf.filename = filename
+                        bf.mime_type = safe_mime
+                        bf.file_data = file_bytes
+                        bf.file_size = len(file_bytes)
+                    db.flush()
+                    print(f"[DriveService] Saved '{filename}' ({len(file_bytes)} bytes) permanently to database.")
+                except Exception as db_err:
+                    print(f"[DriveService] Error saving file to BookFile table: {db_err}")
+
             return local_id
 
         file_metadata = {'name': filename, 'parents': [self.folder_id]}
-        media = MediaIoBaseUpload(file_stream, mimetype=mime_type, resumable=True)
+        file_stream.seek(0)
+        media = MediaIoBaseUpload(file_stream, mimetype=safe_mime, resumable=True)
         file = self.service.files().create(body=file_metadata, media_body=media, fields='id').execute()
         return file.get('id')
 
-    def stream_download(self, file_id, filename, mime_type, file_size=None):
+    def stream_download(self, file_id, filename, mime_type, file_size=None, db=None, book_id=None):
         import urllib.parse
         from fastapi.responses import Response
         from fastapi import HTTPException
@@ -85,17 +140,44 @@ class DriveService:
         }
 
         # 1. Local Storage Mode (mock_mode)
-        if self.mock_mode and file_id.startswith("local_"):
-            file_path = os.path.join(self.upload_dir, file_id)
-            if os.path.exists(file_path):
-                actual_size = os.path.getsize(file_path)
-                headers["Content-Length"] = str(actual_size)
-                
-                with open(file_path, "rb") as f:
-                    content_bytes = f.read()
+        if self.mock_mode or (file_id and file_id.startswith("local_")):
+            file_path = os.path.join(self.upload_dir, file_id) if file_id else ""
+            content_bytes = None
+
+            # Bước A: Thử đọc từ cache đĩa cục bộ
+            if file_path and os.path.exists(file_path):
+                try:
+                    with open(file_path, "rb") as f:
+                        content_bytes = f.read()
+                except Exception:
+                    content_bytes = None
+
+            # Bước B: Nếu file mất trên đĩa (do Render restart), tự động phục hồi tức thì từ Database!
+            if not content_bytes and db:
+                try:
+                    import models
+                    bf = None
+                    if file_id:
+                        bf = db.query(models.BookFile).filter(models.BookFile.file_key == file_id).first()
+                    if not bf and book_id:
+                        bf = db.query(models.BookFile).filter(models.BookFile.book_id == book_id).first()
+                    if bf and bf.file_data:
+                        content_bytes = bf.file_data
+                        # Ghi lại ra đĩa cache để các lần đọc sau nhanh hơn
+                        if file_path:
+                            try:
+                                with open(file_path, "wb") as f:
+                                    f.write(content_bytes)
+                            except Exception:
+                                pass
+                except Exception as e:
+                    print(f"[DriveService] Error querying BookFile from DB: {e}")
+
+            if content_bytes:
+                headers["Content-Length"] = str(len(content_bytes))
                 return Response(content=content_bytes, media_type=mime_type, headers=headers)
             else:
-                raise HTTPException(status_code=404, detail="File không tồn tại trên lưu trữ local")
+                raise HTTPException(status_code=404, detail="File sách không còn tồn tại trên server lưu trữ tạm. Vui lòng sử dụng tính năng 'Khôi phục file sách' trong trang Quản trị để lưu vĩnh viễn vào hệ thống.")
 
         # 2. R2 Storage Mode
         if self.use_r2 and file_id.startswith("r2_"):
@@ -119,17 +201,26 @@ class DriveService:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Lỗi khi tải file từ Google Drive: {str(e)}")
 
-    def download_file_bytes(self, file_id: str) -> bytes:
-        if self.use_r2 and file_id.startswith("r2_"):
+    def download_file_bytes(self, file_id: str, db=None, book_id=None) -> bytes:
+        if self.use_r2 and file_id and file_id.startswith("r2_"):
             real_id = file_id[3:]
             obj = self.s3.get_object(Bucket=self.r2_bucket, Key=real_id)
             return obj['Body'].read()
 
-        if self.mock_mode and file_id.startswith("local_"):
-            file_path = os.path.join(self.upload_dir, file_id)
-            if os.path.exists(file_path):
+        if self.mock_mode or (file_id and file_id.startswith("local_")):
+            file_path = os.path.join(self.upload_dir, file_id) if file_id else ""
+            if file_path and os.path.exists(file_path):
                 with open(file_path, "rb") as f:
                     return f.read()
+            if db:
+                import models
+                bf = None
+                if file_id:
+                    bf = db.query(models.BookFile).filter(models.BookFile.file_key == file_id).first()
+                if not bf and book_id:
+                    bf = db.query(models.BookFile).filter(models.BookFile.book_id == book_id).first()
+                if bf and bf.file_data:
+                    return bf.file_data
             return b""
             
         request = self.service.files().get_media(fileId=file_id)

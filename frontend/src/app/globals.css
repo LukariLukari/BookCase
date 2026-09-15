@@ -33,25 +33,38 @@ body {
   background: #7B7369;
 }
 
-/* =========================================
-   DESIGN SYSTEM TEMPLATE (DARK PALETTE & HIGH CONTRAST)
-   ========================================= */
+/* High contrast utility for cream background elements */
+.text-contrast-dark {
+  color: #181618 !important;
+}
+.text-contrast-dark * {
+  color: #181618 !important;
+}
+.text-contrast-dark svg {
+  color: #181618 !important;
+  stroke: #181618 !important;
+}
 
 @layer components {
   /* Buttons - Strict High Contrast Rules */
   .btn-primary {
-    @apply bg-[#F5ECDC] border-2 border-[#F5ECDC] font-black py-3 px-6 rounded-xl hover:bg-white transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-[#3A373A] disabled:text-[#8A817C] disabled:border-[#4D4845]/50 shadow-md text-black;
-    color: #000000 !important; /* Pure black text on bright cream beige button */
+    @apply bg-[#F5ECDC] border-2 border-[#F5ECDC] font-black py-2.5 px-5 rounded-xl hover:bg-white transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-[#3A373A] disabled:text-[#8A817C] disabled:border-[#4D4845]/50 shadow-md text-[#181618];
+    color: #181618 !important; /* Pure dark text on bright cream beige button */
   }
 
+  .btn-primary *,
+  .btn-primary svg {
+    color: #181618 !important;
+    stroke: #181618 !important;
+  }
   
   .btn-secondary {
-    @apply bg-[#4D4845] border-2 border-[#4D4845] font-bold py-3 px-6 rounded-xl hover:bg-[#5c5653] transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md;
+    @apply bg-[#4D4845] border-2 border-[#4D4845] font-bold py-2.5 px-5 rounded-xl hover:bg-[#5c5653] transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md;
     color: #F5ECDC !important; /* Cream light text on dark gray button */
   }
 
   .btn-outline {
-    @apply bg-[#2A272A] border-2 border-[#4D4845] font-bold py-2.5 px-5 rounded-xl hover:border-[#D7C9B2] hover:text-[#D7C9B2] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm;
+    @apply bg-[#2A272A] border-2 border-[#4D4845] font-bold py-2 px-4 rounded-xl hover:border-[#D7C9B2] hover:text-[#D7C9B2] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm;
     color: #F5ECDC !important;
   }
 

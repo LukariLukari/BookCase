@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Library, LayoutDashboard, Bookmark, User, LogOut, Settings, Menu, X, LogIn, Loader2, KeyRound, Quote as QuoteIcon } from 'lucide-react';
+import { Library, LayoutDashboard, Bookmark, LogOut, Settings, Menu, X, LogIn, Loader2, KeyRound, Quote as QuoteIcon, Sparkles } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 export default function Sidebar() {
@@ -15,25 +15,64 @@ export default function Sidebar() {
     setNavigatingTo(null);
   }, [pathname]);
 
-  const menuItems = [
-    { icon: <LayoutDashboard size={20} />, label: 'My BookCase Board', href: '/' },
-    { icon: <Library size={20} />, label: 'Collections', href: '#' },
+  const mainMenuItems = [
+    { icon: <LayoutDashboard size={20} />, label: 'BookCase Board', href: '/' },
+    { icon: <Sparkles size={20} />, label: 'Không Gian Đọc', href: '/reader' },
     { icon: <Bookmark size={20} />, label: 'Sách Cá Nhân', href: '/my-books' },
-    { icon: <QuoteIcon size={20} />, label: 'Trích Dẫn (Quotes)', href: '/quotes' },
+    { icon: <QuoteIcon size={20} />, label: 'Trích Dẫn', href: '/quotes' },
   ];
 
-  if (user?.role === 'admin') {
-    menuItems.splice(1, 1, { icon: <Library size={20} />, label: 'Collections', href: '/admin/collections' });
-    menuItems.push({ icon: <Settings size={20} />, label: 'Admin Dashboard', href: '/admin' });
-  }
+  const adminMenuItems = [
+    { icon: <Settings size={20} />, label: 'Admin Dashboard', href: '/admin' },
+    { icon: <Library size={20} />, label: 'Bộ Sưu Tập', href: '/admin/collections' },
+    { icon: <KeyRound size={20} />, label: 'Mã Đăng Ký', href: '/admin/registration-codes' },
+  ];
+
+  const isItemActive = (href: string) => {
+    if (href === '/') return pathname === '/';
+    if (href === '/admin') return pathname === '/admin';
+    return pathname === href || (href !== '/' && pathname.startsWith(href));
+  };
+
+  const renderLinkItem = (item: { icon: React.ReactNode; label: string; href: string }, key: string | number) => {
+    const active = isItemActive(item.href);
+    return (
+      <li key={key} className="w-full">
+        <Link 
+          href={item.href} 
+          style={{
+            backgroundColor: active ? '#F5ECDC' : undefined,
+            color: active ? '#181618' : undefined,
+          }}
+          className={`flex items-center gap-3 p-3 md:px-3.5 md:py-2.5 rounded-xl transition-all font-extrabold text-sm w-full ${
+            active 
+              ? 'shadow-md text-[#181618]' 
+              : 'text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#2A272A]'
+          }`}
+          title={item.label}
+          onClick={() => {
+            setIsMobileMenuOpen(false);
+            if (item.href !== pathname) {
+              setNavigatingTo(item.href);
+            }
+          }}
+        >
+          <span className="flex-shrink-0" style={{ color: active ? '#181618' : undefined }}>
+            {navigatingTo === item.href ? <Loader2 size={20} className="animate-spin" /> : item.icon}
+          </span>
+          <span className="truncate" style={{ color: active ? '#181618' : undefined }}>{item.label}</span>
+        </Link>
+      </li>
+    );
+  };
 
   return (
     <>
-      <div className="w-full h-16 fixed left-0 top-0 flex flex-row items-center justify-between bg-[#1F1D20]/90 backdrop-blur-md border-b border-[#4D4845]/40 px-4 z-50 md:w-64 md:h-screen md:flex-col md:justify-start md:border-r md:border-b-0 md:p-6 md:bg-[#181618]">
+      <div className="w-full h-16 fixed left-0 top-0 flex flex-row items-center justify-between bg-[#1F1D20]/90 backdrop-blur-md border-b border-[#4D4845]/40 px-4 z-50 md:w-64 md:h-screen md:flex-col md:justify-start md:border-r md:border-b-0 md:px-4 md:py-6 md:bg-[#181618]">
         {/* Logo */}
-        <div className="flex items-center md:mb-10 flex-shrink-0 z-50">
+        <div className="flex items-center md:mb-8 md:px-2 flex-shrink-0 z-50">
           <Link href="/">
-            <h1 className="text-2xl md:text-3xl font-extrabold text-[#F5ECDC] cursor-pointer hover:opacity-80 transition-opacity">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-[#F5ECDC] cursor-pointer hover:opacity-80 transition-opacity tracking-tight">
               BOOKCASE<span className="text-[#F5ECDC]">.</span>
             </h1>
           </Link>
@@ -41,12 +80,12 @@ export default function Sidebar() {
 
         {/* User Profile Card - Hide on Mobile */}
         {user ? (
-          <div className="hidden md:block bg-[#2A272A] p-5 rounded-2xl mb-10 shadow-md border border-[#4D4845]/40 w-full">
-            <div className="w-12 h-12 bg-[#4D4845] rounded-full flex items-center justify-center mb-3 shadow-inner overflow-hidden border border-[#7B7369]/40">
+          <div className="hidden md:block bg-[#2A272A] p-4 rounded-2xl mb-6 shadow-md border border-[#4D4845]/40 w-full">
+            <div className="w-11 h-11 bg-[#4D4845] rounded-full flex items-center justify-center mb-2.5 shadow-inner overflow-hidden border border-[#7B7369]/40">
                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} alt="Avatar" className="w-full h-full object-cover" />
             </div>
-            <p className="text-xs text-[#D7C9B2] font-medium mb-0.5">Welcome Back</p>
-            <p className="text-lg font-bold text-[#F5ECDC] truncate">{user.username}</p>
+            <p className="text-[11px] text-[#D7C9B2] font-medium mb-0.5">Welcome Back</p>
+            <p className="text-base font-bold text-[#F5ECDC] truncate">{user.username}</p>
           </div>
         ) : (
           <div className="hidden md:block mb-10 w-full">
@@ -66,35 +105,18 @@ export default function Sidebar() {
         </button>
 
         {/* Navigation */}
-        <nav className={`absolute md:static top-16 left-0 w-full md:w-full bg-[#181618] md:bg-transparent border-b md:border-0 border-[#4D4845]/40 shadow-xl md:shadow-none transition-all duration-300 origin-top flex-1 md:flex justify-start ${isMobileMenuOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 md:scale-y-100 md:opacity-100'} overflow-hidden md:overflow-visible`}>
+        <nav className={`absolute md:static top-16 left-0 w-full md:w-full bg-[#181618] md:bg-transparent border-b md:border-0 border-[#4D4845]/40 shadow-xl md:shadow-none transition-all duration-300 origin-top flex-1 md:flex justify-start ${isMobileMenuOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 md:scale-y-100 md:opacity-100'} overflow-y-auto md:overflow-visible`}>
           <ul className="flex flex-col p-4 md:p-0 md:space-y-2 md:w-full w-full gap-2 md:gap-0">
-            {menuItems.map((item, index) => {
-              const isActive = item.href === '/admin' 
-                ? pathname === '/admin' 
-                : (item.href === pathname || (item.href !== '/' && item.href !== '#' && pathname.startsWith(item.href)));
-              return (
-                <li key={index} className="w-full">
-                  <Link 
-                    href={item.href} 
-                    className={`flex items-center justify-start gap-4 p-3 md:px-4 md:py-3 rounded-xl transition-all font-extrabold text-sm w-full ${
-                      isActive 
-                        ? 'bg-[#F5ECDC] text-black shadow-md' 
-                        : 'text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#2A272A]'
-                    }`}
-                    title={item.label}
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      if (item.href !== pathname && item.href !== '#') {
-                        setNavigatingTo(item.href);
-                      }
-                    }}
-                  >
-                    <span>{navigatingTo === item.href ? <Loader2 size={20} className="animate-spin" /> : item.icon}</span>
-                    <span>{item.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
+            {/* Main Menu Items */}
+            {mainMenuItems.map((item, idx) => renderLinkItem(item, idx))}
+
+            {/* Admin Items (separated by clean border) */}
+            {user?.role === 'admin' && (
+              <>
+                <li className="my-2 border-t border-[#4D4845]/40" />
+                {adminMenuItems.map((item, idx) => renderLinkItem(item, `admin-${idx}`))}
+              </>
+            )}
             
             {/* Mobile User Info & Logout/Login (inside menu) */}
             <li className="md:hidden mt-4 pt-4 border-t border-[#4D4845]/40 w-full">
@@ -127,7 +149,7 @@ export default function Sidebar() {
         {/* Logout - Desktop */}
         {user && (
           <div className="hidden md:flex mt-auto pt-6 border-t border-[#4D4845]/40 w-full">
-            <button onClick={logout} className="flex items-center gap-4 px-4 py-2 text-[#D7C9B2] hover:text-red-400 transition-colors font-medium text-sm w-full">
+            <button onClick={logout} className="flex items-center gap-4 px-4 py-2 text-[#D7C9B2] hover:text-red-400 transition-colors font-medium text-sm w-full cursor-pointer">
               <LogOut size={20} />
               <span>Logout</span>
             </button>
