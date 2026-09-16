@@ -19,6 +19,7 @@ interface CheckFileLinksModalProps {
   onOpenEditBook?: (bookId: string) => void;
   initialBrokenBooks?: UnlinkedBook[];
   initialBrokenCount?: number | null;
+  refreshKey?: number;
   onSuccess?: () => void;
 }
 
@@ -29,6 +30,7 @@ export default function CheckFileLinksModal({
   onOpenEditBook,
   initialBrokenBooks = [],
   initialBrokenCount = null,
+  refreshKey,
   onSuccess
 }: CheckFileLinksModalProps) {
   const [isScanning, setIsScanning] = useState(false);
@@ -92,6 +94,24 @@ export default function CheckFileLinksModal({
       setSelectedFiles([]);
       setStatusMsg(null);
     }
+  }, [isOpen, refreshKey]);
+
+  useEffect(() => {
+    if (initialBrokenBooks) {
+      setUnlinkedBooks(initialBrokenBooks);
+    }
+  }, [initialBrokenBooks]);
+
+  useEffect(() => {
+    const onBooksUpdated = () => {
+      if (isOpen) {
+        handleScan();
+      }
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('bookcase:books-updated', onBooksUpdated);
+      return () => window.removeEventListener('bookcase:books-updated', onBooksUpdated);
+    }
   }, [isOpen]);
 
   // Upload file trực tiếp cho riêng 1 cuốn sách bị lỗi
@@ -117,9 +137,13 @@ export default function CheckFileLinksModal({
       // Loại bỏ cuốn sách vừa sửa khỏi danh sách chưa có file
       setUnlinkedBooks(prev => prev.filter(b => b.id !== bookId));
       if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('cached_books');
+        try {
+          sessionStorage.removeItem('cached_books');
+        } catch (e) {}
+        window.dispatchEvent(new CustomEvent('bookcase:books-updated', { detail: { bookId } }));
       }
       if (onSuccess) onSuccess();
+      handleScan();
     } catch (err: any) {
       console.error('Lỗi khi nạp file cho sách:', err);
       setStatusMsg({
@@ -171,7 +195,10 @@ export default function CheckFileLinksModal({
       setStatusMsg({ type: 'success', text: res.data.message || `Đã khôi phục thành công ${res.data.repaired_count} file sách!` });
       setSelectedFiles([]);
       if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('cached_books');
+        try {
+          sessionStorage.removeItem('cached_books');
+        } catch (e) {}
+        window.dispatchEvent(new CustomEvent('bookcase:books-updated'));
       }
       handleScan();
       if (onSuccess) onSuccess();

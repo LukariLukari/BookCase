@@ -116,7 +116,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
       if (newBook && newBook.status === 'manual_download' && newBook.external_url) {
         window.open(newBook.external_url, '_blank');
         setError('File cần mở tải trực tiếp trên trình duyệt. Đã mở tab liên kết tải cho bạn. Sau khi tải về, bạn có thể tải file lên hệ thống.');
-      } else if (newBook && newBook.id) {
+      } else if (newBook && newBook.id && !targetBookId) {
         const downloadUrl = `${API_URL}/api/books/${newBook.id}/download`;
         window.location.href = downloadUrl;
       }
@@ -125,6 +125,12 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
         setImportingId(null);
         setImportProgress(0);
         if (!(newBook && newBook.status === 'manual_download')) {
+          if (typeof window !== 'undefined') {
+            try {
+              sessionStorage.removeItem('cached_books');
+            } catch (e) {}
+            window.dispatchEvent(new CustomEvent('bookcase:books-updated', { detail: { bookId: newBook.id } }));
+          }
           onImportSuccess();
           onClose();
         }

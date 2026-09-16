@@ -258,10 +258,13 @@ app.add_middleware(
 def serialize_book_lightweight(b: models.Book, existing_files_set: Optional[set] = None) -> dict:
     has_file = True
     if not (b.external_url and b.external_url.strip()):
-        if not b.drive_file_id or not str(b.drive_file_id).strip():
+        has_in_db = existing_files_set is not None and ((b.id in existing_files_set) or (bool(b.drive_file_id) and b.drive_file_id in existing_files_set))
+        if has_in_db:
+            has_file = True
+        elif not b.drive_file_id or not str(b.drive_file_id).strip():
             has_file = False
         elif b.drive_file_id.startswith("local_") and existing_files_set is not None:
-            has_file = (b.drive_file_id in existing_files_set) or (b.id in existing_files_set)
+            has_file = False
     return {
         "id": b.id,
         "title": b.title,

@@ -134,6 +134,12 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
     // Refresh library if at least one file succeeded
     const anySuccess = fileStatuses.some(f => f.status === 'success');
     if (anySuccess || allSuccess) {
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.removeItem('cached_books');
+        } catch (e) {}
+        window.dispatchEvent(new CustomEvent('bookcase:books-updated'));
+      }
       onUploadSuccess();
     }
     

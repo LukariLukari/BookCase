@@ -253,6 +253,20 @@ export default function AdminPage() {
   const [brokenBooksList, setBrokenBooksList] = useState<{ id: string; title: string; author?: string; reason?: string }[]>([]);
   const [isCheckingFiles, setIsCheckingFiles] = useState(false);
   const [isBrokenFilterActive, setIsBrokenFilterActive] = useState(false);
+  const [checkLinksRefreshKey, setCheckLinksRefreshKey] = useState(0);
+
+  const refreshAllBookData = async () => {
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.removeItem('cached_books');
+      } catch (e) {}
+    }
+    await Promise.allSettled([
+      fetchBooks(),
+      fetchBrokenFiles()
+    ]);
+    setCheckLinksRefreshKey(k => k + 1);
+  };
 
 
   const handleFixCovers = async () => {
@@ -399,6 +413,16 @@ export default function AdminPage() {
   useEffect(() => {
     fetchBooks();
     fetchBrokenFiles();
+
+    const handleBooksUpdated = () => {
+      fetchBooks();
+      fetchBrokenFiles();
+      setCheckLinksRefreshKey(k => k + 1);
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('bookcase:books-updated', handleBooksUpdated);
+      return () => window.removeEventListener('bookcase:books-updated', handleBooksUpdated);
+    }
   }, []);
 
   const sensors = useSensors(
@@ -451,7 +475,7 @@ export default function AdminPage() {
         headers: getHeaders()
       });
       setSelectedBooks(prev => prev.filter(bookId => bookId !== id));
-      fetchBooks();
+      refreshAllBookData();
     } catch (err: any) {
       if (err.response?.status === 401) {
         logout();
@@ -470,7 +494,7 @@ export default function AdminPage() {
         data: { book_ids: selectedBooks }
       });
       setSelectedBooks([]);
-      fetchBooks();
+      refreshAllBookData();
     } catch (err: any) {
       if (err.response?.status === 401) {
         logout();
@@ -512,7 +536,7 @@ export default function AdminPage() {
         headers: getHeaders()
       });
       setIsEditModalOpen(false);
-      fetchBooks();
+      refreshAllBookData();
     } catch (err: any) {
       if (err.response?.status === 401) {
         logout();
@@ -578,7 +602,7 @@ export default function AdminPage() {
     setIsUploading(false);
     setIsAddModalOpen(false);
     setUploadItems([]);
-    fetchBooks();
+    refreshAllBookData();
     if (uploadedCount > 0) {
        setSuccessMsg(`Đã tải lên thành công ${uploadedCount} sách!`);
        setTimeout(() => setSuccessMsg(null), 3000);
@@ -599,7 +623,7 @@ export default function AdminPage() {
        setIsUploading(false);
        setIsAddModalOpen(false);
        setLinkForm({ title: '', author: '', genre: '', cover_url: '', external_url: '' });
-       fetchBooks();
+       refreshAllBookData();
        setSuccessMsg("Đã thêm sách thành công!");
        setTimeout(() => setSuccessMsg(null), 3000);
     } catch(err: any) {
@@ -716,9 +740,9 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans">
+    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60">
       <Sidebar />
-      <div className="flex-1 min-w-0 md:ml-20 pt-16 md:pt-0 flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen">
         {/* Top Header */}
         <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/95 backdrop-blur-md px-4 py-3.5 md:px-6 md:py-4 border-b border-[#4D4845]/40 flex flex-col gap-3">
           {/* Dòng 1: Tiêu đề Dashboard & Các nút công cụ + Thêm sách */}
@@ -1245,6 +1269,7 @@ export default function AdminPage() {
         onClose={() => setIsCheckLinksOpen(false)}
         initialBrokenBooks={brokenBooksList}
         initialBrokenCount={brokenFileCount}
+        refreshKey={checkLinksRefreshKey}
         onOpenSearchOnline={(q, targetId) => {
           setSearchOnlineQuery(q);
           setSearchOnlineTargetBookId(targetId || null);
@@ -1257,8 +1282,7 @@ export default function AdminPage() {
           }
         }}
         onSuccess={() => {
-          fetchBooks();
-          fetchBrokenFiles();
+          refreshAllBookData();
         }}
       />
 
@@ -1271,8 +1295,7 @@ export default function AdminPage() {
           setSearchOnlineQuery('');
         }}
         onImportSuccess={() => {
-          fetchBooks();
-          fetchBrokenFiles();
+          refreshAllBookData();
         }}
         initialQuery={searchOnlineQuery}
         targetBookId={searchOnlineTargetBookId}
