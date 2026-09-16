@@ -207,8 +207,8 @@ export default function CheckFileLinksModal({
           {/* Header */}
           <div className="p-6 md:p-8 pb-4 border-b border-[#4D4845]/40 flex justify-between items-start">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-[#D97706]/20 border border-[#D97706]/40 rounded-2xl text-[#F59E0B] flex-shrink-0 mt-0.5">
-                <Link2 size={24} className="stroke-[2.5]" />
+              <div className="p-3 bg-[#2A272A] border border-[#4D4845] rounded-2xl text-[#F5ECDC] flex-shrink-0 mt-0.5">
+                <Link2 size={22} className="stroke-[2.5] text-[#F5ECDC]" />
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -216,7 +216,7 @@ export default function CheckFileLinksModal({
                     Kiểm Tra & Khắc Phục File Sách
                   </h2>
                   {unlinkedBooks.length > 0 && (
-                    <span className="px-2 py-0.5 bg-red-500/20 border border-red-500/40 text-red-400 text-xs font-black rounded-full">
+                    <span className="px-2.5 py-0.5 bg-[#363236] border border-[#4D4845] text-[#F5ECDC] text-xs font-black rounded-full">
                       {unlinkedBooks.length} cuốn chưa thể tải
                     </span>
                   )}
@@ -229,7 +229,7 @@ export default function CheckFileLinksModal({
 
             <button
               onClick={onClose}
-              className="p-2.5 bg-[#2A272A] hover:bg-[#3A373A] text-[#D7C9B2] hover:text-[#F5ECDC] rounded-full transition-colors cursor-pointer border border-[#4D4845]/40 flex-shrink-0"
+              className="p-2.5 bg-[#2A272A] hover:bg-[#363236] text-[#D7C9B2] hover:text-[#F5ECDC] rounded-full transition-colors cursor-pointer border border-[#4D4845]/40 flex-shrink-0"
             >
               <X size={18} />
             </button>
@@ -238,12 +238,8 @@ export default function CheckFileLinksModal({
           {/* Modal Body */}
           <div className="p-6 md:p-8 flex-1 overflow-y-auto space-y-6">
             {statusMsg && (
-              <div className={`p-4 rounded-2xl text-sm font-bold border flex items-center gap-3 ${
-                statusMsg.type === 'success' 
-                  ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-400' 
-                  : 'bg-red-950/60 border-red-500/40 text-red-400'
-              }`}>
-                {statusMsg.type === 'success' ? <Check size={18} className="flex-shrink-0" /> : <AlertTriangle size={18} className="flex-shrink-0" />}
+              <div className="p-4 rounded-2xl text-sm font-bold border border-[#4D4845] bg-[#2A272A] text-[#F5ECDC] flex items-center gap-3">
+                {statusMsg.type === 'success' ? <Check size={18} className="text-[#F5ECDC] flex-shrink-0" /> : <AlertTriangle size={18} className="text-[#D7C9B2] flex-shrink-0" />}
                 <span>{statusMsg.text}</span>
               </div>
             )}
@@ -251,15 +247,15 @@ export default function CheckFileLinksModal({
             {/* SCAN RESULTS BANNER */}
             {isScanning ? (
               <div className="p-6 bg-[#2A272A] border border-[#4D4845]/40 rounded-2xl flex flex-col items-center justify-center gap-3">
-                <Loader2 size={28} className="animate-spin text-[#F59E0B]" />
+                <Loader2 size={26} className="animate-spin text-[#D7C9B2]" />
                 <span className="text-sm font-bold text-[#D7C9B2]">Đang kiểm tra dữ liệu file tải về trên máy chủ & PostgreSQL...</span>
               </div>
             ) : unlinkedBooks.length === 0 ? (
-              /* GREEN SAFE BANNER */
-              <div className="p-5 bg-emerald-950/50 border border-emerald-500/40 rounded-2xl flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 text-emerald-400 font-bold text-sm leading-snug">
-                  <div className="p-1.5 bg-emerald-500/20 rounded-full flex-shrink-0">
-                    <Check size={18} className="text-emerald-400 stroke-[3]" />
+              /* SAFE BANNER */
+              <div className="p-5 bg-[#262326] border border-[#4D4845] rounded-2xl flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 text-[#F5ECDC] font-bold text-sm leading-snug">
+                  <div className="p-1.5 bg-[#363236] border border-[#4D4845] rounded-full flex-shrink-0">
+                    <Check size={16} className="text-[#F5ECDC] stroke-[3]" />
                   </div>
                   <span>
                     Toàn bộ {totalBooks || 'tất cả'} cuốn sách đều đã có file dữ liệu EPUB/PDF đầy đủ và sẵn sàng tải về trực tiếp từ web.
@@ -267,17 +263,17 @@ export default function CheckFileLinksModal({
                 </div>
                 <button
                   onClick={handleScan}
-                  className="px-4 py-2 bg-[#2A272A] hover:bg-[#3A373A] text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5"
+                  className="px-4 py-2 bg-[#2A272A] hover:bg-[#363236] text-[#F5ECDC] border border-[#4D4845] rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5"
                 >
                   <RefreshCw size={14} /> Quét lại
                 </button>
               </div>
             ) : (
-              /* YELLOW/RED UNLINKED BANNER & UNLINKED LIST */
-              <div className="p-5 bg-amber-950/40 border border-amber-500/40 rounded-2xl space-y-4">
+              /* UNLINKED BANNER & UNLINKED LIST */
+              <div className="p-5 bg-[#262326] border border-[#4D4845] rounded-2xl space-y-4">
                 <div className="flex items-center justify-between gap-4 flex-wrap">
-                  <div className="flex items-center gap-2.5 text-amber-300 font-extrabold text-sm md:text-base">
-                    <AlertTriangle size={20} className="text-amber-400 flex-shrink-0" />
+                  <div className="flex items-center gap-2.5 text-[#F5ECDC] font-black text-sm md:text-base">
+                    <AlertTriangle size={18} className="text-[#D7C9B2] flex-shrink-0" />
                     <span>Có {unlinkedBooks.length} cuốn sách chưa thể tải về trực tiếp từ web:</span>
                   </div>
 
@@ -285,7 +281,7 @@ export default function CheckFileLinksModal({
                     <button
                       onClick={handleScan}
                       disabled={isScanning}
-                      className="px-3.5 py-1.5 bg-[#2A272A] hover:bg-[#3A373A] text-amber-200 border border-amber-500/40 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5"
+                      className="px-3.5 py-1.5 bg-[#2A272A] hover:bg-[#363236] text-[#F5ECDC] border border-[#4D4845] rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5"
                     >
                       <RefreshCw size={14} className={isScanning ? "animate-spin" : ""} /> Quét lại
                     </button>
@@ -303,7 +299,7 @@ export default function CheckFileLinksModal({
                     return (
                       <div
                         key={book.id}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-[#1F1D20]/95 hover:bg-[#1F1D20] rounded-xl border border-amber-500/30 transition-colors"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-[#1F1D20] hover:bg-[#221F22] rounded-xl border border-[#4D4845] transition-colors"
                       >
                         {/* Book Info */}
                         <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -328,10 +324,10 @@ export default function CheckFileLinksModal({
                               {book.author ? `${book.author}` : 'Tác giả: Chưa rõ'}
                             </div>
                             <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                              <span className="px-2 py-0.5 bg-red-500/20 text-red-300 rounded text-[10px] font-bold border border-red-500/30">
+                              <span className="px-2 py-0.5 bg-[#363236] text-[#D7C9B2] rounded text-[10px] font-bold border border-[#4D4845]">
                                 Chưa thể tải
                               </span>
-                              <span className="text-[11px] text-amber-400/90 font-medium">
+                              <span className="text-[11px] text-[#8A817C] font-medium">
                                 {book.reason || 'File chưa có trên server hoặc database'}
                               </span>
                             </div>
@@ -344,28 +340,28 @@ export default function CheckFileLinksModal({
                           {onOpenSearchOnline && (
                             <button
                               onClick={() => onOpenSearchOnline(book.title, book.id)}
-                              className="px-2.5 py-1.5 bg-[#D97706] hover:bg-[#B45309] text-white font-bold rounded-lg text-xs transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 shadow-sm active:scale-95"
-                              style={{ color: '#FFFFFF' }}
-                              title={`Tìm online từ LibGen/Z-Library để bù file cho cuốn '${book.title}'`}
+                              style={{ backgroundColor: '#F5ECDC', color: '#181618' }}
+                              className="px-3 py-1.5 rounded-lg text-xs font-black transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
+                              title={`Tìm online để bù file cho cuốn '${book.title}'`}
                             >
-                              <Search size={12} className="text-white" />
-                              <span>Tìm online</span>
+                              <Search size={12} style={{ color: '#181618', stroke: '#181618' }} />
+                              <span style={{ color: '#181618' }}>Tìm online</span>
                             </button>
                           )}
 
                           {/* Button 2: Tải File Lên Trực Tiếp Cho Cuốn Này */}
                           <label
-                            className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1 cursor-pointer border ${
+                            className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer border ${
                               isUploadingThis
-                                ? 'bg-[#2A272A] text-amber-400 border-amber-500/40 cursor-wait'
-                                : 'bg-[#2A272A] hover:bg-[#3A373A] text-[#F5ECDC] border-[#4D4845] hover:border-[#D7C9B2]'
+                                ? 'bg-[#363236] text-[#F5ECDC] border-[#4D4845] cursor-wait'
+                                : 'bg-[#2A272A] hover:bg-[#363236] text-[#D7C9B2] hover:text-[#F5ECDC] border border-[#4D4845] hover:border-[#D7C9B2]'
                             }`}
                             title={`Tải file .epub hoặc .pdf từ máy tính để gắn thẳng vào cuốn '${book.title}'`}
                           >
                             {isUploadingThis ? (
                               <>
-                                <Loader2 size={12} className="animate-spin text-amber-400" />
-                                <span>Đang lưu...</span>
+                                <Loader2 size={12} className="animate-spin text-[#F5ECDC]" />
+                                <span className="text-[#F5ECDC]">Đang lưu...</span>
                               </>
                             ) : (
                               <>
@@ -391,7 +387,7 @@ export default function CheckFileLinksModal({
                           {onOpenEditBook && (
                             <button
                               onClick={() => onOpenEditBook(book.id)}
-                              className="p-1.5 bg-[#2A272A] hover:bg-[#3A373A] text-[#D7C9B2] hover:text-[#F5ECDC] rounded-lg text-xs transition-all border border-[#4D4845] cursor-pointer"
+                              className="p-1.5 bg-[#2A272A] hover:bg-[#363236] text-[#D7C9B2] hover:text-[#F5ECDC] rounded-lg text-xs transition-all border border-[#4D4845] hover:border-[#D7C9B2] cursor-pointer"
                               title="Chỉnh sửa thông tin sách hoặc dán link Google Drive/ngoài"
                             >
                               <Edit3 size={14} />
@@ -403,8 +399,8 @@ export default function CheckFileLinksModal({
                   })}
                 </div>
 
-                <div className="p-3 bg-amber-500/10 rounded-xl text-xs text-amber-200/90 leading-relaxed border border-amber-500/20">
-                  💡 <strong>Cách khắc phục:</strong> Bấm <strong>"Tìm online"</strong> để tải file từ Z-Library/LibGen, hoặc bấm <strong>"Tải file"</strong> để chọn file từ máy tính cho từng cuốn. Hoặc bạn có thể kéo thả hàng loạt nhiều file vào ô bên dưới để hệ thống tự động đối chiếu theo tên.
+                <div className="p-3.5 bg-[#2A272A] rounded-xl text-xs text-[#D7C9B2] leading-relaxed border border-[#4D4845]">
+                  <strong className="text-[#F5ECDC]">Hướng dẫn:</strong> Bấm <strong className="text-[#F5ECDC]">"Tìm online"</strong> để tìm và gắn file trực tuyến, hoặc bấm <strong className="text-[#F5ECDC]">"Tải file"</strong> để chọn file từ máy tính cho từng cuốn. Bạn cũng có thể kéo thả hàng loạt file vào ô bên dưới để hệ thống tự động đối chiếu theo tên.
                 </div>
               </div>
             )}
@@ -414,7 +410,7 @@ export default function CheckFileLinksModal({
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-[#4D4845] hover:border-[#D97706] bg-[#2A272A]/50 hover:bg-[#2A272A] rounded-2xl p-6 md:p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group"
+              className="border-2 border-dashed border-[#4D4845] hover:border-[#D7C9B2] bg-[#2A272A]/50 hover:bg-[#2A272A] rounded-2xl p-6 md:p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group"
             >
               <input
                 type="file"
@@ -424,14 +420,14 @@ export default function CheckFileLinksModal({
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              <div className="p-3 bg-[#1F1D20] rounded-full text-[#D97706] border border-[#4D4845]/60 group-hover:scale-110 transition-transform">
-                <Link2 size={28} />
+              <div className="p-3 bg-[#1F1D20] rounded-full text-[#D7C9B2] border border-[#4D4845] group-hover:border-[#D7C9B2] group-hover:text-[#F5ECDC] transition-all">
+                <Link2 size={24} />
               </div>
               <p className="text-sm font-black text-[#F5ECDC] mt-1">
                 Kéo thả file sách (.epub, .pdf) vào đây để khôi phục hàng loạt
               </p>
-              <p className="text-xs text-[#D7C9B2]">
-                Hệ thống sẽ tự động ghép nối theo tên sách và lưu vĩnh viễn vào Database PostgreSQL
+              <p className="text-xs text-[#8A817C]">
+                Hệ thống sẽ tự động ghép nối theo tên sách và lưu vĩnh viễn vào Database
               </p>
             </div>
 
@@ -442,7 +438,7 @@ export default function CheckFileLinksModal({
                   <span>File đã chọn để khôi phục ({selectedFiles.length})</span>
                   <button
                     onClick={() => setSelectedFiles([])}
-                    className="text-red-400 hover:text-red-300 cursor-pointer"
+                    className="text-[#D7C9B2] hover:text-[#F5ECDC] cursor-pointer"
                   >
                     Xóa tất cả
                   </button>
@@ -454,7 +450,7 @@ export default function CheckFileLinksModal({
                       className="flex items-center justify-between p-2.5 bg-[#2A272A] rounded-xl border border-[#4D4845]/40 text-xs font-medium"
                     >
                       <div className="flex items-center gap-2 truncate pr-2">
-                        <FileText size={14} className="text-[#D97706] shrink-0" />
+                        <FileText size={14} className="text-[#D7C9B2] shrink-0" />
                         <span className="truncate text-[#F5ECDC]">{file.name}</span>
                       </div>
                       <button
@@ -462,7 +458,7 @@ export default function CheckFileLinksModal({
                           e.stopPropagation();
                           setSelectedFiles(prev => prev.filter((_, i) => i !== idx));
                         }}
-                        className="text-[#D7C9B2] hover:text-red-400 p-1 cursor-pointer"
+                        className="text-[#D7C9B2] hover:text-[#F5ECDC] p-1 cursor-pointer"
                       >
                         <X size={14} />
                       </button>
@@ -478,20 +474,24 @@ export default function CheckFileLinksModal({
             <button
               onClick={handleRepairSubmit}
               disabled={isRepairing || selectedFiles.length === 0}
-              className={`w-full py-3.5 md:py-4 rounded-2xl font-black text-sm md:text-base flex items-center justify-center gap-2 transition-all shadow-xl cursor-pointer ${
+              style={
                 selectedFiles.length > 0 && !isRepairing
-                  ? 'bg-[#F5ECDC] hover:bg-white text-[#1F1D20] active:scale-[0.99]'
-                  : 'bg-[#2A272A] text-[#7B7369] border border-[#4D4845]/40 cursor-not-allowed opacity-70'
+                  ? { backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }
+                  : { backgroundColor: '#2A272A', color: '#7B7369', borderColor: '#4D4845' }
+              }
+              className={`w-full py-3.5 md:py-4 rounded-2xl font-black text-sm md:text-base flex items-center justify-center gap-2 transition-all shadow-xl cursor-pointer border ${
+                selectedFiles.length > 0 && !isRepairing
+                  ? 'hover:bg-[#E8DCC8] active:scale-[0.99]'
+                  : 'cursor-not-allowed opacity-60'
               }`}
-              style={selectedFiles.length > 0 && !isRepairing ? { color: '#1F1D20' } : {}}
             >
               {isRepairing ? (
                 <>
-                  <Loader2 size={18} className="animate-spin text-[#1F1D20]" />
-                  <span className="text-[#1F1D20] font-black">Đang gắn file và lưu vào PostgreSQL Database...</span>
+                  <Loader2 size={18} className="animate-spin" style={{ color: '#181618', stroke: '#181618' }} />
+                  <span style={{ color: '#181618' }} className="font-black">Đang gắn file và lưu vào Database...</span>
                 </>
               ) : (
-                <span className={selectedFiles.length > 0 ? "text-[#1F1D20] font-black" : "text-[#7B7369]"}>
+                <span style={{ color: selectedFiles.length > 0 ? '#181618' : '#7B7369' }} className="font-black">
                   Khôi Phục & Gắn File Vào Database ({selectedFiles.length} file đã chọn)
                 </span>
               )}

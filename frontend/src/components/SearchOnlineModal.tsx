@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Download, Loader2, BookOpen, Globe, Library, Sparkles } from 'lucide-react';
+import { Search, X, Download, Loader2, BookOpen, Pencil, PenTool, Layers } from 'lucide-react';
 import axios from 'axios';
 
 interface ExternalSearchItem {
@@ -23,7 +23,7 @@ interface SearchOnlineModalProps {
 
 export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, initialQuery, targetBookId }: SearchOnlineModalProps) {
   const [query, setQuery] = useState('');
-  const [selectedSource, setSelectedSource] = useState<'all' | 'cloudily' | 'zlib' | 'openlibrary'>('all');
+  const [selectedSource, setSelectedSource] = useState<'all' | 'zlib' | 'cloudily'>('all');
   const [results, setResults] = useState<ExternalSearchItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [importingId, setImportingId] = useState<string | null>(null);
@@ -44,11 +44,11 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
       const res = await axios.get(url);
       setResults(res.data || []);
       if (!res.data || res.data.length === 0) {
-        setError('Không tìm thấy sách nào từ nguồn này. Hãy thử chọn nguồn khác như "Tất cả" hoặc "Open Library".');
+        setError('Không tìm thấy sách nào từ nguồn này. Hãy thử đổi từ khóa hoặc chọn máy chủ khác.');
       }
     } catch (err: any) {
       if (err.response && err.response.status === 504) {
-        setError(err.response.data.detail || 'Không thể kết nối đến máy chủ tìm kiếm sách (Có thể bị chặn).');
+        setError(err.response.data.detail || 'Không thể kết nối đến máy chủ tìm kiếm sách.');
       } else {
         setError(err.response?.data?.detail || 'Đã xảy ra lỗi khi tìm kiếm. Vui lòng thử lại với từ khóa khác.');
       }
@@ -62,7 +62,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
     handleSearchWithQuery(query, selectedSource);
   };
 
-  const handleSourceChange = (src: 'all' | 'cloudily' | 'zlib' | 'openlibrary') => {
+  const handleSourceChange = (src: 'all' | 'zlib' | 'cloudily') => {
     setSelectedSource(src);
     if (query.trim()) {
       handleSearchWithQuery(query, src);
@@ -132,7 +132,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
     } catch (err: any) {
       clearInterval(interval);
       if (err.response?.status === 401) {
-        setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng xuất ở menu bên trái và đăng nhập lại.');
+        setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
       } else {
         setError(err.response?.data?.detail || 'Lỗi khi tải sách về máy chủ.');
       }
@@ -149,15 +149,12 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
 
   const getSourceBadge = (id: string, title: string) => {
     if (id.startsWith('cloudily|')) {
-      return { label: 'Cloudily (Tiếng Việt)', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' };
+      return { label: 'Server bút mực', icon: PenTool };
     }
     if (id.startsWith('/book_') || id.startsWith('zlib|')) {
-      return { label: 'Z-Library Bot', color: 'bg-sky-500/20 text-sky-300 border-sky-500/40' };
+      return { label: 'Server bút chì', icon: Pencil };
     }
-    if (id.startsWith('openlibrary|') || id.startsWith('ia|') || title.includes('[Open Library]')) {
-      return { label: 'Open Library (Toàn cầu)', color: 'bg-purple-500/20 text-purple-300 border-purple-500/40' };
-    }
-    return { label: 'Online Bot', color: 'bg-amber-500/20 text-amber-300 border-amber-500/40' };
+    return { label: 'Server sách', icon: BookOpen };
   };
 
   if (!isOpen) return null;
@@ -177,26 +174,27 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
           initial={{ opacity: 0, y: 50, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 50, scale: 0.95 }}
-          className="relative bg-[#1F1D20] rounded-3xl max-w-2xl w-full border border-[#4D4845]/50 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
+          className="relative bg-[#1F1D20] rounded-3xl max-w-2xl w-full border border-[#4D4845]/60 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
         >
           {/* Header */}
           <div className="p-6 border-b border-[#4D4845]/50 flex justify-between items-center bg-[#2A272A]">
             <div>
               <h2 className="text-xl font-bold text-[#F5ECDC] flex items-center gap-2">
-                <BookOpen className="text-[#F5ECDC]" size={22} />
+                <BookOpen className="text-[#F5ECDC]" size={20} />
                 Tìm & Tải Sách Online
               </h2>
               {targetBookId && (
-                <p className="text-xs text-amber-300 font-semibold mt-1">
-                  🎯 Đang tìm kiếm file để gắn bù vào cuốn sách bị mất liên kết
+                <p className="text-xs text-[#D7C9B2] font-semibold mt-1">
+                  Đang tìm kiếm file để gắn bù vào cuốn sách bị mất liên kết
                 </p>
               )}
             </div>
             <button 
               onClick={handleModalClose}
-              className="p-2 bg-[#1F1D20] hover:bg-[#F5ECDC] hover:text-black text-[#F5ECDC] rounded-full transition-colors cursor-pointer"
+              style={{ backgroundColor: '#1F1D20', color: '#D7C9B2' }}
+              className="p-2 rounded-full transition-colors cursor-pointer border border-[#4D4845]/50 hover:bg-[#F5ECDC] hover:text-[#181618]"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
 
@@ -208,73 +206,64 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Nhập tên sách, tác giả..."
-                className="flex-1 bg-[#2A272A] border border-[#4D4845] rounded-xl px-4 py-3 text-[#F5ECDC] focus:outline-none focus:border-[#F5ECDC]"
+                className="flex-1 bg-[#2A272A] border border-[#4D4845] rounded-xl px-4 py-3 text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none focus:border-[#D7C9B2]"
                 autoFocus
               />
               <button 
                 type="submit"
                 disabled={isSearching || !query.trim()}
-                className="font-black px-6 py-3 rounded-xl disabled:bg-[#3A373A] border disabled:border-[#4D4845]/50 flex items-center gap-2 transition-all shadow-md cursor-pointer disabled:cursor-not-allowed"
+                className="font-black px-6 py-3 rounded-xl border flex items-center gap-2 transition-all shadow-md cursor-pointer disabled:cursor-not-allowed"
                 style={{ 
-                  backgroundColor: isSearching || !query.trim() ? '#3A373A' : '#F5ECDC',
-                  color: isSearching || !query.trim() ? '#8A817C' : '#000000' 
+                  backgroundColor: isSearching || !query.trim() ? '#2A272A' : '#F5ECDC',
+                  color: isSearching || !query.trim() ? '#7B7369' : '#181618',
+                  borderColor: isSearching || !query.trim() ? '#4D4845' : '#F5ECDC'
                 }}
               >
-                {isSearching ? <Loader2 size={20} className="animate-spin" style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }} /> : <Search size={20} style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }} />}
-                <span className="hidden sm:inline font-black" style={{ color: isSearching || !query.trim() ? '#8A817C' : '#000000' }}>Tìm kiếm</span>
+                {isSearching ? (
+                  <Loader2 size={18} className="animate-spin" style={{ color: isSearching || !query.trim() ? '#7B7369' : '#181618' }} />
+                ) : (
+                  <Search size={18} style={{ color: isSearching || !query.trim() ? '#7B7369' : '#181618', stroke: isSearching || !query.trim() ? '#7B7369' : '#181618' }} />
+                )}
+                <span className="hidden sm:inline font-black" style={{ color: isSearching || !query.trim() ? '#7B7369' : '#181618' }}>Tìm kiếm</span>
               </button>
             </form>
 
             {/* Source Switcher */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
               <button
                 type="button"
                 onClick={() => handleSourceChange('all')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 border ${
-                  selectedSource === 'all'
-                    ? 'bg-[#F5ECDC] text-black border-[#F5ECDC]'
-                    : 'bg-[#2A272A] text-[#D7C9B2] border-[#4D4845]/60 hover:border-[#D7C9B2]'
-                }`}
+                style={selectedSource === 'all' 
+                  ? { backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' } 
+                  : { backgroundColor: '#2A272A', color: '#D7C9B2', borderColor: '#4D4845' }}
+                className="px-3.5 py-1.5 rounded-xl font-black transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border shadow-sm"
               >
-                <Sparkles size={13} />
-                <span>Tất cả nguồn</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSourceChange('cloudily')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 border ${
-                  selectedSource === 'cloudily'
-                    ? 'bg-emerald-500 text-white border-emerald-500'
-                    : 'bg-[#2A272A] text-[#D7C9B2] border-[#4D4845]/60 hover:border-[#D7C9B2]'
-                }`}
-              >
-                <span>Cloudily (Sách TV)</span>
+                <Layers size={13} style={{ color: selectedSource === 'all' ? '#181618' : '#D7C9B2', stroke: selectedSource === 'all' ? '#181618' : '#D7C9B2' }} />
+                <span style={{ color: selectedSource === 'all' ? '#181618' : '#D7C9B2' }} className="font-bold">Tất cả nguồn</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleSourceChange('zlib')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 border ${
-                  selectedSource === 'zlib'
-                    ? 'bg-sky-500 text-white border-sky-500'
-                    : 'bg-[#2A272A] text-[#D7C9B2] border-[#4D4845]/60 hover:border-[#D7C9B2]'
-                }`}
+                style={selectedSource === 'zlib' 
+                  ? { backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' } 
+                  : { backgroundColor: '#2A272A', color: '#D7C9B2', borderColor: '#4D4845' }}
+                className="px-3.5 py-1.5 rounded-xl font-black transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border shadow-sm"
               >
-                <span>Z-Library</span>
+                <Pencil size={13} style={{ color: selectedSource === 'zlib' ? '#181618' : '#D7C9B2', stroke: selectedSource === 'zlib' ? '#181618' : '#D7C9B2' }} />
+                <span style={{ color: selectedSource === 'zlib' ? '#181618' : '#D7C9B2' }} className="font-bold">Server bút chì</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleSourceChange('openlibrary')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 border ${
-                  selectedSource === 'openlibrary'
-                    ? 'bg-purple-500 text-white border-purple-500'
-                    : 'bg-[#2A272A] text-[#D7C9B2] border-[#4D4845]/60 hover:border-[#D7C9B2]'
-                }`}
+                onClick={() => handleSourceChange('cloudily')}
+                style={selectedSource === 'cloudily' 
+                  ? { backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' } 
+                  : { backgroundColor: '#2A272A', color: '#D7C9B2', borderColor: '#4D4845' }}
+                className="px-3.5 py-1.5 rounded-xl font-black transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border shadow-sm"
               >
-                <Library size={13} />
-                <span>Open Library (Toàn cầu)</span>
+                <PenTool size={13} style={{ color: selectedSource === 'cloudily' ? '#181618' : '#D7C9B2', stroke: selectedSource === 'cloudily' ? '#181618' : '#D7C9B2' }} />
+                <span style={{ color: selectedSource === 'cloudily' ? '#181618' : '#D7C9B2' }} className="font-bold">Server bút mực</span>
               </button>
             </div>
           </div>
@@ -282,13 +271,13 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
           {/* Results Area */}
           <div className="flex-1 overflow-y-auto p-6 pt-2">
             {error && (
-              <div className="bg-amber-500/10 border border-amber-500/30 text-amber-300 p-3.5 rounded-xl mb-3 text-xs md:text-sm text-center leading-relaxed">
+              <div className="bg-[#2A272A] border border-[#4D4845] text-[#D7C9B2] p-3.5 rounded-xl mb-3 text-xs md:text-sm text-center leading-relaxed">
                 {error}
               </div>
             )}
 
             {!isSearching && results.length === 0 && !error && query && (
-              <div className="text-center text-[#D7C9B2] py-10 opacity-60">
+              <div className="text-center text-[#7B7369] py-10 font-medium">
                 Nhập từ khóa và bấm tìm kiếm
               </div>
             )}
@@ -296,22 +285,24 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
             <div className="space-y-3">
               {results.map((item, idx) => {
                 const badge = getSourceBadge(item.id, item.title);
+                const BadgeIcon = badge.icon;
                 const displayTitle = item.title.replace(/^\[.*?\]\s*/, '');
 
                 return (
-                  <div key={`${item.id}-${idx}`} className="bg-[#2A272A] border border-[#4D4845]/50 rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between hover:border-[#F5ECDC]/60 transition-colors">
+                  <div key={`${item.id}-${idx}`} className="bg-[#2A272A] border border-[#4D4845]/50 rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between hover:border-[#D7C9B2] transition-colors">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className={`border text-[10px] font-extrabold px-2.5 py-0.5 rounded-md flex items-center gap-1.5 ${badge.color}`}>
-                          {badge.label}
+                        <span className="border border-[#4D4845] bg-[#1F1D20] text-[#D7C9B2] text-[10px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1.5">
+                          <BadgeIcon size={11} className="text-[#D7C9B2]" />
+                          <span>{badge.label}</span>
                         </span>
                       </div>
                       <h3 className="text-[#F5ECDC] font-bold line-clamp-2">{displayTitle}</h3>
                       <p className="text-[#D7C9B2] text-sm mt-1">{item.author || 'Không rõ tác giả'}</p>
                       <div className="flex gap-2 mt-2 text-xs text-[#8A817C] font-semibold">
-                        {item.extension && <span className="bg-[#1F1D20] px-2 py-1 rounded-md uppercase text-[#F5ECDC]">{item.extension}</span>}
-                        {item.size && <span className="bg-[#1F1D20] px-2 py-1 rounded-md text-[#F5ECDC]">{item.size}</span>}
-                        {item.language && <span className="bg-[#1F1D20] px-2 py-1 rounded-md text-[#F5ECDC]">{item.language}</span>}
+                        {item.extension && <span className="bg-[#1F1D20] border border-[#4D4845]/40 px-2 py-0.5 rounded-md uppercase text-[#D7C9B2]">{item.extension}</span>}
+                        {item.size && <span className="bg-[#1F1D20] border border-[#4D4845]/40 px-2 py-0.5 rounded-md text-[#D7C9B2]">{item.size}</span>}
+                        {item.language && <span className="bg-[#1F1D20] border border-[#4D4845]/40 px-2 py-0.5 rounded-md text-[#D7C9B2]">{item.language}</span>}
                       </div>
                     </div>
                     
@@ -324,12 +315,12 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                           </span>
                           <span className="text-[#F5ECDC] font-extrabold">{Math.round(importProgress)}%</span>
                         </div>
-                        <div className="w-full bg-[#1F1D20] rounded-full h-3 shadow-inner overflow-hidden relative">
+                        <div className="w-full bg-[#1F1D20] rounded-full h-3 border border-[#4D4845]/50 overflow-hidden relative">
                           <motion.div 
                             className="bg-gradient-to-r from-[#D7C9B2] via-[#E6D9C5] to-[#F5ECDC] h-full rounded-full transition-all duration-300 relative overflow-hidden"
                             style={{ width: `${importProgress}%` }}
                           >
-                            <div className="absolute inset-0 bg-white/30 animate-pulse" />
+                            <div className="absolute inset-0 bg-white/20 animate-pulse" />
                           </motion.div>
                         </div>
                       </div>
@@ -337,14 +328,15 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                       <button
                         onClick={() => handleImport(item)}
                         disabled={importingId !== null}
-                        className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-black flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer border border-[#4D4845]/50"
+                        className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer border"
                         style={{ 
-                          backgroundColor: importingId !== null ? '#3A373A' : '#F5ECDC',
-                          color: importingId !== null ? '#8A817C' : '#000000' 
+                          backgroundColor: importingId !== null ? '#2A272A' : '#F5ECDC',
+                          color: importingId !== null ? '#7B7369' : '#181618',
+                          borderColor: importingId !== null ? '#4D4845' : '#F5ECDC'
                         }}
                       >
-                        <Download size={16} className="stroke-[2.5]" style={{ color: importingId !== null ? '#8A817C' : '#000000' }} />
-                        <span className="font-black" style={{ color: importingId !== null ? '#8A817C' : '#000000' }}>
+                        <Download size={15} style={{ color: importingId !== null ? '#7B7369' : '#181618', stroke: importingId !== null ? '#7B7369' : '#181618' }} />
+                        <span className="font-black" style={{ color: importingId !== null ? '#7B7369' : '#181618' }}>
                           {targetBookId ? 'Tải & Gắn Bù Vào Sách' : 'Tải về máy & Thêm vào web'}
                         </span>
                       </button>
@@ -360,3 +352,4 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
     </AnimatePresence>
   );
 }
+

@@ -735,17 +735,17 @@ export default function AdminPage() {
                 style={{ 
                   backgroundColor: '#2A272A', 
                   color: '#F5ECDC', 
-                  borderColor: brokenFileCount && brokenFileCount > 0 ? '#F59E0B' : '#4D4845' 
+                  borderColor: '#4D4845' 
                 }}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer shadow-sm"
                 title="Kiểm tra các cuốn sách chưa có file hoặc bị mất liên kết tải về"
               >
-                <Link2 size={15} style={{ color: brokenFileCount && brokenFileCount > 0 ? '#F59E0B' : '#D7C9B2' }} />
+                <Link2 size={15} style={{ color: '#D7C9B2' }} />
                 <span>Kiểm tra file</span>
                 {brokenFileCount !== null && brokenFileCount > 0 && (
                   <span 
-                    style={{ backgroundColor: '#D97706', color: '#FFFFFF' }}
-                    className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none"
+                    style={{ backgroundColor: '#363236', color: '#F5ECDC', borderColor: '#4D4845' }}
+                    className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none border"
                   >
                     {brokenFileCount}
                   </span>
@@ -764,21 +764,22 @@ export default function AdminPage() {
                     }
                   }}
                   style={{
-                    backgroundColor: isBrokenFilterActive ? '#D97706' : '#2A272A',
-                    color: isBrokenFilterActive ? '#FFFFFF' : '#F5ECDC',
-                    borderColor: isBrokenFilterActive ? '#D97706' : '#F59E0B',
+                    backgroundColor: isBrokenFilterActive ? '#F5ECDC' : '#2A272A',
+                    color: isBrokenFilterActive ? '#181618' : '#F5ECDC',
+                    borderColor: isBrokenFilterActive ? '#F5ECDC' : '#4D4845',
                   }}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border shadow-sm"
                   title="Chỉ hiển thị các cuốn sách chưa thể tải về trên bảng quản trị"
                 >
-                  <AlertTriangle size={15} style={{ color: isBrokenFilterActive ? '#FFFFFF' : '#F59E0B' }} />
-                  <span>Sách lỗi file</span>
+                  <AlertTriangle size={15} style={{ color: isBrokenFilterActive ? '#181618' : '#D7C9B2', stroke: isBrokenFilterActive ? '#181618' : '#D7C9B2' }} />
+                  <span style={{ color: isBrokenFilterActive ? '#181618' : '#F5ECDC' }}>Sách lỗi file</span>
                   <span
                     style={{
-                      backgroundColor: isBrokenFilterActive ? '#1F1D20' : '#D97706',
-                      color: '#FFFFFF',
+                      backgroundColor: isBrokenFilterActive ? '#181618' : '#363236',
+                      color: isBrokenFilterActive ? '#F5ECDC' : '#D7C9B2',
+                      borderColor: isBrokenFilterActive ? '#181618' : '#4D4845'
                     }}
-                    className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none"
+                    className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none border"
                   >
                     {brokenFileCount}
                   </span>
