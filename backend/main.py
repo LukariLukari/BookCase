@@ -255,7 +255,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def serialize_book_lightweight(b: models.Book) -> dict:
+def serialize_book_lightweight(b: models.Book, existing_files_set: Optional[set] = None) -> dict:
+    has_file = True
+    if not (b.external_url and b.external_url.strip()):
+        if not b.drive_file_id or not str(b.drive_file_id).strip():
+            has_file = False
+        elif b.drive_file_id.startswith("local_") and existing_files_set is not None:
+            has_file = (b.drive_file_id in existing_files_set) or (b.id in existing_files_set)
     return {
         "id": b.id,
         "title": b.title,
@@ -268,6 +274,7 @@ def serialize_book_lightweight(b: models.Book) -> dict:
         "mime_type": b.mime_type,
         "file_size": b.file_size,
         "progress": b.progress,
+        "has_file": has_file,
         "created_at": b.created_at,
         "updated_at": b.updated_at,
     }
@@ -297,14 +304,22 @@ def get_books(
         query = query.order_by(models.Book.display_order.asc(), models.Book.created_at.desc())
         
     books = query.offset(skip).limit(limit).all()
-    return [serialize_book_lightweight(b) for b in books]
+    existing_file_keys = set(k[0] for k in db.query(models.BookFile.file_key).all() if k[0])
+    existing_book_file_ids = set(k[0] for k in db.query(models.BookFile.book_id).all() if k[0])
+    all_existing_files = existing_file_keys.union(existing_book_file_ids)
+    return [serialize_book_lightweight(b, all_existing_files) for b in books]
 
 @app.get("/api/books/{book_id}", response_model=schemas.BookResponse)
 def get_book(book_id: str, db: Session = Depends(get_db)):
     book = db.query(models.Book).options(defer(models.Book.cover_url)).filter(models.Book.id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
-    return serialize_book_lightweight(book)
+    existing_file_keys = set(k[0] for k in db.query(models.BookFile.file_key).filter(models.BookFile.book_id == book_id).all() if k[0])
+    has_bf = bool(existing_file_keys) or bool(db.query(models.BookFile.id).filter(models.BookFile.book_id == book_id).first())
+    has_file = bool(book.external_url and book.external_url.strip()) or has_bf or (book.drive_file_id and not book.drive_file_id.startswith("local_"))
+    res = serialize_book_lightweight(book)
+    res["has_file"] = has_file
+    return res
 
 @app.post("/api/books/upload", response_model=schemas.BookResponse)
 async def upload_book(
@@ -394,6 +409,33 @@ def normalize_match_str(s: str) -> str:
     s = re.sub(r'[^a-zA-Z0-9]+', ' ', s).lower().strip()
     return s
 
+def is_book_downloadable(b: models.Book, existing_file_keys: set, existing_book_file_ids: set, upload_dir: Optional[str] = None) -> tuple[bool, Optional[str]]:
+    # 1. Có external link (Google Drive hoặc link ngoài hợp lệ)
+    if b.external_url and str(b.external_url).strip():
+        return True, None
+
+    # 2. Không có file key
+    if not b.drive_file_id or not str(b.drive_file_id).strip():
+        return False, "Chưa có file hoặc liên kết tải"
+
+    # 3. Cloudflare R2
+    if b.drive_file_id.startswith("r2_"):
+        return True, None
+
+    # 4. Google Drive (không phải local_)
+    if not b.drive_file_id.startswith("local_") and getattr(drive_service, 'use_gdrive', False):
+        return True, None
+
+    # 5. Local mode: Kiểm tra xem file có trong BookFile table (PostgreSQL) hoặc trên đĩa cục bộ không
+    has_db_file = (b.drive_file_id in existing_file_keys) or (b.id in existing_book_file_ids)
+    file_path = os.path.join(upload_dir, b.drive_file_id) if upload_dir else ""
+    has_disk_file = os.path.exists(file_path) if file_path else False
+
+    if has_db_file or has_disk_file:
+        return True, None
+
+    return False, "Chưa có file dữ liệu EPUB/PDF để tải về"
+
 @app.get("/api/admin/books/check-files")
 def check_book_files(
     db: Session = Depends(get_db),
@@ -408,32 +450,14 @@ def check_book_files(
     # Lấy danh sách file_keys và book_ids đã lưu trong bảng BookFile
     existing_file_keys = set(k[0] for k in db.query(models.BookFile.file_key).all() if k[0])
     existing_book_file_ids = set(k[0] for k in db.query(models.BookFile.book_id).all() if k[0])
-    
-    upload_dir = drive_service.upload_dir
+    upload_dir = getattr(drive_service, 'upload_dir', None)
     
     for b in books:
-        # Nếu có link ngoài (external_url) hợp lệ thì coi như đã liên kết
-        if b.external_url and b.external_url.strip():
-            continue
-            
-        # Không có drive_file_id
-        if not b.drive_file_id:
-            broken_books.append({
-                "id": b.id,
-                "title": b.title,
-                "author": b.author,
-                "reason": "Chưa có file hoặc liên kết"
-            })
-            continue
-            
-        # Nếu là local file
-        if b.drive_file_id.startswith("local_"):
+        # TỰ ĐỘNG ĐẨY LÊN DATABASE: Nếu file có trên đĩa cục bộ nhưng chưa có trong Database
+        if b.drive_file_id and b.drive_file_id.startswith("local_") and upload_dir:
             has_db_file = (b.drive_file_id in existing_file_keys) or (b.id in existing_book_file_ids)
-            file_path = os.path.join(upload_dir, b.drive_file_id) if upload_dir else ""
-            has_disk_file = os.path.exists(file_path) if file_path else False
-
-            # TỰ ĐỘNG ĐẨY LÊN DATABASE: Nếu file có trên đĩa cục bộ nhưng chưa có trong Database
-            if has_disk_file and not has_db_file:
+            file_path = os.path.join(upload_dir, b.drive_file_id)
+            if os.path.exists(file_path) and not has_db_file:
                 try:
                     with open(file_path, "rb") as f:
                         f_bytes = f.read()
@@ -447,23 +471,19 @@ def check_book_files(
                     )
                     db.add(bf)
                     db.commit()
-                    has_db_file = True
                     existing_file_keys.add(b.drive_file_id)
                     existing_book_file_ids.add(b.id)
-                    print(f"[Auto-Migrate] Đã tự động đẩy file '{b.title}' từ đĩa cục bộ vào Database ({len(f_bytes)} bytes)")
-                except Exception as sync_err:
+                except Exception:
                     db.rollback()
-                    print(f"[Auto-Migrate Error] Lỗi đẩy file '{b.title}' vào Database: {sync_err}")
 
-            # TIÊU CHUẨN DUY NHẤT: Bắt buộc file phải có trong Database PostgreSQL!
-            # Không được xem file chỉ có ở đĩa tạm local là an toàn, vì khi đổi thiết bị (iPhone/PC) hoặc Render restart sẽ mất.
-            if not has_db_file:
-                broken_books.append({
-                    "id": b.id,
-                    "title": b.title,
-                    "author": b.author,
-                    "reason": "Chưa được lưu vào Database PostgreSQL (chỉ có ở local hoặc mất liên kết)"
-                })
+        is_avail, reason = is_book_downloadable(b, existing_file_keys, existing_book_file_ids, upload_dir)
+        if not is_avail:
+            broken_books.append({
+                "id": b.id,
+                "title": b.title,
+                "author": b.author,
+                "reason": reason or "Chưa có file dữ liệu EPUB/PDF để tải về"
+            })
                 
     return {
         "total_books": len(books),
@@ -1606,26 +1626,47 @@ def check_file_links(db: Session = Depends(get_db), current_user: models.User = 
     all_books = db.query(models.Book).all()
     total_books = len(all_books)
     unlinked_items = []
-    healthy_count = 0
+    
+    existing_file_keys = set(k[0] for k in db.query(models.BookFile.file_key).all() if k[0])
+    existing_book_file_ids = set(k[0] for k in db.query(models.BookFile.book_id).all() if k[0])
+    upload_dir = getattr(drive_service, 'upload_dir', None)
     
     for book in all_books:
-        has_file = False
-        if book.drive_file_id and str(book.drive_file_id).strip():
-            has_file = True
-        elif book.external_url and str(book.external_url).strip():
-            has_file = True
-            
-        if has_file:
-            healthy_count += 1
-        else:
+        # Tự động đẩy file từ đĩa lên DB nếu có trên đĩa nhưng chưa lưu vào BookFile
+        if book.drive_file_id and book.drive_file_id.startswith("local_") and upload_dir:
+            has_db_file = (book.drive_file_id in existing_file_keys) or (book.id in existing_book_file_ids)
+            file_path = os.path.join(upload_dir, book.drive_file_id)
+            if os.path.exists(file_path) and not has_db_file:
+                try:
+                    with open(file_path, "rb") as f:
+                        f_bytes = f.read()
+                    bf = models.BookFile(
+                        file_key=book.drive_file_id,
+                        book_id=book.id,
+                        filename=f"{book.title}.epub" if "epub" in (book.mime_type or "") else f"{book.title}.pdf",
+                        mime_type=book.mime_type or "application/octet-stream",
+                        file_data=f_bytes,
+                        file_size=len(f_bytes)
+                    )
+                    db.add(bf)
+                    db.commit()
+                    existing_file_keys.add(book.drive_file_id)
+                    existing_book_file_ids.add(book.id)
+                except Exception:
+                    db.rollback()
+
+        is_avail, reason = is_book_downloadable(book, existing_file_keys, existing_book_file_ids, upload_dir)
+        if not is_avail:
             cover = f"/api/books/cover/{book.id}" if book.cover_url else None
             unlinked_items.append(schemas.UnlinkedBookItem(
                 id=book.id,
                 title=book.title,
                 author=book.author,
-                cover_url=cover
+                cover_url=cover,
+                reason=reason or "Chưa có file dữ liệu EPUB/PDF để tải về"
             ))
             
+    healthy_count = total_books - len(unlinked_items)
     return schemas.FileCheckResponse(
         total_books=total_books,
         healthy_count=healthy_count,
@@ -1644,35 +1685,104 @@ async def repair_file_links(
     matched_books = []
     
     all_books = db.query(models.Book).all()
-    unlinked_books = [b for b in all_books if (not b.drive_file_id or not str(b.drive_file_id).strip()) and (not b.external_url or not str(b.external_url).strip())]
+    existing_file_keys = set(k[0] for k in db.query(models.BookFile.file_key).all() if k[0])
+    existing_book_file_ids = set(k[0] for k in db.query(models.BookFile.book_id).all() if k[0])
+    upload_dir = getattr(drive_service, 'upload_dir', None)
+
+    # Lấy danh sách các cuốn sách chưa có file dữ liệu để tải
+    unlinked_books = []
+    for b in all_books:
+        is_avail, _ = is_book_downloadable(b, existing_file_keys, existing_book_file_ids, upload_dir)
+        if not is_avail:
+            unlinked_books.append(b)
+            
     unlinked_map = {b.id: b for b in unlinked_books}
-    
+    already_matched_ids = set()
+
     for idx, file in enumerate(files):
         try:
             contents = await file.read()
+            if not contents or len(contents) < 50:
+                continue
+                
+            filename = file.filename or "book"
+            name_no_ext, ext = os.path.splitext(filename)
+            filename_clean = normalize_match_str(name_no_ext)
             mime_type = file.content_type or 'application/octet-stream'
-            if '.pdf' in file.filename.lower(): mime_type = 'application/pdf'
-            elif '.epub' in file.filename.lower(): mime_type = 'application/epub+zip'
+            
+            is_pdf = filename.lower().endswith('.pdf') or contents.startswith(b'%PDF')
+            if is_pdf:
+                mime_type = 'application/pdf'
+                extracted = extract_pdf_info(contents)
+            else:
+                mime_type = 'application/epub+zip'
+                extracted = extract_epub_info(contents)
+                
+            meta_title = extracted.get('title') or ""
+            meta_author = extracted.get('author') or ""
+            meta_cover = extracted.get('cover_b64')
+            meta_summary = extracted.get('summary') or ""
+            
+            meta_title_clean = normalize_match_str(meta_title)
+            meta_author_clean = normalize_match_str(meta_author)
             
             target_book = None
             if book_ids and idx < len(book_ids) and book_ids[idx] in unlinked_map:
                 target_book = unlinked_map[book_ids[idx]]
             else:
-                # Auto-match filename with book title
-                raw_fname = file.filename.rsplit('.', 1)[0].lower().strip()
+                # Đối soát thông minh với các cuốn sách đang thiếu file
+                best_book = None
+                best_score = 0
                 for b in unlinked_books:
-                    clean_title = b.title.lower().strip()
-                    if clean_title in raw_fname or raw_fname in clean_title:
-                        target_book = b
-                        break
-            
+                    if b.id in already_matched_ids:
+                        continue
+                    b_title_clean = normalize_match_str(b.title)
+                    b_author_clean = normalize_match_str(b.author or '')
+                    b_drive_clean = normalize_match_str(b.drive_file_id or '')
+                    
+                    score = 0
+                    if b_drive_clean and (filename_clean in b_drive_clean or b_drive_clean in filename_clean):
+                        score = max(score, 100)
+                    if meta_title_clean and b_title_clean == meta_title_clean:
+                        score = max(score, 95)
+                    if filename_clean and b_title_clean == filename_clean:
+                        score = max(score, 90)
+                    if b_title_clean and (b_title_clean in filename_clean or filename_clean in b_title_clean):
+                        score = max(score, 85)
+                    
+                    combined_file = f"{filename_clean} {meta_title_clean} {meta_author_clean}"
+                    combined_book = f"{b_title_clean} {b_author_clean}"
+                    f_toks = set(combined_file.split())
+                    b_toks = set(combined_book.split())
+                    if f_toks and b_toks:
+                        overlap = len(f_toks.intersection(b_toks))
+                        ratio = overlap / max(len(b_toks), 1)
+                        if ratio >= 0.5:
+                            score = max(score, int(60 + 35 * ratio))
+                            
+                    if score > best_score:
+                        best_score = score
+                        best_book = b
+                        
+                if best_book and best_score >= 50:
+                    target_book = best_book
+
             if target_book:
+                already_matched_ids.add(target_book.id)
                 file_stream = io.BytesIO(contents)
-                drive_file_id = drive_service.upload_file(file_stream, file.filename, mime_type)
+                # Lưu vĩnh viễn vào BookFile PostgreSQL
+                drive_file_id = drive_service.upload_file(file_stream, filename, mime_type, db=db, book_id=target_book.id)
                 
                 target_book.drive_file_id = drive_file_id
                 target_book.mime_type = mime_type
                 target_book.file_size = len(contents)
+                if meta_cover and (not target_book.cover_url or len(target_book.cover_url) < 100):
+                    target_book.cover_url = meta_cover
+                if meta_author and meta_author != "Unknown Author" and (not target_book.author or target_book.author == "Unknown Author"):
+                    target_book.author = meta_author
+                if meta_summary and not target_book.summary:
+                    target_book.summary = meta_summary
+                    
                 db.commit()
                 repaired_count += 1
                 matched_books.append(target_book.title)

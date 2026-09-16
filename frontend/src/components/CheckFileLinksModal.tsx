@@ -9,6 +9,7 @@ interface UnlinkedBook {
   title: string;
   author?: string;
   cover_url?: string;
+  reason?: string;
 }
 
 interface CheckFileLinksModalProps {
@@ -190,7 +191,7 @@ export default function CheckFileLinksModal({
                     <Check size={18} className="text-emerald-400 stroke-[3]" />
                   </div>
                   <span>
-                    Toàn bộ {totalBooks} cuốn sách đều đã được liên kết file đầy đủ và an toàn trong Database.
+                    Toàn bộ {totalBooks} cuốn sách đều đã được gắn file dữ liệu EPUB/PDF đầy đủ và sẵn sàng tải trên web.
                   </span>
                 </div>
                 <button
@@ -230,21 +231,28 @@ export default function CheckFileLinksModal({
                 </div>
 
                 {/* List of Unlinked Books */}
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-1 no-scrollbar">
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                   {unlinkedBooks.map(book => (
                     <div
                       key={book.id}
-                      className="flex items-center justify-between gap-3 p-3 bg-[#1F1D20]/80 rounded-xl border border-amber-500/20"
+                      className="flex items-center justify-between gap-3 p-3 bg-[#1F1D20]/90 hover:bg-[#1F1D20] rounded-xl border border-amber-500/25 transition-colors"
                     >
-                      <span className="text-xs md:text-sm font-bold text-[#F5ECDC] truncate">
-                        • {book.title}
-                      </span>
+                      <div className="truncate flex-1 min-w-0">
+                        <div className="text-xs md:text-sm font-bold text-[#F5ECDC] truncate">
+                          • {book.title}
+                        </div>
+                        <div className="text-[11px] text-[#D7C9B2]/80 truncate mt-0.5 flex items-center gap-1.5">
+                          {book.author && <span>{book.author} —</span>}
+                          <span className="text-amber-400/90 font-medium">{book.reason || 'Chưa có file dữ liệu EPUB/PDF để tải'}</span>
+                        </div>
+                      </div>
 
                       {onOpenSearchOnline && (
                         <button
                           onClick={() => onOpenSearchOnline(book.title, book.id)}
-                          className="px-3 py-1.5 bg-[#D97706] hover:bg-[#B45309] text-white font-bold rounded-lg text-xs transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 shrink-0 shadow-sm"
+                          className="px-3 py-1.5 bg-[#D97706] hover:bg-[#B45309] text-white font-bold rounded-lg text-xs transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 shrink-0 shadow-sm active:scale-95"
                           style={{ color: '#FFFFFF' }}
+                          title={`Tìm và tải bù file online cho: ${book.title}`}
                         >
                           <Search size={12} className="text-white" />
                           <span>Tìm online</span>

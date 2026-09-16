@@ -12,6 +12,7 @@ export interface Book {
   genre: string;
   summary: string;
   cover_url: string;
+  has_file?: boolean;
   created_at?: string;
 }
 

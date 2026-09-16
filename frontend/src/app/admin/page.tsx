@@ -112,6 +112,10 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
                  <span className="flex items-center gap-1 text-orange-400 font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-500/30" title={book.external_url}>
                    <LinkIcon size={12} /> Drive
                  </span>
+               ) : book.has_file === false ? (
+                 <span className="flex items-center gap-1 text-amber-400 font-bold bg-[#1F1D20]/95 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-amber-500/50" title="Chưa có dữ liệu EPUB/PDF để tải">
+                   <AlertTriangle size={12} className="text-amber-400" /> Chưa có file
+                 </span>
                ) : (
                  <span className="flex items-center gap-1 text-[#D7C9B2] font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-[#4D4845]/40">
                    <Upload size={12} /> Local
@@ -122,6 +126,7 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
              <div className="absolute bottom-2 right-2 flex items-center gap-1.5 z-20">
                  <button 
                    onClick={() => {
+                     if (book.has_file === false) return;
                      setDownloadingId(book.id);
                      const a = document.createElement('a');
                      a.href = `${baseUrl}/api/books/${book.id}/download`;
@@ -131,9 +136,13 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
                      a.remove();
                      setTimeout(() => setDownloadingId(null), 1500);
                    }} 
-                   disabled={downloadingId === book.id}
-                   className="p-1.5 md:p-2 bg-[#F97316] text-white hover:bg-[#EA580C] rounded-full shadow-lg border border-[#F97316] transition-all hover:scale-110 cursor-pointer disabled:opacity-50" 
-                   title="Tải sách xuống"
+                   disabled={downloadingId === book.id || book.has_file === false}
+                   className={`p-1.5 md:p-2 rounded-full shadow-lg border transition-all hover:scale-110 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                     book.has_file === false
+                       ? 'bg-[#2A272A] text-gray-500 border-[#4D4845]'
+                       : 'bg-[#F97316] text-white hover:bg-[#EA580C] border-[#F97316]'
+                   }`} 
+                   title={book.has_file === false ? "Chưa có file dữ liệu EPUB/PDF để tải về" : "Tải sách xuống"}
                  >
                    {downloadingId === book.id ? <Loader2 size={14} className="animate-spin text-white" /> : <Download size={14} className="text-white" />}
                  </button>
@@ -185,6 +194,7 @@ interface Book {
   summary: string;
   cover_url: string;
   external_url: string;
+  has_file?: boolean;
   created_at: string;
 }
 

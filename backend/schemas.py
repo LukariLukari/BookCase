@@ -13,6 +13,7 @@ class BookBase(BaseModel):
     mime_type: Optional[str] = None
     file_size: Optional[int] = None
     progress: Optional[int] = 0
+    has_file: Optional[bool] = True
 
 class BookUpdate(BaseModel):
     title: Optional[str] = None
@@ -202,6 +203,7 @@ class UnlinkedBookItem(BaseModel):
     title: str
     author: Optional[str] = None
     cover_url: Optional[str] = None
+    reason: Optional[str] = None
 
 class FileCheckResponse(BaseModel):
     total_books: int

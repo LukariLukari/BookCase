@@ -15,6 +15,7 @@ interface Book {
   genre: string;
   summary: string;
   cover_url: string;
+  has_file?: boolean;
   created_at?: string;
 }
 
@@ -128,16 +129,21 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
             <button 
               onClick={(e) => {
                 e.stopPropagation();
+                if (book.has_file === false) return;
                 handleDownload(book.id, book.title);
               }}
-              disabled={downloadingId === book.id}
-              className="p-1.5 md:p-2 text-black bg-[#F5ECDC] hover:bg-white rounded-full border border-[#F5ECDC] transition-all flex-shrink-0 cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
-              title="Tải Sách Xuống"
+              disabled={downloadingId === book.id || book.has_file === false}
+              className={`p-1.5 md:p-2 rounded-full border transition-all flex-shrink-0 cursor-pointer shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
+                book.has_file === false
+                  ? 'bg-[#2A272A] text-gray-400 border-[#4D4845]'
+                  : 'text-black bg-[#F5ECDC] hover:bg-white border-[#F5ECDC]'
+              }`}
+              title={book.has_file === false ? "Sách đang được cập nhật file dữ liệu" : "Tải Sách Xuống"}
             >
               {downloadingId === book.id ? (
                 <Loader2 size={16} className="animate-spin text-black" />
               ) : (
-                <Download size={16} className="text-black stroke-[2.5]" />
+                <Download size={16} className={book.has_file === false ? "text-gray-400" : "text-black stroke-[2.5]"} />
               )}
             </button>
 
@@ -321,12 +327,18 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
 
                   <div className="mt-8 pt-4 border-t border-[#4D4845]/40 flex flex-col sm:flex-row gap-3">
                     <button 
-                      onClick={() => handleDownload(selectedBook.id, selectedBook.title)}
-                      disabled={downloadingId === selectedBook.id}
-                      className="btn-primary flex-1 shadow-md disabled:opacity-70 flex justify-center items-center gap-2"
+                      onClick={() => {
+                        if (selectedBook.has_file === false) return;
+                        handleDownload(selectedBook.id, selectedBook.title);
+                      }}
+                      disabled={downloadingId === selectedBook.id || selectedBook.has_file === false}
+                      className={`btn-primary flex-1 shadow-md flex justify-center items-center gap-2 ${
+                        selectedBook.has_file === false ? '!bg-[#2A272A] !text-gray-400 !border-[#4D4845] cursor-not-allowed opacity-60' : ''
+                      }`}
+                      title={selectedBook.has_file === false ? "Sách đang được cập nhật file dữ liệu" : "Tải Sách Xuống"}
                     >
                       {downloadingId === selectedBook.id ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                      <span>{downloadingId === selectedBook.id ? 'Đang tải...' : 'Tải Sách Xuống'}</span>
+                      <span>{downloadingId === selectedBook.id ? 'Đang tải...' : selectedBook.has_file === false ? 'Chưa Có File Tải' : 'Tải Sách Xuống'}</span>
                     </button>
 
                     <button 
