@@ -5,18 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
-<<<<<<< HEAD
-import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, Link2 } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, Link2, Copy, Unlink2, AlertTriangle } from 'lucide-react';
 
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
 import BookCoverImage from '@/components/BookCoverImage';
 import CheckFileLinksModal from '@/components/CheckFileLinksModal';
-=======
-import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, Copy, Unlink2, AlertTriangle } from 'lucide-react';
-
-import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
-import BookCoverImage from '@/components/BookCoverImage';
->>>>>>> 04ef1a449922d653bf835c2fa62e0e114f3e0d74
 import SearchOnlineModal from '@/components/SearchOnlineModal';
 
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
@@ -229,6 +222,7 @@ export default function AdminPage() {
   const [isCheckLinksOpen, setIsCheckLinksOpen] = useState(false);
   const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
   const [searchOnlineQuery, setSearchOnlineQuery] = useState('');
+  const [searchOnlineTargetBookId, setSearchOnlineTargetBookId] = useState<string | null>(null);
   
   // Edit State
   const [editingBook, setEditingBook] = useState<Book | null>(null);
@@ -244,27 +238,10 @@ export default function AdminPage() {
   // Add State (Direct Link)
   const [linkForm, setLinkForm] = useState({ title: '', author: '', genre: '', cover_url: '', external_url: '' });
 
-  // File Health / Broken Links Check & Sync State
-  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
-  const [syncFiles, setSyncFiles] = useState<File[]>([]);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncProgress, setSyncProgress] = useState<string | null>(null);
+  // File Health / Broken Links Check State
   const [brokenFileCount, setBrokenFileCount] = useState<number | null>(null);
   const [brokenBooksList, setBrokenBooksList] = useState<{ id: string; title: string; author?: string; reason?: string }[]>([]);
   const [isCheckingFiles, setIsCheckingFiles] = useState(false);
-  const [syncResult, setSyncResult] = useState<{
-    success: boolean;
-    total_files: number;
-    matched_count: number;
-    created_count: number;
-    matched_books: any[];
-    created_books: any[];
-  } | null>(null);
-
-  // Online Search Modal State
-  const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
-  const [searchOnlineQuery, setSearchOnlineQuery] = useState('');
-  const [searchOnlineTargetBookId, setSearchOnlineTargetBookId] = useState<string | null>(null);
 
 
   const handleFixCovers = async () => {
@@ -625,75 +602,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleSyncFilesSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setSyncFiles(prev => [...prev, ...files]);
-      setSyncResult(null);
-    }
-  };
 
-  const handleSyncDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (e.dataTransfer.files) {
-      const files = Array.from(e.dataTransfer.files).filter(f => 
-        f.name.toLowerCase().endsWith('.epub') || f.name.toLowerCase().endsWith('.pdf')
-      );
-      setSyncFiles(prev => [...prev, ...files]);
-      setSyncResult(null);
-    }
-  };
-
-  const handleSyncFilesSubmit = async () => {
-    if (syncFiles.length === 0) return;
-    setIsSyncing(true);
-    setSyncResult(null);
-    setSyncProgress('Đang chuẩn bị dữ liệu gửi lên máy chủ...');
-
-    const BATCH_SIZE = 5;
-    let totalMatched = 0;
-    let totalCreated = 0;
-    const allMatched: any[] = [];
-    const allCreated: any[] = [];
-
-    for (let i = 0; i < syncFiles.length; i += BATCH_SIZE) {
-      const chunk = syncFiles.slice(i, i + BATCH_SIZE);
-      setSyncProgress(`Đang nạp file ${i + 1} - ${Math.min(i + BATCH_SIZE, syncFiles.length)} / ${syncFiles.length}...`);
-
-      const formData = new FormData();
-      chunk.forEach(f => formData.append('files', f));
-
-      try {
-        const res = await axios.post(`${API_URL}/api/admin/books/sync-files`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            ...getHeaders()
-          }
-        });
-        if (res.data.success) {
-          totalMatched += res.data.matched_count;
-          totalCreated += res.data.created_count;
-          if (res.data.matched_books) allMatched.push(...res.data.matched_books);
-          if (res.data.created_books) allCreated.push(...res.data.created_books);
-        }
-      } catch (err: any) {
-        console.error('Lỗi khi gửi chunk sync file:', err);
-      }
-    }
-
-    setIsSyncing(false);
-    setSyncProgress(null);
-    setSyncResult({
-      success: true,
-      total_files: syncFiles.length,
-      matched_count: totalMatched,
-      created_count: totalCreated,
-      matched_books: allMatched,
-      created_books: allCreated
-    });
-    fetchBooks();
-    fetchBrokenFiles();
-  };
 
   const copyShareLink = (id: string) => {
     const url = `${window.location.origin}/share/book/${id}`;
@@ -802,11 +711,7 @@ export default function AdminPage() {
               {/* Nút Kiểm tra file bị lỗi / mất liên kết */}
               <button 
                 onClick={() => {
-                  setIsSyncModalOpen(true);
-                  setSyncFiles([]);
-                  setSyncResult(null);
-                  setSyncProgress(null);
-                  fetchBrokenFiles();
+                  setIsCheckLinksOpen(true);
                 }}
                 style={{ 
                   backgroundColor: '#2A272A', 
@@ -816,7 +721,7 @@ export default function AdminPage() {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer shadow-sm"
                 title="Kiểm tra các cuốn sách chưa có file hoặc bị mất liên kết tải về"
               >
-                <Unlink2 size={15} style={{ color: brokenFileCount && brokenFileCount > 0 ? '#F59E0B' : '#D7C9B2' }} />
+                <Link2 size={15} style={{ color: brokenFileCount && brokenFileCount > 0 ? '#F59E0B' : '#D7C9B2' }} />
                 <span>Kiểm tra file</span>
                 {brokenFileCount !== null && brokenFileCount > 0 && (
                   <span 
@@ -947,57 +852,7 @@ export default function AdminPage() {
                 </button>
               )}
             </div>
-<<<<<<< HEAD
-            {selectedBooks.length > 0 && (
-              <button 
-                onClick={handleBulkDelete}
-                className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 !bg-red-600 !text-white hover:!bg-red-700 border-none shadow-md shadow-red-950/40"
-              >
-                <Trash2 size={16} className="inline mr-1 text-white" />
-                <span className="hidden sm:inline">Xóa {selectedBooks.length} mục</span>
-              </button>
-            )}
-            <button 
-              onClick={() => setIsCheckLinksOpen(true)}
-              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#D97706]/60 text-[#F59E0B] hover:bg-[#D97706]/20 bg-[#2A272A]"
-            >
-              <Link2 size={16} className="inline mr-1 text-[#F59E0B]" /> 
-              <span className="hidden sm:inline">Kiểm Tra File Sách</span>
-            </button>
-            <button 
-              onClick={handleFixCovers}
-              disabled={isFixing}
-              className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#F97316] hover:text-[#F97316] bg-[#2A272A]"
-            >
-              {isFixing ? <Loader2 size={16} className="animate-spin inline mr-1 text-[#F97316]" /> : <Settings size={16} className="inline mr-1 text-[#F97316]" />} 
-              <span className="hidden sm:inline">{isFixing ? 'Đang sửa...' : 'Sửa bìa lỗi'}</span>
-            </button>
-            {isSortMode ? (
-              <button 
-                onClick={handleSaveOrder}
-                disabled={isSavingOrder}
-                className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-6 md:!px-5 text-sm whitespace-nowrap mr-2 bg-[#F5ECDC] hover:bg-[#D7C9B2] border-none text-[#1F1D20] shadow-md font-bold"
-              >
-                {isSavingOrder ? <Loader2 size={16} className="animate-spin inline mr-1" /> : <Save size={16} className="inline mr-1" />}
-                <span className="hidden sm:inline">Lưu thứ tự</span>
-              </button>
-            ) : (
-              <button 
-                onClick={() => { setIsSortMode(true); setSearchQuery(''); }}
-                className="btn-outline !rounded-full !py-3.5 md:!py-2.5 !px-4 md:!px-5 text-sm whitespace-nowrap mr-2 border-[#4D4845] text-[#F5ECDC] hover:border-[#D7C9B2] hover:text-[#D7C9B2] bg-[#2A272A]"
-              >
-                <GripVertical size={16} className="inline mr-1 text-[#D7C9B2]" /> 
-                <span className="hidden sm:inline">Sắp xếp</span>
-              </button>
-            )}
-            <button 
-              onClick={() => setIsAddModalOpen(true)}
-              className="btn-primary !rounded-full !py-3.5 md:!py-2.5 !px-6 md:!px-5 text-sm whitespace-nowrap"
-            >
-              <Plus size={16} /> <span className="hidden sm:inline">Add Books</span>
-            </button>
-=======
->>>>>>> 04ef1a449922d653bf835c2fa62e0e114f3e0d74
+
           </div>
         </header>
 
@@ -1329,249 +1184,21 @@ export default function AdminPage() {
            </div>
         </div>
       )}
-<<<<<<< HEAD
+
       {/* Check File Links Modal */}
       <CheckFileLinksModal
         isOpen={isCheckLinksOpen}
         onClose={() => setIsCheckLinksOpen(false)}
-        onOpenSearchOnline={(q) => {
+        onOpenSearchOnline={(q, targetId) => {
           setSearchOnlineQuery(q);
+          setSearchOnlineTargetBookId(targetId || null);
           setIsSearchOnlineOpen(true);
         }}
-        onSuccess={fetchBooks}
+        onSuccess={() => {
+          fetchBooks();
+          fetchBrokenFiles();
+        }}
       />
-
-      {/* Search Online Modal */}
-      <SearchOnlineModal 
-        isOpen={isSearchOnlineOpen}
-        onClose={() => setIsSearchOnlineOpen(false)}
-        onImportSuccess={fetchBooks}
-=======
-
-      {/* Sync / Restore 67 Files Modal */}
-      {isSyncModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
-          <div className="bg-[#242124] border border-[#4D4845]/70 rounded-3xl w-full max-w-2xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] flex flex-col text-[#F5ECDC]">
-            <button 
-              onClick={() => {
-                if (!isSyncing) {
-                  setIsSyncModalOpen(false);
-                  setSyncFiles([]);
-                  setSyncResult(null);
-                  setSyncProgress(null);
-                }
-              }} 
-              className="absolute top-6 right-6 p-2 bg-[#2E2B2E] border border-[#4D4845]/50 rounded-full text-[#D7C9B2] hover:text-white cursor-pointer transition-all"
-            >
-              <X size={16} />
-            </button>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
-                <Unlink2 size={20} />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-[#F5ECDC]">Kiểm Tra & Khắc Phục Liên Kết File Sách</h3>
-                <p className="text-xs text-[#D7C9B2]">Rà soát toàn bộ sách xem cuốn nào chưa có file hoặc bị mất liên kết tải về</p>
-              </div>
-            </div>
-
-            {/* Thẻ Báo cáo Kiểm tra File Sách */}
-            <div className="mb-4">
-              {isCheckingFiles ? (
-                <div className="flex items-center gap-2 p-3.5 bg-[#2A272A] rounded-2xl border border-[#4D4845]/50 text-xs text-[#D7C9B2]">
-                  <Loader2 size={16} className="animate-spin text-amber-400" />
-                  <span>Đang rà soát trạng thái file của {books.length} cuốn sách...</span>
-                </div>
-              ) : brokenFileCount !== null && brokenFileCount > 0 ? (
-                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs text-amber-200">
-                  <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-amber-500/20">
-                    <div className="flex items-center gap-2 font-black text-amber-300">
-                      <AlertTriangle size={16} className="text-amber-400 shrink-0" />
-                      <span>Phát hiện {brokenFileCount} cuốn sách chưa có file / mất liên kết:</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => {
-                          setSearchOnlineQuery('');
-                          setSearchOnlineTargetBookId(null);
-                          setIsSearchOnlineOpen(true);
-                        }}
-                        className="text-[11px] font-black text-amber-200 hover:text-white flex items-center gap-1.5 bg-amber-500/25 hover:bg-amber-500/40 px-2.5 py-1 rounded-lg border border-amber-500/40 cursor-pointer transition-all shadow-sm active:scale-95"
-                        title="Mở bảng tìm kiếm và tải sách online từ Z-Library / LibGen"
-                      >
-                        <Search size={12} />
-                        <span>Tìm sách online</span>
-                      </button>
-                      <button 
-                        onClick={fetchBrokenFiles} 
-                        className="text-[11px] font-bold text-amber-400 hover:underline cursor-pointer px-1"
-                      >
-                        Quét lại
-                      </button>
-                    </div>
-                  </div>
-                  <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs">
-                    {brokenBooksList.map((b, i) => (
-                      <div 
-                        key={i} 
-                        className="flex items-center justify-between gap-3 p-2 bg-[#1F1D20]/90 hover:bg-[#2A272A] rounded-xl border border-amber-500/20 transition-colors"
-                      >
-                        <div className="truncate flex-1 min-w-0">
-                          <span className="font-bold text-[#F5ECDC]">• {b.title}</span>
-                          {b.author && <span className="text-[#D7C9B2]/80 font-normal"> — {b.author}</span>}
-                        </div>
-                        <button
-                          onClick={() => {
-                            setSearchOnlineQuery(b.title);
-                            setSearchOnlineTargetBookId(b.id);
-                            setIsSearchOnlineOpen(true);
-                          }}
-                          className="shrink-0 px-2.5 py-1 text-[11px] font-black bg-amber-500/25 hover:bg-amber-500/40 text-amber-300 hover:text-white border border-amber-500/50 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-                          title={`Tìm và tải bù file online cho: ${b.title}`}
-                        >
-                          <Search size={11} />
-                          <span>Tìm online</span>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="mt-2.5 text-[11px] text-amber-300/85 leading-relaxed">
-                    💡 Bấm <b>"Tìm online"</b> cạnh từng cuốn sách để tải trực tiếp từ Z-Library/LibGen, hoặc kéo thả file từ máy tính vào ô bên dưới. Hệ thống sẽ tự động ghép nối và lưu vĩnh viễn vào Database PostgreSQL.
-                  </p>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-xs text-emerald-300">
-                  <div className="flex items-center gap-2.5 font-bold">
-                    <Check size={18} className="text-emerald-400 shrink-0" />
-                    <span>Toàn bộ {books.length} cuốn sách đều đã được liên kết file đầy đủ và an toàn trong Database.</span>
-                  </div>
-                  <button 
-                    onClick={fetchBrokenFiles} 
-                    className="text-[11px] font-bold text-emerald-400 hover:underline cursor-pointer"
-                  >
-                    Quét lại
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="flex-1 overflow-y-auto pr-1 space-y-4">
-              {/* Vùng chọn file / kéo thả */}
-              <div 
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleSyncDrop}
-                className="border-2 border-dashed border-[#4D4845] hover:border-amber-500/80 rounded-2xl p-6 text-center bg-[#1F1D20]/60 transition-all cursor-pointer group"
-                onClick={() => document.getElementById('sync-files-picker')?.click()}
-              >
-                <input 
-                  type="file" 
-                  id="sync-files-picker" 
-                  multiple 
-                  accept=".epub,.pdf" 
-                  className="hidden" 
-                  onChange={handleSyncFilesSelect} 
-                />
-                <Unlink2 size={32} className="mx-auto text-amber-400/70 group-hover:text-amber-400 transition-colors mb-2" />
-                <p className="text-sm font-bold text-[#F5ECDC]">
-                  Kéo thả toàn bộ file sách (.epub, .pdf) vào đây
-                </p>
-                <p className="text-xs text-[#7B7369] mt-1">
-                  hoặc bấm vào để chọn cùng lúc nhiều file từ máy tính của bạn
-                </p>
-              </div>
-
-              {/* Trạng thái danh sách file đã chọn */}
-              {syncFiles.length > 0 && (
-                <div className="bg-[#1F1D20] border border-[#4D4845]/50 rounded-2xl p-4">
-                  <div className="flex justify-between items-center mb-3 pb-2 border-b border-[#4D4845]/40">
-                    <span className="text-xs font-black text-[#F5ECDC]">
-                      Đã chọn {syncFiles.length} file sách ({(syncFiles.reduce((acc, f) => acc + f.size, 0) / (1024 * 1024)).toFixed(1)} MB)
-                    </span>
-                    {!isSyncing && (
-                      <button 
-                        onClick={() => { setSyncFiles([]); setSyncResult(null); }}
-                        className="text-xs font-bold text-red-400 hover:text-red-300 cursor-pointer"
-                      >
-                        Xoá tất cả
-                      </button>
-                    )}
-                  </div>
-                  <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1">
-                    {syncFiles.map((file, idx) => (
-                      <div key={idx} className="flex justify-between items-center text-xs py-1.5 px-2.5 bg-[#2A272A] rounded-xl border border-[#4D4845]/30">
-                        <span className="truncate pr-2 font-medium text-[#F5ECDC]">{file.name}</span>
-                        <span className="shrink-0 text-[#7B7369] font-mono text-[10px]">
-                          {(file.size / (1024 * 1024)).toFixed(2)} MB
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Hiển thị tiến trình đang đồng bộ */}
-              {isSyncing && (
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-center">
-                  <Loader2 size={24} className="animate-spin mx-auto text-amber-400 mb-2" />
-                  <p className="text-xs font-black text-amber-300">{syncProgress || 'Đang xử lý...'}</p>
-                  <p className="text-[11px] text-amber-200/70 mt-1">
-                    Hệ thống chia nhỏ thành từng đợt gửi để đảm bảo ổn định 100% không bị quá tải đường truyền.
-                  </p>
-                </div>
-              )}
-
-              {/* Hiển thị kết quả sau khi đồng bộ xong */}
-              {syncResult && (
-                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 text-xs text-emerald-200">
-                  <div className="flex items-center gap-2 mb-2 font-black text-sm text-emerald-400">
-                    <Check size={18} />
-                    <span>Đồng Bộ Hoàn Tất Thành Công!</span>
-                  </div>
-                  <p className="leading-relaxed">
-                    • Khôi phục thành công: <strong>{syncResult.matched_count}</strong> cuốn sách đã có trong hệ thống.<br />
-                    • Thêm mới thành công: <strong>{syncResult.created_count}</strong> cuốn sách.<br />
-                    Tất cả file đã được chuyển vào PostgreSQL Database vĩnh viễn. Bạn có thể mở đọc hoặc tải xuống ngay!
-                  </p>
-                  {syncResult.matched_books && syncResult.matched_books.length > 0 && (
-                    <div className="mt-3 max-h-32 overflow-y-auto space-y-1 pt-2 border-t border-emerald-500/20">
-                      {syncResult.matched_books.slice(0, 15).map((b, i) => (
-                        <div key={i} className="truncate text-[11px] text-emerald-300">
-                          ✓ {b.title} {b.author ? `— ${b.author}` : ''}
-                        </div>
-                      ))}
-                      {syncResult.matched_books.length > 15 && (
-                        <div className="text-[10px] text-emerald-400 italic">
-                          và {syncResult.matched_books.length - 15} cuốn sách khác...
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Nút kích hoạt đồng bộ */}
-            <div className="mt-6 pt-4 border-t border-[#4D4845]/50 shrink-0">
-              <button
-                onClick={handleSyncFilesSubmit}
-                disabled={isSyncing || syncFiles.length === 0}
-                style={{ backgroundColor: syncFiles.length > 0 ? '#D97706' : '#2A272A', color: syncFiles.length > 0 ? '#FFFFFF' : '#7B7369' }}
-                className="w-full py-3 px-6 rounded-2xl text-sm font-black transition-all shadow-lg cursor-pointer hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-[#4D4845]"
-              >
-                {isSyncing ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    <span>Đang Khôi Phục & Gắn File Vào Database...</span>
-                  </>
-                ) : (
-                  <span>Khôi Phục & Gắn File Vào Database ({syncFiles.length} file đã chọn)</span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Online Book Search Modal */}
       <SearchOnlineModal
@@ -1587,7 +1214,6 @@ export default function AdminPage() {
         }}
         initialQuery={searchOnlineQuery}
         targetBookId={searchOnlineTargetBookId}
->>>>>>> 04ef1a449922d653bf835c2fa62e0e114f3e0d74
       />
     </div>
   );

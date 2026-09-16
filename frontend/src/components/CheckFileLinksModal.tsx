@@ -14,7 +14,7 @@ interface UnlinkedBook {
 interface CheckFileLinksModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onOpenSearchOnline?: (query: string) => void;
+  onOpenSearchOnline?: (query: string, bookId?: string) => void;
   onSuccess?: () => void;
 }
 
@@ -212,7 +212,7 @@ export default function CheckFileLinksModal({
                   <div className="flex items-center gap-2">
                     {onOpenSearchOnline && (
                       <button
-                        onClick={() => onOpenSearchOnline(unlinkedBooks[0]?.title || '')}
+                        onClick={() => onOpenSearchOnline(unlinkedBooks[0]?.title || '', unlinkedBooks[0]?.id)}
                         className="px-3.5 py-2 bg-[#D97706] hover:bg-[#B45309] text-white font-bold rounded-xl text-xs transition-all whitespace-nowrap cursor-pointer shadow-md flex items-center gap-1.5"
                         style={{ color: '#FFFFFF' }}
                       >
@@ -242,7 +242,7 @@ export default function CheckFileLinksModal({
 
                       {onOpenSearchOnline && (
                         <button
-                          onClick={() => onOpenSearchOnline(book.title)}
+                          onClick={() => onOpenSearchOnline(book.title, book.id)}
                           className="px-3 py-1.5 bg-[#D97706] hover:bg-[#B45309] text-white font-bold rounded-lg text-xs transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 shrink-0 shadow-sm"
                           style={{ color: '#FFFFFF' }}
                         >
