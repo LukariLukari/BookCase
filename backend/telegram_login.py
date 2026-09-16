@@ -25,8 +25,12 @@ async def main():
     
     print("\n✅ Đăng nhập thành công! File 'user_session.session' đã được tạo.")
     
-    string_session = StringSession(client.session.save())
-    saved_str = string_session.save()
+    s = StringSession()
+    s._dc_id = client.session.dc_id
+    s._server_address = client.session.server_address
+    s._port = client.session.port
+    s._auth_key = client.session.auth_key
+    saved_str = s.save()
     print("\n=========================================================================================")
     print("MÃ STRING SESSION (Dán vào biến TELEGRAM_STRING_SESSION trên Render nếu cần):")
     print("=========================================================================================")
