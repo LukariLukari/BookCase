@@ -209,7 +209,9 @@ class FileCheckResponse(BaseModel):
     total_books: int
     healthy_count: int
     unlinked_count: int
+    broken_count: Optional[int] = None
     unlinked_books: list[UnlinkedBookItem] = []
+    broken_books: list[UnlinkedBookItem] = []
 
 
 class BookReviewCreate(BaseModel):

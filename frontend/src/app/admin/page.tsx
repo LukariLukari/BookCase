@@ -252,6 +252,7 @@ export default function AdminPage() {
   const [brokenFileCount, setBrokenFileCount] = useState<number | null>(null);
   const [brokenBooksList, setBrokenBooksList] = useState<{ id: string; title: string; author?: string; reason?: string }[]>([]);
   const [isCheckingFiles, setIsCheckingFiles] = useState(false);
+  const [isBrokenFilterActive, setIsBrokenFilterActive] = useState(false);
 
 
   const handleFixCovers = async () => {
@@ -688,7 +689,15 @@ export default function AdminPage() {
   // Danh sách sách hiển thị trên grid
   const displayItems = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    if (isDuplicateFilterActive) {
+    const brokenIds = new Set(brokenBooksList.map(b => b.id));
+
+    if (isBrokenFilterActive) {
+      const brokenOnly = books.filter(b => b.has_file === false || brokenIds.has(b.id));
+      const filtered = q
+        ? brokenOnly.filter(b => b.title.toLowerCase().includes(q) || (b.author && b.author.toLowerCase().includes(q)))
+        : brokenOnly;
+      return filtered.map(b => ({ book: b, duplicateInfo: null }));
+    } else if (isDuplicateFilterActive) {
       if (!q) return duplicateBooksWithInfo;
       return duplicateBooksWithInfo.filter(item => 
         item.book.title.toLowerCase().includes(q) || 
@@ -700,7 +709,7 @@ export default function AdminPage() {
         : books;
       return filtered.map(b => ({ book: b, duplicateInfo: null }));
     }
-  }, [isDuplicateFilterActive, duplicateBooksWithInfo, books, searchQuery]);
+  }, [isBrokenFilterActive, isDuplicateFilterActive, duplicateBooksWithInfo, books, brokenBooksList, searchQuery]);
 
   if (isLoading || !user || user.role !== 'admin') {
     return <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center font-bold text-[#D7C9B2]">Loading...</div>;
@@ -743,11 +752,45 @@ export default function AdminPage() {
                 )}
               </button>
 
+              {/* Nút Lọc Sách Lỗi File */}
+              {brokenFileCount !== null && brokenFileCount > 0 && (
+                <button
+                  onClick={() => {
+                    setIsBrokenFilterActive(!isBrokenFilterActive);
+                    if (!isBrokenFilterActive) {
+                      setIsDuplicateFilterActive(false);
+                      setSearchQuery('');
+                      setIsSortMode(false);
+                    }
+                  }}
+                  style={{
+                    backgroundColor: isBrokenFilterActive ? '#D97706' : '#2A272A',
+                    color: isBrokenFilterActive ? '#FFFFFF' : '#F5ECDC',
+                    borderColor: isBrokenFilterActive ? '#D97706' : '#F59E0B',
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border shadow-sm"
+                  title="Chỉ hiển thị các cuốn sách chưa thể tải về trên bảng quản trị"
+                >
+                  <AlertTriangle size={15} style={{ color: isBrokenFilterActive ? '#FFFFFF' : '#F59E0B' }} />
+                  <span>Sách lỗi file</span>
+                  <span
+                    style={{
+                      backgroundColor: isBrokenFilterActive ? '#1F1D20' : '#D97706',
+                      color: '#FFFFFF',
+                    }}
+                    className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none"
+                  >
+                    {brokenFileCount}
+                  </span>
+                </button>
+              )}
+
               {/* Nút Lọc Sách Trùng */}
               <button
                 onClick={() => {
                   setIsDuplicateFilterActive(!isDuplicateFilterActive);
                   if (!isDuplicateFilterActive) {
+                    setIsBrokenFilterActive(false);
                     setSearchQuery('');
                     setIsSortMode(false);
                   }
@@ -1199,10 +1242,18 @@ export default function AdminPage() {
       <CheckFileLinksModal
         isOpen={isCheckLinksOpen}
         onClose={() => setIsCheckLinksOpen(false)}
+        initialBrokenBooks={brokenBooksList}
+        initialBrokenCount={brokenFileCount}
         onOpenSearchOnline={(q, targetId) => {
           setSearchOnlineQuery(q);
           setSearchOnlineTargetBookId(targetId || null);
           setIsSearchOnlineOpen(true);
+        }}
+        onOpenEditBook={(bookId) => {
+          const b = books.find(item => item.id === bookId);
+          if (b) {
+            openEditModal(b);
+          }
         }}
         onSuccess={() => {
           fetchBooks();

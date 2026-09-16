@@ -478,17 +478,23 @@ def check_book_files(
 
         is_avail, reason = is_book_downloadable(b, existing_file_keys, existing_book_file_ids, upload_dir)
         if not is_avail:
+            cover = f"/api/books/cover/{b.id}" if b.cover_url else None
             broken_books.append({
                 "id": b.id,
                 "title": b.title,
                 "author": b.author,
+                "cover_url": cover,
                 "reason": reason or "Chưa có file dữ liệu EPUB/PDF để tải về"
             })
                 
+    healthy_count = len(books) - len(broken_books)
     return {
         "total_books": len(books),
+        "healthy_count": healthy_count,
         "broken_count": len(broken_books),
-        "broken_books": broken_books
+        "unlinked_count": len(broken_books),
+        "broken_books": broken_books,
+        "unlinked_books": broken_books
     }
 
 @app.post("/api/admin/books/sync-files")
@@ -645,6 +651,49 @@ async def sync_book_files(
         "created_count": len(created_books),
         "matched_books": matched_books,
         "created_books": created_books
+    }
+
+@app.post("/api/admin/books/{book_id}/upload-file")
+async def upload_file_for_book(
+    book_id: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """
+    Tải lên và gắn file EPUB/PDF trực tiếp cho một cuốn sách cụ thể,
+    lưu vĩnh viễn vào Database PostgreSQL.
+    """
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Không tìm thấy cuốn sách này")
+        
+    contents = await file.read()
+    if not contents or len(contents) < 50:
+        raise HTTPException(status_code=400, detail="File không hợp lệ hoặc dung lượng quá nhỏ")
+        
+    filename = file.filename or f"{book.title}.epub"
+    mime_type = file.content_type or 'application/octet-stream'
+    if filename.lower().endswith('.pdf') or contents.startswith(b'%PDF'):
+        mime_type = 'application/pdf'
+    elif filename.lower().endswith('.epub'):
+        mime_type = 'application/epub+zip'
+        
+    file_stream = io.BytesIO(contents)
+    drive_file_id = drive_service.upload_file(file_stream, filename, mime_type, db=db, book_id=book.id)
+    
+    book.drive_file_id = drive_file_id
+    book.mime_type = mime_type
+    book.file_size = len(contents)
+    db.commit()
+    db.refresh(book)
+    
+    return {
+        "success": True,
+        "message": f"Đã nạp file thành công cho cuốn '{book.title}' và lưu vĩnh viễn vào hệ thống!",
+        "book_id": book.id,
+        "title": book.title,
+        "drive_file_id": drive_file_id
     }
 
 @app.put("/api/admin/books/reorder")
@@ -1623,56 +1672,8 @@ def fix_all_covers(db: Session = Depends(get_db), current_user: models.User = De
 
 @app.get("/api/admin/check-file-links", response_model=schemas.FileCheckResponse)
 def check_file_links(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
-    all_books = db.query(models.Book).all()
-    total_books = len(all_books)
-    unlinked_items = []
-    
-    existing_file_keys = set(k[0] for k in db.query(models.BookFile.file_key).all() if k[0])
-    existing_book_file_ids = set(k[0] for k in db.query(models.BookFile.book_id).all() if k[0])
-    upload_dir = getattr(drive_service, 'upload_dir', None)
-    
-    for book in all_books:
-        # Tự động đẩy file từ đĩa lên DB nếu có trên đĩa nhưng chưa lưu vào BookFile
-        if book.drive_file_id and book.drive_file_id.startswith("local_") and upload_dir:
-            has_db_file = (book.drive_file_id in existing_file_keys) or (book.id in existing_book_file_ids)
-            file_path = os.path.join(upload_dir, book.drive_file_id)
-            if os.path.exists(file_path) and not has_db_file:
-                try:
-                    with open(file_path, "rb") as f:
-                        f_bytes = f.read()
-                    bf = models.BookFile(
-                        file_key=book.drive_file_id,
-                        book_id=book.id,
-                        filename=f"{book.title}.epub" if "epub" in (book.mime_type or "") else f"{book.title}.pdf",
-                        mime_type=book.mime_type or "application/octet-stream",
-                        file_data=f_bytes,
-                        file_size=len(f_bytes)
-                    )
-                    db.add(bf)
-                    db.commit()
-                    existing_file_keys.add(book.drive_file_id)
-                    existing_book_file_ids.add(book.id)
-                except Exception:
-                    db.rollback()
-
-        is_avail, reason = is_book_downloadable(book, existing_file_keys, existing_book_file_ids, upload_dir)
-        if not is_avail:
-            cover = f"/api/books/cover/{book.id}" if book.cover_url else None
-            unlinked_items.append(schemas.UnlinkedBookItem(
-                id=book.id,
-                title=book.title,
-                author=book.author,
-                cover_url=cover,
-                reason=reason or "Chưa có file dữ liệu EPUB/PDF để tải về"
-            ))
-            
-    healthy_count = total_books - len(unlinked_items)
-    return schemas.FileCheckResponse(
-        total_books=total_books,
-        healthy_count=healthy_count,
-        unlinked_count=len(unlinked_items),
-        unlinked_books=unlinked_items
-    )
+    res = check_book_files(db=db, current_user=current_user)
+    return schemas.FileCheckResponse(**res)
 
 @app.post("/api/admin/repair-file-links")
 async def repair_file_links(
