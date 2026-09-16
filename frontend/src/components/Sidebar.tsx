@@ -2,7 +2,21 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Library, LayoutDashboard, Bookmark, LogOut, Settings, Menu, X, LogIn, Loader2, KeyRound, Quote as QuoteIcon, Sparkles } from 'lucide-react';
+import { 
+  Home, 
+  BookOpen, 
+  Clock, 
+  Bookmark, 
+  Settings, 
+  AlignLeft, 
+  X, 
+  LogOut, 
+  LogIn, 
+  Loader2, 
+  Sparkles,
+  Quote as QuoteIcon,
+  ShieldCheck
+} from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 export default function Sidebar() {
@@ -15,155 +29,165 @@ export default function Sidebar() {
     setNavigatingTo(null);
   }, [pathname]);
 
-  const mainMenuItems = [
-    { icon: <LayoutDashboard size={20} />, label: 'BookCase Board', href: '/' },
-    { icon: <Sparkles size={20} />, label: 'Không Gian Đọc', href: '/reader' },
-    { icon: <Bookmark size={20} />, label: 'Sách Cá Nhân', href: '/my-books' },
-    { icon: <QuoteIcon size={20} />, label: 'Trích Dẫn', href: '/quotes' },
-  ];
-
-  const adminMenuItems = [
-    { icon: <Settings size={20} />, label: 'Admin Dashboard', href: '/admin' },
-    { icon: <Library size={20} />, label: 'Bộ Sưu Tập', href: '/admin/collections' },
-    { icon: <KeyRound size={20} />, label: 'Mã Đăng Ký', href: '/admin/registration-codes' },
+  const navItems = [
+    { id: 'home', icon: Home, label: 'Trang chủ', href: '/' },
+    { id: 'reader', icon: BookOpen, label: 'Không gian đọc', href: '/reader' },
+    { id: 'timer', icon: Clock, label: 'Ghi chú & Trích dẫn', href: '/quotes' },
+    { id: 'bookmark', icon: Bookmark, label: 'Sách cá nhân', href: '/my-books' },
+    ...(user?.role === 'admin' 
+      ? [{ id: 'admin', icon: Settings, label: 'Quản trị hệ thống', href: '/admin' }]
+      : [{ id: 'settings', icon: Settings, label: 'Cài đặt', href: '/my-books' }])
   ];
 
   const isItemActive = (href: string) => {
     if (href === '/') return pathname === '/';
-    if (href === '/admin') return pathname === '/admin';
+    if (href === '/admin') return pathname === '/admin' || pathname.startsWith('/admin/');
     return pathname === href || (href !== '/' && pathname.startsWith(href));
-  };
-
-  const renderLinkItem = (item: { icon: React.ReactNode; label: string; href: string }, key: string | number) => {
-    const active = isItemActive(item.href);
-    return (
-      <li key={key} className="w-full">
-        <Link 
-          href={item.href} 
-          style={{
-            backgroundColor: active ? '#F5ECDC' : undefined,
-            color: active ? '#181618' : undefined,
-          }}
-          className={`flex items-center gap-3 p-3 md:px-3.5 md:py-2.5 rounded-xl transition-all font-extrabold text-sm w-full ${
-            active 
-              ? 'shadow-md text-[#181618]' 
-              : 'text-[#D7C9B2] hover:text-[#F5ECDC] hover:bg-[#2A272A]'
-          }`}
-          title={item.label}
-          onClick={() => {
-            setIsMobileMenuOpen(false);
-            if (item.href !== pathname) {
-              setNavigatingTo(item.href);
-            }
-          }}
-        >
-          <span className="flex-shrink-0" style={{ color: active ? '#181618' : undefined }}>
-            {navigatingTo === item.href ? <Loader2 size={20} className="animate-spin" /> : item.icon}
-          </span>
-          <span className="truncate" style={{ color: active ? '#181618' : undefined }}>{item.label}</span>
-        </Link>
-      </li>
-    );
   };
 
   return (
     <>
-      <div className="w-full h-16 fixed left-0 top-0 flex flex-row items-center justify-between bg-[#1F1D20]/90 backdrop-blur-md border-b border-[#4D4845]/40 px-4 z-50 md:w-64 md:h-screen md:flex-col md:justify-start md:border-r md:border-b-0 md:px-4 md:py-6 md:bg-[#181618]">
-        {/* Logo */}
-        <div className="flex items-center md:mb-8 md:px-2 flex-shrink-0 z-50">
-          <Link href="/">
-            <h1 className="text-2xl md:text-3xl font-extrabold text-[#F5ECDC] cursor-pointer hover:opacity-80 transition-opacity tracking-tight">
-              BOOKCASE<span className="text-[#F5ECDC]">.</span>
-            </h1>
-          </Link>
-        </div>
-
-        {/* User Profile Card - Hide on Mobile */}
-        {user ? (
-          <div className="hidden md:block bg-[#2A272A] p-4 rounded-2xl mb-6 shadow-md border border-[#4D4845]/40 w-full">
-            <div className="w-11 h-11 bg-[#4D4845] rounded-full flex items-center justify-center mb-2.5 shadow-inner overflow-hidden border border-[#7B7369]/40">
-               <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} alt="Avatar" className="w-full h-full object-cover" />
-            </div>
-            <p className="text-[11px] text-[#D7C9B2] font-medium mb-0.5">Welcome Back</p>
-            <p className="text-base font-bold text-[#F5ECDC] truncate">{user.username}</p>
-          </div>
-        ) : (
-          <div className="hidden md:block mb-10 w-full">
-            <Link href="/login" className="btn-primary w-full flex items-center justify-center gap-2">
-              <LogIn size={18} />
-              <span>Login</span>
-            </Link>
-          </div>
-        )}
-
-        {/* Mobile Hamburger Button */}
-        <button 
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden p-2 text-[#D7C9B2] hover:text-[#F5ECDC] rounded-lg hover:bg-[#2A272A] transition-colors z-50"
+      {/* Desktop Vertical Navigation Rail (Slim ~76px) */}
+      <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-20 flex-col items-center justify-between py-7 bg-[#FAF7F2] border-r border-[#E5DFD7]/80 z-40 select-none shadow-[2px_0_12px_rgba(0,0,0,0.02)]">
+        {/* Brand Icon (Stylized Book Wave Logo) */}
+        <Link 
+          href="/" 
+          className="w-11 h-11 flex items-center justify-center text-[#1D1C1A] hover:scale-105 transition-transform"
+          title="BookCase - Thư viện cá nhân"
         >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="stroke-[#1D1C1A] stroke-[2.2] stroke-linecap-round stroke-linejoin-round">
+            <path d="M7 17C8.5 14 11 12 14 14C17 16 19.5 14 21 11" />
+            <path d="M6 21C8 18 11 16 14 18C17 20 20 18 22 15" />
+            <path d="M12 5C10 5 8 7 8 10V25C8 26.1 8.9 27 10 27H23C24.1 27 25 26.1 25 25V10C25 7 23 5 21 5H12Z" />
+          </svg>
+        </Link>
 
-        {/* Navigation */}
-        <nav className={`absolute md:static top-16 left-0 w-full md:w-full bg-[#181618] md:bg-transparent border-b md:border-0 border-[#4D4845]/40 shadow-xl md:shadow-none transition-all duration-300 origin-top flex-1 md:flex justify-start ${isMobileMenuOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 md:scale-y-100 md:opacity-100'} overflow-y-auto md:overflow-visible`}>
-          <ul className="flex flex-col p-4 md:p-0 md:space-y-2 md:w-full w-full gap-2 md:gap-0">
-            {/* Main Menu Items */}
-            {mainMenuItems.map((item, idx) => renderLinkItem(item, idx))}
+        {/* Center Nav Icons */}
+        <nav className="flex flex-col items-center gap-4 my-auto">
+          {navItems.map((item) => {
+            const active = isItemActive(item.href);
+            const Icon = item.icon;
 
-            {/* Admin Items (separated by clean border) */}
-            {user?.role === 'admin' && (
-              <>
-                <li className="my-2 border-t border-[#4D4845]/40" />
-                {adminMenuItems.map((item, idx) => renderLinkItem(item, `admin-${idx}`))}
-              </>
-            )}
-            
-            {/* Mobile User Info & Logout/Login (inside menu) */}
-            <li className="md:hidden mt-4 pt-4 border-t border-[#4D4845]/40 w-full">
-               {user ? (
-                 <>
-                   <div className="flex items-center gap-3 mb-4 px-2">
-                     <div className="w-10 h-10 bg-[#4D4845] rounded-full flex items-center justify-center shadow-inner overflow-hidden border border-[#7B7369]/40">
-                       <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} alt="Avatar" className="w-full h-full object-cover" />
-                     </div>
-                     <div>
-                       <p className="text-xs text-[#D7C9B2] font-medium leading-tight">Welcome Back</p>
-                       <p className="text-sm font-bold text-[#F5ECDC] leading-tight truncate max-w-[200px]">{user.username}</p>
-                     </div>
-                   </div>
-                   <button onClick={logout} className="flex items-center gap-4 p-3 text-red-400 hover:bg-red-950/30 rounded-xl transition-colors font-medium text-sm w-full">
-                     <LogOut size={20} />
-                     <span>Logout</span>
-                   </button>
-                 </>
-               ) : (
-                 <Link href="/login" className="flex items-center gap-4 p-3 text-[#F5ECDC] hover:bg-[#2A272A] rounded-xl transition-colors font-medium text-sm w-full">
-                   <LogIn size={20} />
-                   <span>Login</span>
-                 </Link>
-               )}
-            </li>
-          </ul>
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                onClick={() => {
+                  if (item.href !== pathname) setNavigatingTo(item.href);
+                }}
+                className={`relative group w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  active 
+                    ? 'bg-[#DE5448] text-white shadow-md shadow-[#DE5448]/30 scale-105' 
+                    : 'text-[#66615E] hover:text-[#1D1C1A] hover:bg-[#EFEAE4]'
+                }`}
+                title={item.label}
+              >
+                {navigatingTo === item.href ? (
+                  <Loader2 size={20} className="animate-spin" />
+                ) : (
+                  <Icon size={20} className={active ? 'stroke-[2.5]' : 'stroke-[1.8]'} />
+                )}
+
+                {/* Subtle Hover Tooltip */}
+                <div className="absolute left-14 px-2.5 py-1 bg-[#1D1C1A] text-white text-[11px] font-bold rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-50">
+                  {item.label}
+                </div>
+              </Link>
+            );
+          })}
         </nav>
 
-        {/* Logout - Desktop */}
-        {user && (
-          <div className="hidden md:flex mt-auto pt-6 border-t border-[#4D4845]/40 w-full">
-            <button onClick={logout} className="flex items-center gap-4 px-4 py-2 text-[#D7C9B2] hover:text-red-400 transition-colors font-medium text-sm w-full cursor-pointer">
-              <LogOut size={20} />
-              <span>Logout</span>
+        {/* Bottom Menu / Collapse & Logout Button */}
+        <div className="flex flex-col items-center gap-3">
+          {user && (
+            <button
+              onClick={logout}
+              className="w-10 h-10 rounded-full flex items-center justify-center text-[#9E9791] hover:text-[#DE5448] hover:bg-[#EFEAE4] transition-colors cursor-pointer"
+              title="Đăng xuất"
+            >
+              <LogOut size={18} />
             </button>
+          )}
+
+          <div 
+            className="w-10 h-10 rounded-full flex items-center justify-center text-[#66615E] hover:bg-[#EFEAE4] transition-colors cursor-pointer"
+            title="Tùy chọn menu"
+          >
+            <AlignLeft size={20} />
           </div>
-        )}
+        </div>
+      </aside>
+
+      {/* Mobile Topbar & Slide Menu */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E5DFD7] px-4 flex items-center justify-between z-50">
+        <Link href="/" className="flex items-center gap-2">
+          <span className="font-extrabold text-lg text-[#1D1C1A] tracking-tight">BOOKCASE.</span>
+        </Link>
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 text-[#1D1C1A] hover:bg-[#EFEAE4] rounded-lg transition-colors"
+        >
+          {isMobileMenuOpen ? <X size={22} /> : <AlignLeft size={22} />}
+        </button>
       </div>
-      
-      {/* Mobile Overlay */}
+
+      {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden top-16" 
-          onClick={() => setIsMobileMenuOpen(false)} 
-        />
+        <div className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm pt-14" onClick={() => setIsMobileMenuOpen(false)}>
+          <div 
+            className="bg-[#FAF7F2] w-64 h-full p-6 flex flex-col justify-between border-r border-[#E5DFD7]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-4">
+              <div className="text-xs font-bold uppercase tracking-wider text-[#9E9791] mb-2">Menu</div>
+              <div className="flex flex-col gap-1.5">
+                {navItems.map((item) => {
+                  const active = isItemActive(item.href);
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        active 
+                          ? 'bg-[#DE5448] text-white shadow-sm' 
+                          : 'text-[#66615E] hover:text-[#1D1C1A] hover:bg-[#EFEAE4]'
+                      }`}
+                    >
+                      <Icon size={18} />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            {user ? (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  logout();
+                }}
+                className="flex items-center gap-2 text-sm font-bold text-[#DE5448] p-2 hover:bg-[#DE5448]/10 rounded-xl transition-colors w-full"
+              >
+                <LogOut size={18} />
+                <span>Đăng xuất ({user.username})</span>
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 bg-[#1D1C1A] text-white py-2.5 rounded-xl font-bold text-sm shadow"
+              >
+                <LogIn size={18} />
+                <span>Đăng nhập</span>
+              </Link>
+            )}
+          </div>
+        </div>
       )}
     </>
   );
 }
+

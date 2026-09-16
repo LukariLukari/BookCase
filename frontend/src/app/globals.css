@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #1F1D20;
-  --foreground: #F5ECDC;
+  --background: #EDE8E3;
+  --foreground: #1D1C1A;
+  --canvas-bg: #EDE8E3;
+  --surface-bg: #FAF7F2;
+  --surface-sub: #F2EDE6;
+  --border-color: #E5DFD7;
+  --accent-coral: #DE5448;
+  --text-main: #1D1C1A;
+  --text-muted: #66615E;
 }
 
 @theme inline {
@@ -12,91 +19,69 @@
 }
 
 body {
-  background-color: #1F1D20;
-  color: #F5ECDC;
-  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
+  background-color: var(--canvas-bg);
+  color: var(--text-main);
+  font-family: var(--font-montserrat), Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbar for dark theme */
+/* Custom Scrollbar for Editorial theme */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #1F1D20;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #4D4845;
+  background: #D5CDC4;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #7B7369;
+  background: #B8ADA2;
 }
 
-/* High contrast utility for cream background elements */
-.text-contrast-dark {
-  color: #181618 !important;
-}
-.text-contrast-dark * {
-  color: #181618 !important;
-}
-.text-contrast-dark svg {
-  color: #181618 !important;
-  stroke: #181618 !important;
+/* 3D Realistic Book Shadow & Bevel Utilities */
+.book-3d-shadow {
+  box-shadow: 
+    -6px 12px 22px -3px rgba(35, 28, 20, 0.22),
+    -2px 4px 8px -2px rgba(35, 28, 20, 0.12),
+    inset 2px 0 4px -1px rgba(255, 255, 255, 0.4),
+    inset -3px 0 6px -1px rgba(0, 0, 0, 0.15);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@layer components {
-  /* Buttons - Strict High Contrast Rules */
-  .btn-primary {
-    @apply bg-[#F5ECDC] border-2 border-[#F5ECDC] font-black py-2.5 px-5 rounded-xl hover:bg-white transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-[#3A373A] disabled:text-[#8A817C] disabled:border-[#4D4845]/50 shadow-md text-[#181618];
-    color: #181618 !important; /* Pure dark text on bright cream beige button */
-  }
-
-  .btn-primary *,
-  .btn-primary svg {
-    color: #181618 !important;
-    stroke: #181618 !important;
-  }
-  
-  .btn-secondary {
-    @apply bg-[#4D4845] border-2 border-[#4D4845] font-bold py-2.5 px-5 rounded-xl hover:bg-[#5c5653] transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md;
-    color: #F5ECDC !important; /* Cream light text on dark gray button */
-  }
-
-  .btn-outline {
-    @apply bg-[#2A272A] border-2 border-[#4D4845] font-bold py-2 px-4 rounded-xl hover:border-[#D7C9B2] hover:text-[#D7C9B2] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm;
-    color: #F5ECDC !important;
-  }
-
-  /* Inputs */
-  .input-primary {
-    @apply w-full bg-[#2A272A] border-2 border-[#4D4845] rounded-xl px-4 py-3 focus:outline-none focus:border-[#D7C9B2] focus:ring-0 transition-all text-[#F5ECDC];
-    color: #F5ECDC !important;
-  }
-
-  
-  .input-primary::placeholder {
-    color: #7B7369 !important;
-  }
-
-  /* Typography */
-  .text-title {
-    @apply font-extrabold;
-    color: #F5ECDC !important;
-  }
-  
-  .text-body {
-    @apply font-medium;
-    color: #D7C9B2 !important;
-  }
-  
-  .text-muted {
-    @apply font-medium text-sm;
-    color: #7B7369 !important;
-  }
-
-  /* Cards */
-  .card-container {
-    @apply bg-[#2A272A] rounded-3xl p-8 shadow-xl border border-[#4D4845]/40 text-[#F5ECDC];
-  }
+.book-3d-shadow-active {
+  box-shadow: 
+    -12px 24px 36px -4px rgba(35, 28, 20, 0.32),
+    -4px 8px 14px -2px rgba(35, 28, 20, 0.18),
+    inset 3px 0 6px -1px rgba(255, 255, 255, 0.5),
+    inset -4px 0 8px -1px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+.book-spine-shine {
+  position: relative;
+}
+.book-spine-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 12px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 60%, rgba(0, 0, 0, 0.15) 100%);
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

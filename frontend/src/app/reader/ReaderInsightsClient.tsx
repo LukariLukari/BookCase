@@ -209,10 +209,10 @@ export default function ReaderInsightsClient() {
   }
 
   return (
-    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60 overflow-x-hidden">
+    <div className="flex bg-[#EDE8E3] text-[#1D1C1A] min-h-screen font-sans selection:bg-[#DE5448]/20 overflow-x-hidden">
       <Sidebar />
 
-      <div className="flex-1 min-w-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 md:ml-20 pt-16 md:pt-0 flex flex-col min-h-screen">
         
         {/* Topbar */}
         <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 border-b border-[#4D4845]/30 flex justify-between items-center">

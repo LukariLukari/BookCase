@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { getCoverUrl } from '@/utils/image';
+import { BookOpen } from 'lucide-react';
 
 interface BookCoverImageProps {
   coverUrl?: string | null;
@@ -10,6 +11,7 @@ interface BookCoverImageProps {
   author?: string | null;
   className?: string;
   aspectRatio?: string;
+  isActive?: boolean;
 }
 
 export default function BookCoverImage({
@@ -18,7 +20,8 @@ export default function BookCoverImage({
   title,
   author,
   className = "w-full h-full object-cover",
-  aspectRatio = "aspect-[2/3]"
+  aspectRatio = "aspect-[2/3]",
+  isActive = false
 }: BookCoverImageProps) {
   const [imgState, setImgState] = useState<'initial' | 'fallback' | 'error'>(
     (coverUrl && coverUrl.trim()) ? 'initial' : 'fallback'
@@ -39,52 +42,64 @@ export default function BookCoverImage({
     }
   };
 
-  const getGradient = (str: string) => {
-    const gradients = [
-      'from-amber-100 via-orange-100 to-amber-200 text-amber-950',
-      'from-sky-100 via-indigo-100 to-blue-200 text-slate-900',
-      'from-emerald-100 via-teal-100 to-cyan-200 text-emerald-950',
-      'from-rose-100 via-pink-100 to-red-200 text-rose-950',
-      'from-purple-100 via-fuchsia-100 to-pink-200 text-purple-950',
-      'from-lime-100 via-emerald-100 to-teal-200 text-lime-950',
-      'from-indigo-100 via-violet-100 to-purple-200 text-indigo-950',
+  const getEditorialPalette = (str: string) => {
+    const palettes = [
+      { bg: 'bg-[#2A2B2E]', text: 'text-[#F5F2EB]', accent: 'text-[#D9822B]' },
+      { bg: 'bg-[#1C2826]', text: 'text-[#F5F2EB]', accent: 'text-[#E0A96D]' },
+      { bg: 'bg-[#3D2645]', text: 'text-[#F5F2EB]', accent: 'text-[#DA7B93]' },
+      { bg: 'bg-[#2E4057]', text: 'text-[#F5F2EB]', accent: 'text-[#F4D06F]' },
+      { bg: 'bg-[#463F3A]', text: 'text-[#F5F2EB]', accent: 'text-[#E0AFA0]' },
+      { bg: 'bg-[#191923]', text: 'text-[#F5F2EB]', accent: 'text-[#FB6107]' }
     ];
     let hash = 0;
     for (let i = 0; i < (str || '').length; i++) {
       hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const index = Math.abs(hash) % gradients.length;
-    return gradients[index];
+    return palettes[Math.abs(hash) % palettes.length];
   };
 
   if (imgState === 'error' || (!src && !bookId)) {
+    const palette = getEditorialPalette(title);
     return (
-      <div className={`w-full h-full ${aspectRatio} bg-[#2A272A] p-4 flex flex-col justify-between relative overflow-hidden select-none border border-[#4D4845]/60 shadow-md rounded-2xl`}>
+      <div 
+        className={`w-full h-full ${aspectRatio} ${palette.bg} p-5 flex flex-col justify-between relative overflow-hidden select-none rounded-r-md rounded-l-[2px] ${
+          isActive ? 'book-3d-shadow-active' : 'book-3d-shadow'
+        } book-spine-shine`}
+      >
         {/* Book spine line overlay */}
-        <div className="absolute top-0 bottom-0 left-2.5 w-[3px] bg-[#4D4845]/40 blur-[0.5px]" />
-        <div className="absolute top-0 bottom-0 left-3.5 w-[1px] bg-[#7B7369]/30" />
-        
-        {/* Subtle background glow */}
-        <div className="absolute -right-8 -bottom-8 w-28 h-28 bg-[#F97316]/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute top-0 bottom-0 left-2 w-[2px] bg-white/20" />
+        <div className="absolute top-0 bottom-0 left-2.5 w-[1px] bg-black/30" />
 
         <div className="pl-3 pr-1 pt-2 z-10">
-          <span className="text-[10px] font-black tracking-widest text-[#F97316] block mb-1 uppercase">BookCase</span>
-          <h4 className="font-extrabold text-[#F5ECDC] text-xs sm:text-sm md:text-base leading-snug line-clamp-4 drop-shadow-none">{title}</h4>
+          <span className={`text-[9px] font-black tracking-widest ${palette.accent} uppercase block mb-1.5`}>
+            BookCase Classic
+          </span>
+          <h4 className={`font-extrabold ${palette.text} text-sm md:text-base leading-snug line-clamp-4 tracking-tight`}>
+            {title}
+          </h4>
         </div>
 
-        <div className="pl-3 pr-1 pb-1 z-10 mt-auto pt-2 border-t border-[#4D4845]/40">
-          <p className="text-[11px] font-bold text-[#D7C9B2] truncate">{author || "Tác giả chưa rõ"}</p>
+        <div className="pl-3 pr-1 pb-1 z-10 mt-auto pt-3 border-t border-white/10 flex items-center justify-between">
+          <p className="text-[11px] font-medium text-white/70 truncate">{author || "Tác giả chưa rõ"}</p>
+          <BookOpen size={14} className="text-white/40 flex-shrink-0" />
         </div>
       </div>
     );
   }
 
   return (
-    <img 
-      src={src} 
-      alt={title} 
-      className={className} 
-      onError={handleImageError} 
-    />
+    <div 
+      className={`relative w-full h-full overflow-hidden rounded-r-md rounded-l-[2px] ${
+        isActive ? 'book-3d-shadow-active' : 'book-3d-shadow'
+      } book-spine-shine`}
+    >
+      <img 
+        src={src} 
+        alt={title} 
+        className={className} 
+        onError={handleImageError} 
+      />
+    </div>
   );
 }
+

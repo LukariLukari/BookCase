@@ -716,9 +716,9 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60">
+    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans">
       <Sidebar />
-      <div className="flex-1 min-w-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 md:ml-20 pt-16 md:pt-0 flex flex-col min-h-screen">
         {/* Top Header */}
         <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/95 backdrop-blur-md px-4 py-3.5 md:px-6 md:py-4 border-b border-[#4D4845]/40 flex flex-col gap-3">
           {/* Dòng 1: Tiêu đề Dashboard & Các nút công cụ + Thêm sách */}
