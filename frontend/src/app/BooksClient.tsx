@@ -309,13 +309,13 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
   }
 
   return (
-    <div className="h-screen max-h-screen overflow-hidden bg-[#D8C9BB] p-3 sm:p-4 md:p-5 flex gap-4 lg:gap-5 font-sans selection:bg-[#1B2A4A]/20 selection:text-[#1C1917] relative w-full">
+    <div className="h-screen max-h-screen overflow-hidden bg-[#D8C9BB] pt-[80px] pb-4 px-3 md:p-5 flex flex-col md:flex-row gap-3 md:gap-4 lg:gap-5 font-sans selection:bg-[#1B2A4A]/20 selection:text-[#1C1917] relative w-full">
       
       {/* 1. LEFT COLUMN: FLOATING PILL DOCK */}
       <Sidebar />
 
       {/* 2. CENTER COLUMN: MAIN BOARD CONTAINER */}
-      <main className="flex-1 h-full bg-[#FBF8F4] rounded-[36px] p-4 sm:p-6 md:p-7 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col overflow-hidden min-w-0 transition-all duration-300">
+      <main className="flex-1 w-full bg-[#FBF8F4] rounded-[28px] md:rounded-[36px] p-3 sm:p-5 md:p-7 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col overflow-hidden min-w-0 transition-all duration-300">
         
         {/* TOP SEARCH & ACTION BAR (PINNED) */}
         <header className="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3.5 pb-2">
@@ -454,11 +454,14 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
 
       {/* 3. TRỢ LÝ TÌM SÁCH ONLINE DRAWER (SCALES UI) */}
       <aside className={`
-        relative h-full flex-shrink-0 z-40
+        relative flex-shrink-0 z-40
         transition-all duration-300 ease-in-out overflow-hidden
-        ${isChatOpen ? 'w-full sm:w-[420px] md:w-[460px] opacity-100' : 'w-0 opacity-0'}
+        md:h-full
+        ${isChatOpen 
+          ? 'h-[55vh] md:h-full w-full md:w-[420px] lg:w-[460px] opacity-100' 
+          : 'h-0 md:h-full md:w-0 opacity-0'}
       `}>
-        <div className="w-full sm:w-[420px] md:w-[460px] bg-[#FAF6F0] h-full rounded-[32px] p-4 sm:p-5 shadow-[0_20px_60px_rgba(120,100,85,0.22)] border border-[#ECE2D5] flex flex-col gap-3 overflow-hidden">
+        <div className="w-full h-full bg-[#FAF6F0] rounded-[28px] md:rounded-[32px] p-4 sm:p-5 shadow-[0_-10px_40px_rgba(120,100,85,0.12)] md:shadow-[0_20px_60px_rgba(120,100,85,0.22)] border border-[#ECE2D5] flex flex-col gap-3 overflow-hidden">
           
           {/* Assistant Header */}
           <div className="flex items-center justify-between pb-2 border-b border-[#EBE2D5] flex-shrink-0">
