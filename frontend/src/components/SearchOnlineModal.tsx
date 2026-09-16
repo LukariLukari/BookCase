@@ -235,12 +235,12 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 onClick={() => handleSourceChange('all')}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border shadow-sm ${
                   selectedSource === 'all'
-                    ? 'bg-[#1B2A4A] text-white border-[#1B2A4A]'
+                    ? 'bg-[#1B2A4A] !text-white border-[#1B2A4A]'
                     : 'bg-[#FAF6F0] text-[#57534E] border-[#E5DACD] hover:bg-[#EFE8DE] hover:text-[#1C1917]'
                 }`}
               >
-                <Layers size={13} />
-                <span>Tất cả nguồn</span>
+                <Layers size={13} className={selectedSource === 'all' ? '!text-white stroke-white' : ''} />
+                <span className={selectedSource === 'all' ? '!text-white' : ''}>Tất cả nguồn</span>
               </button>
 
               <button
@@ -248,12 +248,12 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 onClick={() => handleSourceChange('zlib')}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border shadow-sm ${
                   selectedSource === 'zlib'
-                    ? 'bg-[#1B2A4A] text-white border-[#1B2A4A]'
+                    ? 'bg-[#1B2A4A] !text-white border-[#1B2A4A]'
                     : 'bg-[#FAF6F0] text-[#57534E] border-[#E5DACD] hover:bg-[#EFE8DE] hover:text-[#1C1917]'
                 }`}
               >
-                <Pencil size={13} />
-                <span>Server bút chì</span>
+                <Pencil size={13} className={selectedSource === 'zlib' ? '!text-white stroke-white' : ''} />
+                <span className={selectedSource === 'zlib' ? '!text-white' : ''}>Server bút chì</span>
               </button>
 
               <button
@@ -261,12 +261,12 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 onClick={() => handleSourceChange('cloudily')}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border shadow-sm ${
                   selectedSource === 'cloudily'
-                    ? 'bg-[#1B2A4A] text-white border-[#1B2A4A]'
+                    ? 'bg-[#1B2A4A] !text-white border-[#1B2A4A]'
                     : 'bg-[#FAF6F0] text-[#57534E] border-[#E5DACD] hover:bg-[#EFE8DE] hover:text-[#1C1917]'
                 }`}
               >
-                <PenTool size={13} />
-                <span>Server bút mực</span>
+                <PenTool size={13} className={selectedSource === 'cloudily' ? '!text-white stroke-white' : ''} />
+                <span className={selectedSource === 'cloudily' ? '!text-white' : ''}>Server bút mực</span>
               </button>
             </div>
           </div>

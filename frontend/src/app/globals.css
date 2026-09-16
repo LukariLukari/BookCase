@@ -106,15 +106,23 @@ body {
   bottom: -20px;
 }
 
-/* Navy Accent Button (previously gradient) */
-.btn-gradient, .btn-navy {
-  background-color: #1B2A4A;
+/* Navy Accent Button & Pills (Pure Contrast Guarantee) */
+.btn-gradient, .btn-navy, .bg-\[\#1B2A4A\], [class*="bg-[#1B2A4A]"] {
+  background-color: #1B2A4A !important;
   color: #FFFFFF !important;
-  box-shadow: 0 4px 14px rgba(27, 42, 74, 0.28);
-  transition: all 0.2s ease;
 }
+
+.btn-gradient *, .btn-navy *, .bg-\[\#1B2A4A\] *, [class*="bg-[#1B2A4A]"] * {
+  color: #FFFFFF !important;
+}
+
+.btn-gradient svg, .btn-navy svg, .bg-\[\#1B2A4A\] svg, [class*="bg-[#1B2A4A]"] svg {
+  stroke: #FFFFFF !important;
+  color: #FFFFFF !important;
+}
+
 .btn-gradient:hover, .btn-navy:hover {
-  background-color: #131E33;
+  background-color: #131E33 !important;
   color: #FFFFFF !important;
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(27, 42, 74, 0.38);
@@ -139,6 +147,13 @@ body {
   transform: scale(1.05);
 }
 .squircle-btn.active {
-  background-color: #1B2A4A;
-  color: #FFFFFF;
+  background-color: #1B2A4A !important;
+  color: #FFFFFF !important;
 }
+.squircle-btn.active * {
+  color: #FFFFFF !important;
+}
+.squircle-btn.active svg {
+  stroke: #FFFFFF !important;
+}
+
