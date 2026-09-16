@@ -1,15 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #EDE8E3;
-  --foreground: #1D1C1A;
-  --canvas-bg: #EDE8E3;
-  --surface-bg: #FAF7F2;
-  --surface-sub: #F2EDE6;
-  --border-color: #E5DFD7;
-  --accent-coral: #DE5448;
-  --text-main: #1D1C1A;
-  --text-muted: #66615E;
+  --background: #D8C9BB;
+  --foreground: #2A2320;
+  --surface: #FBF8F4;
+  --surface-muted: #EFE8DE;
+  --surface-card: #FFFFFF;
+  --border-soft: #E5DACD;
+  --text-main: #2A2320;
+  --text-muted: #7A6F68;
+  --accent-purple: #7E79BF;
+  --accent-coral: #E56B6F;
+  --accent-navy: #273248;
 }
 
 @theme inline {
@@ -19,69 +21,123 @@
 }
 
 body {
-  background-color: var(--canvas-bg);
-  color: var(--text-main);
-  font-family: var(--font-montserrat), Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #D8C9BB;
+  color: #2A2320;
+  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbar for Editorial theme */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #EFE8DE;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D5CDC4;
+  background: #C8BAA9;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #B8ADA2;
+  background: #AFA190;
 }
 
-/* 3D Realistic Book Shadow & Bevel Utilities */
-.book-3d-shadow {
-  box-shadow: 
-    -6px 12px 22px -3px rgba(35, 28, 20, 0.22),
-    -2px 4px 8px -2px rgba(35, 28, 20, 0.12),
-    inset 2px 0 4px -1px rgba(255, 255, 255, 0.4),
-    inset -3px 0 6px -1px rgba(0, 0, 0, 0.15);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.book-3d-shadow-active {
-  box-shadow: 
-    -12px 24px 36px -4px rgba(35, 28, 20, 0.32),
-    -4px 8px 14px -2px rgba(35, 28, 20, 0.18),
-    inset 3px 0 6px -1px rgba(255, 255, 255, 0.5),
-    inset -4px 0 8px -1px rgba(0, 0, 0, 0.2);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.book-spine-shine {
+/* Hardcover Book & Ribbon Visual System */
+.book-hardcover-container {
   position: relative;
+  perspective: 800px;
+  display: flex;
+  flex-direction: column;
 }
-.book-spine-shine::before {
-  content: '';
+
+.book-hardcover {
+  position: relative;
+  border-radius: 4px 14px 14px 4px;
+  box-shadow: 
+    -4px 2px 8px rgba(70, 50, 40, 0.15),
+    4px 8px 20px rgba(80, 60, 45, 0.2),
+    inset 4px 0 6px rgba(0, 0, 0, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease;
+  overflow: hidden;
+  background-color: #EDE4D8;
+}
+
+.book-hardcover:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 
+    -5px 4px 12px rgba(70, 50, 40, 0.2),
+    6px 16px 28px rgba(80, 60, 45, 0.25),
+    inset 4px 0 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Simulated white paper edge trim at bottom */
+.book-paper-edge {
   position: absolute;
-  top: 0;
   bottom: 0;
-  left: 0;
-  width: 12px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 60%, rgba(0, 0, 0, 0.15) 100%);
-  pointer-events: none;
-  z-index: 20;
+  left: 6px;
+  right: 0;
+  height: 7px;
+  background: linear-gradient(180deg, #FAF6EE 0%, #E6DEC8 100%);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0 0 12px 0;
+  z-index: 10;
 }
 
-/* Hide scrollbar utility */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* Dangling Fabric Ribbon Bookmark */
+.ribbon-bookmark {
+  position: absolute;
+  bottom: -16px;
+  width: 14px;
+  height: 28px;
+  border-radius: 2px 2px 0 0;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 82%, 0% 100%);
+  z-index: 15;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+  transition: height 0.25s ease, transform 0.25s ease;
 }
 
+.book-hardcover:hover .ribbon-bookmark {
+  height: 32px;
+  bottom: -20px;
+}
+
+/* Gradient Button Accent */
+.btn-gradient {
+  background: linear-gradient(135deg, #5F65B9 0%, #8E65A8 50%, #E56B6F 100%);
+  color: #FFFFFF !important;
+  box-shadow: 0 6px 18px rgba(142, 101, 168, 0.35);
+  transition: all 0.2s ease;
+}
+.btn-gradient:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(142, 101, 168, 0.45);
+}
+
+/* Squircle & Clay Card Utilities */
+.clay-card {
+  background-color: #FBF8F4;
+  border-radius: 32px;
+  box-shadow: 0 16px 40px rgba(120, 100, 85, 0.08);
+  border: 1px solid #EFE8DE;
+}
+
+.squircle-btn {
+  background-color: #EFE8DE;
+  color: #2A2320;
+  border-radius: 16px;
+  transition: all 0.2s ease;
+}
+.squircle-btn:hover {
+  background-color: #E2D7C8;
+  transform: scale(1.05);
+}
+.squircle-btn.active {
+  background-color: #2A2320;
+  color: #FAF6F0;
+}

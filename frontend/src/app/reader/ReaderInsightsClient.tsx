@@ -202,54 +202,54 @@ export default function ReaderInsightsClient() {
 
   if (authLoading || !user) {
     return (
-      <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center font-bold text-[#D7C9B2]">
+      <div className="min-h-screen bg-[#D8C9BB] flex items-center justify-center font-bold text-[#7A6F68]">
         Đang tải...
       </div>
     );
   }
 
   return (
-    <div className="flex bg-[#EDE8E3] text-[#1D1C1A] min-h-screen font-sans selection:bg-[#DE5448]/20 overflow-x-hidden">
+    <div className="min-h-screen bg-[#D8C9BB] text-[#2A2320] p-3 sm:p-5 md:p-6 lg:p-7 flex flex-col md:flex-row gap-5 font-sans selection:bg-[#E5DACD]">
       <Sidebar />
 
-      <div className="flex-1 min-w-0 md:ml-20 pt-16 md:pt-0 flex flex-col min-h-screen">
+      <main className="flex-1 min-w-0 bg-[#FBF8F4] rounded-[36px] p-6 md:p-8 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col space-y-6">
         
         {/* Topbar */}
-        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 border-b border-[#4D4845]/30 flex justify-between items-center">
+        <header className="pb-5 mb-2 border-b border-[#EFE8DE] flex justify-between items-center">
           <div>
-            <h1 className="text-xl md:text-2xl font-black text-[#F5ECDC]">
+            <h1 className="text-xl md:text-2xl font-black text-[#2A2320] tracking-tight">
               Không Gian Đọc
             </h1>
-            <p className="text-xs text-[#D7C9B2] font-medium mt-0.5">
+            <p className="text-xs text-[#7A6F68] font-medium mt-0.5">
               Theo dõi thói quen đọc, bài học cốt lõi & tiến độ sách cá nhân
             </p>
           </div>
 
           <button
             onClick={() => router.push('/')}
-            className="btn-outline !py-2 !px-4 text-xs font-bold"
+            className="px-4 py-2 bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#2A2320] border border-[#E5DACD] rounded-full text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
           >
-            <Compass size={16} /> <span>Tủ Sách Chung</span>
+            <Compass size={15} className="text-[#5F65B9]" /> <span>Tủ Sách Chung</span>
           </button>
         </header>
 
-        {/* Main Content */}
-        <main className="flex-1 px-4 md:px-10 pt-6 pb-16 space-y-6">
+        {/* Main Content Body */}
+        <section className="flex-1 space-y-6">
           
           {isLoading && !dashboard ? (
             <div className="py-24 flex flex-col items-center justify-center gap-3">
-              <Loader2 className="animate-spin text-[#F5ECDC]" size={32} />
-              <p className="text-sm font-bold text-[#D7C9B2]">Đang tải dữ liệu...</p>
+              <Loader2 className="animate-spin text-[#5F65B9]" size={32} />
+              <p className="text-xs font-bold text-[#7A6F68]">Đang tải dữ liệu...</p>
             </div>
           ) : (
             <>
-              {/* HERO BANNER: Tone-compliant with BookCase Palette */}
-              <div className="bg-[#2A272A] border border-[#4D4845]/40 rounded-3xl p-6 md:p-8 shadow-md">
+              {/* HERO BANNER: Warm Almond Style */}
+              <div className="bg-[#FAF6F0] border border-[#ECE2D5] rounded-3xl p-6 md:p-8 shadow-sm">
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                   
                   {/* Left: Avatar & Motivation */}
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-[#4D4845] border border-[#7B7369]/40 overflow-hidden flex-shrink-0 shadow-inner">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-[#EFE8DE] border border-[#E5DACD] overflow-hidden flex-shrink-0 shadow-inner">
                       <img 
                         src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} 
                         alt="Avatar" 
@@ -257,26 +257,26 @@ export default function ReaderInsightsClient() {
                       />
                     </div>
                     <div>
-                      <h2 className="text-xl md:text-2xl font-black text-[#F5ECDC]">
+                      <h2 className="text-xl md:text-2xl font-black text-[#2A2320]">
                         Chào {user.username}
                       </h2>
-                      <p className="text-xs md:text-sm text-[#D7C9B2] mt-1 max-w-xl italic leading-relaxed">
+                      <p className="text-xs md:text-sm text-[#7A6F68] mt-1 max-w-xl italic leading-relaxed font-medium">
                         &ldquo;Đọc sách không phải để nhớ từng câu chữ, mà để xây dựng thế giới quan và gom nhặt những góc nhìn sâu sắc nhất.&rdquo;
                       </p>
                     </div>
                   </div>
 
                   {/* Right: Streak & Yearly Challenge Goal */}
-                  <div className="w-full lg:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-[#1F1D20] border border-[#4D4845]/40 p-4 rounded-2xl">
+                  <div className="w-full lg:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-white border border-[#ECE2D5] p-4 rounded-2xl shadow-sm">
                     
                     {/* Streak Badge */}
-                    <div className="flex items-center gap-3 pr-4 sm:border-r border-[#4D4845]/40">
-                      <div className="p-2.5 bg-[#2A272A] text-[#F5ECDC] border border-[#4D4845]/50 rounded-xl">
-                        <Flame size={22} className="text-[#F5ECDC]" />
+                    <div className="flex items-center gap-3 pr-4 sm:border-r border-[#EFE8DE]">
+                      <div className="p-2.5 bg-[#FAF0F0] text-[#E56B6F] border border-[#F0D5D5] rounded-xl">
+                        <Flame size={22} className="text-[#E56B6F] fill-[#E56B6F]" />
                       </div>
                       <div>
-                        <p className="text-[11px] text-[#7B7369] font-bold uppercase">Chuỗi Đọc Sách</p>
-                        <p className="text-lg font-black text-[#F5ECDC]">
+                        <p className="text-[10px] text-[#A0958C] font-bold uppercase tracking-wider">Chuỗi Đọc Sách</p>
+                        <p className="text-lg font-black text-[#2A2320]">
                           {dashboard?.reading_streak_days || 1} Ngày
                         </p>
                       </div>
@@ -285,20 +285,20 @@ export default function ReaderInsightsClient() {
                     {/* Challenge Goal */}
                     <div className="min-w-[180px]">
                       <div className="flex justify-between items-center text-xs mb-1.5 font-bold">
-                        <span className="text-[#D7C9B2] flex items-center gap-1">
-                          <Target size={13} className="text-[#F5ECDC]" /> Mục Tiêu Đọc Sách
+                        <span className="text-[#7A6F68] flex items-center gap-1">
+                          <Target size={13} className="text-[#5F65B9]" /> Mục Tiêu Đọc Sách
                         </span>
-                        <span className="text-[#F5ECDC]">
+                        <span className="text-[#2A2320]">
                           {dashboard?.total_completed || 0}/{dashboard?.yearly_goal || 24} cuốn
                         </span>
                       </div>
-                      <div className="w-full h-2 bg-[#2A272A] rounded-full overflow-hidden border border-[#4D4845]/40">
+                      <div className="w-full h-2 bg-[#EFE8DE] rounded-full overflow-hidden border border-[#E5DACD]">
                         <div 
-                          className="h-full bg-[#F5ECDC] rounded-full transition-all duration-500"
+                          className="h-full btn-gradient rounded-full transition-all duration-500"
                           style={{ width: `${Math.min(100, dashboard?.yearly_goal_progress || 0)}%` }}
                         />
                       </div>
-                      <p className="text-[11px] text-[#7B7369] mt-1 text-right font-medium">
+                      <p className="text-[11px] text-[#A0958C] mt-1 text-right font-medium">
                         Đạt {dashboard?.yearly_goal_progress || 0}% mục tiêu
                       </p>
                     </div>
@@ -308,61 +308,61 @@ export default function ReaderInsightsClient() {
                 </div>
               </div>
 
-              {/* METRIC CARDS (Clean, Unified Palette) */}
+              {/* METRIC CARDS */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 
                 {/* Completed */}
-                <div className="bg-[#2A272A] border border-[#4D4845]/40 p-5 rounded-2xl flex items-center gap-4">
-                  <div className="w-11 h-11 bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845]/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="bg-[#FAF6F0] border border-[#ECE2D5] p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+                  <div className="w-11 h-11 bg-white text-emerald-600 border border-emerald-200 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
                     <CheckCircle2 size={20} />
                   </div>
                   <div>
-                    <p className="text-[11px] text-[#7B7369] font-bold uppercase">Đã Đọc Xong</p>
-                    <p className="text-2xl font-black text-[#F5ECDC]">{dashboard?.total_completed || 0}</p>
-                    <span className="text-[11px] text-[#D7C9B2] font-medium">cuốn sách</span>
+                    <p className="text-[10px] text-[#A0958C] font-bold uppercase tracking-wider">Đã Đọc Xong</p>
+                    <p className="text-2xl font-black text-[#2A2320]">{dashboard?.total_completed || 0}</p>
+                    <span className="text-[11px] text-[#7A6F68] font-medium">cuốn sách</span>
                   </div>
                 </div>
 
                 {/* Currently Reading */}
-                <div className="bg-[#2A272A] border border-[#4D4845]/40 p-5 rounded-2xl flex items-center gap-4">
-                  <div className="w-11 h-11 bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845]/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="bg-[#FAF6F0] border border-[#ECE2D5] p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+                  <div className="w-11 h-11 bg-white text-[#5F65B9] border border-[#5F65B9]/20 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
                     <BookOpen size={20} />
                   </div>
                   <div>
-                    <p className="text-[11px] text-[#7B7369] font-bold uppercase">Đang Đọc Dở</p>
-                    <p className="text-2xl font-black text-[#F5ECDC]">{dashboard?.currently_reading || 0}</p>
-                    <span className="text-[11px] text-[#D7C9B2] font-medium">đang tiếp thu</span>
+                    <p className="text-[10px] text-[#A0958C] font-bold uppercase tracking-wider">Đang Đọc Dở</p>
+                    <p className="text-2xl font-black text-[#2A2320]">{dashboard?.currently_reading || 0}</p>
+                    <span className="text-[11px] text-[#7A6F68] font-medium">đang tiếp thu</span>
                   </div>
                 </div>
 
                 {/* Average Rating */}
-                <div className="bg-[#2A272A] border border-[#4D4845]/40 p-5 rounded-2xl flex items-center gap-4">
-                  <div className="w-11 h-11 bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845]/40 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Star size={20} className="fill-[#F5ECDC]" />
+                <div className="bg-[#FAF6F0] border border-[#ECE2D5] p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+                  <div className="w-11 h-11 bg-white text-amber-500 border border-amber-200 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <Star size={20} className="fill-amber-400 text-amber-400" />
                   </div>
                   <div>
-                    <p className="text-[11px] text-[#7B7369] font-bold uppercase">Điểm Trung Bình</p>
-                    <p className="text-2xl font-black text-[#F5ECDC]">{dashboard?.average_rating ? dashboard.average_rating.toFixed(1) : '0.0'}</p>
-                    <span className="text-[11px] text-[#D7C9B2] font-medium">{dashboard?.total_reviews || 0} lần đánh giá</span>
+                    <p className="text-[10px] text-[#A0958C] font-bold uppercase tracking-wider">Điểm Trung Bình</p>
+                    <p className="text-2xl font-black text-[#2A2320]">{dashboard?.average_rating ? dashboard.average_rating.toFixed(1) : '0.0'}</p>
+                    <span className="text-[11px] text-[#7A6F68] font-medium">{dashboard?.total_reviews || 0} lần đánh giá</span>
                   </div>
                 </div>
 
                 {/* Insights & Quotes count */}
-                <div className="bg-[#2A272A] border border-[#4D4845]/40 p-5 rounded-2xl flex items-center gap-4">
-                  <div className="w-11 h-11 bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845]/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="bg-[#FAF6F0] border border-[#ECE2D5] p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+                  <div className="w-11 h-11 bg-white text-purple-600 border border-purple-200 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
                     <Sparkles size={20} />
                   </div>
                   <div>
-                    <p className="text-[11px] text-[#7B7369] font-bold uppercase">Bài Học Đúc Kết</p>
-                    <p className="text-2xl font-black text-[#F5ECDC]">{dashboard?.key_takeaways?.length || 0}</p>
-                    <span className="text-[11px] text-[#D7C9B2] font-medium">& {dashboard?.total_quotes || 0} trích dẫn</span>
+                    <p className="text-[10px] text-[#A0958C] font-bold uppercase tracking-wider">Bài Học Đúc Kết</p>
+                    <p className="text-2xl font-black text-[#2A2320]">{dashboard?.key_takeaways?.length || 0}</p>
+                    <span className="text-[11px] text-[#7A6F68] font-medium">& {dashboard?.total_quotes || 0} trích dẫn</span>
                   </div>
                 </div>
 
               </div>
 
-              {/* TABS NAVIGATION (Matching BooksClient topbar format) */}
-              <div className="flex border-b border-[#4D4845]/40 gap-4 sm:gap-8 overflow-x-auto no-scrollbar">
+              {/* TABS NAVIGATION */}
+              <div className="flex border-b border-[#EFE8DE] gap-4 sm:gap-8 overflow-x-auto no-scrollbar">
                 {[
                   { key: 'journal', label: 'Sổ Đánh Giá & Insight', icon: <BookMarked size={16} /> },
                   { key: 'active', label: `Đang Đọc (${dashboard?.current_reads?.length || 0})`, icon: <Clock size={16} /> },
@@ -372,10 +372,10 @@ export default function ReaderInsightsClient() {
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key as any)}
-                    className={`flex items-center gap-2 pb-3 px-1 text-sm font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                    className={`flex items-center gap-2 pb-3 px-1 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                       activeTab === tab.key
-                        ? 'border-[#F5ECDC] text-[#F5ECDC]'
-                        : 'border-transparent text-[#7B7369] hover:text-[#D7C9B2]'
+                        ? 'border-[#2A2320] text-[#2A2320]'
+                        : 'border-transparent text-[#A0958C] hover:text-[#2A2320]'
                     }`}
                   >
                     {tab.icon}
@@ -837,7 +837,7 @@ export default function ReaderInsightsClient() {
             </>
           )}
 
-        </main>
+        </section>
 
         {/* Edit / Add Modal */}
         {editingBook && (
@@ -851,8 +851,7 @@ export default function ReaderInsightsClient() {
             onSuccess={fetchInsights}
           />
         )}
-
-      </div>
+      </main>
     </div>
   );
 }

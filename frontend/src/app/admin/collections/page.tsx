@@ -210,66 +210,69 @@ export default function AdminCollectionsPage() {
   };
 
   if (isAuthLoading || !user || user.role !== 'admin') {
-    return <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center font-bold text-[#D7C9B2]">Loading...</div>;
+    return <div className="min-h-screen bg-[#D8C9BB] flex items-center justify-center font-bold text-[#7A6F68]">Loading...</div>;
   }
 
   return (
-    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60 overflow-x-hidden">
+    <div className="min-h-screen bg-[#D8C9BB] text-[#2A2320] p-3 sm:p-5 md:p-6 lg:p-7 flex flex-col md:flex-row gap-5 font-sans selection:bg-[#E5DACD]">
       <Sidebar />
-      <div className="flex-1 min-w-0 md:ml-20 pt-16 md:pt-0 flex flex-col min-h-screen">
+      <main className="flex-1 min-w-0 bg-[#FBF8F4] rounded-[36px] p-6 md:p-8 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col">
         
         {/* Header */}
-        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex justify-between items-center border-b border-[#4D4845]/40">
-          <div className="flex items-center gap-3 text-xl font-bold">
-            <Library size={24} className="text-orange-500" />
-            <span className="text-[#F5ECDC]">Quản Lý Tệp Sách (Collections)</span>
+        <header className="pb-5 mb-6 flex justify-between items-center border-b border-[#EFE8DE]">
+          <div>
+            <div className="flex items-center gap-2.5 text-xl font-black text-[#2A2320]">
+              <Library size={22} className="text-[#5F65B9]" />
+              <span>Quản Lý Tệp Sách (Collections)</span>
+            </div>
+            <p className="text-xs text-[#7A6F68] font-medium mt-0.5">Tạo các bộ sưu tập chủ đề và chia sẻ nhóm sách</p>
           </div>
           <button 
             onClick={openCreateModal}
-            className="btn-primary !rounded-full !py-2.5 md:!py-3 !px-5 md:!px-6 shadow-md flex items-center gap-2"
+            className="btn-gradient text-white rounded-full py-2.5 px-5 shadow-md flex items-center gap-1.5 font-bold text-xs hover:opacity-95 transition-all cursor-pointer border-none"
           >
-            <Plus size={18} /> <span>Tạo Tệp Mới</span>
+            <Plus size={16} className="text-white stroke-[3]" /> <span>Tạo Tệp Mới</span>
           </button>
         </header>
 
         {/* Content */}
-        <main className="flex-1 px-4 md:px-10 pt-8 pb-12">
+        <section className="flex-1">
           {error && (
-            <div className="text-center bg-red-950/40 border border-red-500/40 text-red-400 p-4 rounded-xl text-sm font-bold mb-6">
+            <div className="text-center bg-red-50 border border-red-200 text-red-600 p-4 rounded-2xl text-xs font-bold mb-6">
               {error}
             </div>
           )}
           {loading ? (
             <div className="flex justify-center mt-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-4 border-orange-500 border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#5F65B9] border-t-transparent"></div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {collections.map(c => (
-                <div key={c.id} className="bg-[#2A272A] rounded-3xl p-6 shadow-md border border-[#4D4845]/50 flex flex-col hover:border-[#F97316]/50 transition-all">
+                <div key={c.id} className="bg-[#FAF6F0] rounded-3xl p-6 shadow-sm border border-[#ECE2D5] flex flex-col hover:border-[#5F65B9] transition-all">
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-xl font-bold text-[#F5ECDC]">{c.name}</h3>
-                    <div className="flex gap-2 shrink-0">
-                      <button onClick={() => copyShareLink(c.id)} className="p-2 text-[#D7C9B2] hover:text-green-400 hover:bg-[#1F1D20] rounded-full transition-colors" title="Copy Share Link">
-                        {copiedId === c.id ? <Check size={18} className="text-green-400" /> : <LinkIcon size={18} />}
+                    <h3 className="text-lg font-bold text-[#2A2320]">{c.name}</h3>
+                    <div className="flex gap-1.5 shrink-0">
+                      <button onClick={() => copyShareLink(c.id)} className="p-2 text-[#7A6F68] hover:text-[#2A2320] hover:bg-white rounded-full transition-colors cursor-pointer border border-[#ECE2D5]" title="Copy Share Link">
+                        {copiedId === c.id ? <Check size={16} className="text-emerald-600" /> : <LinkIcon size={16} />}
                       </button>
-                      <button onClick={() => openEditModal(c)} className="p-2 text-[#D7C9B2] hover:text-orange-400 hover:bg-[#1F1D20] rounded-full transition-colors">
-                        <Edit2 size={18} />
+                      <button onClick={() => openEditModal(c)} className="p-2 text-[#7A6F68] hover:text-[#2A2320] hover:bg-white rounded-full transition-colors cursor-pointer border border-[#ECE2D5]">
+                        <Edit2 size={16} />
                       </button>
-                      <button onClick={() => handleDelete(c.id)} className="p-2 text-[#D7C9B2] hover:text-red-400 hover:bg-[#1F1D20] rounded-full transition-colors">
-                        <Trash2 size={18} />
+                      <button onClick={() => handleDelete(c.id)} className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors cursor-pointer border border-red-200">
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
-                  <p className="text-[#D7C9B2] text-sm mb-4 line-clamp-2 min-h-[40px]">
+                  <p className="text-[#7A6F68] text-xs mb-4 line-clamp-2 min-h-[36px] font-medium">
                     {c.description || 'Không có mô tả'}
                   </p>
                   
-                  <div className="mt-auto pt-4 border-t border-[#4D4845]/40 flex justify-between items-center">
-                    <span className="text-sm font-bold text-[#7B7369]">{c.book_count} cuốn sách</span>
+                  <div className="mt-auto pt-4 border-t border-[#EFE8DE] flex justify-between items-center">
+                    <span className="text-xs font-bold text-[#A0958C]">{c.book_count} cuốn sách</span>
                     <button 
                       onClick={() => openManageModal(c.id)}
-                      className="text-xs md:text-sm font-bold px-4 py-2 rounded-full text-[#1F1D20] bg-orange-500 hover:bg-orange-600 shadow-md transition-all duration-200 cursor-pointer active:scale-95 flex items-center gap-1.5"
+                      className="text-xs font-bold px-4 py-2 rounded-full text-white btn-gradient shadow-sm hover:opacity-95 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5 border-none"
                     >
                       <span>Quản lý sách</span>
                     </button>
@@ -278,32 +281,32 @@ export default function AdminCollectionsPage() {
               ))}
               
               {collections.length === 0 && (
-                <div className="col-span-full text-center py-20 bg-[#2A272A] rounded-3xl border border-dashed border-[#4D4845]/60">
-                  <Library size={48} className="text-[#7B7369] mx-auto mb-4" />
-                  <p className="text-[#D7C9B2]">Chưa có Tệp sách nào.</p>
+                <div className="col-span-full text-center py-20 bg-[#FAF6F0] rounded-3xl border border-dashed border-[#D8C9BB]">
+                  <Library size={48} className="text-[#A0958C] mx-auto mb-4" />
+                  <p className="text-xs text-[#7A6F68] font-bold">Chưa có Tệp sách nào.</p>
                 </div>
               )}
             </div>
           )}
-        </main>
-      </div>
+        </section>
+      </main>
 
       {/* Form Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-           <div className="bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845]/60 rounded-3xl w-full max-w-md p-8 shadow-2xl relative">
-              <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 p-2 bg-[#2A272A] rounded-full text-[#D7C9B2] hover:text-[#F5ECDC] transition-colors border border-[#4D4845]/40"><X size={16}/></button>
-              <h2 className="text-2xl font-black text-[#F5ECDC] mb-6">{editingCollection ? 'Sửa Tệp Sách' : 'Tạo Tệp Sách Mới'}</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+           <div className="bg-[#FBF8F4] text-[#2A2320] border border-[#ECE2D5] rounded-[36px] w-full max-w-md p-8 shadow-2xl relative">
+              <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 p-2 bg-[#FAF6F0] rounded-full text-[#7A6F68] hover:text-[#2A2320] transition-colors border border-[#ECE2D5] cursor-pointer"><X size={16}/></button>
+              <h2 className="text-xl font-black text-[#2A2320] mb-6">{editingCollection ? 'Sửa Tệp Sách' : 'Tạo Tệp Sách Mới'}</h2>
               <form onSubmit={handleSave} className="flex flex-col gap-4">
                  <div>
-                   <label className="block text-sm font-bold text-[#D7C9B2] mb-2">Tên Tệp</label>
-                   <input type="text" required value={name} onChange={e => setName(e.target.value)} className="w-full bg-[#2A272A] border border-[#4D4845] text-[#F5ECDC] text-sm rounded-2xl focus:ring-orange-500 focus:border-orange-500 block p-4 outline-none transition-all placeholder-[#7B7369]" placeholder="Nhập tên tệp..." />
+                   <label className="block text-xs font-bold text-[#7A6F68] mb-2">Tên Tệp</label>
+                   <input type="text" required value={name} onChange={e => setName(e.target.value)} className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] text-xs rounded-xl focus:border-[#5F65B9] block p-3.5 outline-none transition-all placeholder-[#A0958C]" placeholder="Nhập tên tệp..." />
                  </div>
                  <div>
-                   <label className="block text-sm font-bold text-[#D7C9B2] mb-2">Mô tả (Tùy chọn)</label>
-                   <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full bg-[#2A272A] border border-[#4D4845] text-[#F5ECDC] text-sm rounded-2xl focus:ring-orange-500 focus:border-orange-500 block p-4 outline-none transition-all h-24 placeholder-[#7B7369]" placeholder="Nhập mô tả..." />
+                   <label className="block text-xs font-bold text-[#7A6F68] mb-2">Mô tả (Tùy chọn)</label>
+                   <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] text-xs rounded-xl focus:border-[#5F65B9] block p-3.5 outline-none transition-all h-24 placeholder-[#A0958C]" placeholder="Nhập mô tả..." />
                  </div>
-                 <button type="submit" className="w-full btn-primary mt-2">
+                 <button type="submit" className="w-full btn-gradient text-white rounded-full py-3 text-xs font-bold shadow-md cursor-pointer border-none mt-2 hover:opacity-95">
                    {editingCollection ? 'Lưu Thay Đổi' : 'Tạo Tệp Sách'}
                  </button>
               </form>
@@ -313,11 +316,11 @@ export default function AdminCollectionsPage() {
 
       {/* Manage Books Modal */}
       {isManageModalOpen && activeCollection && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-           <div className="bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845]/60 rounded-3xl w-full max-w-4xl p-6 md:p-8 shadow-2xl relative h-[90vh] flex flex-col">
-              <button onClick={() => setIsManageModalOpen(false)} className="absolute top-6 right-6 p-2 bg-[#2A272A] rounded-full text-[#D7C9B2] hover:text-[#F5ECDC] transition-colors border border-[#4D4845]/40 z-10"><X size={16}/></button>
-              <h2 className="text-2xl font-black text-[#F5ECDC] mb-2 pr-10">Thêm sách vào: {activeCollection.name}</h2>
-              <p className="text-[#D7C9B2] mb-6 text-sm">Bấm vào sách để thêm hoặc xóa khỏi tệp.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+           <div className="bg-[#FBF8F4] text-[#2A2320] border border-[#ECE2D5] rounded-[36px] w-full max-w-4xl p-6 md:p-8 shadow-2xl relative h-[90vh] flex flex-col">
+              <button onClick={() => setIsManageModalOpen(false)} className="absolute top-6 right-6 p-2 bg-[#FAF6F0] rounded-full text-[#7A6F68] hover:text-[#2A2320] transition-colors border border-[#ECE2D5] z-10 cursor-pointer"><X size={16}/></button>
+              <h2 className="text-xl md:text-2xl font-black text-[#2A2320] mb-1 pr-10">Thêm sách vào: {activeCollection.name}</h2>
+              <p className="text-[#7A6F68] mb-6 text-xs font-medium">Bấm vào sách để thêm hoặc xóa khỏi tệp.</p>
               
               <div className="flex-1 overflow-y-auto pr-2">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -327,7 +330,7 @@ export default function AdminCollectionsPage() {
                       <div 
                         key={book.id} 
                         onClick={() => toggleBookInCollection(book.id)}
-                        className={`cursor-pointer group relative rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isAdded ? 'border-orange-500 shadow-md ring-2 ring-orange-500/30' : 'border-[#4D4845]/40 hover:border-gray-500'}`}
+                        className={`cursor-pointer group relative rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isAdded ? 'border-[#5F65B9] shadow-md ring-2 ring-[#5F65B9]/30' : 'border-[#ECE2D5] hover:border-[#D8C9BB]'}`}
                       >
                          <div className="w-full aspect-[2/3] relative">
                             <BookCoverImage 
@@ -335,20 +338,20 @@ export default function AdminCollectionsPage() {
                               bookId={book.id}
                               title={book.title}
                               author={book.author}
-                              className={`w-full h-full object-cover transition-all ${isAdded ? 'brightness-110' : 'brightness-75 group-hover:brightness-100'}`}
+                              className={`w-full h-full object-cover transition-all ${isAdded ? 'brightness-105' : 'brightness-90 group-hover:brightness-100'}`}
                             />
                            
                             {/* Checkmark overlay */}
                             {isAdded && (
-                              <div className="absolute inset-0 bg-orange-500/30 flex items-center justify-center">
-                                <div className="bg-orange-500 text-[#1F1D20] rounded-full p-2 shadow-lg">
-                                  <Check size={24} strokeWidth={3} />
+                              <div className="absolute inset-0 bg-[#5F65B9]/20 flex items-center justify-center">
+                                <div className="btn-gradient text-white rounded-full p-2 shadow-lg">
+                                  <Check size={20} strokeWidth={3} />
                                 </div>
                               </div>
                             )}
                          </div>
-                         <div className="p-2 bg-[#2A272A]">
-                           <h3 className="text-xs font-bold text-[#F5ECDC] line-clamp-1">{book.title}</h3>
+                         <div className="p-2.5 bg-white border-t border-[#ECE2D5]">
+                           <h3 className="text-xs font-bold text-[#2A2320] line-clamp-1">{book.title}</h3>
                          </div>
                       </div>
                     )

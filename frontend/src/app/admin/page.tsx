@@ -50,8 +50,10 @@ export function normalizeTitle(title: string | null | undefined): string {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'd');
-  return str.split(/\s+/).filter(Boolean).join(' ');
+    .replace(/Đ/g, 'd')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return str;
 }
 
 function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection, setDownloadingId, downloadingId, baseUrl, copyShareLink, copiedId, openEditModal, handleDelete, duplicateInfo }: any) {
@@ -65,17 +67,17 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={`flex flex-col group relative ${isSortMode ? 'cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-[#D7C9B2] rounded-2xl' : ''}`}>
+    <div ref={setNodeRef} style={style} className={`flex flex-col group relative ${isSortMode ? 'cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-[#7E79BF] rounded-2xl' : ''}`}>
       {isSortMode && (
-         <div {...attributes} {...listeners} className="absolute top-2 left-2 z-40 bg-black/60 p-1.5 rounded-lg text-white hover:bg-[#F5ECDC] hover:text-[#1F1D20] transition-colors backdrop-blur-sm cursor-grab">
+         <div {...attributes} {...listeners} className="absolute top-2 left-2 z-40 bg-[#2A2320]/80 p-1.5 rounded-lg text-white hover:bg-black transition-colors backdrop-blur-sm cursor-grab">
            <GripVertical size={16} />
          </div>
       )}
-      <div className={`w-full aspect-[2/3] relative z-10 mb-3 rounded-2xl overflow-hidden shadow-sm border ${
+      <div className={`w-full aspect-[2/3] relative z-10 mb-2.5 rounded-2xl overflow-hidden shadow-sm border ${
         duplicateInfo && duplicateInfo.isRedundant 
-          ? 'border-red-500/50 shadow-red-950/20' 
-          : 'border-[#4D4845]/40'
-      } transition-all duration-300 ${!isSortMode ? 'group-hover:shadow-xl' : ''}`}>
+          ? 'border-red-400 shadow-red-200' 
+          : 'border-[#E5DACD]'
+      } transition-all duration-300 ${!isSortMode ? 'group-hover:shadow-md group-hover:-translate-y-1' : ''}`}>
          <BookCoverImage 
            coverUrl={book.cover_url}
            bookId={book.id}
@@ -91,7 +93,7 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
                  type="checkbox" 
                  checked={selectedBooks.includes(book.id)}
                  onChange={() => toggleBookSelection(book.id)}
-                 className="w-5 h-5 rounded-md border-2 border-white/80 bg-black/40 checked:bg-orange-500 checked:border-orange-500 cursor-pointer shadow-sm focus:ring-0 focus:ring-offset-0 transition-colors"
+                 className="w-5 h-5 rounded-md border-2 border-[#E5DACD] bg-white checked:bg-[#2A2320] checked:border-[#2A2320] cursor-pointer shadow-sm focus:ring-0 transition-colors"
                />
              </div>
 
@@ -99,8 +101,8 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
                <div className="absolute top-2 right-9 z-20">
                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-md backdrop-blur-md shadow-sm border ${
                    duplicateInfo.isRedundant 
-                     ? 'bg-red-950/90 text-red-200 border-red-700/60' 
-                     : 'bg-[#1F1D20]/90 text-[#F5ECDC] border-[#4D4845]/80'
+                     ? 'bg-[#FAF0F0] text-[#EB5757] border-[#F0D5D5]' 
+                     : 'bg-[#FAF6F0] text-[#2A2320] border-[#E5DACD]'
                  }`}>
                    {duplicateInfo.isRedundant ? `Bản thừa #${duplicateInfo.copyIndex}` : 'Bản gốc'}
                  </span>
@@ -109,16 +111,16 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
              
              <div className="absolute top-2 left-2 z-20">
                {book.external_url ? (
-                 <span className="flex items-center gap-1 text-orange-400 font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-orange-500/30" title={book.external_url}>
-                   <LinkIcon size={12} /> Drive
+                 <span className="flex items-center gap-1 text-[#3A7BD5] font-bold bg-[#FAF6F0]/95 backdrop-blur px-2 py-0.5 rounded-lg text-[10px] shadow-sm border border-[#E5DACD]" title={book.external_url}>
+                   <LinkIcon size={11} /> Drive
                  </span>
                ) : book.has_file === false ? (
-                 <span className="flex items-center gap-1 text-amber-400 font-bold bg-[#1F1D20]/95 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-amber-500/50" title="Chưa có dữ liệu EPUB/PDF để tải">
-                   <AlertTriangle size={12} className="text-amber-400" /> Chưa có file
+                 <span className="flex items-center gap-1 text-[#C06060] font-bold bg-[#FAF0F0]/95 backdrop-blur px-2 py-0.5 rounded-lg text-[10px] shadow-sm border border-[#F0D5D5]" title="Chưa có dữ liệu file">
+                   <AlertTriangle size={11} className="text-[#C06060]" /> Chưa có file
                  </span>
                ) : (
-                 <span className="flex items-center gap-1 text-[#D7C9B2] font-bold bg-[#1F1D20]/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] shadow-sm border border-[#4D4845]/40">
-                   <Upload size={12} /> Local
+                 <span className="flex items-center gap-1 text-[#27AE60] font-bold bg-[#FAF6F0]/95 backdrop-blur px-2 py-0.5 rounded-lg text-[10px] shadow-sm border border-[#E5DACD]">
+                   <Upload size={11} /> Local
                  </span>
                )}
              </div>
@@ -137,36 +139,36 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
                      setTimeout(() => setDownloadingId(null), 1500);
                    }} 
                    disabled={downloadingId === book.id || book.has_file === false}
-                   className={`p-1.5 md:p-2 rounded-full shadow-lg border transition-all hover:scale-110 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                   className={`p-1.5 rounded-full shadow-md border transition-all hover:scale-105 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                      book.has_file === false
-                       ? 'bg-[#2A272A] text-gray-500 border-[#4D4845]'
-                       : 'bg-[#F97316] text-white hover:bg-[#EA580C] border-[#F97316]'
+                       ? 'bg-[#EFE8DE] text-gray-400 border-[#E0D5C7]'
+                       : 'bg-[#2A2320] hover:bg-[#5F65B9] text-white border-[#2A2320]'
                    }`} 
-                   title={book.has_file === false ? "Chưa có file dữ liệu EPUB/PDF để tải về" : "Tải sách xuống"}
+                   title={book.has_file === false ? "Chưa có file dữ liệu" : "Tải sách xuống"}
                  >
-                   {downloadingId === book.id ? <Loader2 size={14} className="animate-spin text-white" /> : <Download size={14} className="text-white" />}
+                   {downloadingId === book.id ? <Loader2 size={13} className="animate-spin text-white" /> : <Download size={13} className="text-white" />}
                  </button>
                  <button 
                    onClick={() => copyShareLink(book.id)} 
-                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-green-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer" 
+                   className="p-1.5 bg-[#FAF6F0]/95 text-[#2A2320] hover:bg-[#EFE8DE] rounded-full shadow-sm border border-[#E5DACD] transition-all hover:scale-105 cursor-pointer" 
                    title="Sao chép link chia sẻ"
                  >
-                   {copiedId === book.id ? <Check size={14} className="text-green-400" /> : <Share2 size={14} className="text-[#D7C9B2] hover:text-green-400" />}
+                   {copiedId === book.id ? <Check size={13} className="text-green-600 stroke-[3]" /> : <Share2 size={13} className="text-[#7A6F68]" />}
                  </button>
 
                  <button 
                    onClick={() => openEditModal(book)} 
-                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-orange-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer" 
+                   className="p-1.5 bg-[#FAF6F0]/95 text-[#2A2320] hover:bg-[#EFE8DE] rounded-full shadow-sm border border-[#E5DACD] transition-all hover:scale-105 cursor-pointer" 
                    title="Sửa thông tin sách"
                  >
-                   <Edit2 size={14} className="text-[#D7C9B2] hover:text-orange-400" />
+                   <Edit2 size={13} className="text-[#7A6F68]" />
                  </button>
                  <button 
                    onClick={() => handleDelete(book.id)} 
-                   className="p-1.5 md:p-2 bg-[#1F1D20]/95 text-[#F5ECDC] hover:text-red-400 hover:bg-[#2A272A] rounded-full shadow-lg border border-[#4D4845]/50 transition-all hover:scale-110 cursor-pointer" 
+                   className="p-1.5 bg-[#FAF6F0]/95 text-[#EB5757] hover:bg-[#FAF0F0] rounded-full shadow-sm border border-[#E5DACD] transition-all hover:scale-105 cursor-pointer" 
                    title="Xóa sách"
                  >
-                   <Trash2 size={14} className="text-[#D7C9B2] hover:text-red-400" />
+                   <Trash2 size={13} />
                  </button>
               </div>
            </>
@@ -174,10 +176,10 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
       </div>
       
       <div className="px-1">
-        <h3 className="text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2">{book.title}</h3>
-        <p className="text-xs text-[#D7C9B2] font-semibold mt-1 truncate">{book.author || 'Chưa rõ tác giả'}</p>
+        <h3 className="text-xs sm:text-sm font-extrabold text-[#2A2320] leading-snug line-clamp-2">{book.title}</h3>
+        <p className="text-[11px] sm:text-xs text-[#8B7070] font-semibold mt-0.5 truncate">{book.author || 'Chưa rõ tác giả'}</p>
         {duplicateInfo && (
-          <p className="text-[10px] font-bold text-[#7B7369] mt-0.5">
+          <p className="text-[10px] font-bold text-[#7A6F68] mt-0.5">
             Nhóm trùng #{duplicateInfo.groupIndex} ({duplicateInfo.totalInGroup} bản)
           </p>
         )}
@@ -736,41 +738,36 @@ export default function AdminPage() {
   }, [isBrokenFilterActive, isDuplicateFilterActive, duplicateBooksWithInfo, books, brokenBooksList, searchQuery]);
 
   if (isLoading || !user || user.role !== 'admin') {
-    return <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center font-bold text-[#D7C9B2]">Loading...</div>;
+    return <div className="min-h-screen bg-[#D8C9BB] flex items-center justify-center font-bold text-[#7A6F68]">Loading...</div>;
   }
 
   return (
-    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60">
+    <div className="min-h-screen bg-[#D8C9BB] text-[#2A2320] p-3 sm:p-5 md:p-6 lg:p-7 flex flex-col md:flex-row gap-5 font-sans selection:bg-[#E5DACD]">
       <Sidebar />
-      <div className="flex-1 min-w-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen">
+      <main className="flex-1 min-w-0 bg-[#FBF8F4] rounded-[36px] p-5 md:p-8 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col">
         {/* Top Header */}
-        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/95 backdrop-blur-md px-4 py-3.5 md:px-6 md:py-4 border-b border-[#4D4845]/40 flex flex-col gap-3">
+        <header className="pb-5 mb-6 border-b border-[#EFE8DE] flex flex-col gap-4">
           {/* Dòng 1: Tiêu đề Dashboard & Các nút công cụ + Thêm sách */}
           <div className="flex flex-wrap items-center justify-between gap-3 w-full">
-            <h1 className="text-xl md:text-2xl font-black text-[#F5ECDC] tracking-tight">Admin Dashboard</h1>
+            <div>
+              <h1 className="text-xl md:text-2xl font-black text-[#2A2320] tracking-tight">Admin Dashboard</h1>
+              <p className="text-xs text-[#7A6F68] font-medium mt-0.5">Quản lý toàn bộ kho sách, kiểm tra liên kết và xử lý dữ liệu</p>
+            </div>
 
             {/* Nhóm công cụ kiểm tra, quản trị & Thêm sách */}
-            <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               {/* Nút Kiểm tra file bị lỗi / mất liên kết */}
               <button 
                 onClick={() => {
                   setIsCheckLinksOpen(true);
                 }}
-                style={{ 
-                  backgroundColor: '#2A272A', 
-                  color: '#F5ECDC', 
-                  borderColor: '#4D4845' 
-                }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#2A2320] border border-[#E5DACD] transition-all cursor-pointer shadow-sm"
                 title="Kiểm tra các cuốn sách chưa có file hoặc bị mất liên kết tải về"
               >
-                <Link2 size={15} style={{ color: '#D7C9B2' }} />
+                <Link2 size={15} className="text-[#5F65B9]" />
                 <span>Kiểm tra file</span>
                 {brokenFileCount !== null && brokenFileCount > 0 && (
-                  <span 
-                    style={{ backgroundColor: '#363236', color: '#F5ECDC', borderColor: '#4D4845' }}
-                    className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none border"
-                  >
+                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none bg-[#E56B6F] text-white">
                     {brokenFileCount}
                   </span>
                 )}
@@ -787,24 +784,16 @@ export default function AdminPage() {
                       setIsSortMode(false);
                     }
                   }}
-                  style={{
-                    backgroundColor: isBrokenFilterActive ? '#F5ECDC' : '#2A272A',
-                    color: isBrokenFilterActive ? '#181618' : '#F5ECDC',
-                    borderColor: isBrokenFilterActive ? '#F5ECDC' : '#4D4845',
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border shadow-sm"
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer shadow-sm border ${
+                    isBrokenFilterActive 
+                      ? 'bg-[#E56B6F] text-white border-transparent' 
+                      : 'bg-[#FAF0F0] text-[#C06060] border-[#F0D5D5] hover:bg-[#FDE8E8]'
+                  }`}
                   title="Chỉ hiển thị các cuốn sách chưa thể tải về trên bảng quản trị"
                 >
-                  <AlertTriangle size={15} style={{ color: isBrokenFilterActive ? '#181618' : '#D7C9B2', stroke: isBrokenFilterActive ? '#181618' : '#D7C9B2' }} />
-                  <span style={{ color: isBrokenFilterActive ? '#181618' : '#F5ECDC' }}>Sách lỗi file</span>
-                  <span
-                    style={{
-                      backgroundColor: isBrokenFilterActive ? '#181618' : '#363236',
-                      color: isBrokenFilterActive ? '#F5ECDC' : '#D7C9B2',
-                      borderColor: isBrokenFilterActive ? '#181618' : '#4D4845'
-                    }}
-                    className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none border"
-                  >
+                  <AlertTriangle size={15} />
+                  <span>Sách lỗi file</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none ${isBrokenFilterActive ? 'bg-white text-[#E56B6F]' : 'bg-[#E56B6F] text-white'}`}>
                     {brokenFileCount}
                   </span>
                 </button>
@@ -820,24 +809,17 @@ export default function AdminPage() {
                     setIsSortMode(false);
                   }
                 }}
-                style={{
-                  backgroundColor: isDuplicateFilterActive ? '#F5ECDC' : '#2A272A',
-                  color: isDuplicateFilterActive ? '#181618' : (duplicateGroups.length > 0 ? '#F5ECDC' : '#7B7369'),
-                  borderColor: isDuplicateFilterActive ? '#F5ECDC' : '#4D4845',
-                }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border shadow-sm"
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer shadow-sm border ${
+                  isDuplicateFilterActive 
+                    ? 'bg-[#2A2320] text-white border-[#2A2320]' 
+                    : 'bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#2A2320] border-[#E5DACD]'
+                }`}
                 title="Lọc các cuốn sách bị trùng lặp tên & tác giả"
               >
-                <Copy size={15} style={{ color: isDuplicateFilterActive ? '#181618' : 'currentColor' }} />
-                <span style={{ color: isDuplicateFilterActive ? '#181618' : 'currentColor' }}>Lọc trùng</span>
+                <Copy size={15} />
+                <span>Lọc trùng</span>
                 {duplicateRedundantCount > 0 && (
-                  <span 
-                    style={{
-                      backgroundColor: isDuplicateFilterActive ? '#181618' : '#4D4845',
-                      color: '#F5ECDC',
-                    }}
-                    className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none"
-                  >
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none ${isDuplicateFilterActive ? 'bg-white text-[#2A2320]' : 'bg-[#2A2320] text-white'}`}>
                     {duplicateRedundantCount}
                   </span>
                 )}
@@ -847,10 +829,9 @@ export default function AdminPage() {
               {selectedBooks.length > 0 && (
                 <button 
                   onClick={handleBulkDelete}
-                  style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black hover:bg-red-700 text-white transition-all shadow-md cursor-pointer border border-red-600"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-[#EB5757] hover:bg-red-600 text-white transition-all shadow-md cursor-pointer border-none"
                 >
-                  <Trash2 size={15} style={{ color: '#FFFFFF' }} />
+                  <Trash2 size={15} className="text-white" />
                   <span>Xóa {selectedBooks.length}</span>
                 </button>
               )}
@@ -859,12 +840,11 @@ export default function AdminPage() {
               <button 
                 onClick={handleFixCovers}
                 disabled={isFixing}
-                style={{ backgroundColor: '#2A272A', color: '#F5ECDC', borderColor: '#4D4845' }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#2A2320] border border-[#E5DACD] transition-all cursor-pointer disabled:opacity-50 shadow-sm"
                 title="Tự động sửa ảnh bìa bị lỗi"
               >
-                {isFixing ? <Loader2 size={15} className="animate-spin text-[#F5ECDC]" /> : <Settings size={15} style={{ color: '#F5ECDC' }} />}
-                <span className="hidden sm:inline" style={{ color: '#F5ECDC' }}>{isFixing ? 'Đang sửa...' : 'Sửa bìa'}</span>
+                {isFixing ? <Loader2 size={15} className="animate-spin text-[#7A6F68]" /> : <Settings size={15} className="text-[#7A6F68]" />}
+                <span className="hidden sm:inline">{isFixing ? 'Đang sửa...' : 'Sửa bìa'}</span>
               </button>
 
               {/* Sắp xếp */}
@@ -872,103 +852,98 @@ export default function AdminPage() {
                 <button 
                   onClick={handleSaveOrder}
                   disabled={isSavingOrder}
-                  style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black hover:bg-white transition-all shadow-md cursor-pointer border"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-[#2A2320] text-white hover:bg-black transition-all shadow-md cursor-pointer border-none"
                 >
-                  {isSavingOrder ? <Loader2 size={15} className="animate-spin text-[#181618]" /> : <Save size={15} style={{ color: '#181618' }} />}
-                  <span style={{ color: '#181618' }}>Lưu thứ tự</span>
+                  {isSavingOrder ? <Loader2 size={15} className="animate-spin text-white" /> : <Save size={15} className="text-white" />}
+                  <span>Lưu thứ tự</span>
                 </button>
               ) : (
                 <button 
                   onClick={() => { setIsSortMode(true); setSearchQuery(''); setIsDuplicateFilterActive(false); }}
-                  style={{ backgroundColor: '#2A272A', color: '#F5ECDC', borderColor: '#4D4845' }}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border hover:border-[#D7C9B2] transition-all cursor-pointer shadow-sm"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#2A2320] border border-[#E5DACD] transition-all cursor-pointer shadow-sm"
                   title="Thay đổi thứ tự sắp xếp sách"
                 >
-                  <GripVertical size={15} style={{ color: '#F5ECDC' }} />
-                  <span style={{ color: '#F5ECDC' }}>Sắp xếp</span>
+                  <GripVertical size={15} className="text-[#7A6F68]" />
+                  <span>Sắp xếp</span>
                 </button>
               )}
 
               {/* Đường phân cách thẩm mỹ */}
-              <div className="h-6 w-px bg-[#4D4845]/50 mx-1 hidden sm:block shrink-0" />
+              <div className="h-6 w-px bg-[#E5DACD] mx-1 hidden sm:block shrink-0" />
 
               {/* Nút Hành Động Chính: Thêm Sách */}
               <button 
                 onClick={() => setIsAddModalOpen(true)}
-                style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black hover:bg-white transition-all shadow-md cursor-pointer border shrink-0"
+                className="btn-gradient flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black text-white hover:opacity-95 transition-all shadow-md cursor-pointer shrink-0 border-none"
               >
-                <Plus size={16} style={{ color: '#181618' }} />
-                <span style={{ color: '#181618' }}>Thêm Sách</span>
+                <Plus size={16} className="text-white stroke-[3]" />
+                <span>Thêm Sách</span>
               </button>
             </div>
           </div>
 
-          {/* Dòng 2 riêng biệt: Số lượng sách & Ô tìm kiếm (Không bao giờ bị đè) */}
-          <div className="flex items-center justify-between gap-3 w-full pt-1 border-t border-[#4D4845]/25">
+          {/* Dòng 2: Số lượng sách & Ô tìm kiếm */}
+          <div className="flex items-center justify-between gap-3 w-full pt-2 border-t border-[#EFE8DE]">
             <div className="flex items-center gap-2 shrink-0">
-              <span className="text-xs font-bold px-3 py-1.5 bg-[#2A272A] border border-[#4D4845]/50 text-[#D7C9B2] rounded-xl flex items-center gap-2">
+              <span className="text-xs font-bold px-3.5 py-1.5 bg-[#FAF6F0] border border-[#E5DACD] text-[#7A6F68] rounded-full flex items-center gap-2 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
                 <span>{books.length} cuốn sách</span>
               </span>
             </div>
 
-            {/* Search Input rộng rãi, độc lập */}
+            {/* Search Input */}
             <div className="relative w-full max-w-xs sm:max-w-sm">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7B7369]" size={14} />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A0958C]" size={14} />
               <input 
                 type="text" 
                 placeholder="Tìm tên sách, tác giả..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-2 pl-9 pr-8 text-xs font-medium text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none focus:border-[#F5ECDC] transition-all"
+                className="w-full bg-[#FAF6F0] border border-[#E5DACD] rounded-full py-2 pl-9 pr-8 text-xs font-medium text-[#2A2320] placeholder-[#A0958C] focus:outline-none focus:border-[#5F65B9] transition-all shadow-sm"
               />
               {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7B7369] hover:text-[#F5ECDC] cursor-pointer">
+                <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A0958C] hover:text-[#2A2320] cursor-pointer">
                   <X size={13} />
                 </button>
               )}
             </div>
-
           </div>
         </header>
 
-        <main className="flex-1 px-4 md:px-8 pt-6 pb-12">
+        <section className="flex-1">
           {/* Banner hướng dẫn và xử lý trùng lặp */}
           {isDuplicateFilterActive && (
             duplicateGroups.length === 0 ? (
-              <div className="bg-[#2A272A] border border-[#4D4845]/50 rounded-2xl p-8 text-center my-4">
-                <Check size={32} className="mx-auto text-[#F5ECDC] mb-3" />
-                <h3 className="text-base font-bold text-[#F5ECDC]">Không phát hiện cuốn sách nào bị trùng lặp</h3>
-                <p className="text-xs text-[#D7C9B2] mt-1 max-w-md mx-auto">
+              <div className="bg-[#FAF6F0] border border-[#ECE2D5] rounded-3xl p-8 text-center my-4 shadow-sm">
+                <Check size={32} className="mx-auto text-emerald-600 mb-3" />
+                <h3 className="text-base font-bold text-[#2A2320]">Không phát hiện cuốn sách nào bị trùng lặp</h3>
+                <p className="text-xs text-[#7A6F68] mt-1 max-w-md mx-auto">
                   Hệ thống đã đối soát toàn bộ {books.length} cuốn sách theo tên & tác giả (đã hỗ trợ đảo họ tên và bỏ dấu tiếng Việt).
                 </p>
                 <button 
                   onClick={() => setIsDuplicateFilterActive(false)}
-                  style={{ backgroundColor: '#F5ECDC', color: '#181618', borderColor: '#F5ECDC' }}
-                  className="mt-4 px-5 py-2.5 font-black text-xs rounded-xl hover:bg-white cursor-pointer transition-all shadow-md border inline-flex items-center justify-center gap-2"
+                  className="mt-4 px-5 py-2.5 font-bold text-xs rounded-full bg-[#2A2320] text-white hover:bg-black cursor-pointer transition-all shadow-md inline-flex items-center justify-center gap-2"
                 >
-                  <span style={{ color: '#181618' }}>Quay lại xem tất cả sách</span>
+                  <span>Quay lại xem tất cả sách</span>
                 </button>
               </div>
             ) : (
-              <div className="bg-[#2A272A] border border-[#4D4845]/70 rounded-2xl p-4 md:p-5 mb-6 shadow-lg">
+              <div className="bg-[#FAF6F0] border border-[#ECE2D5] rounded-3xl p-5 mb-6 shadow-sm">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div className="flex items-start gap-3">
-                    <div className="p-2.5 bg-[#1F1D20] border border-[#4D4845]/60 rounded-xl text-[#F5ECDC] shrink-0">
+                    <div className="p-2.5 bg-[#EFE8DE] border border-[#E5DACD] rounded-2xl text-[#2A2320] shrink-0">
                       <Copy size={20} />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-sm md:text-base font-black text-[#F5ECDC]">
+                        <h3 className="text-sm md:text-base font-black text-[#2A2320]">
                           Phát hiện {duplicateGroups.length} nhóm sách trùng lặp ({totalDuplicateBooks} cuốn)
                         </h3>
-                        <span className="text-[11px] font-bold px-2 py-0.5 bg-red-950/60 text-red-300 border border-red-800/40 rounded-full">
+                        <span className="text-[11px] font-bold px-2.5 py-0.5 bg-red-100 text-red-600 border border-red-200 rounded-full">
                           {duplicateRedundantCount} bản sao thừa
                         </span>
                       </div>
-                      <p className="text-xs text-[#D7C9B2] mt-1">
+                      <p className="text-xs text-[#7A6F68] mt-1">
                         Hệ thống đã nhận diện thông minh tên sách và họ tên tác giả (ví dụ: &ldquo;Higashino Keigo&rdquo; = &ldquo;Keigo Higashino&rdquo;).
                       </p>
                     </div>
@@ -977,7 +952,7 @@ export default function AdminPage() {
                   <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                     <button
                       onClick={handleSelectAllDuplicates}
-                      className="flex-1 md:flex-initial px-3.5 py-2 bg-[#1F1D20] hover:bg-[#3A373A] border border-[#4D4845] text-[#F5ECDC] text-xs font-black rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="flex-1 md:flex-initial px-4 py-2 bg-[#2A2320] hover:bg-black text-white text-xs font-bold rounded-full transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Check size={14} />
                       <span>Chọn {duplicateRedundantCount} bản thừa để xóa</span>
@@ -987,7 +962,7 @@ export default function AdminPage() {
                         setIsDuplicateFilterActive(false);
                         setSelectedBooks([]);
                       }}
-                      className="px-3 py-2 text-xs font-bold text-[#D7C9B2] hover:text-[#F5ECDC] cursor-pointer"
+                      className="px-3.5 py-2 text-xs font-bold text-[#7A6F68] hover:text-[#2A2320] cursor-pointer"
                     >
                       Thoát lọc
                     </button>
@@ -999,10 +974,10 @@ export default function AdminPage() {
 
           {isFetchingBooks ? (
             <div className="flex flex-col items-center justify-center mt-32 max-w-md mx-auto w-full px-4">
-               <div className="w-full bg-[#2A272A] border border-[#4D4845]/50 rounded-full h-3 mb-3 shadow-inner overflow-hidden">
-                 <div className="bg-gradient-to-r from-orange-500 to-orange-600 h-full rounded-full transition-all duration-300" style={{ width: `${downloadProgress}%` }}></div>
+               <div className="w-full bg-[#EFE8DE] border border-[#E5DACD] rounded-full h-3 mb-3 shadow-inner overflow-hidden">
+                 <div className="btn-gradient h-full rounded-full transition-all duration-300" style={{ width: `${downloadProgress}%` }}></div>
                </div>
-               <span className="text-sm font-bold text-[#D7C9B2] animate-pulse">Đang tải danh sách sách... {downloadProgress}%</span>
+               <span className="text-sm font-bold text-[#7A6F68] animate-pulse">Đang tải danh sách sách... {downloadProgress}%</span>
             </div>
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -1031,53 +1006,68 @@ export default function AdminPage() {
           )}
 
           {successMsg && (
-            <div className="text-center bg-green-950/40 border border-green-500/30 text-green-400 p-4 rounded-xl text-sm font-bold mt-10">
+            <div className="text-center bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-2xl text-sm font-bold mt-10">
               {successMsg}
             </div>
           )}
 
           {error && (
-            <div className="text-center bg-red-950/40 border border-red-500/30 text-red-400 p-4 rounded-xl text-sm font-bold mt-10">
+            <div className="text-center bg-red-50 border border-red-200 text-red-600 p-4 rounded-2xl text-sm font-bold mt-10">
               {error}
             </div>
           )}
 
           {!isFetchingBooks && displayItems.length === 0 && !error && (
-            <div className="text-center text-[#D7C9B2] text-sm mt-10">No books found.</div>
+            <div className="text-center text-[#7A6F68] text-sm mt-10">No books found.</div>
           )}
-        </main>
-      </div>
+        </section>
+      </main>
 
       {/* Edit Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-           <div className="bg-[#1F1D20] text-[#F5ECDC] border border-[#4D4845]/60 rounded-3xl w-full max-w-4xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] flex flex-col">
-              <button onClick={() => setIsEditModalOpen(false)} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 bg-[#2A272A] rounded-full text-[#D7C9B2] hover:text-[#F5ECDC] transition-colors border border-[#4D4845]/40"><X size={16}/></button>
-              <h3 className="text-xl md:text-2xl font-extrabold mb-4 md:mb-8 text-[#F5ECDC] shrink-0">Edit Book</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+           <div className="bg-[#FBF8F4] text-[#2A2320] border border-[#ECE2D5] rounded-[36px] w-full max-w-4xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] flex flex-col">
+              <button onClick={() => setIsEditModalOpen(false)} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 bg-[#FAF6F0] rounded-full text-[#7A6F68] hover:text-[#2A2320] transition-colors border border-[#ECE2D5] cursor-pointer"><X size={16}/></button>
+              <h3 className="text-xl md:text-2xl font-black mb-4 md:mb-6 text-[#2A2320] shrink-0">Chỉnh sửa sách</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 overflow-y-auto flex-1 pr-2">
                 {/* Left Column - Details */}
                 <div className="space-y-4 md:space-y-5">
-                  <div><label className="text-title text-sm block mb-1.5">Title</label><input type="text" className="input-primary" value={editForm.title} onChange={e=>setEditForm({...editForm, title: e.target.value})} /></div>
-                  <div><label className="text-title text-sm block mb-1.5">Author</label><input type="text" className="input-primary" value={editForm.author} onChange={e=>setEditForm({...editForm, author: e.target.value})} /></div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div><label className="text-title text-sm block mb-1.5">Genre</label><input type="text" className="input-primary" value={editForm.genre} onChange={e=>setEditForm({...editForm, genre: e.target.value})} /></div>
-                    <div><label className="text-title text-sm block mb-1.5 text-orange-500">Google Drive Link</label><input type="text" className="input-primary border-orange-200" placeholder="Optional URL" value={editForm.external_url} onChange={e=>setEditForm({...editForm, external_url: e.target.value})} /></div>
+                  <div>
+                    <label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Tên sách</label>
+                    <input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={editForm.title} onChange={e=>setEditForm({...editForm, title: e.target.value})} />
                   </div>
-                  <div><label className="text-title text-sm block mb-1.5">Summary</label><textarea className="input-primary h-32 md:h-36 resize-none" value={editForm.summary} onChange={e=>setEditForm({...editForm, summary: e.target.value})} /></div>
+                  <div>
+                    <label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Tác giả</label>
+                    <input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={editForm.author} onChange={e=>setEditForm({...editForm, author: e.target.value})} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Thể loại</label>
+                      <input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={editForm.genre} onChange={e=>setEditForm({...editForm, genre: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-[#5F65B9] block mb-1.5">Google Drive Link</label>
+                      <input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" placeholder="Optional URL" value={editForm.external_url} onChange={e=>setEditForm({...editForm, external_url: e.target.value})} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Tóm tắt</label>
+                    <textarea className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9] h-32 md:h-36 resize-none leading-relaxed" value={editForm.summary} onChange={e=>setEditForm({...editForm, summary: e.target.value})} />
+                  </div>
                 </div>
 
                 {/* Right Column - Cover */}
                 <div className="flex flex-col">
-                  <label className="text-title text-sm block mb-1.5">Cover Image</label>
+                  <label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Ảnh bìa</label>
                   <div className="flex gap-2 mb-4">
-                    <input type="text" className="input-primary flex-1 text-xs" value={editForm.cover_url} placeholder="Paste Link OR Upload Image ->" onChange={e=>setEditForm({...editForm, cover_url: e.target.value})} />
-                    <label className="btn-secondary !py-2 !px-4 text-xs cursor-pointer whitespace-nowrap">
+                    <input type="text" className="flex-1 bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={editForm.cover_url} placeholder="Dán link hoặc tải ảnh lên ->" onChange={e=>setEditForm({...editForm, cover_url: e.target.value})} />
+                    <label className="px-4 py-2 bg-[#EFE8DE] hover:bg-[#E5DACD] text-[#2A2320] rounded-xl text-xs font-bold cursor-pointer whitespace-nowrap border border-[#E5DACD] transition-colors flex items-center">
                       Upload
                       <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
                     </label>
                   </div>
-                  <div className="bg-[#2A272A] border border-[#4D4845]/50 rounded-2xl flex items-center justify-center flex-1 min-h-[200px] md:min-h-[280px] p-4 overflow-hidden">
+                  <div className="bg-[#FAF6F0] border border-[#ECE2D5] rounded-2xl flex items-center justify-center flex-1 min-h-[200px] md:min-h-[280px] p-4 overflow-hidden">
                     {editForm.cover_url ? (
                       <img src={getCoverUrl(editForm.cover_url)} className="max-h-[200px] md:max-h-[260px] rounded-lg object-contain shadow-sm" alt="cover preview" 
                            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = DEFAULT_COVER_SVG; }} />
@@ -1086,15 +1076,15 @@ export default function AdminPage() {
                         <BookCoverImage coverUrl={editingBook.cover_url} bookId={editingBook.id} title={editingBook.title} author={editingBook.author} />
                       </div>
                     ) : (
-                      <span className="text-[#D7C9B2] text-sm font-medium">No Cover Provided</span>
+                      <span className="text-[#A0958C] text-sm font-medium">Chưa có ảnh bìa</span>
                     )}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 md:mt-10 pt-4 md:pt-6 border-t border-[#4D4845]/40 flex justify-end gap-3 shrink-0">
-                 <button onClick={() => setIsEditModalOpen(false)} className="btn-outline !py-3 !px-6 text-sm text-[#F5ECDC] bg-[#2A272A] border-[#4D4845] hover:bg-[#363236]">Cancel</button>
-                 <button onClick={handleEditSubmit} className="btn-primary !py-3 !px-8 text-sm !bg-[#F97316] !text-white font-bold hover:!bg-[#EA580C] shadow-md border-none">Save Changes</button>
+              <div className="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-[#EFE8DE] flex justify-end gap-3 shrink-0">
+                 <button onClick={() => setIsEditModalOpen(false)} className="px-5 py-2.5 text-xs font-bold text-[#7A6F68] hover:text-[#2A2320] bg-[#FAF6F0] hover:bg-[#EFE8DE] border border-[#E5DACD] rounded-full cursor-pointer transition-colors">Hủy</button>
+                 <button onClick={handleEditSubmit} className="btn-gradient !py-2.5 !px-6 text-xs font-bold text-white rounded-full shadow-md cursor-pointer border-none hover:opacity-95 transition-all">Lưu thay đổi</button>
               </div>
            </div>
         </div>
@@ -1102,19 +1092,19 @@ export default function AdminPage() {
 
       {/* Add Modal (Bulk Upload + Links) */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-           <div className="bg-white rounded-3xl w-full max-w-2xl p-8 shadow-2xl relative max-h-[90vh] flex flex-col">
-              <button onClick={() => {setIsAddModalOpen(false); setUploadItems([]); setAddMode('upload');}} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-500 hover:text-black"><X size={16}/></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+           <div className="bg-[#FBF8F4] text-[#2A2320] border border-[#ECE2D5] rounded-[36px] w-full max-w-2xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] flex flex-col">
+              <button onClick={() => {setIsAddModalOpen(false); setUploadItems([]); setAddMode('upload');}} className="absolute top-6 right-6 p-2 bg-[#FAF6F0] rounded-full text-[#7A6F68] hover:text-[#2A2320] border border-[#ECE2D5] cursor-pointer"><X size={16}/></button>
               
-              <div className="flex gap-4 mb-6 border-b">
+              <div className="flex gap-4 mb-6 border-b border-[#EFE8DE]">
                  <button 
-                    className={`pb-3 text-lg font-bold px-2 ${addMode === 'upload' ? 'text-black border-b-2 border-black' : 'text-gray-400'}`}
+                    className={`pb-3 text-base font-bold px-3 transition-colors cursor-pointer ${addMode === 'upload' ? 'text-[#2A2320] border-b-2 border-[#2A2320]' : 'text-[#A0958C] hover:text-[#2A2320]'}`}
                     onClick={() => setAddMode('upload')}
                  >
                     Upload Sách (PDF/EPUB)
                  </button>
                  <button 
-                    className={`pb-3 text-lg font-bold px-2 ${addMode === 'link' ? 'text-black border-b-2 border-black' : 'text-gray-400'}`}
+                    className={`pb-3 text-base font-bold px-3 transition-colors cursor-pointer ${addMode === 'link' ? 'text-[#2A2320] border-b-2 border-[#2A2320]' : 'text-[#A0958C] hover:text-[#2A2320]'}`}
                     onClick={() => setAddMode('link')}
                  >
                     Thêm Nhanh (Bằng Link)
@@ -1122,7 +1112,7 @@ export default function AdminPage() {
               </div>
 
               {uploadStatus && (
-                <div className={`p-3 rounded-xl mb-4 text-sm font-bold ${uploadStatus.type === 'error' ? 'bg-red-50 text-red-500' : 'bg-green-50 text-green-600'}`}>
+                <div className={`p-3.5 rounded-2xl mb-4 text-xs font-bold ${uploadStatus.type === 'error' ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
                   {uploadStatus.msg}
                 </div>
               )}
@@ -1131,21 +1121,21 @@ export default function AdminPage() {
                 {addMode === 'upload' ? (
                   <>
                     {/* Khu vực chọn file */}
-                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:bg-gray-50 transition-colors relative">
+                    <div className="border-2 border-dashed border-[#D8C9BB] bg-[#FAF6F0] hover:bg-[#FAF0E6] rounded-2xl p-8 text-center cursor-pointer transition-colors relative">
                       <input type="file" multiple accept=".pdf,.epub" className="absolute opacity-0 cursor-pointer inset-0 z-10" onChange={handleFileSelect} />
-                      <Upload size={32} className="mx-auto text-gray-400 mb-2" />
-                      <p className="text-sm font-bold text-black">Click or Drag to Select Multiple PDF/EPUB Files</p>
+                      <Upload size={32} className="mx-auto text-[#7A6F68] mb-2" />
+                      <p className="text-xs font-bold text-[#2A2320]">Nhấp chuột hoặc kéo thả nhiều file PDF/EPUB vào đây</p>
                     </div>
 
                     {/* Smart Paste Block */}
                     {uploadItems.length > 0 && uploadItems.some(item => !item.external_url) && (
-                      <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl mt-4">
-                        <h4 className="text-sm font-bold text-orange-600 mb-2">Smart Auto-Match</h4>
-                        <p className="text-xs text-orange-500/80 mb-3">Dán danh sách theo định dạng <b>Tên Sách - Link Drive</b>, hệ thống sẽ tự động ghép đúng link vào đúng sách bất chấp thứ tự!</p>
+                      <div className="bg-[#FAF6F0] border border-[#ECE2D5] p-4 rounded-2xl mt-4">
+                        <h4 className="text-xs font-black text-[#5F65B9] mb-1.5">Smart Auto-Match</h4>
+                        <p className="text-[11px] text-[#7A6F68] mb-3">Dán danh sách theo định dạng <b>Tên Sách - Link Drive</b>, hệ thống sẽ tự động ghép đúng link vào đúng sách bất chấp thứ tự!</p>
                         <div className="flex flex-col gap-2">
                           <textarea 
                             placeholder="Tên Sách 1 - https://drive...&#10;Tên Sách 2 - https://drive..." 
-                            className="input-primary w-full !text-xs !bg-white min-h-[100px] resize-y leading-relaxed"
+                            className="w-full bg-white border border-[#E5DACD] text-[#2A2320] rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#5F65B9] min-h-[100px] resize-y leading-relaxed"
                             value={smartPasteText}
                             onChange={(e) => setSmartPasteText(e.target.value)}
                             onPaste={(e) => {
@@ -1165,14 +1155,14 @@ export default function AdminPage() {
                                   setTimeout(() => setUploadStatus(null), 3000);
                                 }
                               }}
-                              className="btn-secondary !py-2 !px-4 text-xs whitespace-nowrap bg-white border border-gray-200 !text-gray-700 hover:bg-gray-50 flex items-center gap-1 shadow-sm"
+                              className="px-3.5 py-2 text-xs font-bold rounded-xl bg-white border border-[#E5DACD] text-[#2A2320] hover:bg-[#FAF6F0] flex items-center gap-1 shadow-sm cursor-pointer"
                             >
                               Dán (Paste)
                             </button>
                             <button 
                               onClick={handleSmartPaste}
                               disabled={!smartPasteText}
-                              className="btn-primary !py-2 !px-4 text-xs disabled:opacity-50 whitespace-nowrap"
+                              className="btn-gradient px-4 py-2 text-xs font-bold text-white rounded-xl disabled:opacity-50 whitespace-nowrap cursor-pointer shadow-sm border-none"
                             >
                               Auto Match Links
                             </button>
@@ -1184,19 +1174,19 @@ export default function AdminPage() {
                     {/* Danh sách file đã chọn */}
                     {uploadItems.length > 0 && (
                       <div className="mt-6 space-y-3">
-                        <h4 className="text-sm font-bold text-black border-b pb-2">Selected Files ({uploadItems.length})</h4>
+                        <h4 className="text-xs font-black text-[#2A2320] border-b border-[#EFE8DE] pb-2">Selected Files ({uploadItems.length})</h4>
                         {uploadItems.map((item, index) => (
-                          <div key={index} className="flex flex-col gap-2 p-4 bg-gray-50 rounded-xl border border-gray-100 relative group">
+                          <div key={index} className="flex flex-col gap-2 p-3.5 bg-[#FAF6F0] rounded-2xl border border-[#ECE2D5] relative group">
                             <div className="flex justify-between items-center">
-                              <span className="font-bold text-sm text-black truncate pr-4">{item.file.name}</span>
-                              <button onClick={() => setUploadItems(items => items.filter((_, i) => i !== index))} className="text-gray-400 hover:text-red-500"><Trash2 size={16}/></button>
+                              <span className="font-bold text-xs text-[#2A2320] truncate pr-4">{item.file.name}</span>
+                              <button onClick={() => setUploadItems(items => items.filter((_, i) => i !== index))} className="text-[#A0958C] hover:text-red-500 cursor-pointer"><Trash2 size={15}/></button>
                             </div>
                             <div className="flex items-center gap-2">
-                              <LinkIcon size={14} className="text-gray-400 shrink-0"/>
+                              <LinkIcon size={14} className="text-[#7A6F68] shrink-0"/>
                               <input 
                                 type="text" 
                                 placeholder="Paste Google Drive Link here..." 
-                                className="input-primary flex-1 !text-xs !py-1.5"
+                                className="w-full bg-white border border-[#E5DACD] text-[#2A2320] rounded-xl px-3 py-1.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]"
                                 value={item.external_url}
                                 onChange={(e) => {
                                   const newItems = [...uploadItems];
@@ -1216,7 +1206,7 @@ export default function AdminPage() {
                                     setTimeout(() => setUploadStatus(null), 3000);
                                   }
                                 }}
-                                className="!py-1.5 !px-3 text-[10px] font-bold rounded-lg border border-gray-200 bg-white !text-gray-700 hover:bg-gray-100 whitespace-nowrap shadow-sm transition-colors"
+                                className="py-1.5 px-3 text-[10px] font-bold rounded-xl border border-[#E5DACD] bg-white text-[#2A2320] hover:bg-[#FAF6F0] whitespace-nowrap shadow-sm transition-colors cursor-pointer"
                               >
                                 Paste
                               </button>
@@ -1228,24 +1218,23 @@ export default function AdminPage() {
                   </>
                 ) : (
                   <div className="space-y-4">
-                    <p className="text-xs text-gray-500 mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100 text-blue-800">
+                    <p className="text-xs text-[#5F65B9] bg-[#FAF6F0] p-3 rounded-2xl border border-[#ECE2D5] leading-relaxed">
                       Thêm sách nhanh chóng không cần Upload file EPUB/PDF. Giúp tiết kiệm 100% băng thông tải lên và tự động lấy ảnh bìa từ đường link bạn cung cấp!
                     </p>
-                    <div><label className="text-title text-sm block mb-1.5">Tên Sách <span className="text-red-500">*</span></label><input type="text" className="input-primary" value={linkForm.title} onChange={e=>setLinkForm({...linkForm, title: e.target.value})} /></div>
-                    <div><label className="text-title text-sm block mb-1.5">Tác Giả</label><input type="text" className="input-primary" value={linkForm.author} onChange={e=>setLinkForm({...linkForm, author: e.target.value})} /></div>
-                    <div><label className="text-title text-sm block mb-1.5">Thể Loại</label><input type="text" className="input-primary" value={linkForm.genre} onChange={e=>setLinkForm({...linkForm, genre: e.target.value})} /></div>
-                    <div><label className="text-title text-sm block mb-1.5">Link Google Drive <span className="text-red-500">*</span></label><input type="text" className="input-primary border-orange-200" placeholder="https://drive.google.com/..." value={linkForm.external_url} onChange={e=>setLinkForm({...linkForm, external_url: e.target.value})} /></div>
-                    <div><label className="text-title text-sm block mb-1.5">Link Ảnh Bìa (Cover URL)</label><input type="text" className="input-primary" placeholder="https://..." value={linkForm.cover_url} onChange={e=>setLinkForm({...linkForm, cover_url: e.target.value})} /></div>
+                    <div><label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Tên Sách <span className="text-red-500">*</span></label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={linkForm.title} onChange={e=>setLinkForm({...linkForm, title: e.target.value})} /></div>
+                    <div><label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Tác Giả</label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={linkForm.author} onChange={e=>setLinkForm({...linkForm, author: e.target.value})} /></div>
+                    <div><label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Thể Loại</label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={linkForm.genre} onChange={e=>setLinkForm({...linkForm, genre: e.target.value})} /></div>
+                    <div><label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Link Google Drive <span className="text-red-500">*</span></label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" placeholder="https://drive.google.com/..." value={linkForm.external_url} onChange={e=>setLinkForm({...linkForm, external_url: e.target.value})} /></div>
+                    <div><label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Link Ảnh Bìa (Cover URL)</label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" placeholder="https://..." value={linkForm.cover_url} onChange={e=>setLinkForm({...linkForm, cover_url: e.target.value})} /></div>
                   </div>
                 )}
               </div>
-              
-              <div className="mt-6 pt-4 border-t border-gray-100 shrink-0">
+              <div className="mt-6 pt-4 border-t border-[#EFE8DE] shrink-0">
                  {addMode === 'upload' ? (
                    <button 
                      onClick={handleBulkUploadSubmit} 
                      disabled={isUploading || uploadItems.length === 0}
-                     className="btn-primary w-full !py-3"
+                     className="btn-gradient w-full !py-3 rounded-full text-white font-bold shadow-md cursor-pointer border-none text-xs hover:opacity-95 transition-all"
                    >
                      {isUploading ? 'Uploading...' : `Upload All ${uploadItems.length} Books`}
                    </button>
@@ -1253,7 +1242,7 @@ export default function AdminPage() {
                    <button 
                      onClick={handleAddByLinkSubmit} 
                      disabled={isUploading || !linkForm.title || !linkForm.external_url}
-                     className="btn-primary w-full !py-3"
+                     className="btn-gradient w-full !py-3 rounded-full text-white font-bold shadow-md cursor-pointer border-none text-xs hover:opacity-95 transition-all"
                    >
                      {isUploading ? 'Đang thêm...' : 'Thêm Sách Nhanh'}
                    </button>

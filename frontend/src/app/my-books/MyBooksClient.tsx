@@ -71,33 +71,39 @@ export default function MyBooksClient() {
   };
 
   if (authLoading || !user) {
-    return <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center font-bold text-[#D7C9B2]">Đang tải...</div>;
+    return <div className="min-h-screen bg-[#D8C9BB] flex items-center justify-center font-bold text-[#7A6F68]">Đang tải...</div>;
   }
 
   return (
-    <div className="flex bg-[#EDE8E3] text-[#1D1C1A] min-h-screen font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[#D8C9BB] text-[#2A2320] p-3 sm:p-5 md:p-6 lg:p-7 flex flex-col md:flex-row gap-5 font-sans selection:bg-[#E5DACD]">
       <Sidebar />
 
-      <div className="flex-1 min-w-0 md:ml-20 pt-16 md:pt-0 flex flex-col min-h-screen p-4 sm:p-6 md:p-8">
-        
-        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 border-b border-[#4D4845]/30 flex justify-between items-center">
-          <h1 className="text-xl md:text-2xl font-black text-[#F5ECDC]">Sách Cá Nhân</h1>
+      <main className="flex-1 min-w-0 bg-[#FBF8F4] rounded-[36px] p-6 md:p-8 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col">
+        <header className="pb-5 mb-6 border-b border-[#EFE8DE] flex justify-between items-center">
+          <div>
+            <h1 className="text-xl md:text-2xl font-black text-[#2A2320] tracking-tight">Sách Cá Nhân</h1>
+            <p className="text-xs text-[#7A6F68] font-medium mt-0.5">Không gian sưu tập sách và lưu giữ trích dẫn yêu thích của bạn</p>
+          </div>
           <button 
             onClick={() => setIsAddModalOpen(true)}
-            className="bg-[#2A272A] hover:bg-[#3A373A] text-[#F5ECDC] border border-[#4D4845]/60 rounded-xl py-2 px-4 text-sm font-bold shadow-md transition-colors flex items-center gap-2"
+            className="btn-gradient text-white rounded-full py-2.5 px-4 text-xs font-bold shadow-md hover:opacity-95 transition-all flex items-center gap-1.5 cursor-pointer border-none"
           >
-            <Plus size={16} /> Thêm Sách
+            <Plus size={16} className="text-white stroke-[3]" /> Thêm Sách
           </button>
         </header>
 
-        <main className="flex-1 px-4 md:px-10 pt-8 pb-12">
+        <section className="flex-1">
           {isLoading ? (
-            <div className="flex justify-center mt-20"><Loader2 className="animate-spin text-[#D7C9B2]" size={32} /></div>
+            <div className="flex justify-center mt-20"><Loader2 className="animate-spin text-[#5F65B9]" size={32} /></div>
           ) : userBooks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center bg-[#2A272A] border border-[#4D4845]/40 rounded-3xl p-12 mt-10">
-              <BookIcon size={48} className="text-[#4D4845] mb-4" />
-              <h2 className="text-[#F5ECDC] text-lg font-bold mb-2">Thư viện của bạn đang trống</h2>
-              <p className="text-[#D7C9B2] text-sm text-center max-w-md">Hãy thêm những cuốn sách bạn yêu thích vào đây để tạo bộ sưu tập cá nhân và lưu giữ các trích dẫn (quotes) độc đáo bằng camera nhé.</p>
+            <div className="flex flex-col items-center justify-center bg-[#FAF6F0] border border-[#ECE2D5] rounded-3xl p-12 mt-6 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#EFE8DE] flex items-center justify-center text-[#7A6F68] mb-4">
+                <BookIcon size={28} />
+              </div>
+              <h2 className="text-[#2A2320] text-base font-bold mb-1.5">Thư viện của bạn đang trống</h2>
+              <p className="text-[#7A6F68] text-xs text-center max-w-md leading-relaxed">
+                Hãy thêm những cuốn sách bạn yêu thích vào đây để tạo bộ sưu tập cá nhân và lưu giữ các trích dẫn (quotes) độc đáo bằng camera nhé.
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
@@ -114,91 +120,92 @@ export default function MyBooksClient() {
                     onClick={() => setSelectedBook(ub)}
                     whileHover={{ y: -5 }}
                   >
-                    <div className="w-full aspect-[2/3] relative mb-3">
+                    <div className="w-full aspect-[2/3] relative mb-3 book-hardcover">
                        <BookCoverImage 
                          coverUrl={coverUrl}
                          bookId={ub.book_id || ub.id}
                          title={title}
                          author={author}
-                         className="w-full h-full object-cover rounded-2xl shadow-md group-hover:shadow-xl transition-shadow"
+                         className="w-full h-full object-cover rounded-r-xl"
                        />
+                       <div className="book-paper-edge" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-[#F5ECDC] leading-tight line-clamp-2 mb-1 group-hover:text-[#D7C9B2]">{title}</h3>
-                      <p className="text-xs text-[#D7C9B2] truncate">{author}</p>
+                      <h3 className="text-xs sm:text-sm font-bold text-[#2A2320] leading-tight line-clamp-2 mb-1 group-hover:text-[#5F65B9] transition-colors">{title}</h3>
+                      <p className="text-[11px] text-[#7A6F68] truncate font-medium">{author}</p>
                     </div>
                   </motion.div>
                 );
               })}
             </div>
           )}
-        </main>
+        </section>
 
         <AnimatePresence>
           {selectedBook && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
               <motion.div 
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                 onClick={() => setSelectedBook(null)}
               />
               <motion.div 
                 layoutId={`userbook-${selectedBook.id}`}
-                className="relative bg-[#1F1D20] border border-[#4D4845]/40 rounded-3xl p-6 md:p-8 max-w-4xl w-full shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
+                className="relative bg-[#FBF8F4] text-[#2A2320] border border-[#ECE2D5] rounded-[36px] p-6 md:p-8 max-w-4xl w-full shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
               >
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex gap-6 w-full relative">
-                    <div className="w-24 md:w-32 aspect-[2/3] flex-shrink-0">
+                    <div className="w-24 md:w-32 aspect-[2/3] flex-shrink-0 book-hardcover">
                       <BookCoverImage 
                         coverUrl={selectedBook.custom_cover_url || selectedBook.book?.cover_url}
                         bookId={selectedBook.book_id || selectedBook.id}
                         title={selectedBook.custom_title || selectedBook.book?.title}
                         author={selectedBook.custom_author || selectedBook.book?.author}
-                        className="w-full h-full object-cover rounded-xl shadow-lg"
+                        className="w-full h-full object-cover rounded-r-xl shadow-lg"
                       />
+                      <div className="book-paper-edge" />
                     </div>
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
-                        <h2 className="text-2xl md:text-3xl font-black text-[#F5ECDC] leading-tight mb-2 pr-10">
+                        <h2 className="text-xl md:text-2xl font-black text-[#2A2320] leading-tight mb-1.5 pr-10">
                           {selectedBook.custom_title || selectedBook.book?.title || "Unknown"}
                         </h2>
-                        <p className="text-base text-[#D7C9B2] font-semibold mb-4">
+                        <p className="text-sm text-[#7A6F68] font-bold mb-4">
                           {selectedBook.custom_author || selectedBook.book?.author || "Unknown"}
                         </p>
                         
                         <button 
                           onClick={() => handleDelete(selectedBook.id)}
-                          className="flex items-center gap-2 text-red-400 hover:text-red-300 text-sm font-medium bg-red-400/10 hover:bg-red-400/20 px-3 py-1.5 rounded-lg transition-colors w-fit"
+                          className="flex items-center gap-1.5 text-red-600 hover:text-red-700 text-xs font-bold bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-full transition-colors w-fit cursor-pointer"
                         >
-                          <Trash2 size={16} /> Xóa khỏi thư viện
+                          <Trash2 size={14} /> Xóa khỏi thư viện
                         </button>
                       </div>
 
                       <div className="flex items-center gap-4 mt-6">
                          <div className="flex items-center gap-2">
-                           <QuoteIcon size={18} className="text-[#F5ECDC]" />
-                           <h3 className="text-lg font-bold text-[#F5ECDC]">Trích dẫn</h3>
-                           <span className="text-xs font-bold bg-[#2A272A] text-[#D7C9B2] border border-[#4D4845]/60 px-2 py-0.5 rounded-full">
+                           <QuoteIcon size={18} className="text-[#5F65B9]" />
+                           <h3 className="text-base font-bold text-[#2A2320]">Trích dẫn</h3>
+                           <span className="text-xs font-bold bg-[#FAF6F0] text-[#7A6F68] border border-[#ECE2D5] px-2.5 py-0.5 rounded-full">
                              {quoteCount}
                            </span>
                          </div>
                          <button 
                            onClick={() => setIsCollectorOpen(true)}
-                           className="bg-[#F5ECDC] hover:bg-white font-bold py-1.5 px-3 rounded-lg flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer text-sm"
-                           style={{ color: '#1F1D20' }}
+                           className="btn-gradient text-white font-bold py-1.5 px-4 rounded-full flex items-center gap-1.5 shadow-sm hover:opacity-95 transition-all cursor-pointer text-xs border-none"
                          >
-                           <Plus size={14} />
+                           <Plus size={14} className="stroke-[3]" />
                            <span>Thêm Trích Dẫn</span>
                          </button>
                       </div>
                     </div>
                   </div>
-                  <button onClick={() => setSelectedBook(null)} className="absolute top-6 right-6 md:top-8 md:right-8 p-2 text-[#D7C9B2] hover:text-[#F5ECDC] bg-[#2A272A] rounded-full transition-colors flex-shrink-0 z-20 shadow-md border border-[#4D4845]/40">
-                    <X size={20} />
+                  <button onClick={() => setSelectedBook(null)} className="absolute top-6 right-6 md:top-8 md:right-8 p-2 text-[#7A6F68] hover:text-[#2A2320] bg-[#FAF6F0] hover:bg-[#EFE8DE] rounded-full transition-colors flex-shrink-0 z-20 shadow-sm border border-[#ECE2D5] cursor-pointer">
+                    <X size={18} />
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto w-full border-t border-[#4D4845]/40 pt-4 pb-6">
+                <div className="flex-1 overflow-y-auto w-full border-t border-[#EFE8DE] pt-4 pb-6">
                   <QuoteGallery 
                     userBookId={selectedBook.id} 
                     bookTitle={selectedBook.custom_title || selectedBook.book?.title || "Unknown Book"}
@@ -227,7 +234,7 @@ export default function MyBooksClient() {
             onSaveSuccess={() => setRefreshTrigger(prev => prev + 1)} 
           />
         )}
-      </div>
+      </main>
     </div>
   );
 }

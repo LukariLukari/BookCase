@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, X, Loader2, Share2, Check, Smartphone, Star, Sparkles, Award, Quote, BookOpen } from 'lucide-react';
+import { Download, X, Loader2, Share2, Check, Smartphone, Star, Sparkles, Award } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import BookCoverImage from '@/components/BookCoverImage';
@@ -19,6 +19,16 @@ interface Book {
   created_at?: string;
 }
 
+const RIBBON_COLORS = [
+  '#F2C94C', // gold
+  '#E56B6F', // coral
+  '#56CCF2', // cyan
+  '#27AE60', // emerald
+  '#9B51E0', // purple
+  '#F2994A', // amber
+  '#EB5757', // crimson
+];
+
 export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books: Book[], refresh: () => void, sortBy?: string }) {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -30,7 +40,6 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
   const [isLoadingRatingSummary, setIsLoadingRatingSummary] = useState(false);
 
   const router = useRouter();
-
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   const fetchRatings = async () => {
@@ -60,64 +69,112 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
       const res = await axios.get(`${API_URL}/api/books/${bookId}/rating-summary`);
       setRatingSummary(res.data);
     } catch (e) {
-      console.error('Lỗi tải rating summary:', e);
+      console.error('Lỗi tải tóm tắt đánh giá:', e);
     } finally {
       setIsLoadingRatingSummary(false);
     }
   };
 
-  const handleDownload = (id: string, title: string) => {
-    setDownloadingId(id);
-    const url = `${API_URL}/api/books/${id}/download`;
-    window.location.href = url;
-    setTimeout(() => setDownloadingId(null), 1500);
+  const handleDownload = async (bookId: string, bookTitle: string) => {
+    try {
+      setDownloadingId(bookId);
+      const res = await axios.get(`${API_URL}/api/books/${bookId}/download-check`);
+      if (res.data && res.data.external_url) {
+        window.open(res.data.external_url, '_blank');
+        setDownloadingId(null);
+        return;
+      }
+      const downloadUrl = `${API_URL}/api/books/${bookId}/download`;
+      window.location.href = downloadUrl;
+      setTimeout(() => setDownloadingId(null), 2500);
+    } catch (err) {
+      console.error('Lỗi tải sách:', err);
+      const downloadUrl = `${API_URL}/api/books/${bookId}/download`;
+      window.location.href = downloadUrl;
+      setTimeout(() => setDownloadingId(null), 2500);
+    }
   };
 
-  const copyShareLink = (e: React.MouseEvent, id: string) => {
+  const copyShareLink = (e: React.MouseEvent, bookId: string) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/share/book/${id}`;
-    navigator.clipboard.writeText(url);
-    setCopiedId(id);
+    const shareUrl = `${window.location.origin}/share/book/${bookId}`;
+    navigator.clipboard.writeText(shareUrl);
+    setCopiedId(bookId);
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  // Render Book Card
-  const renderBookCard = (book: Book) => {
+  const getRibbonColor = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+      hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % RIBBON_COLORS.length;
+    return RIBBON_COLORS[index];
+  };
+
+  const renderBookItem = (book: Book, index: number) => {
     const ratingInfo = ratingsMap[book.id];
+    const ribbonColor = getRibbonColor(book.id);
+
     return (
       <motion.div
         key={book.id}
         layoutId={`book-container-${book.id}`}
-        className="flex flex-col cursor-pointer group h-full select-none"
+        className="flex flex-col cursor-pointer group pb-4"
         onClick={() => setSelectedBook(book)}
         whileHover={{ y: -6 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        transition={{ type: "spring", stiffness: 300, damping: 22 }}
       >
-        <motion.div layoutId={`book-cover-${book.id}`} className="w-full aspect-[2/3] relative z-10 mb-3">
-          <BookCoverImage 
-            coverUrl={book.cover_url}
-            bookId={book.id}
-            title={book.title}
-            author={book.author}
-          />
-          {ratingInfo && ratingInfo.count > 0 && (
-            <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-md text-white px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1 shadow-md z-20">
-              <Star size={10} className="fill-[#DE5448] text-[#DE5448]" />
-              <span>{ratingInfo.average_rating.toFixed(1)}</span>
-            </div>
-          )}
-        </motion.div>
-        <div className="flex flex-col flex-1">
-          <div className="w-full mb-2 flex-1">
-            <h3 className="text-xs sm:text-sm font-extrabold text-[#1D1C1A] leading-tight line-clamp-2 mb-1 group-hover:text-[#DE5448] transition-colors" title={book.title}>
-              {book.title}
-            </h3>
-            <p className="text-[11px] text-[#66615E] italic truncate" title={book.author || "Tác giả chưa rõ"}>
-              {book.author || "BookCase Edition"}
-            </p>
+        {/* HARDCOVER BOOK CONTAINER */}
+        <div className="w-full aspect-[2/3] relative mb-3">
+          <div className="book-hardcover w-full h-full relative">
+            <BookCoverImage 
+              coverUrl={book.cover_url}
+              bookId={book.id}
+              title={book.title}
+              author={book.author}
+              className="w-full h-full object-cover"
+            />
+
+            {/* Bottom White Paper Edge */}
+            <div className="book-paper-edge" />
+
+            {/* Dangling Ribbon Bookmark */}
+            <div 
+              className="ribbon-bookmark"
+              style={{ 
+                backgroundColor: ribbonColor,
+                right: '22px'
+              }}
+            />
+
+            {/* Rating badge */}
+            {ratingInfo && ratingInfo.count > 0 && (
+              <div className="absolute top-2.5 right-2.5 bg-[#FAF6F0]/90 backdrop-blur-md text-[#2A2320] border border-[#E5DACD] px-2 py-0.5 rounded-full text-[11px] font-extrabold flex items-center gap-1 shadow-sm z-20">
+                <Star size={11} className="fill-[#F2C94C] text-[#F2C94C]" />
+                <span>{ratingInfo.average_rating.toFixed(1)}</span>
+              </div>
+            )}
           </div>
-          
-          <div className="flex items-center gap-1.5 mt-auto pt-2 border-t border-[#E5DFD7]/60" onClick={(e) => e.stopPropagation()}>
+        </div>
+
+        {/* BOOK INFO */}
+        <div className="flex flex-col flex-1 px-1">
+          <h3 
+            className="text-sm md:text-[14px] font-extrabold text-[#2A2320] leading-snug line-clamp-2 mb-0.5 group-hover:text-[#5F65B9] transition-colors" 
+            title={book.title}
+          >
+            {book.title}
+          </h3>
+          <p 
+            className="text-xs font-semibold text-[#8B7070] truncate mb-2.5" 
+            title={book.author || "Unknown Author"}
+          >
+            {book.author || "Unknown Author"}
+          </p>
+
+          {/* QUICK ACTION BUTTONS */}
+          <div className="flex items-center gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
             <button 
               onClick={(e) => {
                 e.stopPropagation();
@@ -125,13 +182,17 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                 handleDownload(book.id, book.title);
               }}
               disabled={downloadingId === book.id || book.has_file === false}
-              className="p-1.5 rounded-full bg-[#F3EFEA] hover:bg-[#1D1C1A] text-[#1D1C1A] hover:text-white border border-[#E5DFD7] transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
-              title={book.has_file === false ? "Sách đang được cập nhật file dữ liệu" : "Tải Sách Xuống"}
+              className={`p-2 rounded-xl transition-all flex-shrink-0 cursor-pointer shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
+                book.has_file === false
+                  ? 'bg-[#EFE8DE] text-[#9E9086] border border-[#E0D5C7]'
+                  : 'bg-[#EFE8DE] hover:bg-[#E2D7C8] text-[#2A2320] border border-[#E0D5C7]'
+              }`}
+              title={book.has_file === false ? "Sách đang được cập nhật file" : "Tải Sách Xuống"}
             >
               {downloadingId === book.id ? (
-                <Loader2 size={13} className="animate-spin text-[#DE5448]" />
+                <Loader2 size={14} className="animate-spin text-[#2A2320]" />
               ) : (
-                <Download size={13} />
+                <Download size={14} className="stroke-[2.5]" />
               )}
             </button>
 
@@ -140,18 +201,18 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                 e.stopPropagation();
                 setKindleBook({ id: book.id, title: book.title });
               }}
-              className="p-1.5 text-[#66615E] hover:text-[#1D1C1A] bg-[#F3EFEA] hover:bg-[#EFEAE4] rounded-full border border-[#E5DFD7] transition-colors cursor-pointer shadow-sm"
+              className="p-2 text-[#7A6F68] hover:text-[#2A2320] bg-[#EFE8DE] hover:bg-[#E2D7C8] rounded-xl border border-[#E0D5C7] transition-all flex-shrink-0 cursor-pointer shadow-sm"
               title="Gửi sang Kindle (Wi-Fi)"
             >
-              <Smartphone size={13} />
+              <Smartphone size={14} />
             </button>
 
             <button 
               onClick={(e) => copyShareLink(e, book.id)} 
-              className="p-1.5 text-[#66615E] hover:text-[#1D1C1A] bg-[#F3EFEA] hover:bg-[#EFEAE4] rounded-full border border-[#E5DFD7] transition-colors cursor-pointer shadow-sm"
+              className="p-2 text-[#7A6F68] hover:text-[#2A2320] bg-[#EFE8DE] hover:bg-[#E2D7C8] rounded-xl border border-[#E0D5C7] transition-all flex-shrink-0 cursor-pointer shadow-sm"
               title="Chia sẻ sách"
             >
-              {copiedId === book.id ? <Check size={13} className="text-[#DE5448]" /> : <Share2 size={13} />}
+              {copiedId === book.id ? <Check size={14} className="text-green-600 stroke-[3]" /> : <Share2 size={14} />}
             </button>
           </div>
         </div>
@@ -159,7 +220,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
     );
   };
 
-  // Handle Grouping by Author
+  // Group by Author if requested
   let groupedBooks: Record<string, Book[]> = {};
   if (sortBy === 'author') {
     books.forEach(book => {
@@ -180,84 +241,107 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
   return (
     <div>
       {sortBy === 'author' ? (
-        <div className="space-y-12">
+        <div className="space-y-10">
           {Object.entries(groupedBooks).map(([author, authorBooks]) => (
             <div key={author} className="space-y-4">
-              <div className="flex items-center gap-3 border-b border-[#E5DFD7] pb-2">
-                <h2 className="text-base sm:text-lg font-extrabold text-[#1D1C1A]">{author}</h2>
-                <span className="text-xs bg-[#F3EFEA] text-[#66615E] border border-[#E5DFD7] px-2.5 py-0.5 rounded-full font-bold">
+              <div className="flex items-center gap-3 border-b border-[#EAE2D5] pb-2">
+                <h2 className="text-lg font-black text-[#2A2320]">{author}</h2>
+                <span className="text-xs font-bold text-[#8B7070] bg-[#EFE8DE] px-2.5 py-0.5 rounded-full">
                   {authorBooks.length} cuốn
                 </span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 sm:gap-6">
-                {authorBooks.map(renderBookCard)}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-5 gap-y-7">
+                {authorBooks.map((book, idx) => renderBookItem(book, idx))}
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 sm:gap-6">
-          {books.map(renderBookCard)}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-5 gap-y-7">
+          {books.map((book, idx) => renderBookItem(book, idx))}
         </div>
       )}
 
-      {/* Book Detail Modal */}
+      {/* BOOK DETAIL MODAL */}
       <AnimatePresence>
         {selectedBook && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
              <motion.div 
-               initial={{ opacity: 0, scale: 0.95, y: 20 }}
-               animate={{ opacity: 1, scale: 1, y: 0 }}
-               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-               className="relative bg-[#FAF7F2] border border-[#E5DFD7] rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col md:flex-row gap-6 md:gap-8 text-[#1D1C1A]"
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+               onClick={() => setSelectedBook(null)}
+             />
+             
+             <motion.div 
+               layoutId={`book-container-${selectedBook.id}`}
+               className="relative bg-[#FBF8F4] text-[#2A2320] rounded-[36px] max-w-2xl w-full p-6 md:p-8 shadow-2xl overflow-hidden z-10 border border-[#ECE2D5] flex flex-col md:flex-row gap-6 max-h-[90vh]"
              >
-                <div className="w-full md:w-1/3 flex-shrink-0 flex flex-col items-center">
-                  <motion.div layoutId={`book-cover-${selectedBook.id}`} className="w-40 md:w-full aspect-[2/3] relative mb-4">
+                {/* Left: Book Cover Preview */}
+                <div className="w-full md:w-1/3 flex flex-col items-center flex-shrink-0">
+                  <div className="book-hardcover w-40 sm:w-48 aspect-[2/3] relative mb-4">
                     <BookCoverImage 
                       coverUrl={selectedBook.cover_url}
                       bookId={selectedBook.id}
                       title={selectedBook.title}
                       author={selectedBook.author}
+                      className="w-full h-full object-cover"
                     />
-                  </motion.div>
+                    <div className="book-paper-edge" />
+                    <div 
+                      className="ribbon-bookmark"
+                      style={{ 
+                        backgroundColor: getRibbonColor(selectedBook.id),
+                        right: '22px'
+                      }}
+                    />
+                  </div>
 
-                  {/* Rating Badge under cover */}
+                  {/* Rating Summary Pill */}
                   {ratingSummary && (
-                    <div className="w-full bg-[#F3EFEA] border border-[#E5DFD7] rounded-xl p-3 text-center mb-3">
-                      <div className="flex items-center justify-center gap-1.5 text-[#1D1C1A] mb-1">
-                        <Star size={16} className="fill-[#DE5448] text-[#DE5448]" />
-                        <span className="text-lg font-black text-[#1D1C1A]">
+                    <div className="w-full bg-[#EFE8DE] p-3 rounded-2xl text-center mb-3 border border-[#E0D5C7]">
+                      <div className="flex items-center justify-center gap-1 mb-0.5">
+                        <Star size={14} className="fill-[#F2C94C] text-[#F2C94C]" />
+                        <span className="font-extrabold text-base text-[#2A2320]">
                           {ratingSummary.average_rating ? ratingSummary.average_rating.toFixed(1) : '5.0'}
                         </span>
-                        <span className="text-xs text-[#9E9791]">/ 5</span>
+                        <span className="text-xs text-[#7A6F68]">/ 5</span>
                       </div>
-                      <p className="text-[11px] text-[#66615E] font-medium">
-                        {ratingSummary.total_reviews} lượt độc giả đánh giá
+                      <p className="text-[11px] text-[#7A6F68] font-bold">
+                        {ratingSummary.total_reviews} lượt đánh giá
                       </p>
                     </div>
                   )}
 
-                  {/* Rate & Add Insight Button */}
+                  {/* Rate Button */}
                   <button
                     onClick={() => setIsRatingModalOpen(true)}
-                    className="w-full py-2.5 px-3 bg-[#1D1C1A] hover:bg-black text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                    className="w-full py-2.5 px-3 bg-[#EFE8DE] hover:bg-[#E2D7C8] text-[#2A2320] font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 border border-[#E0D5C7]"
                   >
-                    <Sparkles size={13} className="text-[#DE5448]" />
-                    <span>Đánh Giá & Insight</span>
+                    <Sparkles size={14} className="text-[#F2994A]" />
+                    <span>Đánh Giá Sách</span>
                   </button>
                 </div>
 
-                <div className="w-full md:w-2/3 flex flex-col justify-between overflow-y-auto">
+                {/* Right: Book Details */}
+                <div className="w-full md:w-2/3 flex flex-col justify-between overflow-y-auto pr-1">
                   <div>
                     <div className="flex justify-between items-start gap-4">
                       <div>
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#9E9791]">{selectedBook.genre || "Literature"}</span>
-                        <h2 className="text-xl sm:text-2xl font-black text-[#1D1C1A] leading-tight mt-1">{selectedBook.title}</h2>
-                        <p className="text-sm text-[#66615E] italic mt-1">{selectedBook.author || "Tác giả chưa rõ"}</p>
+                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#C06060] bg-[#FAF0F0] px-2.5 py-0.5 rounded-full">
+                          {selectedBook.genre || "Tủ sách"}
+                        </span>
+                        <h2 className="text-xl md:text-2xl font-black text-[#2A2320] leading-tight mt-1.5">
+                          {selectedBook.title}
+                        </h2>
+                        <p className="text-sm text-[#8B7070] font-bold mt-1">
+                          {selectedBook.author || "Unknown Author"}
+                        </p>
                       </div>
                       <button 
                         onClick={() => setSelectedBook(null)}
-                        className="p-2 text-[#66615E] hover:text-[#1D1C1A] bg-[#F3EFEA] hover:bg-[#EFEAE4] rounded-full transition-colors flex-shrink-0 cursor-pointer"
+                        className="p-2 text-[#7A6F68] hover:text-[#2A2320] bg-[#EFE8DE] hover:bg-[#E2D7C8] rounded-full transition-colors flex-shrink-0 cursor-pointer border border-[#E0D5C7]"
                       >
                         <X size={18} />
                       </button>
@@ -265,33 +349,33 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   </div>
                   
                   <div className="flex-grow mt-5 space-y-4">
+                    {/* Summary */}
                     <div>
-                      <h3 className="text-xs font-bold uppercase text-[#9E9791] tracking-wider mb-1.5">Tóm tắt nội dung</h3>
-                      <p className="text-[#66615E] leading-relaxed text-xs sm:text-sm whitespace-pre-wrap">
+                      <h3 className="text-xs font-black uppercase text-[#7A6F68] tracking-wider mb-1.5">Tóm tắt nội dung</h3>
+                      <p className="text-[#2A2320] leading-relaxed text-xs md:text-sm whitespace-pre-wrap bg-[#FAF6F0] p-3.5 rounded-2xl border border-[#ECE2D5]">
                         {selectedBook.summary || "Chưa có tóm tắt cho cuốn sách này."}
                       </p>
                     </div>
 
+                    {/* Reviews */}
                     {ratingSummary && ratingSummary.reviews && ratingSummary.reviews.length > 0 && (
-                      <div className="pt-2">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-[#1D1C1A] mb-2.5 flex items-center gap-1.5">
-                          <Award size={14} className="text-[#DE5448]" /> Độc Giả Chia Sẻ ({ratingSummary.reviews.length})
+                      <div className="pt-1">
+                        <h3 className="text-xs font-black uppercase tracking-wider text-[#7A6F68] mb-2 flex items-center gap-1.5">
+                          <Award size={13} className="text-[#F2994A]" /> Cảm nhận độc giả ({ratingSummary.reviews.length})
                         </h3>
-                        <div className="space-y-2.5 max-h-36 overflow-y-auto pr-1">
+                        <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
                           {ratingSummary.reviews.map((rev: any) => (
-                            <div key={rev.id} className="bg-[#F3EFEA] border border-[#E5DFD7] rounded-xl p-2.5">
+                            <div key={rev.id} className="bg-[#FAF6F0] border border-[#ECE2D5] rounded-xl p-2.5 text-xs">
                               <div className="flex justify-between items-center mb-1">
-                                <span className="text-xs font-bold text-[#1D1C1A]">{rev.username || 'Độc giả'}</span>
-                                <div className="flex items-center gap-0.5 text-[#DE5448]">
+                                <span className="font-bold text-[#2A2320]">{rev.username || 'Độc giả'}</span>
+                                <div className="flex items-center gap-0.5">
                                   {[...Array(rev.rating)].map((_, i) => (
-                                    <Star key={i} size={10} className="fill-[#DE5448]" />
+                                    <Star key={i} size={10} className="fill-[#F2C94C] text-[#F2C94C]" />
                                   ))}
                                 </div>
                               </div>
-                              {rev.key_takeaway && (
-                                <p className="text-xs text-[#1D1C1A] font-medium italic border-l-2 border-[#DE5448] pl-2 my-1">
-                                  &ldquo;{rev.key_takeaway}&rdquo;
-                                </p>
+                              {rev.review_text && (
+                                <p className="text-[#7A6F68] line-clamp-2">{rev.review_text}</p>
                               )}
                             </div>
                           ))}
@@ -300,35 +384,29 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                     )}
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-[#E5DFD7] flex flex-col sm:flex-row gap-2.5">
-                    <button
-                      onClick={() => {
-                        router.push(`/reader?book_id=${selectedBook.id}`);
-                      }}
-                      className="py-2.5 px-4 bg-[#1D1C1A] hover:bg-black text-white text-xs sm:text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer flex-1"
-                    >
-                      <BookOpen size={16} />
-                      <span>Đọc Sách</span>
-                    </button>
-
+                  {/* Footer Actions */}
+                  <div className="mt-6 pt-4 border-t border-[#EAE2D5] flex flex-col sm:flex-row gap-3">
                     <button 
                       onClick={() => {
                         if (selectedBook.has_file === false) return;
                         handleDownload(selectedBook.id, selectedBook.title);
                       }}
                       disabled={downloadingId === selectedBook.id || selectedBook.has_file === false}
-                      className="py-2.5 px-4 bg-[#F3EFEA] hover:bg-[#EFEAE4] text-[#1D1C1A] text-xs font-bold rounded-xl border border-[#E5DFD7] flex items-center justify-center gap-2 transition-all cursor-pointer flex-1"
+                      className={`btn-gradient flex-1 py-3 px-4 rounded-2xl font-black text-sm flex justify-center items-center gap-2 cursor-pointer ${
+                        selectedBook.has_file === false ? '!bg-[#EFE8DE] !text-[#9E9086] !shadow-none opacity-60 cursor-not-allowed' : ''
+                      }`}
+                      title={selectedBook.has_file === false ? "Sách đang được cập nhật file" : "Tải Sách Xuống"}
                     >
-                      {downloadingId === selectedBook.id ? <Loader2 size={16} className="animate-spin text-[#DE5448]" /> : <Download size={16} />}
-                      <span>Tải Về Máy</span>
+                      {downloadingId === selectedBook.id ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                      <span>{downloadingId === selectedBook.id ? 'Đang tải...' : selectedBook.has_file === false ? 'Chưa Có File Tải' : 'Tải Sách Xuống'}</span>
                     </button>
 
                     <button 
                       onClick={() => setKindleBook({ id: selectedBook.id, title: selectedBook.title })}
-                      className="py-2.5 px-3 bg-[#F3EFEA] hover:bg-[#EFEAE4] text-[#1D1C1A] text-xs font-bold rounded-xl border border-[#E5DFD7] flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                      className="bg-[#EFE8DE] hover:bg-[#E2D7C8] text-[#2A2320] border border-[#E0D5C7] flex-1 py-3 px-4 rounded-2xl font-bold text-sm flex justify-center items-center gap-2 transition-all cursor-pointer"
                     >
                       <Smartphone size={16} />
-                      <span>Kindle</span>
+                      <span>Gửi Sang Kindle</span>
                     </button>
                   </div>
                 </div>

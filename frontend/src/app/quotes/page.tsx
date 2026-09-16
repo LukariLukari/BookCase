@@ -156,25 +156,25 @@ export default function QuotesPage() {
   };
 
   if (authLoading || !user) {
-    return <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center font-bold text-[#D7C9B2]">Đang tải...</div>;
+    return <div className="min-h-screen bg-[#D8C9BB] flex items-center justify-center font-bold text-[#7A6F68]">Đang tải...</div>;
   }
 
   return (
-    <div className="flex bg-[#EDE8E3] text-[#1D1C1A] min-h-screen font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[#D8C9BB] text-[#2A2320] p-3 sm:p-5 md:p-6 lg:p-7 flex flex-col md:flex-row gap-5 font-sans selection:bg-[#E5DACD]">
       <Sidebar />
 
-      <div className="flex-1 min-w-0 md:ml-20 pt-16 md:pt-0 flex flex-col min-h-screen">
+      <main className="flex-1 min-w-0 bg-[#FBF8F4] rounded-[36px] p-6 md:p-8 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col space-y-6">
         
         {/* Header */}
-        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/95 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 border-b border-[#4D4845]/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <header className="pb-5 mb-2 border-b border-[#EFE8DE] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <div className="flex items-center gap-2.5 mb-1">
-              <div className="p-2 bg-[#2A272A] rounded-xl text-[#F5ECDC] border border-[#4D4845]/50">
+              <div className="p-2 bg-[#FAF6F0] rounded-2xl text-[#5F65B9] border border-[#ECE2D5] shadow-sm">
                 <QuoteIcon size={18} />
               </div>
-              <h1 className="text-xl md:text-2xl font-black text-[#F5ECDC]">Kho Trích Dẫn Toàn Cục</h1>
+              <h1 className="text-xl md:text-2xl font-black text-[#2A2320]">Kho Trích Dẫn Toàn Cục</h1>
             </div>
-            <p className="text-xs text-[#D7C9B2]">Tìm kiếm, lưu giữ và xuất ảnh trích dẫn từ mọi cuốn sách của bạn</p>
+            <p className="text-xs text-[#7A6F68] font-medium">Tìm kiếm, lưu giữ và xuất ảnh trích dẫn từ mọi cuốn sách của bạn</p>
           </div>
 
           {/* Quick Actions */}
@@ -182,35 +182,35 @@ export default function QuotesPage() {
             <button 
               onClick={handleExportMarkdown}
               disabled={filteredQuotes.length === 0}
-              className="flex-1 sm:flex-none bg-[#2A272A] hover:bg-[#3A373A] text-[#F5ECDC] border border-[#4D4845]/70 rounded-xl py-2 px-3.5 text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-30"
+              className="flex-1 sm:flex-none bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#2A2320] border border-[#E5DACD] rounded-full py-2.5 px-4 text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-30"
               title="Xuất danh sách ra file Markdown cho Notion / Obsidian"
             >
-              <FileDown size={14} />
+              <FileDown size={14} className="text-[#5F65B9]" />
               <span>Xuất Markdown</span>
             </button>
           </div>
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 px-4 md:px-10 pt-6 pb-16">
+        <section className="flex-1 space-y-6">
           
           {/* Controls Bar */}
-          <div className="bg-[#2A272A]/70 border border-[#4D4845]/50 rounded-2xl p-4 mb-8 space-y-4">
+          <div className="bg-[#FAF6F0] border border-[#ECE2D5] rounded-3xl p-5 mb-6 space-y-4 shadow-sm">
             
             {/* Search Input */}
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A817C]" size={16} />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A0958C]" size={16} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Tìm kiếm nội dung trích dẫn, tên sách, tác giả, số trang..."
-                className="w-full bg-[#1F1D20] border border-[#4D4845]/60 focus:border-[#F5ECDC]/60 rounded-xl py-2.5 pl-10 pr-4 text-sm text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none transition-colors"
+                className="w-full bg-white border border-[#E5DACD] focus:border-[#5F65B9] rounded-full py-2.5 pl-10 pr-4 text-xs font-medium text-[#2A2320] placeholder-[#A0958C] focus:outline-none transition-colors shadow-sm"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#8A817C] hover:text-[#F5ECDC] bg-[#2A272A] px-2 py-0.5 rounded-md"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#A0958C] hover:text-[#2A2320] bg-[#FAF6F0] px-2 py-0.5 rounded-full cursor-pointer"
                 >
                   Xóa
                 </button>
@@ -218,11 +218,11 @@ export default function QuotesPage() {
             </div>
 
             {/* Filter by Book Chips & Sort */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#4D4845]/30">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#EFE8DE]">
               
               {/* Book Filter Chips */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
-                <span className="text-xs text-[#8A817C] font-semibold flex-shrink-0">
+                <span className="text-xs text-[#7A6F68] font-bold flex-shrink-0">
                   Sách:
                 </span>
                 
@@ -386,7 +386,7 @@ export default function QuotesPage() {
             </div>
           )}
 
-        </main>
+        </section>
 
         {/* Share / Export Quote Modal */}
         {sharingQuote && sharingQuote.text_content && (
@@ -399,8 +399,7 @@ export default function QuotesPage() {
             onClose={() => setSharingQuote(null)}
           />
         )}
-
-      </div>
+      </main>
     </div>
   );
 }

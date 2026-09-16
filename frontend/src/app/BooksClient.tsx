@@ -4,11 +4,39 @@ import Bookshelf from '@/components/Bookshelf';
 import Sidebar from '@/components/Sidebar';
 import SearchOnlineModal from '@/components/SearchOnlineModal';
 import UploadModal from '@/components/UploadModal';
-import { Search } from 'lucide-react';
+import { 
+  Search, 
+  Upload, 
+  BookOpen, 
+  ChevronRight, 
+  ChevronLeft, 
+  Send, 
+  Paperclip, 
+  MoreHorizontal, 
+  Eye, 
+  Sparkles, 
+  Layers, 
+  Heart, 
+  Compass, 
+  Flame, 
+  Feather, 
+  GraduationCap, 
+  BookMarked 
+} from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-
 import axios from 'axios';
+
+const CATEGORIES = [
+  { id: 'all', label: 'Tất cả', icon: Layers, color: '#3A7BD5' },
+  { id: 'fiction', label: 'Tiểu thuyết', icon: BookOpen, color: '#E56B6F' },
+  { id: 'bestseller', label: 'Bán chạy', icon: Flame, color: '#F2994A' },
+  { id: 'classic', label: 'Kinh điển', icon: Feather, color: '#27AE60' },
+  { id: 'selfhelp', label: 'Kỹ năng', icon: GraduationCap, color: '#8E44AD' },
+  { id: 'romance', label: 'Tình cảm', icon: Heart, color: '#EB5757' },
+  { id: 'scifi', label: 'Khoa học', icon: Compass, color: '#56CCF2' },
+  { id: 'audiobook', label: 'Tuyển chọn', icon: BookMarked, color: '#F2C94C' },
+];
 
 export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
   const [books, setBooks] = useState<any[]>(() => {
@@ -22,12 +50,21 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
     return [];
   });
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isLoadingBooks, setIsLoadingBooks] = useState(true);
   
+  // Chat drawer state
+  const [chatMessages, setChatMessages] = useState<Array<{ sender: 'user' | 'bot'; text: string; book?: any }>>([
+    { sender: 'bot', text: 'Chào bạn! Bạn đang tìm cuốn sách hoặc tác giả nào hôm nay?' },
+    { sender: 'user', text: 'Gợi ý cho tôi vài cuốn sách văn học kinh điển hay nhất nhé?' },
+    { sender: 'bot', text: 'Dưới đây là một số tác phẩm kinh điển được bạn đọc yêu thích nhất trong thư viện BookCase:' }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   // Pagination & Cold Start States
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -42,14 +79,12 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
     try {
       if (!isLoadMore) {
         setIsLoadingBooks(true);
-        // We do NOT set page = 0 here synchronously because it can cause race conditions. We'll track skip directly.
       } else {
         setIsLoadingMore(true);
       }
       
       const currentSkip = isLoadMore ? (page + 1) * 30 : 0;
       
-      // If it takes more than 5 seconds, it's likely a cold start
       const coldStartTimer = setTimeout(() => {
         if (!isLoadMore) setIsColdStart(true);
       }, 5000);
@@ -61,7 +96,6 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
           search: searchQuery,
           sort_by: sortBy
         }
-        // Removed strict 15000ms timeout so Render free tier can wake up (takes ~50s)
       });
       
       clearTimeout(coldStartTimer);
@@ -77,7 +111,6 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
           } catch (e) {}
         } else {
           setBooks(prev => {
-            // Lọc trùng lặp phòng trường hợp spam click
             const existingIds = new Set(prev.map((b: any) => b.id));
             const newBooks = res.data.filter((b: any) => !existingIds.has(b.id));
             return [...prev, ...newBooks];
@@ -101,12 +134,11 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
     }
   }, [user, isLoading, router]);
 
-  // Refetch when search query or sort order changes (with debounce)
   useEffect(() => {
     if (user) {
       const delayTimer = setTimeout(() => {
         fetchBooks(false);
-      }, 400); // 400ms debounce
+      }, 400);
       return () => clearTimeout(delayTimer);
     }
   }, [user, searchQuery, sortBy]);
@@ -134,153 +166,384 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
     }
   }, []);
 
+  const handleSendChat = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    const userText = chatInput.trim();
+    setChatMessages(prev => [...prev, { sender: 'user', text: userText }]);
+    setChatInput('');
+
+    // Fast local AI search matching
+    setTimeout(() => {
+      const matched = books.find(b => 
+        b.title.toLowerCase().includes(userText.toLowerCase()) || 
+        (b.author && b.author.toLowerCase().includes(userText.toLowerCase()))
+      );
+      if (matched) {
+        setChatMessages(prev => [
+          ...prev, 
+          { 
+            sender: 'bot', 
+            text: `Tôi đã tìm thấy cuốn "${matched.title}" của tác giả ${matched.author || 'chưa rõ'}:`,
+            book: matched
+          }
+        ]);
+      } else {
+        setChatMessages(prev => [
+          ...prev, 
+          { 
+            sender: 'bot', 
+            text: `Bạn có thể bấm vào "Tìm Sách Online" ở thanh trên để tìm thêm tác phẩm này từ các máy chủ trực tuyến nhé!` 
+          }
+        ]);
+      }
+    }, 600);
+  };
+
+  // Filter books by category
+  const filteredBooks = books.filter(b => {
+    if (selectedCategory === 'all') return true;
+    if (selectedCategory === 'fiction') return (b.genre && /tiểu thuyết|fiction|văn học/i.test(b.genre));
+    if (selectedCategory === 'classic') return (b.genre && /kinh điển|classic/i.test(b.genre));
+    if (selectedCategory === 'selfhelp') return (b.genre && /kỹ năng|self-help|phát triển/i.test(b.genre));
+    if (selectedCategory === 'romance') return (b.genre && /tình cảm|romance/i.test(b.genre));
+    if (selectedCategory === 'scifi') return (b.genre && /khoa học|sci-fi|viễn tưởng/i.test(b.genre));
+    return true;
+  });
+
   if (isLoading || !user) {
-    return <div className="min-h-screen bg-[#1F1D20] flex items-center justify-center font-bold text-[#D7C9B2]">Đang tải...</div>;
+    return (
+      <div className="min-h-screen bg-[#D8C9BB] flex items-center justify-center font-bold text-[#2A2320]">
+        Đang tải BookCase...
+      </div>
+    );
   }
 
   return (
-    <div className="flex bg-[#1F1D20] text-[#F5ECDC] min-h-screen font-sans selection:bg-orange-950/60 overflow-x-hidden">
+    <div className="min-h-screen bg-[#D8C9BB] p-3 sm:p-5 md:p-6 lg:p-7 flex justify-center gap-5 font-sans selection:bg-[#5F65B9]/20">
       
-      {/* Sidebar - Fixed Left */}
+      {/* 1. LEFT COLUMN: FLOATING PILL DOCK */}
       <Sidebar />
 
-      {/* Main Content Area - Shifted Right */}
-      <div className="flex-1 min-w-0 md:ml-64 pt-16 md:pt-0 flex flex-col min-h-screen">
+      {/* 2. CENTER COLUMN: MAIN BOARD CONTAINER */}
+      <main className="flex-1 max-w-5xl bg-[#FBF8F4] rounded-[36px] p-5 sm:p-7 md:p-8 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col gap-6 overflow-hidden min-w-0">
         
-        {/* Topbar */}
-        <header className="sticky top-16 md:top-0 z-30 bg-[#1F1D20]/90 backdrop-blur-md px-4 py-4 md:px-10 md:py-6 flex flex-col gap-4 border-b border-[#4D4845]/30">
-          
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
-            {/* Menu links on topbar */}
-            <div className="flex items-center gap-6 md:gap-8 text-base md:text-sm font-bold text-[#D7C9B2] overflow-x-auto w-full md:w-auto no-scrollbar">
-               <a href="#" className="text-[#F5ECDC] border-b-2 border-[#F5ECDC] pb-1 whitespace-nowrap">New Release</a>
-               <a href="#" className="hover:text-[#F5ECDC] transition-colors pb-1 whitespace-nowrap">Featured</a>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center w-full md:w-auto gap-3">
-              <button
-                onClick={() => setIsSearchOnlineOpen(true)}
-                className="flex-1 md:flex-none bg-[#F5ECDC] hover:bg-white !text-black border border-[#F5ECDC] rounded-xl py-3.5 md:py-2.5 px-5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-md transition-all cursor-pointer whitespace-nowrap"
-                style={{ color: '#000000' }}
-              >
-                <span style={{ color: '#000000' }} className="!text-black font-black">Tìm Sách Online</span>
-              </button>
-              <button
-                onClick={() => setIsUploadModalOpen(true)}
-                className="flex-1 md:flex-none bg-[#2A272A] hover:bg-[#3A373A] text-[#F5ECDC] border border-[#4D4845]/60 rounded-xl py-3.5 md:py-2.5 px-5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-md transition-all cursor-pointer whitespace-nowrap"
-              >
-                <span className="font-black text-[#F5ECDC]">Tải Sách Lên</span>
-              </button>
-              <button
-                onClick={() => setIsSearchExpanded(!isSearchExpanded)}
-                className="p-3.5 md:p-2.5 bg-[#2A272A] hover:bg-[#3A373A] text-[#F5ECDC] border border-[#4D4845]/60 rounded-xl focus:outline-none shadow-md transition-all cursor-pointer"
-              >
-                <Search size={20} />
-              </button>
-            </div>
+        {/* TOP SEARCH & ACTION BAR */}
+        <header className="flex flex-col sm:flex-row items-center justify-between gap-3.5">
+          {/* Pill Search Input */}
+          <div className="w-full sm:flex-1 bg-[#EFE8DE] rounded-full px-4 py-2 flex items-center gap-2.5 border border-[#E0D5C7] shadow-inner transition-all focus-within:border-[#5F65B9]">
+            <Search size={18} className="text-[#8B7070] flex-shrink-0" />
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm sách, tác giả..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-transparent text-sm font-medium text-[#2A2320] placeholder-[#8B7070] focus:outline-none"
+            />
           </div>
 
-          {/* Search & Sort Row */}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            
-            <div className="w-full md:w-auto flex justify-start">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full md:w-auto bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-3 md:py-2.5 px-5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-inner transition-all text-[#F5ECDC] cursor-pointer appearance-none pr-10"
-                style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23F5ECDC%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
-              >
-                <option value="newest" className="bg-[#1F1D20] text-[#F5ECDC]">Sắp xếp: Mới nhất</option>
-                <option value="author" className="bg-[#1F1D20] text-[#F5ECDC]">Phân loại: Theo Tác Giả</option>
-                <option value="a-z" className="bg-[#1F1D20] text-[#F5ECDC]">Tên sách: A ➔ Z</option>
-                <option value="z-a" className="bg-[#1F1D20] text-[#F5ECDC]">Tên sách: Z ➔ A</option>
-              </select>
-            </div>
+          {/* Action Buttons: Gradient Search & Upload Pill */}
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+            <button
+              onClick={() => setIsSearchOnlineOpen(true)}
+              className="btn-gradient px-6 py-2.5 rounded-full font-black text-xs sm:text-sm tracking-wide shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
+            >
+              Tìm Online
+            </button>
 
-            <div className="w-full md:w-1/2 flex justify-end h-11">
-              {isSearchExpanded && (
-                <div className="relative w-full md:max-w-md animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7B7369]" size={16} />
-                  <input 
-                    type="text" 
-                    placeholder="Search your books"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-[#2A272A] border border-[#4D4845]/60 rounded-xl py-3 md:py-2.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#F5ECDC]/50 shadow-inner transition-all text-[#F5ECDC] placeholder-[#7B7369]"
-                    autoFocus
-                  />
-                </div>
-              )}
-            </div>
-            
+            <button
+              onClick={() => setIsUploadModalOpen(true)}
+              className="w-10 h-10 rounded-full bg-[#EFE8DE] hover:bg-[#E2D7C8] border border-[#E0D5C7] flex items-center justify-center text-[#2A2320] transition-all cursor-pointer shadow-sm hover:scale-105"
+              title="Tải sách từ máy lên"
+            >
+              <Upload size={16} />
+            </button>
+
+            {/* Mobile Chat Toggle Button */}
+            <button
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className="xl:hidden w-10 h-10 rounded-full bg-[#7E79BF] text-white flex items-center justify-center shadow-sm cursor-pointer"
+              title="Mở Trợ lý Chat"
+            >
+              <Sparkles size={16} />
+            </button>
           </div>
         </header>
 
-        {/* Content */}
-        <main className="flex-1 px-4 md:px-10 pt-4 pb-12">
-          {isLoadingBooks && books.length === 0 ? (
-            <div className="flex flex-col items-center pt-10">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10 w-full animate-pulse">
-                {[...Array(10)].map((_, i) => (
-                  <div key={i} className="flex flex-col">
-                    <div className="w-full aspect-[2/3] bg-[#2A272A] rounded-2xl mb-4 border border-[#4D4845]/30"></div>
-                    <div className="h-4 bg-[#2A272A] rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-[#2A272A] rounded w-1/2"></div>
-                  </div>
-                ))}
-              </div>
-              {isColdStart && (
-                <div className="mt-8 px-6 py-4 bg-orange-500/10 border border-orange-500/30 rounded-2xl flex flex-col items-center max-w-md text-center animate-fade-in shadow-lg">
-                   <div className="animate-spin rounded-full h-8 w-8 border-4 border-orange-500 border-t-transparent mb-3"></div>
-                   <h3 className="text-orange-400 font-bold mb-1">Máy chủ đang thức dậy...</h3>
-                   <p className="text-[#D7C9B2] text-sm">Hệ thống đang khởi động lại do đã lâu không có ai truy cập. Quá trình này có thể mất tới 60 giây, vui lòng kiên nhẫn nhé!</p>
+        {/* CATEGORIES / BOOK FORMAT ROW */}
+        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
+          {CATEGORIES.map((cat) => {
+            const Icon = cat.icon;
+            const active = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`flex flex-col items-center gap-1.5 px-3.5 py-2 rounded-2xl transition-all flex-shrink-0 cursor-pointer ${
+                  active 
+                    ? 'bg-[#EFE8DE] shadow-sm border border-[#DFCFC0] scale-105' 
+                    : 'hover:bg-[#F2ECE2] opacity-75 hover:opacity-100'
+                }`}
+              >
+                <div 
+                  className="w-8 h-8 rounded-xl flex items-center justify-center shadow-xs"
+                  style={{ backgroundColor: `${cat.color}20`, color: cat.color }}
+                >
+                  <Icon size={16} />
                 </div>
-              )}
+                <span className={`text-[11px] font-bold ${active ? 'text-[#2A2320]' : 'text-[#7A6F68]'}`}>
+                  {cat.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* "POPULAR" SECTION HEADER */}
+        <div className="flex items-center justify-between pt-1">
+          <h2 className="text-xl md:text-2xl font-black text-[#2A2320] tracking-tight">
+            Sách Nổi Bật
+          </h2>
+          <div className="flex items-center gap-2">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-[#EFE8DE] border border-[#E0D5C7] rounded-full text-xs font-bold px-3.5 py-1.5 text-[#2A2320] cursor-pointer focus:outline-none shadow-sm"
+            >
+              <option value="newest">Mới nhất</option>
+              <option value="author">Theo tác giả</option>
+              <option value="a-z">A ➔ Z</option>
+              <option value="z-a">Z ➔ A</option>
+            </select>
+          </div>
+        </div>
+
+        {/* BOOKSHELF DISPLAY */}
+        <section className="flex-1 min-h-[300px]">
+          {isLoadingBooks && books.length === 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 animate-pulse pt-2">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="flex flex-col gap-2">
+                  <div className="aspect-[2/3] bg-[#EFE8DE] rounded-2xl" />
+                  <div className="h-4 bg-[#EFE8DE] rounded-md w-3/4" />
+                  <div className="h-3 bg-[#EFE8DE] rounded-md w-1/2" />
+                </div>
+              ))}
             </div>
-          ) : books.length === 0 ? (
-            <div className="h-64 flex flex-col items-center justify-center bg-[#2A272A] rounded-3xl shadow-sm border border-[#4D4845]/40">
-              <p className="text-[#D7C9B2] font-medium mb-4">Bookshelf is currently empty.</p>
+          ) : filteredBooks.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center text-[#7A6F68]">
+              <BookOpen size={40} className="text-[#C8BAA9] mb-3" />
+              <p className="font-bold text-base text-[#2A2320]">Không tìm thấy cuốn sách nào</p>
+              <p className="text-xs text-[#7A6F68] mt-1">Hãy thử đổi từ khóa hoặc tìm kiếm trực tuyến từ kho thư viện mở</p>
             </div>
           ) : (
-            <>
-              <Bookshelf books={books} refresh={() => fetchBooks(false)} sortBy={sortBy} />
-              
-              {hasMore && (
-                <div className="mt-10 flex justify-center pb-8">
-                  <button 
-                    onClick={() => fetchBooks(true)}
-                    disabled={isLoadingMore}
-                    className="bg-[#2A272A] hover:bg-[#3A373A] border border-[#4D4845] text-[#F5ECDC] font-bold py-3 px-8 rounded-full shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                  >
-                    {isLoadingMore ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#F5ECDC] border-t-transparent"></div>
-                        Đang tải...
-                      </>
-                    ) : (
-                      'Tải Thêm Sách'
-                    )}
-                  </button>
-                </div>
-              )}
-            </>
+            <Bookshelf 
+              books={filteredBooks} 
+              refresh={() => fetchBooks(false)} 
+              sortBy={sortBy} 
+            />
           )}
-        </main>
 
-        <SearchOnlineModal 
-          isOpen={isSearchOnlineOpen} 
-          onClose={() => setIsSearchOnlineOpen(false)} 
-          onImportSuccess={() => fetchBooks(false)} 
-        />
+          {/* Load More Button */}
+          {hasMore && !searchQuery && filteredBooks.length > 0 && (
+            <div className="flex justify-center pt-8 pb-4">
+              <button
+                onClick={() => fetchBooks(true)}
+                disabled={isLoadingMore}
+                className="px-6 py-2.5 bg-[#EFE8DE] hover:bg-[#E2D7C8] border border-[#E0D5C7] rounded-full text-xs font-bold text-[#2A2320] shadow-sm transition-all cursor-pointer"
+              >
+                {isLoadingMore ? 'Đang tải thêm...' : 'Xem thêm sách'}
+              </button>
+            </div>
+          )}
+        </section>
 
-        <UploadModal 
-          isOpen={isUploadModalOpen} 
-          onClose={() => setIsUploadModalOpen(false)} 
-          onUploadSuccess={() => fetchBooks(false)} 
-        />
+        {/* PROMO BESTSELLERS BANNER & CURATED MINI LISTS */}
+        <section className="mt-4 pt-6 border-t border-[#EAE2D5] grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* Left Promo Card */}
+          <div className="lg:col-span-7 bg-[#EFE8DE] rounded-3xl p-6 flex items-center justify-between gap-4 border border-[#E0D5C7] shadow-sm">
+            <div className="space-y-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#E56B6F] bg-[#FAF0F0] px-2.5 py-0.5 rounded-full">
+                Tuyển chọn 2026
+              </span>
+              <h3 className="text-base sm:text-lg font-black text-[#2A2320] leading-tight">
+                Top 50 Tác Phẩm Đọc Nhiều Nhất
+              </h3>
+              <p className="text-xs text-[#7A6F68] leading-relaxed max-w-sm">
+                Tổng hợp những cuốn sách được cộng đồng bạn đọc đánh giá cao và tải về nhiều nhất trên BookCase.
+              </p>
+              <div className="pt-1">
+                <button 
+                  onClick={() => setIsSearchOnlineOpen(true)}
+                  className="bg-[#E56B6F] hover:bg-[#D6595D] text-white px-4 py-2 rounded-full text-xs font-black flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                >
+                  <Eye size={13} />
+                  <span>Khám phá ngay</span>
+                </button>
+              </div>
+            </div>
 
-      </div>
+            {/* Decorative Book Stack graphic */}
+            <div className="hidden sm:flex flex-col items-center gap-1 opacity-85 flex-shrink-0">
+              <div className="w-20 h-5 bg-[#EB5757] rounded-md shadow-xs border-r-4 border-white/40" />
+              <div className="w-24 h-5 bg-[#3A7BD5] rounded-md shadow-xs border-r-4 border-white/40" />
+              <div className="w-22 h-5 bg-[#27AE60] rounded-md shadow-xs border-r-4 border-white/40" />
+              <div className="w-26 h-5 bg-[#F2C94C] rounded-md shadow-xs border-r-4 border-white/40" />
+              <div className="w-28 h-5 bg-[#9B51E0] rounded-md shadow-xs border-r-4 border-white/40" />
+            </div>
+          </div>
+
+          {/* Right Mini Curated Cards */}
+          <div className="lg:col-span-5 flex flex-col justify-between gap-2.5">
+            <div 
+              onClick={() => { setSelectedCategory('classic'); }}
+              className="bg-[#FFFFFF] hover:bg-[#FAF6F0] p-3 rounded-2xl border border-[#ECE2D5] flex items-center gap-3 cursor-pointer transition-all shadow-2xs hover:scale-[1.01]"
+            >
+              <div className="w-9 h-9 rounded-xl bg-[#27AE60]/15 text-[#27AE60] flex items-center justify-center flex-shrink-0">
+                <Feather size={18} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h4 className="text-xs font-black text-[#2A2320] truncate">Top 50 Sách Kinh Điển</h4>
+                <p className="text-[11px] text-[#7A6F68] truncate">Những áng văn trường tồn với thời gian</p>
+              </div>
+              <ChevronRight size={16} className="text-[#C8BAA9]" />
+            </div>
+
+            <div 
+              onClick={() => { setSelectedCategory('selfhelp'); }}
+              className="bg-[#FFFFFF] hover:bg-[#FAF6F0] p-3 rounded-2xl border border-[#ECE2D5] flex items-center gap-3 cursor-pointer transition-all shadow-2xs hover:scale-[1.01]"
+            >
+              <div className="w-9 h-9 rounded-xl bg-[#8E44AD]/15 text-[#8E44AD] flex items-center justify-center flex-shrink-0">
+                <GraduationCap size={18} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h4 className="text-xs font-black text-[#2A2320] truncate">Top Sách Phát Triển Bản Thân</h4>
+                <p className="text-[11px] text-[#7A6F68] truncate">Tư duy, năng suất và bài học cuộc sống</p>
+              </div>
+              <ChevronRight size={16} className="text-[#C8BAA9]" />
+            </div>
+
+            <div 
+              onClick={() => { setSelectedCategory('scifi'); }}
+              className="bg-[#FFFFFF] hover:bg-[#FAF6F0] p-3 rounded-2xl border border-[#ECE2D5] flex items-center gap-3 cursor-pointer transition-all shadow-2xs hover:scale-[1.01]"
+            >
+              <div className="w-9 h-9 rounded-xl bg-[#56CCF2]/20 text-[#2F80ED] flex items-center justify-center flex-shrink-0">
+                <Compass size={18} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h4 className="text-xs font-black text-[#2A2320] truncate">Top Khoa Học & Viễn Tưởng</h4>
+                <p className="text-[11px] text-[#7A6F68] truncate">Khám phá tương lai và vũ trụ</p>
+              </div>
+              <ChevronRight size={16} className="text-[#C8BAA9]" />
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* 3. RIGHT COLUMN: CHAT / ASSISTANT DRAWER */}
+      <aside className={`
+        fixed xl:static top-0 right-0 h-full xl:h-[calc(100vh-48px)] w-80 lg:w-84 
+        bg-[#FAF6F0] rounded-l-[36px] xl:rounded-[36px] p-5 
+        shadow-[0_16px_40px_rgba(120,100,85,0.14)] border border-[#ECE2D5] 
+        flex flex-col gap-4 z-50 transition-transform duration-300
+        ${isChatOpen ? 'translate-x-0' : 'translate-x-full xl:translate-x-0'}
+      `}>
+        {/* Chat Header */}
+        <div className="flex items-center justify-between pb-2 border-b border-[#EBE2D5]">
+          <div className="flex items-center gap-2">
+            <h3 className="font-extrabold text-base text-[#2A2320]">Trợ Lý BookCase</h3>
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          </div>
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={() => setIsChatOpen(false)}
+              className="xl:hidden p-1.5 text-[#7A6F68] hover:text-[#2A2320] rounded-lg"
+            >
+              ✕
+            </button>
+            <div className="p-1.5 text-[#7A6F68]">
+              <MoreHorizontal size={18} />
+            </div>
+          </div>
+        </div>
+
+        {/* Support Pill Banner */}
+        <div className="bg-[#EFE8DE] p-3 rounded-2xl flex items-center justify-between border border-[#E0D5C7] text-xs">
+          <div>
+            <p className="font-bold text-[#2A2320]">Tư vấn sách thông minh</p>
+            <p className="text-[11px] text-[#7A6F68]">Hỏi về bất kỳ cuốn sách nào</p>
+          </div>
+          <ChevronRight size={16} className="text-[#8B7070]" />
+        </div>
+
+        {/* Messages List */}
+        <div className="flex-1 overflow-y-auto space-y-3 pr-1 text-xs">
+          {chatMessages.map((msg, idx) => (
+            <div key={idx} className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+              <div 
+                className={`max-w-[85%] p-3.5 rounded-2xl leading-relaxed ${
+                  msg.sender === 'user' 
+                    ? 'bg-[#7E79BF] text-white rounded-br-xs shadow-xs' 
+                    : 'bg-[#FFFFFF] text-[#2A2320] rounded-bl-xs shadow-xs border border-[#ECE2D5]'
+                }`}
+              >
+                {msg.text}
+
+                {/* Embedded Book Card in Chat */}
+                {msg.book && (
+                  <div className="mt-2.5 pt-2 border-t border-[#ECE2D5] flex items-center gap-2.5">
+                    {msg.book.cover_url && (
+                      <img 
+                        src={msg.book.cover_url} 
+                        alt={msg.book.title} 
+                        className="w-9 h-13 object-cover rounded-md shadow-xs flex-shrink-0"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-extrabold text-[11px] text-[#2A2320] truncate">{msg.book.title}</p>
+                      <p className="text-[10px] text-[#7A6F68] truncate">{msg.book.author}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Chat Input Box */}
+        <form onSubmit={handleSendChat} className="bg-[#EFE8DE] rounded-full p-1.5 pl-4 flex items-center gap-2 border border-[#E0D5C7] shadow-inner">
+          <input 
+            type="text" 
+            placeholder="Hỏi trợ lý về sách..."
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            className="flex-1 bg-transparent text-xs font-medium text-[#2A2320] placeholder-[#8B7070] focus:outline-none"
+          />
+          <button 
+            type="submit"
+            disabled={!chatInput.trim()}
+            className="w-8 h-8 rounded-full bg-[#E56B6F] hover:bg-[#D6595D] text-white flex items-center justify-center shadow-sm disabled:opacity-40 transition-transform active:scale-95 cursor-pointer flex-shrink-0"
+          >
+            <Send size={13} className="ml-0.5" />
+          </button>
+        </form>
+      </aside>
+
+      {/* MODALS */}
+      <SearchOnlineModal 
+        isOpen={isSearchOnlineOpen} 
+        onClose={() => setIsSearchOnlineOpen(false)} 
+        onImportSuccess={() => fetchBooks(false)} 
+      />
+
+      <UploadModal 
+        isOpen={isUploadModalOpen} 
+        onClose={() => setIsUploadModalOpen(false)} 
+        onUploadSuccess={() => fetchBooks(false)} 
+      />
+
     </div>
   );
 }
