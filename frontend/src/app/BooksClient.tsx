@@ -309,13 +309,13 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
   }
 
   return (
-    <div className="h-screen max-h-screen overflow-hidden bg-[#D8C9BB] p-3 sm:p-4 md:p-5 flex justify-center gap-4 lg:gap-5 font-sans selection:bg-[#1B2A4A]/20 selection:text-[#1C1917] relative">
+    <div className="h-screen max-h-screen overflow-hidden bg-[#D8C9BB] p-3 sm:p-4 md:p-5 flex gap-4 lg:gap-5 font-sans selection:bg-[#1B2A4A]/20 selection:text-[#1C1917] relative w-full">
       
       {/* 1. LEFT COLUMN: FLOATING PILL DOCK */}
       <Sidebar />
 
-      {/* 2. CENTER COLUMN: MAIN BOARD CONTAINER (LOCKED OUTER FRAME) */}
-      <main className="flex-1 max-w-5xl h-full bg-[#FBF8F4] rounded-[36px] p-4 sm:p-6 md:p-7 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col overflow-hidden min-w-0">
+      {/* 2. CENTER COLUMN: MAIN BOARD CONTAINER */}
+      <main className="flex-1 h-full bg-[#FBF8F4] rounded-[36px] p-4 sm:p-6 md:p-7 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col overflow-hidden min-w-0 transition-all duration-300">
         
         {/* TOP SEARCH & ACTION BAR (PINNED) */}
         <header className="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3.5 pb-2">
@@ -368,17 +368,17 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
                 className={`flex flex-col items-center gap-1.5 px-3.5 py-2 rounded-2xl transition-all flex-shrink-0 cursor-pointer ${
                   active 
                     ? 'bg-[#1B2A4A] !text-white shadow-md border border-[#1B2A4A] scale-105' 
-                    : 'bg-[#EFE8DE] text-[#1C1917] border border-[#E0D5C7] hover:bg-[#E5DACD] opacity-90 hover:opacity-100'
+                    : 'bg-[#EFE8DE] !text-[#1C1917] border border-[#E0D5C7] hover:bg-[#E5DACD] opacity-90 hover:opacity-100'
                 }`}
               >
                 <div 
                   className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-xs transition-colors ${
-                    active ? 'bg-white/20 text-white' : 'bg-[#E5DACD] text-[#1C1917]'
+                    active ? 'bg-white/20 text-white' : 'bg-[#E5DACD] !text-[#1C1917]'
                   }`}
                 >
-                  <Icon size={16} className={active ? '!text-white stroke-white' : ''} />
+                  <Icon size={16} className={active ? '!text-white stroke-white' : '!text-[#1C1917]'} />
                 </div>
-                <span className={`text-[11px] font-bold ${active ? '!text-white font-black' : 'text-[#1C1917]'}`}>
+                <span className={`text-[11px] font-bold ${active ? '!text-white font-black' : '!text-[#1C1917]'}`}>
                   {cat.label}
                 </span>
               </button>
@@ -449,103 +449,16 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
             )}
           </section>
 
-          {/* PROMO BESTSELLERS BANNER & CURATED MINI LISTS */}
-          <section className="pt-6 border-t border-[#EAE2D5] grid grid-cols-1 lg:grid-cols-12 gap-5">
-            {/* Left Promo Card */}
-            <div className="lg:col-span-7 bg-[#EFE8DE] rounded-3xl p-6 flex items-center justify-between gap-4 border border-[#E0D5C7] shadow-sm">
-              <div className="space-y-2">
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#1B2A4A] bg-[#EBF0F7] border border-[#D5E1F0] px-2.5 py-0.5 rounded-full">
-                  Tuyển chọn 2026
-                </span>
-                <h3 className="text-base sm:text-lg font-black text-[#1C1917] leading-tight">
-                  Top 50 Tác Phẩm Đọc Nhiều Nhất
-                </h3>
-                <p className="text-xs text-[#57534E] leading-relaxed max-w-sm">
-                  Tổng hợp những cuốn sách được cộng đồng bạn đọc đánh giá cao và tải về nhiều nhất trên BookCase.
-                </p>
-                <div className="pt-1">
-                  <button 
-                    onClick={() => setIsChatOpen(true)}
-                    className="bg-[#1B2A4A] hover:bg-[#131E33] !text-white px-4 py-2 rounded-full text-xs font-black flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-                  >
-                    <Eye size={13} className="!text-white stroke-white" />
-                    <span className="!text-white">Tìm qua Trợ lý ngay</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Decorative Book Stack graphic in Navy & Charcoal */}
-              <div className="hidden sm:flex flex-col items-center gap-1 opacity-85 flex-shrink-0">
-                <div className="w-20 h-5 bg-[#1B2A4A] rounded-md shadow-xs border-r-4 border-white/40" />
-                <div className="w-24 h-5 bg-[#2B2B2E] rounded-md shadow-xs border-r-4 border-white/40" />
-                <div className="w-22 h-5 bg-[#16243E] rounded-md shadow-xs border-r-4 border-white/40" />
-                <div className="w-26 h-5 bg-[#3D3D42] rounded-md shadow-xs border-r-4 border-white/40" />
-                <div className="w-28 h-5 bg-[#1B2A4A] rounded-md shadow-xs border-r-4 border-white/40" />
-              </div>
-            </div>
-
-            {/* Right Mini Curated Cards */}
-            <div className="lg:col-span-5 flex flex-col justify-between gap-2.5">
-              <div 
-                onClick={() => { setSelectedCategory('classic'); }}
-                className="bg-[#FFFFFF] hover:bg-[#FAF6F0] p-3 rounded-2xl border border-[#ECE2D5] flex items-center gap-3 cursor-pointer transition-all shadow-2xs hover:scale-[1.01]"
-              >
-                <div className="w-9 h-9 rounded-xl bg-[#EBF0F7] text-[#1B2A4A] flex items-center justify-center flex-shrink-0 font-bold">
-                  <Feather size={18} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-xs font-black text-[#1C1917] truncate">Top 50 Sách Kinh Điển</h4>
-                  <p className="text-[11px] text-[#57534E] truncate">Những áng văn trường tồn với thời gian</p>
-                </div>
-                <ChevronRight size={16} className="text-[#A89F95]" />
-              </div>
-
-              <div 
-                onClick={() => { setSelectedCategory('selfhelp'); }}
-                className="bg-[#FFFFFF] hover:bg-[#FAF6F0] p-3 rounded-2xl border border-[#ECE2D5] flex items-center gap-3 cursor-pointer transition-all shadow-2xs hover:scale-[1.01]"
-              >
-                <div className="w-9 h-9 rounded-xl bg-[#EFE8DE] text-[#1C1917] flex items-center justify-center flex-shrink-0 font-bold">
-                  <GraduationCap size={18} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-xs font-black text-[#1C1917] truncate">Top Sách Phát Triển Bản Thân</h4>
-                  <p className="text-[11px] text-[#57534E] truncate">Tư duy, năng suất và bài học cuộc sống</p>
-                </div>
-                <ChevronRight size={16} className="text-[#A89F95]" />
-              </div>
-
-              <div 
-                onClick={() => { setSelectedCategory('scifi'); }}
-                className="bg-[#FFFFFF] hover:bg-[#FAF6F0] p-3 rounded-2xl border border-[#ECE2D5] flex items-center gap-3 cursor-pointer transition-all shadow-2xs hover:scale-[1.01]"
-              >
-                <div className="w-9 h-9 rounded-xl bg-[#EBF0F7] text-[#1B2A4A] flex items-center justify-center flex-shrink-0 font-bold">
-                  <Compass size={18} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-xs font-black text-[#1C1917] truncate">Top Khoa Học & Viễn Tưởng</h4>
-                  <p className="text-[11px] text-[#57534E] truncate">Khám phá tương lai và vũ trụ</p>
-                </div>
-                <ChevronRight size={16} className="text-[#A89F95]" />
-              </div>
-            </div>
-          </section>
         </div>
       </main>
 
-      {/* 3. TRỢ LÝ TÌM SÁCH ONLINE DRAWER (CHỈ HIỆN KHI BẤM "TÌM ONLINE") */}
-      {isChatOpen && (
-        <div 
-          onClick={() => setIsChatOpen(false)} 
-          className="fixed inset-0 bg-black/25 backdrop-blur-[2px] z-40 xl:hidden transition-opacity"
-        />
-      )}
-
+      {/* 3. TRỢ LÝ TÌM SÁCH ONLINE DRAWER (SCALES UI) */}
       <aside className={`
-        fixed top-0 right-0 h-full w-full sm:w-[420px] md:w-[460px] p-3 sm:p-4 z-50
-        transition-transform duration-300 ease-in-out
-        ${isChatOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'}
+        relative h-full flex-shrink-0 z-40
+        transition-all duration-300 ease-in-out overflow-hidden
+        ${isChatOpen ? 'w-full sm:w-[420px] md:w-[460px] opacity-100' : 'w-0 opacity-0'}
       `}>
-        <div className="bg-[#FAF6F0] h-full rounded-[32px] p-4 sm:p-5 shadow-[0_20px_60px_rgba(120,100,85,0.22)] border border-[#ECE2D5] flex flex-col gap-3 overflow-hidden">
+        <div className="w-full sm:w-[420px] md:w-[460px] bg-[#FAF6F0] h-full rounded-[32px] p-4 sm:p-5 shadow-[0_20px_60px_rgba(120,100,85,0.22)] border border-[#ECE2D5] flex flex-col gap-3 overflow-hidden">
           
           {/* Assistant Header */}
           <div className="flex items-center justify-between pb-2 border-b border-[#EBE2D5] flex-shrink-0">
