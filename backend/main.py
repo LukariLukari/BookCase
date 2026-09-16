@@ -794,12 +794,18 @@ def create_book_from_link(book_in: schemas.BookLinkCreate, db: Session = Depends
 
 @app.get("/api/external-search", response_model=List[schemas.ExternalSearchItem])
 async def external_search(q: str, source: Optional[str] = None):
-    import telegram_client
+    import book_search_service
     try:
-        books = await telegram_client.search_books_via_telegram(q, source=source)
+        books = await book_search_service.search_all_sources(q, source=source)
         return books
     except Exception as e:
+        print(f"[external_search error]: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/admin/telegram/status")
+async def get_telegram_status_endpoint(current_user: models.User = Depends(auth.get_current_admin_user)):
+    import telegram_client
+    return await telegram_client.get_telegram_status()
 
 @app.post("/api/external-import", response_model=schemas.BookResponse)
 async def external_import(
@@ -807,12 +813,17 @@ async def external_import(
     db: Session = Depends(get_db), 
     current_user: models.User = Depends(auth.get_current_user)
 ):
-    import telegram_client
     import io
-    
+    file_bytes = None
+    filename = "book"
+
     try:
-        # Tải file qua Telegram
-        file_bytes, filename = await telegram_client.download_book_via_telegram(request.id)
+        if request.id.startswith('openlibrary|') or request.id.startswith('ia|'):
+            import book_search_service
+            file_bytes, filename = book_search_service.download_openlibrary_book(request.id)
+        else:
+            import telegram_client
+            file_bytes, filename = await telegram_client.download_book_via_telegram(request.id)
     except Exception as e:
         err_str = str(e)
         if err_str.startswith("MANUAL_DOWNLOAD|"):

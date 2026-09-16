@@ -1,10 +1,22 @@
 from telethon.sync import TelegramClient
+from telethon.sessions import StringSession
 import os
 
 api_id = 31840703
 api_hash = 'e72130f8cbf7d43f7ece893c526019e8'
 
-# This will create a file named 'user_session.session'
+# Nếu session cũ bị lỗi AuthKeyDuplicatedError hoặc bị Telegram thu hồi, xóa để đăng nhập mới
+if os.path.exists('user_session.session'):
+    try:
+        test_client = TelegramClient('user_session', api_id, api_hash)
+        test_client.connect()
+        if not test_client.is_user_authorized():
+            test_client.disconnect()
+            os.remove('user_session.session')
+    except Exception:
+        if os.path.exists('user_session.session'):
+            os.remove('user_session.session')
+
 client = TelegramClient('user_session', api_id, api_hash)
 
 async def main():
@@ -12,16 +24,23 @@ async def main():
     await client.start()
     
     print("\n✅ Đăng nhập thành công! File 'user_session.session' đã được tạo.")
-    print("Bây giờ bạn có thể chạy lại lệnh 'npm run dev' để Backend sử dụng session này.")
     
-    # Send a ping to the bot to test
-    bot_username = '@LukariEbook_bot'
-    print(f"\nTesting connection to {bot_username}...")
-    try:
-        await client.send_message(bot_username, '/start')
-        print(f"✅ Đã gửi lệnh /start tới {bot_username} thành công.")
-    except Exception as e:
-        print(f"Lỗi khi gửi tin nhắn tới bot: {e}")
+    string_session = StringSession(client.session.save())
+    saved_str = string_session.save()
+    print("\n=========================================================================================")
+    print("MÃ STRING SESSION (Dán vào biến TELEGRAM_STRING_SESSION trên Render nếu cần):")
+    print("=========================================================================================")
+    print(saved_str)
+    print("=========================================================================================\n")
+    
+    # Test ping bot
+    for bot in ['@cloudilybot', '@LukariEbook_bot']:
+        try:
+            print(f"Kiểm tra kết nối đến bot {bot}...")
+            await client.send_message(bot, '/start')
+            print(f"✅ Gửi lệnh /start tới {bot} thành công.")
+        except Exception as e:
+            print(f"⚠️ Lưu ý với {bot}: {e}")
 
 with client:
     client.loop.run_until_complete(main())
