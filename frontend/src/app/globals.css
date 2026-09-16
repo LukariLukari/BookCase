@@ -107,16 +107,16 @@ body {
 }
 
 /* Navy Accent Button & Pills (Pure Contrast Guarantee) */
-.btn-gradient, .btn-navy, .bg-\[\#1B2A4A\], [class*="bg-[#1B2A4A]"] {
+.btn-gradient, .btn-navy, .bg-\[\#1B2A4A\] {
   background-color: #1B2A4A !important;
   color: #FFFFFF !important;
 }
 
-.btn-gradient *, .btn-navy *, .bg-\[\#1B2A4A\] *, [class*="bg-[#1B2A4A]"] * {
+.btn-gradient *, .btn-navy *, .bg-\[\#1B2A4A\] * {
   color: #FFFFFF !important;
 }
 
-.btn-gradient svg, .btn-navy svg, .bg-\[\#1B2A4A\] svg, [class*="bg-[#1B2A4A]"] svg {
+.btn-gradient svg, .btn-navy svg, .bg-\[\#1B2A4A\] svg {
   stroke: #FFFFFF !important;
   color: #FFFFFF !important;
 }
