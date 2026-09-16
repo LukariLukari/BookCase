@@ -143,11 +143,11 @@ export default function AdminRegistrationCodesPage() {
         {/* Header */}
         <header className="pb-5 mb-6 flex justify-between items-center border-b border-[#EFE8DE]">
           <div>
-            <div className="flex items-center gap-2.5 text-xl font-black text-[#2A2320]">
-              <KeyRound size={22} className="text-[#5F65B9]" />
+            <div className="flex items-center gap-2.5 text-xl font-black text-[#1C1917]">
+              <KeyRound size={22} className="text-[#1B2A4A]" />
               <span>Quản Lý Mã Đăng Ký</span>
             </div>
-            <p className="text-xs text-[#7A6F68] font-medium mt-0.5">Tạo và cấp phát mã kích hoạt tài khoản thành viên</p>
+            <p className="text-xs text-[#57534E] font-medium mt-0.5">Tạo và cấp phát mã kích hoạt tài khoản thành viên</p>
           </div>
           <button 
             onClick={handleCreateCode}
@@ -176,24 +176,24 @@ export default function AdminRegistrationCodesPage() {
 
           {loading ? (
             <div className="flex justify-center mt-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#5F65B9] border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#1B2A4A] border-t-transparent"></div>
             </div>
           ) : (
             <div className="bg-[#FAF6F0] rounded-3xl p-6 md:p-8 shadow-sm border border-[#ECE2D5]">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-lg font-black text-[#2A2320]">Danh sách mã đăng ký</h2>
-                  <p className="text-xs text-[#7A6F68] mt-0.5 font-medium">Mã ngẫu nhiên được Admin cấp cho thành viên để đăng ký tài khoản.</p>
+                  <h2 className="text-lg font-black text-[#1C1917]">Danh sách mã đăng ký</h2>
+                  <p className="text-xs text-[#57534E] mt-0.5 font-medium">Mã ngẫu nhiên được Admin cấp cho thành viên để đăng ký tài khoản.</p>
                 </div>
-                <span className="text-xs font-bold px-3 py-1 bg-white text-[#7A6F68] border border-[#ECE2D5] rounded-full shadow-sm">
+                <span className="text-xs font-bold px-3 py-1 bg-white text-[#57534E] border border-[#ECE2D5] rounded-full shadow-sm">
                   Tổng: {codes.length} mã
                 </span>
               </div>
 
               {codes.length === 0 ? (
                 <div className="text-center py-16 border border-dashed border-[#D8C9BB] rounded-2xl">
-                  <KeyRound size={48} className="text-[#A0958C] mx-auto mb-3" />
-                  <p className="text-xs text-[#7A6F68] font-bold mb-4">Chưa có mã đăng ký nào.</p>
+                  <KeyRound size={48} className="text-[#57534E] mx-auto mb-3" />
+                  <p className="text-xs text-[#57534E] font-bold mb-4">Chưa có mã đăng ký nào.</p>
                   <button 
                     onClick={handleCreateCode}
                     disabled={isCreating}
@@ -207,7 +207,7 @@ export default function AdminRegistrationCodesPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-[#EFE8DE] text-xs font-bold text-[#A0958C] uppercase tracking-wider">
+                      <tr className="border-b border-[#EFE8DE] text-xs font-bold text-[#57534E] uppercase tracking-wider">
                         <th className="pb-3.5 pl-4">Mã Code</th>
                         <th className="pb-3.5">Trạng thái</th>
                         <th className="pb-3.5">Người sử dụng</th>
@@ -218,7 +218,7 @@ export default function AdminRegistrationCodesPage() {
                     <tbody className="divide-y divide-[#EFE8DE] text-xs">
                       {codes.map((item) => (
                         <tr key={item.id} className="hover:bg-white/60 transition-colors">
-                          <td className="py-3.5 pl-4 font-mono font-bold text-sm text-[#5F65B9]">
+                          <td className="py-3.5 pl-4 font-mono font-bold text-sm text-[#1B2A4A]">
                             {item.code}
                           </td>
                           <td className="py-3.5">
@@ -234,21 +234,21 @@ export default function AdminRegistrationCodesPage() {
                               </span>
                             )}
                           </td>
-                          <td className="py-3.5 font-medium text-[#2A2320]">
+                          <td className="py-3.5 font-medium text-[#1C1917]">
                             {item.used_by_username ? (
-                              <span className="font-bold text-[#2A2320]">@{item.used_by_username}</span>
+                              <span className="font-bold text-[#1C1917]">@{item.used_by_username}</span>
                             ) : (
-                              <span className="text-[#A0958C] font-normal">—</span>
+                              <span className="text-[#8C827A] font-normal">—</span>
                             )}
                           </td>
-                          <td className="py-3.5 text-[#7A6F68]">
+                          <td className="py-3.5 text-[#57534E]">
                             {new Date(item.created_at).toLocaleString('vi-VN')}
                           </td>
                           <td className="py-3.5 pr-4 text-right">
                             <div className="flex items-center justify-end gap-1.5">
                               <button 
                                 onClick={() => copyToClipboard(item.code, item.id)}
-                                className="p-1.5 rounded-full text-[#7A6F68] hover:text-[#2A2320] hover:bg-white transition-colors flex items-center gap-1 text-xs font-bold border border-[#ECE2D5] cursor-pointer"
+                                className="p-1.5 rounded-full text-[#57534E] hover:text-[#1C1917] hover:bg-white transition-colors flex items-center gap-1 text-xs font-bold border border-[#ECE2D5] cursor-pointer"
                                 title="Sao chép mã"
                               >
                                 {copiedId === item.id ? (
@@ -268,7 +268,7 @@ export default function AdminRegistrationCodesPage() {
                                 <>
                                   <button 
                                     onClick={() => handleRegenerateCode(item.id)}
-                                    className="p-1.5 rounded-full text-[#5F65B9] hover:bg-white transition-colors border border-[#ECE2D5] cursor-pointer"
+                                    className="p-1.5 rounded-full text-[#1B2A4A] hover:bg-white transition-colors border border-[#ECE2D5] cursor-pointer"
                                     title="Tạo lại mã ngẫu nhiên mới"
                                   >
                                     <RefreshCw size={14} />

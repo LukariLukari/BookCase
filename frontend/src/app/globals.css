@@ -2,16 +2,16 @@
 
 :root {
   --background: #D8C9BB;
-  --foreground: #2A2320;
+  --foreground: #1C1917;
   --surface: #FBF8F4;
   --surface-muted: #EFE8DE;
   --surface-card: #FFFFFF;
   --border-soft: #E5DACD;
-  --text-main: #2A2320;
-  --text-muted: #7A6F68;
-  --accent-purple: #7E79BF;
-  --accent-coral: #E56B6F;
-  --accent-navy: #273248;
+  --text-main: #1C1917;
+  --text-muted: #57534E;
+  --color-charcoal: #1F1E20;
+  --color-navy: #1B2A4A;
+  --color-navy-hover: #131E33;
 }
 
 @theme inline {
@@ -22,7 +22,7 @@
 
 body {
   background-color: #D8C9BB;
-  color: #2A2320;
+  color: #1C1917;
   font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
@@ -106,17 +106,18 @@ body {
   bottom: -20px;
 }
 
-/* Gradient Button Accent */
-.btn-gradient {
-  background: linear-gradient(135deg, #5F65B9 0%, #8E65A8 50%, #E56B6F 100%);
+/* Navy Accent Button (previously gradient) */
+.btn-gradient, .btn-navy {
+  background-color: #1B2A4A;
   color: #FFFFFF !important;
-  box-shadow: 0 6px 18px rgba(142, 101, 168, 0.35);
+  box-shadow: 0 4px 14px rgba(27, 42, 74, 0.28);
   transition: all 0.2s ease;
 }
-.btn-gradient:hover {
-  opacity: 0.95;
+.btn-gradient:hover, .btn-navy:hover {
+  background-color: #131E33;
+  color: #FFFFFF !important;
   transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(142, 101, 168, 0.45);
+  box-shadow: 0 6px 18px rgba(27, 42, 74, 0.38);
 }
 
 /* Squircle & Clay Card Utilities */
@@ -129,7 +130,7 @@ body {
 
 .squircle-btn {
   background-color: #EFE8DE;
-  color: #2A2320;
+  color: #1C1917;
   border-radius: 16px;
   transition: all 0.2s ease;
 }
@@ -138,6 +139,6 @@ body {
   transform: scale(1.05);
 }
 .squircle-btn.active {
-  background-color: #2A2320;
-  color: #FAF6F0;
+  background-color: #1B2A4A;
+  color: #FFFFFF;
 }

@@ -22,86 +22,86 @@ interface BookSpineShelfProps {
   title?: string;
 }
 
-// Authentic hardcover bookbinding material themes
+// Authentic hardcover bookbinding material themes in Navy, Charcoal, and Beige
 const PHYSICAL_SPINE_THEMES = [
   { 
-    bg: '#4a121a', // Vintage Burgundy Leather
-    textColor: '#fceade', 
-    foilColor: '#d4af37', // Gold Foil
-    authorColor: '#e2c2a4',
-    paperEdge: '#f4ebd0',
+    bg: '#1B2A4A', // Classic Deep Navy
+    textColor: '#FFFFFF', 
+    foilColor: '#E8EDF5', // Soft Silver Foil
+    authorColor: '#B0C2DE',
+    paperEdge: '#F5EFE6',
     type: 'leather' 
   },
   { 
-    bg: '#0f1b29', // Royal Navy Linen
-    textColor: '#f0f4f8', 
-    foilColor: '#e0e0e0', // Silver Foil
-    authorColor: '#9bb1c9',
-    paperEdge: '#e8e3d5',
-    type: 'linen' 
-  },
-  { 
-    bg: '#193324', // Deep Forest Velvet
-    textColor: '#e8f5e9', 
-    foilColor: '#d4af37', // Gold Foil
-    authorColor: '#a3c9a8',
-    paperEdge: '#f2ebd9',
-    type: 'leather' 
-  },
-  { 
-    bg: '#7c3626', // Terracotta Hardbound
-    textColor: '#fff5ee', 
-    foilColor: '#e8a87c', // Copper Foil
-    authorColor: '#f7d6c6',
-    paperEdge: '#f4ece1',
-    type: 'linen' 
-  },
-  { 
-    bg: '#2b231d', // Aged Espresso Leather
-    textColor: '#f4e8c1', 
-    foilColor: '#d4af37', // Gold Foil
-    authorColor: '#c4b58a',
-    paperEdge: '#ebdcb9',
-    type: 'leather' 
-  },
-  { 
-    bg: '#1c1d21', // Onyx Obsidian Cloth
-    textColor: '#ffffff', 
-    foilColor: '#c0c0c0', // Silver Foil
-    authorColor: '#b0b3b8',
-    paperEdge: '#dedede',
+    bg: '#1F1E20', // Charcoal Off-black
+    textColor: '#FFFFFF', 
+    foilColor: '#D8C9BB', // Beige Foil
+    authorColor: '#D8C9BB',
+    paperEdge: '#EFE8DE',
     type: 'cloth' 
   },
   { 
-    bg: '#3b1f50', // Imperial Purple
-    textColor: '#f8f0fc', 
-    foilColor: '#d4af37', // Gold Foil
-    authorColor: '#d8b4e2',
-    paperEdge: '#f2e8f7',
+    bg: '#16243E', // Midnight Navy Linen
+    textColor: '#FFFFFF', 
+    foilColor: '#CAD6E8', // Muted Ice Foil
+    authorColor: '#A8BED9',
+    paperEdge: '#F4ECE1',
+    type: 'linen' 
+  },
+  { 
+    bg: '#2B2B2E', // Soft Charcoal Bound
+    textColor: '#FAF8F5', 
+    foilColor: '#E5DACD', // Warm Cream Foil
+    authorColor: '#C8BAA9',
+    paperEdge: '#EDE4D8',
+    type: 'leather' 
+  },
+  { 
+    bg: '#D8C9BB', // Premium Warm Beige Cloth
+    textColor: '#1C1917', 
+    foilColor: '#1B2A4A', // Navy Inlay Foil
+    authorColor: '#1B2A4A',
+    paperEdge: '#FFFFFF',
+    type: 'linen' 
+  },
+  { 
+    bg: '#0F1B29', // Deep Navy Leather
+    textColor: '#FFFFFF', 
+    foilColor: '#E2E8F0', // Platinum Foil
+    authorColor: '#93A5C0',
+    paperEdge: '#FAF6EE',
+    type: 'leather' 
+  },
+  { 
+    bg: '#1C1917', // Obsidian Off-black
+    textColor: '#FAF8F5', 
+    foilColor: '#D8C9BB', // Beige Foil
+    authorColor: '#B8ABA0',
+    paperEdge: '#F0E8DC',
     type: 'velvet' 
   },
   { 
-    bg: '#8c7853', // Vintage Tan Canvas
-    textColor: '#23180c', 
-    foilColor: '#4a371c', // Dark Bronze
-    authorColor: '#42331e',
-    paperEdge: '#f5edd6',
+    bg: '#E5DACD', // Soft Cream Hardbound
+    textColor: '#1C1917', 
+    foilColor: '#1F1E20', // Charcoal Foil
+    authorColor: '#1F1E20',
+    paperEdge: '#FFFFFF',
     type: 'cloth' 
   },
   { 
-    bg: '#6b1624', // Crimson Bound
-    textColor: '#fff0f2', 
-    foilColor: '#ffd700', // Bright Gold
-    authorColor: '#f3b3bc',
-    paperEdge: '#f8eedc',
-    type: 'leather' 
+    bg: '#23324E', // Rich Navy Velvet
+    textColor: '#FFFFFF', 
+    foilColor: '#D8C9BB', // Beige Foil
+    authorColor: '#CBD5E1',
+    paperEdge: '#FAF6EE',
+    type: 'velvet' 
   },
   { 
-    bg: '#163840', // Deep Teal Hardcover
-    textColor: '#e0f7fa', 
-    foilColor: '#80deea', // Metallic Cyan
-    authorColor: '#80cbc4',
-    paperEdge: '#e5f3f0',
+    bg: '#333338', // Slate Charcoal
+    textColor: '#FFFFFF', 
+    foilColor: '#E5DACD', // Cream Foil
+    authorColor: '#D8CCBD',
+    paperEdge: '#EDE4D8',
     type: 'linen' 
   },
 ];
@@ -134,12 +134,12 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
       <div className="flex justify-between items-end mb-4 px-1">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl md:text-2xl font-bold text-black tracking-tight">{title}</h2>
-            <span className="bg-orange-100 text-orange-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-orange-200">
+            <h2 className="text-xl md:text-2xl font-bold text-[#1C1917] tracking-tight">{title}</h2>
+            <span className="bg-[#EBF0F7] text-[#1B2A4A] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D5E1F0]">
               {books.length} cuốn
             </span>
           </div>
-          <p className="text-xs md:text-sm text-gray-500 mt-0.5 font-medium">
+          <p className="text-xs md:text-sm text-[#57534E] mt-0.5 font-medium">
             Bấm trực tiếp vào gáy sách 3D để xem chi tiết
           </p>
         </div>
@@ -148,7 +148,7 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleScroll('left')}
-            className="w-9 h-9 rounded-full bg-black text-white hover:bg-orange-600 transition-colors flex items-center justify-center shadow-md active:scale-95 cursor-pointer"
+            className="w-9 h-9 rounded-full bg-[#1B2A4A] text-white hover:bg-[#131E33] transition-colors flex items-center justify-center shadow-md active:scale-95 cursor-pointer"
             title="Cuộn sang trái"
             aria-label="Cuộn sang trái"
           >
@@ -156,7 +156,7 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
           </button>
           <button
             onClick={() => handleScroll('right')}
-            className="w-9 h-9 rounded-full bg-black text-white hover:bg-orange-600 transition-colors flex items-center justify-center shadow-md active:scale-95 cursor-pointer"
+            className="w-9 h-9 rounded-full bg-[#1B2A4A] text-white hover:bg-[#131E33] transition-colors flex items-center justify-center shadow-md active:scale-95 cursor-pointer"
             title="Cuộn sang phải"
             aria-label="Cuộn sang phải"
           >

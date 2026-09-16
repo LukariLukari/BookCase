@@ -30,37 +30,32 @@ export default function Sidebar() {
 
   const navItems = [
     { 
-      icon: <LayoutGrid size={20} className="text-[#3A7BD5]" />, 
+      icon: <LayoutGrid size={20} />, 
       label: 'Kệ sách chính', 
       href: '/',
-      bgActive: 'bg-[#EAE1D3]'
     },
     { 
-      icon: <Sparkles size={20} className="text-[#F2994A]" />, 
+      icon: <Sparkles size={20} />, 
       label: 'Không gian đọc', 
       href: '/reader',
-      bgActive: 'bg-[#EAE1D3]'
     },
     { 
-      icon: <Bookmark size={20} className="text-[#27AE60]" />, 
+      icon: <Bookmark size={20} />, 
       label: 'Sách cá nhân', 
       href: '/my-books',
-      bgActive: 'bg-[#EAE1D3]'
     },
     { 
-      icon: <Heart size={20} className="text-[#EB5757]" />, 
+      icon: <Heart size={20} />, 
       label: 'Trích dẫn hay', 
       href: '/quotes',
-      bgActive: 'bg-[#EAE1D3]'
     },
   ];
 
   if (user?.role === 'admin') {
     navItems.push({
-      icon: <Settings size={20} className="text-[#8E44AD]" />,
+      icon: <Settings size={20} />,
       label: 'Admin Dashboard',
       href: '/admin',
-      bgActive: 'bg-[#EAE1D3]'
     });
   }
 
@@ -105,18 +100,18 @@ export default function Sidebar() {
                 title={item.label}
                 className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all cursor-pointer relative group ${
                   active
-                    ? 'bg-[#EFE7DC] shadow-inner scale-105 border border-[#DFCFC0]'
-                    : 'bg-[#FAF6F0] hover:bg-[#F2ECE2] hover:scale-110 shadow-sm border border-[#F0E7DC]'
+                    ? 'bg-[#1B2A4A] text-white shadow-md scale-105 border border-[#1B2A4A]'
+                    : 'bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#1C1917] hover:scale-105 shadow-sm border border-[#F0E7DC]'
                 }`}
               >
                 {navigatingTo === item.href ? (
-                  <Loader2 size={20} className="animate-spin text-[#7A6F68]" />
+                  <Loader2 size={20} className="animate-spin text-[#57534E]" />
                 ) : (
                   item.icon
                 )}
 
                 {/* Tooltip on hover */}
-                <span className="absolute left-16 px-3 py-1.5 bg-[#2A2320] text-[#FAF6F0] text-xs font-bold rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-50">
+                <span className="absolute left-16 px-3 py-1.5 bg-[#1C1917] text-[#FAF6F0] text-xs font-bold rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-50">
                   {item.label}
                 </span>
               </Link>
@@ -130,18 +125,18 @@ export default function Sidebar() {
             <button
               onClick={logout}
               title="Đăng xuất"
-              className="w-10 h-10 rounded-xl bg-[#F5ECE1] hover:bg-[#EBDCCB] text-[#7A6F68] hover:text-red-500 flex items-center justify-center transition-all cursor-pointer"
+              className="w-10 h-10 rounded-xl bg-[#EFE8DE] hover:bg-[#E5DACD] text-[#57534E] hover:text-[#1C1917] flex items-center justify-center transition-all cursor-pointer"
             >
               <LogOut size={16} />
             </button>
           )}
 
           <div 
-            className="w-12 py-3 bg-[#273248] text-white rounded-2xl flex flex-col items-center justify-center gap-1 shadow-md cursor-pointer hover:bg-[#1E2738] transition-colors"
+            className="w-12 py-3 bg-[#1B2A4A] text-white rounded-2xl flex flex-col items-center justify-center gap-1 shadow-md cursor-pointer hover:bg-[#131E33] transition-colors"
             title="BookCase Library"
           >
-            <Bell size={15} className="text-[#F2C94C] animate-bounce" />
-            <span className="text-[9px] font-black tracking-tighter uppercase [writing-mode:vertical-lr] rotate-180 opacity-80 mt-1">
+            <Bell size={15} className="text-white" />
+            <span className="text-[9px] font-black tracking-tighter uppercase [writing-mode:vertical-lr] rotate-180 opacity-90 mt-1">
               BookCase
             </span>
           </div>
@@ -151,16 +146,16 @@ export default function Sidebar() {
       {/* MOBILE TOP BAR & SLIDE-OUT MENU */}
       <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#FAF6F0]/95 backdrop-blur-md border-b border-[#EBE2D5] px-4 flex items-center justify-between z-50 shadow-sm">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-[#273248] flex items-center justify-center text-[#F2C94C] shadow-sm">
+          <div className="w-8 h-8 rounded-xl bg-[#1B2A4A] flex items-center justify-center text-white shadow-sm">
             <BookOpen size={16} />
           </div>
-          <span className="font-extrabold text-lg text-[#2A2320] tracking-tight">BOOKCASE.</span>
+          <span className="font-extrabold text-lg text-[#1C1917] tracking-tight">BOOKCASE.</span>
         </Link>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2.5 rounded-xl bg-[#EFE8DE] text-[#2A2320] transition-colors"
+            className="p-2.5 rounded-xl bg-[#EFE8DE] text-[#1C1917] transition-colors"
           >
             {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -178,8 +173,8 @@ export default function Sidebar() {
                 className="w-10 h-10 rounded-full bg-white p-0.5" 
               />
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-[#7A6F68]">Xin chào,</p>
-                <p className="text-sm font-bold text-[#2A2320] truncate">{user.username}</p>
+                <p className="text-xs text-[#57534E]">Xin chào,</p>
+                <p className="text-sm font-bold text-[#1C1917] truncate">{user.username}</p>
               </div>
             </div>
           )}
@@ -193,7 +188,7 @@ export default function Sidebar() {
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-2.5 p-3 rounded-2xl font-bold text-xs transition-all ${
-                    active ? 'bg-[#2A2320] text-white shadow-md' : 'bg-[#EFE8DE] text-[#2A2320]'
+                    active ? 'bg-[#1B2A4A] text-white shadow-md' : 'bg-[#EFE8DE] text-[#1C1917]'
                   }`}
                 >
                   {item.icon}
@@ -207,7 +202,7 @@ export default function Sidebar() {
             {user ? (
               <button 
                 onClick={() => { logout(); setIsMobileMenuOpen(false); }} 
-                className="text-red-500 font-bold flex items-center gap-1.5 py-2 cursor-pointer"
+                className="text-[#1C1917] font-bold flex items-center gap-1.5 py-2 cursor-pointer"
               >
                 <LogOut size={14} /> Đăng xuất
               </button>
@@ -215,7 +210,7 @@ export default function Sidebar() {
               <Link 
                 href="/login" 
                 onClick={() => setIsMobileMenuOpen(false)} 
-                className="text-[#2A2320] font-bold flex items-center gap-1.5 py-2"
+                className="text-[#1C1917] font-bold flex items-center gap-1.5 py-2"
               >
                 <LogIn size={14} /> Đăng nhập
               </Link>

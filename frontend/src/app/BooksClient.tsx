@@ -28,14 +28,14 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 const CATEGORIES = [
-  { id: 'all', label: 'Tất cả', icon: Layers, color: '#3A7BD5' },
-  { id: 'fiction', label: 'Tiểu thuyết', icon: BookOpen, color: '#E56B6F' },
-  { id: 'bestseller', label: 'Bán chạy', icon: Flame, color: '#F2994A' },
-  { id: 'classic', label: 'Kinh điển', icon: Feather, color: '#27AE60' },
-  { id: 'selfhelp', label: 'Kỹ năng', icon: GraduationCap, color: '#8E44AD' },
-  { id: 'romance', label: 'Tình cảm', icon: Heart, color: '#EB5757' },
-  { id: 'scifi', label: 'Khoa học', icon: Compass, color: '#56CCF2' },
-  { id: 'audiobook', label: 'Tuyển chọn', icon: BookMarked, color: '#F2C94C' },
+  { id: 'all', label: 'Tất cả', icon: Layers },
+  { id: 'fiction', label: 'Tiểu thuyết', icon: BookOpen },
+  { id: 'bestseller', label: 'Bán chạy', icon: Flame },
+  { id: 'classic', label: 'Kinh điển', icon: Feather },
+  { id: 'selfhelp', label: 'Kỹ năng', icon: GraduationCap },
+  { id: 'romance', label: 'Tình cảm', icon: Heart },
+  { id: 'scifi', label: 'Khoa học', icon: Compass },
+  { id: 'audiobook', label: 'Tuyển chọn', icon: BookMarked },
 ];
 
 export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
@@ -221,7 +221,7 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#D8C9BB] p-3 sm:p-5 md:p-6 lg:p-7 flex justify-center gap-5 font-sans selection:bg-[#5F65B9]/20">
+    <div className="min-h-screen bg-[#D8C9BB] p-3 sm:p-5 md:p-6 lg:p-7 flex justify-center gap-5 font-sans selection:bg-[#1B2A4A]/20 selection:text-[#1C1917]">
       
       {/* 1. LEFT COLUMN: FLOATING PILL DOCK */}
       <Sidebar />
@@ -232,18 +232,18 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
         {/* TOP SEARCH & ACTION BAR */}
         <header className="flex flex-col sm:flex-row items-center justify-between gap-3.5">
           {/* Pill Search Input */}
-          <div className="w-full sm:flex-1 bg-[#EFE8DE] rounded-full px-4 py-2 flex items-center gap-2.5 border border-[#E0D5C7] shadow-inner transition-all focus-within:border-[#5F65B9]">
-            <Search size={18} className="text-[#8B7070] flex-shrink-0" />
+          <div className="w-full sm:flex-1 bg-[#EFE8DE] rounded-full px-4 py-2 flex items-center gap-2.5 border border-[#E0D5C7] shadow-inner transition-all focus-within:border-[#1B2A4A]">
+            <Search size={18} className="text-[#57534E] flex-shrink-0" />
             <input 
               type="text" 
               placeholder="Tìm kiếm sách, tác giả..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent text-sm font-medium text-[#2A2320] placeholder-[#8B7070] focus:outline-none"
+              className="w-full bg-transparent text-sm font-semibold text-[#1C1917] placeholder-[#57534E] focus:outline-none"
             />
           </div>
 
-          {/* Action Buttons: Gradient Search & Upload Pill */}
+          {/* Action Buttons: Navy Search & Upload Pill */}
           <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
             <button
               onClick={() => setIsSearchOnlineOpen(true)}
@@ -254,7 +254,7 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
 
             <button
               onClick={() => setIsUploadModalOpen(true)}
-              className="w-10 h-10 rounded-full bg-[#EFE8DE] hover:bg-[#E2D7C8] border border-[#E0D5C7] flex items-center justify-center text-[#2A2320] transition-all cursor-pointer shadow-sm hover:scale-105"
+              className="w-10 h-10 rounded-full bg-[#EFE8DE] hover:bg-[#E5DACD] border border-[#E0D5C7] flex items-center justify-center text-[#1C1917] transition-all cursor-pointer shadow-sm hover:scale-105"
               title="Tải sách từ máy lên"
             >
               <Upload size={16} />
@@ -263,7 +263,7 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
             {/* Mobile Chat Toggle Button */}
             <button
               onClick={() => setIsChatOpen(!isChatOpen)}
-              className="xl:hidden w-10 h-10 rounded-full bg-[#7E79BF] text-white flex items-center justify-center shadow-sm cursor-pointer"
+              className="xl:hidden w-10 h-10 rounded-full bg-[#1B2A4A] text-white hover:bg-[#131E33] flex items-center justify-center shadow-sm cursor-pointer"
               title="Mở Trợ lý Chat"
             >
               <Sparkles size={16} />
@@ -282,17 +282,18 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`flex flex-col items-center gap-1.5 px-3.5 py-2 rounded-2xl transition-all flex-shrink-0 cursor-pointer ${
                   active 
-                    ? 'bg-[#EFE8DE] shadow-sm border border-[#DFCFC0] scale-105' 
-                    : 'hover:bg-[#F2ECE2] opacity-75 hover:opacity-100'
+                    ? 'bg-[#1B2A4A] text-white shadow-md border border-[#1B2A4A] scale-105' 
+                    : 'bg-[#EFE8DE] text-[#1C1917] border border-[#E0D5C7] hover:bg-[#E5DACD] opacity-90 hover:opacity-100'
                 }`}
               >
                 <div 
-                  className="w-8 h-8 rounded-xl flex items-center justify-center shadow-xs"
-                  style={{ backgroundColor: `${cat.color}20`, color: cat.color }}
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-xs transition-colors ${
+                    active ? 'bg-white/20 text-white' : 'bg-[#E5DACD] text-[#1C1917]'
+                  }`}
                 >
                   <Icon size={16} />
                 </div>
-                <span className={`text-[11px] font-bold ${active ? 'text-[#2A2320]' : 'text-[#7A6F68]'}`}>
+                <span className={`text-[11px] font-bold ${active ? 'text-white font-black' : 'text-[#1C1917]'}`}>
                   {cat.label}
                 </span>
               </button>
@@ -364,19 +365,19 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
           {/* Left Promo Card */}
           <div className="lg:col-span-7 bg-[#EFE8DE] rounded-3xl p-6 flex items-center justify-between gap-4 border border-[#E0D5C7] shadow-sm">
             <div className="space-y-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#E56B6F] bg-[#FAF0F0] px-2.5 py-0.5 rounded-full">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#1B2A4A] bg-[#EBF0F7] border border-[#D5E1F0] px-2.5 py-0.5 rounded-full">
                 Tuyển chọn 2026
               </span>
-              <h3 className="text-base sm:text-lg font-black text-[#2A2320] leading-tight">
+              <h3 className="text-base sm:text-lg font-black text-[#1C1917] leading-tight">
                 Top 50 Tác Phẩm Đọc Nhiều Nhất
               </h3>
-              <p className="text-xs text-[#7A6F68] leading-relaxed max-w-sm">
+              <p className="text-xs text-[#57534E] leading-relaxed max-w-sm">
                 Tổng hợp những cuốn sách được cộng đồng bạn đọc đánh giá cao và tải về nhiều nhất trên BookCase.
               </p>
               <div className="pt-1">
                 <button 
                   onClick={() => setIsSearchOnlineOpen(true)}
-                  className="bg-[#E56B6F] hover:bg-[#D6595D] text-white px-4 py-2 rounded-full text-xs font-black flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                  className="bg-[#1B2A4A] hover:bg-[#131E33] text-white px-4 py-2 rounded-full text-xs font-black flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                 >
                   <Eye size={13} />
                   <span>Khám phá ngay</span>
@@ -384,13 +385,13 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
               </div>
             </div>
 
-            {/* Decorative Book Stack graphic */}
+            {/* Decorative Book Stack graphic in Navy & Charcoal */}
             <div className="hidden sm:flex flex-col items-center gap-1 opacity-85 flex-shrink-0">
-              <div className="w-20 h-5 bg-[#EB5757] rounded-md shadow-xs border-r-4 border-white/40" />
-              <div className="w-24 h-5 bg-[#3A7BD5] rounded-md shadow-xs border-r-4 border-white/40" />
-              <div className="w-22 h-5 bg-[#27AE60] rounded-md shadow-xs border-r-4 border-white/40" />
-              <div className="w-26 h-5 bg-[#F2C94C] rounded-md shadow-xs border-r-4 border-white/40" />
-              <div className="w-28 h-5 bg-[#9B51E0] rounded-md shadow-xs border-r-4 border-white/40" />
+              <div className="w-20 h-5 bg-[#1B2A4A] rounded-md shadow-xs border-r-4 border-white/40" />
+              <div className="w-24 h-5 bg-[#2B2B2E] rounded-md shadow-xs border-r-4 border-white/40" />
+              <div className="w-22 h-5 bg-[#16243E] rounded-md shadow-xs border-r-4 border-white/40" />
+              <div className="w-26 h-5 bg-[#3D3D42] rounded-md shadow-xs border-r-4 border-white/40" />
+              <div className="w-28 h-5 bg-[#1B2A4A] rounded-md shadow-xs border-r-4 border-white/40" />
             </div>
           </div>
 
@@ -400,42 +401,42 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
               onClick={() => { setSelectedCategory('classic'); }}
               className="bg-[#FFFFFF] hover:bg-[#FAF6F0] p-3 rounded-2xl border border-[#ECE2D5] flex items-center gap-3 cursor-pointer transition-all shadow-2xs hover:scale-[1.01]"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#27AE60]/15 text-[#27AE60] flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-[#EBF0F7] text-[#1B2A4A] flex items-center justify-center flex-shrink-0 font-bold">
                 <Feather size={18} />
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="text-xs font-black text-[#2A2320] truncate">Top 50 Sách Kinh Điển</h4>
-                <p className="text-[11px] text-[#7A6F68] truncate">Những áng văn trường tồn với thời gian</p>
+                <h4 className="text-xs font-black text-[#1C1917] truncate">Top 50 Sách Kinh Điển</h4>
+                <p className="text-[11px] text-[#57534E] truncate">Những áng văn trường tồn với thời gian</p>
               </div>
-              <ChevronRight size={16} className="text-[#C8BAA9]" />
+              <ChevronRight size={16} className="text-[#A89F95]" />
             </div>
 
             <div 
               onClick={() => { setSelectedCategory('selfhelp'); }}
               className="bg-[#FFFFFF] hover:bg-[#FAF6F0] p-3 rounded-2xl border border-[#ECE2D5] flex items-center gap-3 cursor-pointer transition-all shadow-2xs hover:scale-[1.01]"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#8E44AD]/15 text-[#8E44AD] flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-[#EFE8DE] text-[#1C1917] flex items-center justify-center flex-shrink-0 font-bold">
                 <GraduationCap size={18} />
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="text-xs font-black text-[#2A2320] truncate">Top Sách Phát Triển Bản Thân</h4>
-                <p className="text-[11px] text-[#7A6F68] truncate">Tư duy, năng suất và bài học cuộc sống</p>
+                <h4 className="text-xs font-black text-[#1C1917] truncate">Top Sách Phát Triển Bản Thân</h4>
+                <p className="text-[11px] text-[#57534E] truncate">Tư duy, năng suất và bài học cuộc sống</p>
               </div>
-              <ChevronRight size={16} className="text-[#C8BAA9]" />
+              <ChevronRight size={16} className="text-[#A89F95]" />
             </div>
 
             <div 
               onClick={() => { setSelectedCategory('scifi'); }}
               className="bg-[#FFFFFF] hover:bg-[#FAF6F0] p-3 rounded-2xl border border-[#ECE2D5] flex items-center gap-3 cursor-pointer transition-all shadow-2xs hover:scale-[1.01]"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#56CCF2]/20 text-[#2F80ED] flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-[#EBF0F7] text-[#1B2A4A] flex items-center justify-center flex-shrink-0 font-bold">
                 <Compass size={18} />
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="text-xs font-black text-[#2A2320] truncate">Top Khoa Học & Viễn Tưởng</h4>
-                <p className="text-[11px] text-[#7A6F68] truncate">Khám phá tương lai và vũ trụ</p>
+                <h4 className="text-xs font-black text-[#1C1917] truncate">Top Khoa Học & Viễn Tưởng</h4>
+                <p className="text-[11px] text-[#57534E] truncate">Khám phá tương lai và vũ trụ</p>
               </div>
-              <ChevronRight size={16} className="text-[#C8BAA9]" />
+              <ChevronRight size={16} className="text-[#A89F95]" />
             </div>
           </div>
         </section>
@@ -452,17 +453,17 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
         {/* Chat Header */}
         <div className="flex items-center justify-between pb-2 border-b border-[#EBE2D5]">
           <div className="flex items-center gap-2">
-            <h3 className="font-extrabold text-base text-[#2A2320]">Trợ Lý BookCase</h3>
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <h3 className="font-extrabold text-base text-[#1C1917]">Trợ Lý BookCase</h3>
+            <span className="w-2 h-2 rounded-full bg-[#1B2A4A] animate-pulse" />
           </div>
           <div className="flex items-center gap-1">
             <button 
               onClick={() => setIsChatOpen(false)}
-              className="xl:hidden p-1.5 text-[#7A6F68] hover:text-[#2A2320] rounded-lg"
+              className="xl:hidden p-1.5 text-[#57534E] hover:text-[#1C1917] rounded-lg"
             >
               ✕
             </button>
-            <div className="p-1.5 text-[#7A6F68]">
+            <div className="p-1.5 text-[#57534E]">
               <MoreHorizontal size={18} />
             </div>
           </div>
@@ -471,10 +472,10 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
         {/* Support Pill Banner */}
         <div className="bg-[#EFE8DE] p-3 rounded-2xl flex items-center justify-between border border-[#E0D5C7] text-xs">
           <div>
-            <p className="font-bold text-[#2A2320]">Tư vấn sách thông minh</p>
-            <p className="text-[11px] text-[#7A6F68]">Hỏi về bất kỳ cuốn sách nào</p>
+            <p className="font-bold text-[#1C1917]">Tư vấn sách thông minh</p>
+            <p className="text-[11px] text-[#57534E]">Hỏi về bất kỳ cuốn sách nào</p>
           </div>
-          <ChevronRight size={16} className="text-[#8B7070]" />
+          <ChevronRight size={16} className="text-[#57534E]" />
         </div>
 
         {/* Messages List */}
@@ -484,8 +485,8 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
               <div 
                 className={`max-w-[85%] p-3.5 rounded-2xl leading-relaxed ${
                   msg.sender === 'user' 
-                    ? 'bg-[#7E79BF] text-white rounded-br-xs shadow-xs' 
-                    : 'bg-[#FFFFFF] text-[#2A2320] rounded-bl-xs shadow-xs border border-[#ECE2D5]'
+                    ? 'bg-[#1B2A4A] text-white rounded-br-xs shadow-xs font-medium' 
+                    : 'bg-[#FFFFFF] text-[#1C1917] rounded-bl-xs shadow-xs border border-[#ECE2D5]'
                 }`}
               >
                 {msg.text}
@@ -502,8 +503,8 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
                       />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="font-extrabold text-[11px] text-[#2A2320] truncate">{msg.book.title}</p>
-                      <p className="text-[10px] text-[#7A6F68] truncate">{msg.book.author}</p>
+                      <p className="font-extrabold text-[11px] text-[#1C1917] truncate">{msg.book.title}</p>
+                      <p className="text-[10px] text-[#57534E] truncate">{msg.book.author}</p>
                     </div>
                   </div>
                 )}
@@ -519,12 +520,12 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
             placeholder="Hỏi trợ lý về sách..."
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
-            className="flex-1 bg-transparent text-xs font-medium text-[#2A2320] placeholder-[#8B7070] focus:outline-none"
+            className="flex-1 bg-transparent text-xs font-semibold text-[#1C1917] placeholder-[#57534E] focus:outline-none"
           />
           <button 
             type="submit"
             disabled={!chatInput.trim()}
-            className="w-8 h-8 rounded-full bg-[#E56B6F] hover:bg-[#D6595D] text-white flex items-center justify-center shadow-sm disabled:opacity-40 transition-transform active:scale-95 cursor-pointer flex-shrink-0"
+            className="w-8 h-8 rounded-full bg-[#1B2A4A] hover:bg-[#131E33] text-white flex items-center justify-center shadow-sm disabled:opacity-40 transition-transform active:scale-95 cursor-pointer flex-shrink-0"
           >
             <Send size={13} className="ml-0.5" />
           </button>

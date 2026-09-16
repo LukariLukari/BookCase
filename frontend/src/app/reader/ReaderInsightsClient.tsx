@@ -227,9 +227,9 @@ export default function ReaderInsightsClient() {
 
           <button
             onClick={() => router.push('/')}
-            className="px-4 py-2 bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#2A2320] border border-[#E5DACD] rounded-full text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#1C1917] border border-[#E5DACD] rounded-full text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
           >
-            <Compass size={15} className="text-[#5F65B9]" /> <span>Tủ Sách Chung</span>
+            <Compass size={15} className="text-[#1B2A4A]" /> <span>Tủ Sách Chung</span>
           </button>
         </header>
 
@@ -238,8 +238,8 @@ export default function ReaderInsightsClient() {
           
           {isLoading && !dashboard ? (
             <div className="py-24 flex flex-col items-center justify-center gap-3">
-              <Loader2 className="animate-spin text-[#5F65B9]" size={32} />
-              <p className="text-xs font-bold text-[#7A6F68]">Đang tải dữ liệu...</p>
+              <Loader2 className="animate-spin text-[#1B2A4A]" size={32} />
+              <p className="text-xs font-bold text-[#57534E]">Đang tải dữ liệu...</p>
             </div>
           ) : (
             <>
@@ -257,10 +257,10 @@ export default function ReaderInsightsClient() {
                       />
                     </div>
                     <div>
-                      <h2 className="text-xl md:text-2xl font-black text-[#2A2320]">
+                      <h2 className="text-xl md:text-2xl font-black text-[#1C1917]">
                         Chào {user.username}
                       </h2>
-                      <p className="text-xs md:text-sm text-[#7A6F68] mt-1 max-w-xl italic leading-relaxed font-medium">
+                      <p className="text-xs md:text-sm text-[#57534E] mt-1 max-w-xl italic leading-relaxed font-medium">
                         &ldquo;Đọc sách không phải để nhớ từng câu chữ, mà để xây dựng thế giới quan và gom nhặt những góc nhìn sâu sắc nhất.&rdquo;
                       </p>
                     </div>
@@ -271,12 +271,12 @@ export default function ReaderInsightsClient() {
                     
                     {/* Streak Badge */}
                     <div className="flex items-center gap-3 pr-4 sm:border-r border-[#EFE8DE]">
-                      <div className="p-2.5 bg-[#FAF0F0] text-[#E56B6F] border border-[#F0D5D5] rounded-xl">
-                        <Flame size={22} className="text-[#E56B6F] fill-[#E56B6F]" />
+                      <div className="p-2.5 bg-[#EFE8DE] text-[#1B2A4A] border border-[#E0D5C7] rounded-xl">
+                        <Flame size={22} className="text-[#1B2A4A] fill-[#1B2A4A]" />
                       </div>
                       <div>
-                        <p className="text-[10px] text-[#A0958C] font-bold uppercase tracking-wider">Chuỗi Đọc Sách</p>
-                        <p className="text-lg font-black text-[#2A2320]">
+                        <p className="text-[10px] text-[#57534E] font-bold uppercase tracking-wider">Chuỗi Đọc Sách</p>
+                        <p className="text-lg font-black text-[#1C1917]">
                           {dashboard?.reading_streak_days || 1} Ngày
                         </p>
                       </div>
@@ -285,10 +285,10 @@ export default function ReaderInsightsClient() {
                     {/* Challenge Goal */}
                     <div className="min-w-[180px]">
                       <div className="flex justify-between items-center text-xs mb-1.5 font-bold">
-                        <span className="text-[#7A6F68] flex items-center gap-1">
-                          <Target size={13} className="text-[#5F65B9]" /> Mục Tiêu Đọc Sách
+                        <span className="text-[#57534E] flex items-center gap-1">
+                          <Target size={13} className="text-[#1B2A4A]" /> Mục Tiêu Đọc Sách
                         </span>
-                        <span className="text-[#2A2320]">
+                        <span className="text-[#1C1917]">
                           {dashboard?.total_completed || 0}/{dashboard?.yearly_goal || 24} cuốn
                         </span>
                       </div>
@@ -298,7 +298,7 @@ export default function ReaderInsightsClient() {
                           style={{ width: `${Math.min(100, dashboard?.yearly_goal_progress || 0)}%` }}
                         />
                       </div>
-                      <p className="text-[11px] text-[#A0958C] mt-1 text-right font-medium">
+                      <p className="text-[11px] text-[#57534E] mt-1 text-right font-medium">
                         Đạt {dashboard?.yearly_goal_progress || 0}% mục tiêu
                       </p>
                     </div>
@@ -313,25 +313,25 @@ export default function ReaderInsightsClient() {
                 
                 {/* Completed */}
                 <div className="bg-[#FAF6F0] border border-[#ECE2D5] p-5 rounded-2xl flex items-center gap-4 shadow-sm">
-                  <div className="w-11 h-11 bg-white text-emerald-600 border border-emerald-200 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <div className="w-11 h-11 bg-white text-[#1B2A4A] border border-[#E5DACD] rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
                     <CheckCircle2 size={20} />
                   </div>
                   <div>
-                    <p className="text-[10px] text-[#A0958C] font-bold uppercase tracking-wider">Đã Đọc Xong</p>
-                    <p className="text-2xl font-black text-[#2A2320]">{dashboard?.total_completed || 0}</p>
-                    <span className="text-[11px] text-[#7A6F68] font-medium">cuốn sách</span>
+                    <p className="text-[10px] text-[#57534E] font-bold uppercase tracking-wider">Đã Đọc Xong</p>
+                    <p className="text-2xl font-black text-[#1C1917]">{dashboard?.total_completed || 0}</p>
+                    <span className="text-[11px] text-[#57534E] font-medium">cuốn sách</span>
                   </div>
                 </div>
 
                 {/* Currently Reading */}
                 <div className="bg-[#FAF6F0] border border-[#ECE2D5] p-5 rounded-2xl flex items-center gap-4 shadow-sm">
-                  <div className="w-11 h-11 bg-white text-[#5F65B9] border border-[#5F65B9]/20 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <div className="w-11 h-11 bg-white text-[#1B2A4A] border border-[#1B2A4A]/20 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
                     <BookOpen size={20} />
                   </div>
                   <div>
-                    <p className="text-[10px] text-[#A0958C] font-bold uppercase tracking-wider">Đang Đọc Dở</p>
-                    <p className="text-2xl font-black text-[#2A2320]">{dashboard?.currently_reading || 0}</p>
-                    <span className="text-[11px] text-[#7A6F68] font-medium">đang tiếp thu</span>
+                    <p className="text-[10px] text-[#57534E] font-bold uppercase tracking-wider">Đang Đọc Dở</p>
+                    <p className="text-2xl font-black text-[#1C1917]">{dashboard?.currently_reading || 0}</p>
+                    <span className="text-[11px] text-[#57534E] font-medium">đang tiếp thu</span>
                   </div>
                 </div>
 

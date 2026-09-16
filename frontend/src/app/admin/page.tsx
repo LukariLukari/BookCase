@@ -67,7 +67,7 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={`flex flex-col group relative ${isSortMode ? 'cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-[#7E79BF] rounded-2xl' : ''}`}>
+    <div ref={setNodeRef} style={style} className={`flex flex-col group relative ${isSortMode ? 'cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-[#1B2A4A] rounded-2xl' : ''}`}>
       {isSortMode && (
          <div {...attributes} {...listeners} className="absolute top-2 left-2 z-40 bg-[#2A2320]/80 p-1.5 rounded-lg text-white hover:bg-black transition-colors backdrop-blur-sm cursor-grab">
            <GripVertical size={16} />
@@ -142,7 +142,7 @@ function SortableBookItem({ book, isSortMode, selectedBooks, toggleBookSelection
                    className={`p-1.5 rounded-full shadow-md border transition-all hover:scale-105 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                      book.has_file === false
                        ? 'bg-[#EFE8DE] text-gray-400 border-[#E0D5C7]'
-                       : 'bg-[#2A2320] hover:bg-[#5F65B9] text-white border-[#2A2320]'
+                       : 'bg-[#1B2A4A] hover:bg-[#131E33] text-white border-[#1B2A4A]'
                    }`} 
                    title={book.has_file === false ? "Chưa có file dữ liệu" : "Tải sách xuống"}
                  >
@@ -761,13 +761,13 @@ export default function AdminPage() {
                 onClick={() => {
                   setIsCheckLinksOpen(true);
                 }}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#2A2320] border border-[#E5DACD] transition-all cursor-pointer shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#1C1917] border border-[#E5DACD] transition-all cursor-pointer shadow-sm"
                 title="Kiểm tra các cuốn sách chưa có file hoặc bị mất liên kết tải về"
               >
-                <Link2 size={15} className="text-[#5F65B9]" />
+                <Link2 size={15} className="text-[#1B2A4A]" />
                 <span>Kiểm tra file</span>
                 {brokenFileCount !== null && brokenFileCount > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none bg-[#E56B6F] text-white">
+                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none bg-[#1B2A4A] text-white">
                     {brokenFileCount}
                   </span>
                 )}
@@ -786,14 +786,14 @@ export default function AdminPage() {
                   }}
                   className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer shadow-sm border ${
                     isBrokenFilterActive 
-                      ? 'bg-[#E56B6F] text-white border-transparent' 
-                      : 'bg-[#FAF0F0] text-[#C06060] border-[#F0D5D5] hover:bg-[#FDE8E8]'
+                      ? 'bg-[#1B2A4A] text-white border-transparent' 
+                      : 'bg-[#EFE8DE] text-[#1C1917] border-[#E0D5C7] hover:bg-[#E5DACD]'
                   }`}
                   title="Chỉ hiển thị các cuốn sách chưa thể tải về trên bảng quản trị"
                 >
                   <AlertTriangle size={15} />
                   <span>Sách lỗi file</span>
-                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none ${isBrokenFilterActive ? 'bg-white text-[#E56B6F]' : 'bg-[#E56B6F] text-white'}`}>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none ${isBrokenFilterActive ? 'bg-white text-[#1B2A4A]' : 'bg-[#1B2A4A] text-white'}`}>
                     {brokenFileCount}
                   </span>
                 </button>
@@ -899,7 +899,7 @@ export default function AdminPage() {
                 placeholder="Tìm tên sách, tác giả..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#FAF6F0] border border-[#E5DACD] rounded-full py-2 pl-9 pr-8 text-xs font-medium text-[#2A2320] placeholder-[#A0958C] focus:outline-none focus:border-[#5F65B9] transition-all shadow-sm"
+                className="w-full bg-[#FAF6F0] border border-[#E5DACD] rounded-full py-2 pl-9 pr-8 text-xs font-medium text-[#1C1917] placeholder-[#57534E] focus:outline-none focus:border-[#1B2A4A] transition-all shadow-sm"
               />
               {searchQuery && (
                 <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A0958C] hover:text-[#2A2320] cursor-pointer">
@@ -1034,34 +1034,34 @@ export default function AdminPage() {
                 {/* Left Column - Details */}
                 <div className="space-y-4 md:space-y-5">
                   <div>
-                    <label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Tên sách</label>
-                    <input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={editForm.title} onChange={e=>setEditForm({...editForm, title: e.target.value})} />
+                    <label className="text-xs font-bold text-[#57534E] block mb-1.5">Tên sách</label>
+                    <input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#1B2A4A]" value={editForm.title} onChange={e=>setEditForm({...editForm, title: e.target.value})} />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Tác giả</label>
-                    <input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={editForm.author} onChange={e=>setEditForm({...editForm, author: e.target.value})} />
+                    <label className="text-xs font-bold text-[#57534E] block mb-1.5">Tác giả</label>
+                    <input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#1B2A4A]" value={editForm.author} onChange={e=>setEditForm({...editForm, author: e.target.value})} />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Thể loại</label>
-                      <input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={editForm.genre} onChange={e=>setEditForm({...editForm, genre: e.target.value})} />
+                      <label className="text-xs font-bold text-[#57534E] block mb-1.5">Thể loại</label>
+                      <input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#1B2A4A]" value={editForm.genre} onChange={e=>setEditForm({...editForm, genre: e.target.value})} />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-[#5F65B9] block mb-1.5">Google Drive Link</label>
-                      <input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" placeholder="Optional URL" value={editForm.external_url} onChange={e=>setEditForm({...editForm, external_url: e.target.value})} />
+                      <label className="text-xs font-bold text-[#1B2A4A] block mb-1.5">Google Drive Link</label>
+                      <input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#1B2A4A]" placeholder="Optional URL" value={editForm.external_url} onChange={e=>setEditForm({...editForm, external_url: e.target.value})} />
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Tóm tắt</label>
-                    <textarea className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9] h-32 md:h-36 resize-none leading-relaxed" value={editForm.summary} onChange={e=>setEditForm({...editForm, summary: e.target.value})} />
+                    <label className="text-xs font-bold text-[#57534E] block mb-1.5">Tóm tắt</label>
+                    <textarea className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#1B2A4A] h-32 md:h-36 resize-none leading-relaxed" value={editForm.summary} onChange={e=>setEditForm({...editForm, summary: e.target.value})} />
                   </div>
                 </div>
 
                 {/* Right Column - Cover */}
                 <div className="flex flex-col">
-                  <label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Ảnh bìa</label>
+                  <label className="text-xs font-bold text-[#57534E] block mb-1.5">Ảnh bìa</label>
                   <div className="flex gap-2 mb-4">
-                    <input type="text" className="flex-1 bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={editForm.cover_url} placeholder="Dán link hoặc tải ảnh lên ->" onChange={e=>setEditForm({...editForm, cover_url: e.target.value})} />
+                    <input type="text" className="flex-1 bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#1B2A4A]" value={editForm.cover_url} placeholder="Dán link hoặc tải ảnh lên ->" onChange={e=>setEditForm({...editForm, cover_url: e.target.value})} />
                     <label className="px-4 py-2 bg-[#EFE8DE] hover:bg-[#E5DACD] text-[#2A2320] rounded-xl text-xs font-bold cursor-pointer whitespace-nowrap border border-[#E5DACD] transition-colors flex items-center">
                       Upload
                       <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
@@ -1130,12 +1130,12 @@ export default function AdminPage() {
                     {/* Smart Paste Block */}
                     {uploadItems.length > 0 && uploadItems.some(item => !item.external_url) && (
                       <div className="bg-[#FAF6F0] border border-[#ECE2D5] p-4 rounded-2xl mt-4">
-                        <h4 className="text-xs font-black text-[#5F65B9] mb-1.5">Smart Auto-Match</h4>
-                        <p className="text-[11px] text-[#7A6F68] mb-3">Dán danh sách theo định dạng <b>Tên Sách - Link Drive</b>, hệ thống sẽ tự động ghép đúng link vào đúng sách bất chấp thứ tự!</p>
+                        <h4 className="text-xs font-black text-[#1B2A4A] mb-1.5">Smart Auto-Match</h4>
+                        <p className="text-[11px] text-[#57534E] mb-3">Dán danh sách theo định dạng <b>Tên Sách - Link Drive</b>, hệ thống sẽ tự động ghép đúng link vào đúng sách bất chấp thứ tự!</p>
                         <div className="flex flex-col gap-2">
                           <textarea 
                             placeholder="Tên Sách 1 - https://drive...&#10;Tên Sách 2 - https://drive..." 
-                            className="w-full bg-white border border-[#E5DACD] text-[#2A2320] rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#5F65B9] min-h-[100px] resize-y leading-relaxed"
+                            className="w-full bg-white border border-[#E5DACD] text-[#1C1917] rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#1B2A4A] min-h-[100px] resize-y leading-relaxed"
                             value={smartPasteText}
                             onChange={(e) => setSmartPasteText(e.target.value)}
                             onPaste={(e) => {
@@ -1155,14 +1155,14 @@ export default function AdminPage() {
                                   setTimeout(() => setUploadStatus(null), 3000);
                                 }
                               }}
-                              className="px-3.5 py-2 text-xs font-bold rounded-xl bg-white border border-[#E5DACD] text-[#2A2320] hover:bg-[#FAF6F0] flex items-center gap-1 shadow-sm cursor-pointer"
+                              className="px-3.5 py-2 text-xs font-bold rounded-xl bg-white border border-[#E5DACD] text-[#1C1917] hover:bg-[#FAF6F0] flex items-center gap-1 shadow-sm cursor-pointer"
                             >
                               Dán (Paste)
                             </button>
                             <button 
                               onClick={handleSmartPaste}
                               disabled={!smartPasteText}
-                              className="btn-gradient px-4 py-2 text-xs font-bold text-white rounded-xl disabled:opacity-50 whitespace-nowrap cursor-pointer shadow-sm border-none"
+                              className="btn-gradient px-4 py-2 text-xs font-black text-white rounded-xl disabled:opacity-50 whitespace-nowrap cursor-pointer shadow-sm border-none"
                             >
                               Auto Match Links
                             </button>
@@ -1174,19 +1174,19 @@ export default function AdminPage() {
                     {/* Danh sách file đã chọn */}
                     {uploadItems.length > 0 && (
                       <div className="mt-6 space-y-3">
-                        <h4 className="text-xs font-black text-[#2A2320] border-b border-[#EFE8DE] pb-2">Selected Files ({uploadItems.length})</h4>
+                        <h4 className="text-xs font-black text-[#1C1917] border-b border-[#EFE8DE] pb-2">Selected Files ({uploadItems.length})</h4>
                         {uploadItems.map((item, index) => (
                           <div key={index} className="flex flex-col gap-2 p-3.5 bg-[#FAF6F0] rounded-2xl border border-[#ECE2D5] relative group">
                             <div className="flex justify-between items-center">
-                              <span className="font-bold text-xs text-[#2A2320] truncate pr-4">{item.file.name}</span>
-                              <button onClick={() => setUploadItems(items => items.filter((_, i) => i !== index))} className="text-[#A0958C] hover:text-red-500 cursor-pointer"><Trash2 size={15}/></button>
+                              <span className="font-bold text-xs text-[#1C1917] truncate pr-4">{item.file.name}</span>
+                              <button onClick={() => setUploadItems(items => items.filter((_, i) => i !== index))} className="text-[#8C827A] hover:text-red-500 cursor-pointer"><Trash2 size={15}/></button>
                             </div>
                             <div className="flex items-center gap-2">
-                              <LinkIcon size={14} className="text-[#7A6F68] shrink-0"/>
+                              <LinkIcon size={14} className="text-[#57534E] shrink-0"/>
                               <input 
                                 type="text" 
                                 placeholder="Paste Google Drive Link here..." 
-                                className="w-full bg-white border border-[#E5DACD] text-[#2A2320] rounded-xl px-3 py-1.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]"
+                                className="w-full bg-white border border-[#E5DACD] text-[#1C1917] rounded-xl px-3 py-1.5 text-xs font-medium focus:outline-none focus:border-[#1B2A4A]"
                                 value={item.external_url}
                                 onChange={(e) => {
                                   const newItems = [...uploadItems];
@@ -1206,7 +1206,7 @@ export default function AdminPage() {
                                     setTimeout(() => setUploadStatus(null), 3000);
                                   }
                                 }}
-                                className="py-1.5 px-3 text-[10px] font-bold rounded-xl border border-[#E5DACD] bg-white text-[#2A2320] hover:bg-[#FAF6F0] whitespace-nowrap shadow-sm transition-colors cursor-pointer"
+                                className="py-1.5 px-3 text-[10px] font-bold rounded-xl border border-[#E5DACD] bg-white text-[#1C1917] hover:bg-[#FAF6F0] whitespace-nowrap shadow-sm transition-colors cursor-pointer"
                               >
                                 Paste
                               </button>
@@ -1218,14 +1218,14 @@ export default function AdminPage() {
                   </>
                 ) : (
                   <div className="space-y-4">
-                    <p className="text-xs text-[#5F65B9] bg-[#FAF6F0] p-3 rounded-2xl border border-[#ECE2D5] leading-relaxed">
+                    <p className="text-xs text-[#1B2A4A] bg-[#FAF6F0] p-3 rounded-2xl border border-[#ECE2D5] leading-relaxed font-semibold">
                       Thêm sách nhanh chóng không cần Upload file EPUB/PDF. Giúp tiết kiệm 100% băng thông tải lên và tự động lấy ảnh bìa từ đường link bạn cung cấp!
                     </p>
-                    <div><label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Tên Sách <span className="text-red-500">*</span></label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={linkForm.title} onChange={e=>setLinkForm({...linkForm, title: e.target.value})} /></div>
-                    <div><label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Tác Giả</label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={linkForm.author} onChange={e=>setLinkForm({...linkForm, author: e.target.value})} /></div>
-                    <div><label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Thể Loại</label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" value={linkForm.genre} onChange={e=>setLinkForm({...linkForm, genre: e.target.value})} /></div>
-                    <div><label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Link Google Drive <span className="text-red-500">*</span></label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" placeholder="https://drive.google.com/..." value={linkForm.external_url} onChange={e=>setLinkForm({...linkForm, external_url: e.target.value})} /></div>
-                    <div><label className="text-xs font-bold text-[#7A6F68] block mb-1.5">Link Ảnh Bìa (Cover URL)</label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#5F65B9]" placeholder="https://..." value={linkForm.cover_url} onChange={e=>setLinkForm({...linkForm, cover_url: e.target.value})} /></div>
+                    <div><label className="text-xs font-bold text-[#57534E] block mb-1.5">Tên Sách <span className="text-red-500">*</span></label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#1B2A4A]" value={linkForm.title} onChange={e=>setLinkForm({...linkForm, title: e.target.value})} /></div>
+                    <div><label className="text-xs font-bold text-[#57534E] block mb-1.5">Tác Giả</label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#1B2A4A]" value={linkForm.author} onChange={e=>setLinkForm({...linkForm, author: e.target.value})} /></div>
+                    <div><label className="text-xs font-bold text-[#57534E] block mb-1.5">Thể Loại</label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#1B2A4A]" value={linkForm.genre} onChange={e=>setLinkForm({...linkForm, genre: e.target.value})} /></div>
+                    <div><label className="text-xs font-bold text-[#57534E] block mb-1.5">Link Google Drive <span className="text-red-500">*</span></label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#1B2A4A]" placeholder="https://drive.google.com/..." value={linkForm.external_url} onChange={e=>setLinkForm({...linkForm, external_url: e.target.value})} /></div>
+                    <div><label className="text-xs font-bold text-[#57534E] block mb-1.5">Link Ảnh Bìa (Cover URL)</label><input type="text" className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-[#1B2A4A]" placeholder="https://..." value={linkForm.cover_url} onChange={e=>setLinkForm({...linkForm, cover_url: e.target.value})} /></div>
                   </div>
                 )}
               </div>

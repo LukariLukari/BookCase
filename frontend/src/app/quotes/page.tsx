@@ -169,12 +169,12 @@ export default function QuotesPage() {
         <header className="pb-5 mb-2 border-b border-[#EFE8DE] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <div className="flex items-center gap-2.5 mb-1">
-              <div className="p-2 bg-[#FAF6F0] rounded-2xl text-[#5F65B9] border border-[#ECE2D5] shadow-sm">
+              <div className="p-2 bg-[#FAF6F0] rounded-2xl text-[#1B2A4A] border border-[#ECE2D5] shadow-sm">
                 <QuoteIcon size={18} />
               </div>
-              <h1 className="text-xl md:text-2xl font-black text-[#2A2320]">Kho Trích Dẫn Toàn Cục</h1>
+              <h1 className="text-xl md:text-2xl font-black text-[#1C1917]">Kho Trích Dẫn Toàn Cục</h1>
             </div>
-            <p className="text-xs text-[#7A6F68] font-medium">Tìm kiếm, lưu giữ và xuất ảnh trích dẫn từ mọi cuốn sách của bạn</p>
+            <p className="text-xs text-[#57534E] font-medium">Tìm kiếm, lưu giữ và xuất ảnh trích dẫn từ mọi cuốn sách của bạn</p>
           </div>
 
           {/* Quick Actions */}
@@ -182,10 +182,10 @@ export default function QuotesPage() {
             <button 
               onClick={handleExportMarkdown}
               disabled={filteredQuotes.length === 0}
-              className="flex-1 sm:flex-none bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#2A2320] border border-[#E5DACD] rounded-full py-2.5 px-4 text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-30"
+              className="flex-1 sm:flex-none bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#1C1917] border border-[#E5DACD] rounded-full py-2.5 px-4 text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-30"
               title="Xuất danh sách ra file Markdown cho Notion / Obsidian"
             >
-              <FileDown size={14} className="text-[#5F65B9]" />
+              <FileDown size={14} className="text-[#1B2A4A]" />
               <span>Xuất Markdown</span>
             </button>
           </div>
@@ -199,18 +199,18 @@ export default function QuotesPage() {
             
             {/* Search Input */}
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A0958C]" size={16} />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#57534E]" size={16} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Tìm kiếm nội dung trích dẫn, tên sách, tác giả, số trang..."
-                className="w-full bg-white border border-[#E5DACD] focus:border-[#5F65B9] rounded-full py-2.5 pl-10 pr-4 text-xs font-medium text-[#2A2320] placeholder-[#A0958C] focus:outline-none transition-colors shadow-sm"
+                className="w-full bg-white border border-[#E5DACD] focus:border-[#1B2A4A] rounded-full py-2.5 pl-10 pr-4 text-xs font-medium text-[#1C1917] placeholder-[#57534E] focus:outline-none transition-colors shadow-sm"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#A0958C] hover:text-[#2A2320] bg-[#FAF6F0] px-2 py-0.5 rounded-full cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#57534E] hover:text-[#1C1917] bg-[#FAF6F0] px-2 py-0.5 rounded-full cursor-pointer"
                 >
                   Xóa
                 </button>

@@ -234,12 +234,12 @@ export default function CheckFileLinksModal({
           {/* Header */}
           <div className="p-6 md:p-8 pb-4 border-b border-[#EFE8DE] flex justify-between items-start">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-[#FAF6F0] border border-[#ECE2D5] rounded-2xl text-[#5F65B9] flex-shrink-0 mt-0.5 shadow-sm">
+              <div className="p-3 bg-[#FAF6F0] border border-[#ECE2D5] rounded-2xl text-[#1B2A4A] flex-shrink-0 mt-0.5 shadow-sm">
                 <Link2 size={22} className="stroke-[2.5]" />
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-xl md:text-2xl font-black text-[#2A2320] leading-tight">
+                  <h2 className="text-xl md:text-2xl font-black text-[#1C1917] leading-tight">
                     Kiểm Tra & Khắc Phục File Sách
                   </h2>
                   {unlinkedBooks.length > 0 && (
@@ -248,7 +248,7 @@ export default function CheckFileLinksModal({
                     </span>
                   )}
                 </div>
-                <p className="text-xs md:text-sm text-[#7A6F68] mt-1 font-medium">
+                <p className="text-xs md:text-sm text-[#57534E] mt-1 font-medium">
                   Rà soát toàn bộ sách trong hệ thống để tìm các cuốn chưa thể tải về trực tiếp từ web và tiến hành khắc phục
                 </p>
               </div>
@@ -256,7 +256,7 @@ export default function CheckFileLinksModal({
 
             <button
               onClick={onClose}
-              className="p-2.5 bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#7A6F68] hover:text-[#2A2320] rounded-full transition-colors cursor-pointer border border-[#ECE2D5] flex-shrink-0 shadow-sm"
+              className="p-2.5 bg-[#EFE8DE] hover:bg-[#E5DACD] text-[#57534E] hover:text-[#1C1917] rounded-full transition-colors cursor-pointer border border-[#ECE2D5] flex-shrink-0 shadow-sm"
             >
               <X size={18} />
             </button>
@@ -274,8 +274,8 @@ export default function CheckFileLinksModal({
             {/* SCAN RESULTS BANNER */}
             {isScanning ? (
               <div className="p-6 bg-[#FAF6F0] border border-[#ECE2D5] rounded-2xl flex flex-col items-center justify-center gap-3">
-                <Loader2 size={26} className="animate-spin text-[#5F65B9]" />
-                <span className="text-xs font-bold text-[#7A6F68]">Đang kiểm tra dữ liệu file tải về trên máy chủ & PostgreSQL...</span>
+                <Loader2 size={26} className="animate-spin text-[#1B2A4A]" />
+                <span className="text-xs font-bold text-[#57534E]">Đang kiểm tra dữ liệu file tải về trên máy chủ & PostgreSQL...</span>
               </div>
             ) : unlinkedBooks.length === 0 ? (
               /* SAFE BANNER */
@@ -436,7 +436,7 @@ export default function CheckFileLinksModal({
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-[#D8C9BB] hover:border-[#5F65B9] bg-[#FAF6F0] hover:bg-[#FAF0E6] rounded-3xl p-6 md:p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group"
+              className="border-2 border-dashed border-[#D8C9BB] hover:border-[#1B2A4A] bg-[#FAF6F0] hover:bg-[#FAF0E6] rounded-3xl p-6 md:p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group"
             >
               <input
                 type="file"
@@ -446,13 +446,13 @@ export default function CheckFileLinksModal({
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              <div className="p-3 bg-white rounded-full text-[#5F65B9] border border-[#ECE2D5] shadow-sm transition-all">
+              <div className="p-3 bg-white rounded-full text-[#1B2A4A] border border-[#ECE2D5] shadow-sm transition-all">
                 <Link2 size={24} />
               </div>
-              <p className="text-sm font-black text-[#2A2320] mt-1">
+              <p className="text-sm font-black text-[#1C1917] mt-1">
                 Kéo thả file sách (.epub, .pdf) vào đây để khôi phục hàng loạt
               </p>
-              <p className="text-xs text-[#7A6F68]">
+              <p className="text-xs text-[#57534E]">
                 Hệ thống sẽ tự động ghép nối theo tên sách và lưu vĩnh viễn vào Database
               </p>
             </div>
@@ -460,11 +460,11 @@ export default function CheckFileLinksModal({
             {/* SELECTED FILES LIST FOR BATCH REPAIR */}
             {selectedFiles.length > 0 && (
               <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs font-bold text-[#7A6F68]">
+                <div className="flex justify-between items-center text-xs font-bold text-[#57534E]">
                   <span>File đã chọn để khôi phục ({selectedFiles.length})</span>
                   <button
                     onClick={() => setSelectedFiles([])}
-                    className="text-[#7A6F68] hover:text-[#2A2320] cursor-pointer"
+                    className="text-[#57534E] hover:text-[#1C1917] cursor-pointer"
                   >
                     Xóa tất cả
                   </button>
@@ -476,8 +476,8 @@ export default function CheckFileLinksModal({
                       className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-[#ECE2D5] text-xs font-medium"
                     >
                       <div className="flex items-center gap-2 truncate pr-2">
-                        <FileText size={14} className="text-[#5F65B9] shrink-0" />
-                        <span className="truncate text-[#2A2320] font-semibold">{file.name}</span>
+                        <FileText size={14} className="text-[#1B2A4A] shrink-0" />
+                        <span className="truncate text-[#1C1917] font-semibold">{file.name}</span>
                       </div>
                       <button
                         onClick={(e) => {

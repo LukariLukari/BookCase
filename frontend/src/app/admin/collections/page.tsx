@@ -221,11 +221,11 @@ export default function AdminCollectionsPage() {
         {/* Header */}
         <header className="pb-5 mb-6 flex justify-between items-center border-b border-[#EFE8DE]">
           <div>
-            <div className="flex items-center gap-2.5 text-xl font-black text-[#2A2320]">
-              <Library size={22} className="text-[#5F65B9]" />
+            <div className="flex items-center gap-2.5 text-xl font-black text-[#1C1917]">
+              <Library size={22} className="text-[#1B2A4A]" />
               <span>Quản Lý Tệp Sách (Collections)</span>
             </div>
-            <p className="text-xs text-[#7A6F68] font-medium mt-0.5">Tạo các bộ sưu tập chủ đề và chia sẻ nhóm sách</p>
+            <p className="text-xs text-[#57534E] font-medium mt-0.5">Tạo các bộ sưu tập chủ đề và chia sẻ nhóm sách</p>
           </div>
           <button 
             onClick={openCreateModal}
@@ -244,19 +244,19 @@ export default function AdminCollectionsPage() {
           )}
           {loading ? (
             <div className="flex justify-center mt-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#5F65B9] border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#1B2A4A] border-t-transparent"></div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {collections.map(c => (
-                <div key={c.id} className="bg-[#FAF6F0] rounded-3xl p-6 shadow-sm border border-[#ECE2D5] flex flex-col hover:border-[#5F65B9] transition-all">
+                <div key={c.id} className="bg-[#FAF6F0] rounded-3xl p-6 shadow-sm border border-[#ECE2D5] flex flex-col hover:border-[#1B2A4A] transition-all">
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-lg font-bold text-[#2A2320]">{c.name}</h3>
+                    <h3 className="text-lg font-bold text-[#1C1917]">{c.name}</h3>
                     <div className="flex gap-1.5 shrink-0">
-                      <button onClick={() => copyShareLink(c.id)} className="p-2 text-[#7A6F68] hover:text-[#2A2320] hover:bg-white rounded-full transition-colors cursor-pointer border border-[#ECE2D5]" title="Copy Share Link">
+                      <button onClick={() => copyShareLink(c.id)} className="p-2 text-[#57534E] hover:text-[#1C1917] hover:bg-white rounded-full transition-colors cursor-pointer border border-[#ECE2D5]" title="Copy Share Link">
                         {copiedId === c.id ? <Check size={16} className="text-emerald-600" /> : <LinkIcon size={16} />}
                       </button>
-                      <button onClick={() => openEditModal(c)} className="p-2 text-[#7A6F68] hover:text-[#2A2320] hover:bg-white rounded-full transition-colors cursor-pointer border border-[#ECE2D5]">
+                      <button onClick={() => openEditModal(c)} className="p-2 text-[#57534E] hover:text-[#1C1917] hover:bg-white rounded-full transition-colors cursor-pointer border border-[#ECE2D5]">
                         <Edit2 size={16} />
                       </button>
                       <button onClick={() => handleDelete(c.id)} className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors cursor-pointer border border-red-200">
@@ -264,12 +264,12 @@ export default function AdminCollectionsPage() {
                       </button>
                     </div>
                   </div>
-                  <p className="text-[#7A6F68] text-xs mb-4 line-clamp-2 min-h-[36px] font-medium">
+                  <p className="text-[#57534E] text-xs mb-4 line-clamp-2 min-h-[36px] font-medium">
                     {c.description || 'Không có mô tả'}
                   </p>
                   
                   <div className="mt-auto pt-4 border-t border-[#EFE8DE] flex justify-between items-center">
-                    <span className="text-xs font-bold text-[#A0958C]">{c.book_count} cuốn sách</span>
+                    <span className="text-xs font-bold text-[#57534E]">{c.book_count} cuốn sách</span>
                     <button 
                       onClick={() => openManageModal(c.id)}
                       className="text-xs font-bold px-4 py-2 rounded-full text-white btn-gradient shadow-sm hover:opacity-95 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5 border-none"
@@ -294,19 +294,19 @@ export default function AdminCollectionsPage() {
       {/* Form Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-           <div className="bg-[#FBF8F4] text-[#2A2320] border border-[#ECE2D5] rounded-[36px] w-full max-w-md p-8 shadow-2xl relative">
-              <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 p-2 bg-[#FAF6F0] rounded-full text-[#7A6F68] hover:text-[#2A2320] transition-colors border border-[#ECE2D5] cursor-pointer"><X size={16}/></button>
-              <h2 className="text-xl font-black text-[#2A2320] mb-6">{editingCollection ? 'Sửa Tệp Sách' : 'Tạo Tệp Sách Mới'}</h2>
+           <div className="bg-[#FBF8F4] text-[#1C1917] border border-[#ECE2D5] rounded-[36px] w-full max-w-md p-8 shadow-2xl relative">
+              <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 p-2 bg-[#EFE8DE] hover:bg-[#E5DACD] rounded-full text-[#57534E] hover:text-[#1C1917] transition-colors border border-[#ECE2D5] cursor-pointer"><X size={16}/></button>
+              <h2 className="text-xl font-black text-[#1C1917] mb-6">{editingCollection ? 'Sửa Tệp Sách' : 'Tạo Tệp Sách Mới'}</h2>
               <form onSubmit={handleSave} className="flex flex-col gap-4">
                  <div>
-                   <label className="block text-xs font-bold text-[#7A6F68] mb-2">Tên Tệp</label>
-                   <input type="text" required value={name} onChange={e => setName(e.target.value)} className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] text-xs rounded-xl focus:border-[#5F65B9] block p-3.5 outline-none transition-all placeholder-[#A0958C]" placeholder="Nhập tên tệp..." />
+                   <label className="block text-xs font-bold text-[#57534E] mb-2">Tên Tệp</label>
+                   <input type="text" required value={name} onChange={e => setName(e.target.value)} className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] text-xs rounded-xl focus:border-[#1B2A4A] block p-3.5 outline-none transition-all placeholder-[#57534E]" placeholder="Nhập tên tệp..." />
                  </div>
                  <div>
-                   <label className="block text-xs font-bold text-[#7A6F68] mb-2">Mô tả (Tùy chọn)</label>
-                   <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#2A2320] text-xs rounded-xl focus:border-[#5F65B9] block p-3.5 outline-none transition-all h-24 placeholder-[#A0958C]" placeholder="Nhập mô tả..." />
+                   <label className="block text-xs font-bold text-[#57534E] mb-2">Mô tả (Tùy chọn)</label>
+                   <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full bg-[#FAF6F0] border border-[#E5DACD] text-[#1C1917] text-xs rounded-xl focus:border-[#1B2A4A] block p-3.5 outline-none transition-all h-24 placeholder-[#57534E]" placeholder="Nhập mô tả..." />
                  </div>
-                 <button type="submit" className="w-full btn-gradient text-white rounded-full py-3 text-xs font-bold shadow-md cursor-pointer border-none mt-2 hover:opacity-95">
+                 <button type="submit" className="w-full btn-gradient text-white rounded-full py-3 text-xs font-black shadow-md cursor-pointer border-none mt-2 hover:opacity-95">
                    {editingCollection ? 'Lưu Thay Đổi' : 'Tạo Tệp Sách'}
                  </button>
               </form>
@@ -317,10 +317,10 @@ export default function AdminCollectionsPage() {
       {/* Manage Books Modal */}
       {isManageModalOpen && activeCollection && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-           <div className="bg-[#FBF8F4] text-[#2A2320] border border-[#ECE2D5] rounded-[36px] w-full max-w-4xl p-6 md:p-8 shadow-2xl relative h-[90vh] flex flex-col">
-              <button onClick={() => setIsManageModalOpen(false)} className="absolute top-6 right-6 p-2 bg-[#FAF6F0] rounded-full text-[#7A6F68] hover:text-[#2A2320] transition-colors border border-[#ECE2D5] z-10 cursor-pointer"><X size={16}/></button>
-              <h2 className="text-xl md:text-2xl font-black text-[#2A2320] mb-1 pr-10">Thêm sách vào: {activeCollection.name}</h2>
-              <p className="text-[#7A6F68] mb-6 text-xs font-medium">Bấm vào sách để thêm hoặc xóa khỏi tệp.</p>
+           <div className="bg-[#FBF8F4] text-[#1C1917] border border-[#ECE2D5] rounded-[36px] w-full max-w-4xl p-6 md:p-8 shadow-2xl relative h-[90vh] flex flex-col">
+              <button onClick={() => setIsManageModalOpen(false)} className="absolute top-6 right-6 p-2 bg-[#EFE8DE] hover:bg-[#E5DACD] rounded-full text-[#57534E] hover:text-[#1C1917] transition-colors border border-[#ECE2D5] z-10 cursor-pointer"><X size={16}/></button>
+              <h2 className="text-xl md:text-2xl font-black text-[#1C1917] mb-1 pr-10">Thêm sách vào: {activeCollection.name}</h2>
+              <p className="text-[#57534E] mb-6 text-xs font-medium">Bấm vào sách để thêm hoặc xóa khỏi tệp.</p>
               
               <div className="flex-1 overflow-y-auto pr-2">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -330,7 +330,7 @@ export default function AdminCollectionsPage() {
                       <div 
                         key={book.id} 
                         onClick={() => toggleBookInCollection(book.id)}
-                        className={`cursor-pointer group relative rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isAdded ? 'border-[#5F65B9] shadow-md ring-2 ring-[#5F65B9]/30' : 'border-[#ECE2D5] hover:border-[#D8C9BB]'}`}
+                        className={`cursor-pointer group relative rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isAdded ? 'border-[#1B2A4A] shadow-md ring-2 ring-[#1B2A4A]/30' : 'border-[#ECE2D5] hover:border-[#D8C9BB]'}`}
                       >
                          <div className="w-full aspect-[2/3] relative">
                             <BookCoverImage 
@@ -343,7 +343,7 @@ export default function AdminCollectionsPage() {
                            
                             {/* Checkmark overlay */}
                             {isAdded && (
-                              <div className="absolute inset-0 bg-[#5F65B9]/20 flex items-center justify-center">
+                              <div className="absolute inset-0 bg-[#1B2A4A]/20 flex items-center justify-center">
                                 <div className="btn-gradient text-white rounded-full p-2 shadow-lg">
                                   <Check size={20} strokeWidth={3} />
                                 </div>
@@ -351,7 +351,7 @@ export default function AdminCollectionsPage() {
                             )}
                          </div>
                          <div className="p-2.5 bg-white border-t border-[#ECE2D5]">
-                           <h3 className="text-xs font-bold text-[#2A2320] line-clamp-1">{book.title}</h3>
+                           <h3 className="text-xs font-bold text-[#1C1917] line-clamp-1">{book.title}</h3>
                          </div>
                       </div>
                     )

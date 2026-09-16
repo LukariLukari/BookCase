@@ -94,14 +94,14 @@ export default function MyBooksClient() {
 
         <section className="flex-1">
           {isLoading ? (
-            <div className="flex justify-center mt-20"><Loader2 className="animate-spin text-[#5F65B9]" size={32} /></div>
+            <div className="flex justify-center mt-20"><Loader2 className="animate-spin text-[#1B2A4A]" size={32} /></div>
           ) : userBooks.length === 0 ? (
             <div className="flex flex-col items-center justify-center bg-[#FAF6F0] border border-[#ECE2D5] rounded-3xl p-12 mt-6 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-[#EFE8DE] flex items-center justify-center text-[#7A6F68] mb-4">
+              <div className="w-14 h-14 rounded-2xl bg-[#EFE8DE] flex items-center justify-center text-[#57534E] mb-4">
                 <BookIcon size={28} />
               </div>
-              <h2 className="text-[#2A2320] text-base font-bold mb-1.5">Thư viện của bạn đang trống</h2>
-              <p className="text-[#7A6F68] text-xs text-center max-w-md leading-relaxed">
+              <h2 className="text-[#1C1917] text-base font-bold mb-1.5">Thư viện của bạn đang trống</h2>
+              <p className="text-[#57534E] text-xs text-center max-w-md leading-relaxed font-medium">
                 Hãy thêm những cuốn sách bạn yêu thích vào đây để tạo bộ sưu tập cá nhân và lưu giữ các trích dẫn (quotes) độc đáo bằng camera nhé.
               </p>
             </div>
@@ -131,8 +131,8 @@ export default function MyBooksClient() {
                        <div className="book-paper-edge" />
                     </div>
                     <div>
-                      <h3 className="text-xs sm:text-sm font-bold text-[#2A2320] leading-tight line-clamp-2 mb-1 group-hover:text-[#5F65B9] transition-colors">{title}</h3>
-                      <p className="text-[11px] text-[#7A6F68] truncate font-medium">{author}</p>
+                      <h3 className="text-xs sm:text-sm font-bold text-[#1C1917] leading-tight line-clamp-2 mb-1 group-hover:text-[#1B2A4A] transition-colors">{title}</h3>
+                      <p className="text-[11px] text-[#57534E] truncate font-medium">{author}</p>
                     </div>
                   </motion.div>
                 );
@@ -151,7 +151,7 @@ export default function MyBooksClient() {
               />
               <motion.div 
                 layoutId={`userbook-${selectedBook.id}`}
-                className="relative bg-[#FBF8F4] text-[#2A2320] border border-[#ECE2D5] rounded-[36px] p-6 md:p-8 max-w-4xl w-full shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
+                className="relative bg-[#FBF8F4] text-[#1C1917] border border-[#ECE2D5] rounded-[36px] p-6 md:p-8 max-w-4xl w-full shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
               >
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex gap-6 w-full relative">
@@ -167,10 +167,10 @@ export default function MyBooksClient() {
                     </div>
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
-                        <h2 className="text-xl md:text-2xl font-black text-[#2A2320] leading-tight mb-1.5 pr-10">
+                        <h2 className="text-xl md:text-2xl font-black text-[#1C1917] leading-tight mb-1.5 pr-10">
                           {selectedBook.custom_title || selectedBook.book?.title || "Unknown"}
                         </h2>
-                        <p className="text-sm text-[#7A6F68] font-bold mb-4">
+                        <p className="text-sm text-[#57534E] font-bold mb-4">
                           {selectedBook.custom_author || selectedBook.book?.author || "Unknown"}
                         </p>
                         
@@ -184,9 +184,9 @@ export default function MyBooksClient() {
 
                       <div className="flex items-center gap-4 mt-6">
                          <div className="flex items-center gap-2">
-                           <QuoteIcon size={18} className="text-[#5F65B9]" />
-                           <h3 className="text-base font-bold text-[#2A2320]">Trích dẫn</h3>
-                           <span className="text-xs font-bold bg-[#FAF6F0] text-[#7A6F68] border border-[#ECE2D5] px-2.5 py-0.5 rounded-full">
+                           <QuoteIcon size={18} className="text-[#1B2A4A]" />
+                           <h3 className="text-base font-bold text-[#1C1917]">Trích dẫn</h3>
+                           <span className="text-xs font-bold bg-[#FAF6F0] text-[#57534E] border border-[#ECE2D5] px-2.5 py-0.5 rounded-full">
                              {quoteCount}
                            </span>
                          </div>
