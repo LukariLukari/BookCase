@@ -117,13 +117,13 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
       <motion.div
         key={book.id}
         layoutId={`book-container-${book.id}`}
-        className="flex flex-col cursor-pointer group pb-4"
+        className="flex flex-col cursor-pointer group pb-1 sm:pb-4"
         onClick={() => setSelectedBook(book)}
         whileHover={{ y: -6 }}
         transition={{ type: "spring", stiffness: 300, damping: 22 }}
       >
         {/* 3D BOOK COVER CONTAINER */}
-        <div className="w-full aspect-[2/3] relative mb-3">
+        <div className="w-full aspect-[2/3] relative mb-1.5 sm:mb-3">
           <div className="book-card-3d absolute inset-0">
             <BookCoverImage 
               coverUrl={book.cover_url}
@@ -144,8 +144,8 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
 
             {/* Rating badge */}
             {ratingInfo && ratingInfo.count > 0 && (
-              <div className="absolute top-2.5 right-2.5 bg-[#FAF6F0]/95 backdrop-blur-md text-[#1C1917] border border-[#E5DACD] px-2 py-0.5 rounded-full text-[11px] font-extrabold flex items-center gap-1 shadow-sm z-20">
-                <Star size={11} className="fill-[#1B2A4A] text-[#1B2A4A]" />
+              <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 bg-[#FAF6F0]/95 backdrop-blur-md text-[#1C1917] border border-[#E5DACD] px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold flex items-center gap-1 shadow-sm z-20">
+                <Star size={10} className="fill-[#1B2A4A] text-[#1B2A4A]" />
                 <span>{ratingInfo.average_rating.toFixed(1)}</span>
               </div>
             )}
@@ -153,22 +153,22 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
         </div>
 
         {/* BOOK INFO */}
-        <div className="flex flex-col flex-1 px-1">
+        <div className="flex flex-col flex-1 px-0.5 sm:px-1">
           <h3 
-            className="text-sm md:text-[14px] font-extrabold text-[#1C1917] leading-snug line-clamp-2 mb-0.5 group-hover:text-[#1B2A4A] transition-colors" 
+            className="text-xs sm:text-sm md:text-[14px] font-extrabold text-[#1C1917] leading-tight line-clamp-1 sm:line-clamp-2 mb-0.5 group-hover:text-[#1B2A4A] transition-colors" 
             title={book.title}
           >
             {book.title}
           </h3>
           <p 
-            className="text-xs font-semibold text-[#57534E] truncate mb-2.5" 
+            className="text-[11px] sm:text-xs font-semibold text-[#57534E] truncate mb-1 sm:mb-2.5" 
             title={book.author || "Unknown Author"}
           >
             {book.author || "Unknown Author"}
           </p>
 
           {/* QUICK ACTION BUTTONS */}
-          <div className="flex items-center gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-1 sm:gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
             <button 
               onClick={(e) => {
                 e.stopPropagation();
@@ -176,7 +176,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                 handleDownload(book.id, book.title);
               }}
               disabled={downloadingId === book.id || book.has_file === false}
-              className={`p-2 rounded-xl transition-all flex-shrink-0 cursor-pointer shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
+              className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all flex-shrink-0 cursor-pointer shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
                 book.has_file === false
                   ? 'bg-[#EFE8DE] text-[#8C827A] border border-[#E0D5C7]'
                   : 'bg-[#EFE8DE] hover:bg-[#E5DACD] text-[#1C1917] border border-[#E0D5C7]'
@@ -184,9 +184,9 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
               title={book.has_file === false ? "Sách đang được cập nhật file" : "Tải Sách Xuống"}
             >
               {downloadingId === book.id ? (
-                <Loader2 size={14} className="animate-spin text-[#1C1917]" />
+                <Loader2 size={13} className="animate-spin text-[#1C1917]" />
               ) : (
-                <Download size={14} className="stroke-[2.5]" />
+                <Download size={13} className="stroke-[2.5]" />
               )}
             </button>
 
@@ -195,18 +195,18 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                 e.stopPropagation();
                 setKindleBook({ id: book.id, title: book.title });
               }}
-              className="p-2 text-[#57534E] hover:text-[#1C1917] bg-[#EFE8DE] hover:bg-[#E5DACD] rounded-xl border border-[#E0D5C7] transition-all flex-shrink-0 cursor-pointer shadow-sm"
+              className="p-1.5 sm:p-2 text-[#57534E] hover:text-[#1C1917] bg-[#EFE8DE] hover:bg-[#E5DACD] rounded-lg sm:rounded-xl border border-[#E0D5C7] transition-all flex-shrink-0 cursor-pointer shadow-sm"
               title="Gửi sang Kindle (Wi-Fi)"
             >
-              <Smartphone size={14} />
+              <Smartphone size={13} />
             </button>
 
             <button 
               onClick={(e) => copyShareLink(e, book.id)} 
-              className="p-2 text-[#57534E] hover:text-[#1C1917] bg-[#EFE8DE] hover:bg-[#E5DACD] rounded-xl border border-[#E0D5C7] transition-all flex-shrink-0 cursor-pointer shadow-sm"
+              className="p-1.5 sm:p-2 text-[#57534E] hover:text-[#1C1917] bg-[#EFE8DE] hover:bg-[#E5DACD] rounded-lg sm:rounded-xl border border-[#E0D5C7] transition-all flex-shrink-0 cursor-pointer shadow-sm"
               title="Chia sẻ sách"
             >
-              {copiedId === book.id ? <Check size={14} className="text-[#1B2A4A] stroke-[3]" /> : <Share2 size={14} />}
+              {copiedId === book.id ? <Check size={13} className="text-[#1B2A4A] stroke-[3]" /> : <Share2 size={13} />}
             </button>
           </div>
         </div>
@@ -235,23 +235,23 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
   return (
     <div>
       {sortBy === 'author' ? (
-        <div className="space-y-10">
+        <div className="space-y-6 sm:space-y-10">
           {Object.entries(groupedBooks).map(([author, authorBooks]) => (
-            <div key={author} className="space-y-4">
-              <div className="flex items-center gap-3 border-b border-[#EAE2D5] pb-2">
-                <h2 className="text-lg font-black text-[#2A2320]">{author}</h2>
-                <span className="text-xs font-bold text-[#8B7070] bg-[#EFE8DE] px-2.5 py-0.5 rounded-full">
+            <div key={author} className="space-y-3 sm:space-y-4">
+              <div className="flex items-center gap-2 sm:gap-3 border-b border-[#EAE2D5] pb-1.5">
+                <h2 className="text-sm sm:text-lg font-black text-[#2A2320]">{author}</h2>
+                <span className="text-[10px] sm:text-xs font-bold text-[#8B7070] bg-[#EFE8DE] px-2 py-0.5 rounded-full">
                   {authorBooks.length} cuốn
                 </span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-5 gap-y-7 pt-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 sm:gap-x-5 gap-y-2.5 sm:gap-y-7 pt-1 sm:pt-3">
                 {authorBooks.map((book, idx) => renderBookItem(book, idx))}
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-5 gap-y-7 pt-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 sm:gap-x-5 gap-y-2.5 sm:gap-y-7 pt-1 sm:pt-3">
           {books.map((book, idx) => renderBookItem(book, idx))}
         </div>
       )}

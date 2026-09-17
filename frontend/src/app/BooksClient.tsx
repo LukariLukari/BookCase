@@ -278,49 +278,49 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
   }
 
   return (
-    <div className="fixed top-0 inset-x-0 w-full h-[100dvh] max-h-[100dvh] overflow-hidden overscroll-none touch-none bg-[#D8C9BB] pt-[80px] pb-3 px-3 md:relative md:top-auto md:h-screen md:p-5 md:touch-auto flex flex-col md:flex-row gap-3 md:gap-4 lg:gap-5 font-sans selection:bg-[#1B2A4A]/20 selection:text-[#1C1917]">
+    <div className="fixed top-0 inset-x-0 w-full h-[100dvh] max-h-[100dvh] overflow-hidden overscroll-none touch-none bg-[#D8C9BB] pt-[60px] pb-1 px-1.5 sm:pt-[76px] sm:pb-3 sm:px-3 md:relative md:top-auto md:h-screen md:p-5 md:touch-auto flex flex-col md:flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-5 font-sans selection:bg-[#1B2A4A]/20 selection:text-[#1C1917]">
       
       {/* 1. LEFT COLUMN: FLOATING PILL DOCK */}
       <Sidebar />
 
       {/* 2. CENTER COLUMN: MAIN BOARD CONTAINER */}
-      <main className="flex-1 w-full bg-[#FBF8F4] rounded-[28px] md:rounded-[36px] p-3 sm:p-5 md:p-7 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col overflow-hidden min-w-0 transition-all duration-300">
+      <main className="flex-1 w-full bg-[#FBF8F4] rounded-[24px] sm:rounded-[28px] md:rounded-[36px] p-2.5 sm:p-5 md:p-7 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col overflow-hidden min-w-0 transition-all duration-300">
         
         {/* TOP SEARCH & ACTION BAR (PINNED) */}
-        <header className="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3.5 pb-2 touch-none">
+        <header className="flex-shrink-0 flex items-center justify-between gap-2 pb-1 touch-none">
           {/* Pill Search Input */}
-          <div className="w-full sm:flex-1 bg-[#EFE8DE] rounded-full px-4 py-2 flex items-center gap-2.5 border border-[#E0D5C7] shadow-inner transition-all focus-within:border-[#1B2A4A]">
-            <Search size={18} className="text-[#57534E] flex-shrink-0" />
+          <div className="flex-1 bg-[#EFE8DE] rounded-full px-3 py-1.5 flex items-center gap-2 border border-[#E0D5C7] shadow-inner transition-all focus-within:border-[#1B2A4A]">
+            <Search size={15} className="text-[#57534E] flex-shrink-0" />
             <input 
               type="text" 
-              placeholder="Tìm kiếm sách, tác giả trong thư viện..."
+              placeholder="Tìm kiếm sách, tác giả..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent text-sm font-semibold text-[#1C1917] placeholder-[#57534E] focus:outline-none touch-auto"
+              className="w-full bg-transparent text-xs font-semibold text-[#1C1917] placeholder-[#57534E] focus:outline-none touch-auto"
             />
           </div>
 
           {/* Action Buttons: Tìm Online (Opens Assistant) & Upload Pill */}
-          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={() => setIsChatOpen(prev => !prev)}
-              className={`px-5 py-2.5 rounded-full font-black text-xs sm:text-sm tracking-wide shadow-md active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-2 transition-all ${
+              className={`px-3 py-1.5 rounded-full font-black text-xs tracking-wide shadow-sm active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1.5 transition-all ${
                 isChatOpen 
                   ? 'bg-[#131E33] !text-white ring-2 ring-[#1B2A4A]/40' 
                   : 'btn-gradient !text-white'
               }`}
               title="Mở Trợ lý Tìm Sách Online"
             >
-              <Sparkles size={15} className="!text-white stroke-white" />
-              <span className="!text-white">Tìm Online</span>
+              <Sparkles size={13} className="!text-white stroke-white" />
+              <span className="!text-white text-xs">Tìm Online</span>
             </button>
 
             <button
               onClick={() => setIsUploadModalOpen(true)}
-              className="w-10 h-10 rounded-full bg-[#EFE8DE] hover:bg-[#E5DACD] border border-[#E0D5C7] flex items-center justify-center text-[#1C1917] transition-all cursor-pointer shadow-sm hover:scale-105"
+              className="w-8 h-8 rounded-full bg-[#EFE8DE] hover:bg-[#E5DACD] border border-[#E0D5C7] flex items-center justify-center text-[#1C1917] transition-all cursor-pointer shadow-sm hover:scale-105"
               title="Tải sách từ máy lên"
             >
-              <Upload size={16} />
+              <Upload size={14} />
             </button>
           </div>
         </header>
@@ -328,15 +328,15 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
 
 
         {/* "POPULAR" SECTION HEADER (PINNED) */}
-        <div className="flex-shrink-0 flex items-center justify-between pt-2 pb-2 touch-none">
-          <h2 className="text-xl md:text-2xl font-black text-[#1C1917] tracking-tight">
+        <div className="flex-shrink-0 flex items-center justify-between pt-0.5 pb-1 touch-none">
+          <h2 className="text-sm sm:text-xl md:text-2xl font-black text-[#1C1917] tracking-tight">
             Sách Nổi Bật
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-[#EFE8DE] border border-[#E0D5C7] rounded-full text-xs font-bold px-3.5 py-1.5 text-[#1C1917] cursor-pointer focus:outline-none shadow-sm touch-auto"
+              className="bg-[#EFE8DE] border border-[#E0D5C7] rounded-full text-[11px] sm:text-xs font-bold px-2.5 py-1 text-[#1C1917] cursor-pointer focus:outline-none shadow-sm touch-auto"
             >
               <option value="newest">Mới nhất</option>
               <option value="author">Theo tác giả</option>
@@ -348,7 +348,7 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
 
         {/* SCROLLABLE INNER CONTAINER (ONLY THIS SCROLLS!) */}
         <div 
-          className="flex-1 overflow-y-auto no-scrollbar pr-1 pt-2 pb-6 space-y-6 overscroll-contain touch-pan-y"
+          className="flex-1 overflow-y-auto no-scrollbar pr-0.5 pt-1 pb-3 space-y-3 overscroll-contain touch-pan-y"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
           {/* BOOKSHELF DISPLAY */}
