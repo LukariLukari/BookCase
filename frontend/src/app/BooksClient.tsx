@@ -207,7 +207,16 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
         }
       });
 
-      const onlineResults = Array.isArray(res.data) ? res.data : [];
+      const data = res.data;
+      const onlineResults = Array.isArray(data)
+        ? data
+        : (Array.isArray(data?.results) ? data.results : []);
+
+      const aiReplyText = data?.reply || (
+        onlineResults.length > 0
+          ? `Tôi đã tìm thấy ${onlineResults.length} bản sách trực tuyến cho "${cleanQuery}". Bạn có thể bấm "Tải về tủ" để thêm ngay vào kệ sách:`
+          : `Không tìm thấy sách phù hợp với "${cleanQuery}". Bạn thử đổi từ khóa ngắn gọn hơn (tên tác phẩm hoặc họ tên tác giả) nhé!`
+      );
 
       // Local matches check
       const localMatches = books.filter(b => 
@@ -215,31 +224,16 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
         (b.author && b.author.toLowerCase().includes(cleanQuery.toLowerCase()))
       ).slice(0, 2);
 
-      if (onlineResults.length > 0) {
-        setChatMessages(prev => [
-          ...prev,
-          {
-            id: botMsgId,
-            sender: 'bot',
-            text: `Tôi đã tìm thấy ${onlineResults.length} bản sách trực tuyến cho "${cleanQuery}". Bạn có thể bấm "Tải về tủ" để thêm ngay vào kệ sách:`,
-            onlineResults: onlineResults.slice(0, 6),
-            localResults: localMatches.length > 0 ? localMatches : undefined
-          }
-        ]);
-      } else {
-        setChatMessages(prev => [
-          ...prev,
-          {
-            id: botMsgId,
-            sender: 'bot',
-            text: `Không tìm thấy sách phù hợp với "${cleanQuery}" trên ${
-              assistantSource === 'all' ? 'các server hiện tại' : 
-              assistantSource === 'zlib' ? 'Server bút chì' : 'Server bút mực'
-            }. Bạn thử đổi từ khóa ngắn gọn hơn (tên tác phẩm hoặc họ tên tác giả) nhé!`,
-            localResults: localMatches.length > 0 ? localMatches : undefined
-          }
-        ]);
-      }
+      setChatMessages(prev => [
+        ...prev,
+        {
+          id: botMsgId,
+          sender: 'bot',
+          text: aiReplyText,
+          onlineResults: onlineResults.slice(0, 6),
+          localResults: localMatches.length > 0 ? localMatches : undefined
+        }
+      ]);
     } catch (err: any) {
       setChatMessages(prev => [
         ...prev,
@@ -496,61 +490,7 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
             </div>
           </div>
 
-          {/* Source Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-shrink-0 text-xs">
-            <button
-              type="button"
-              onClick={() => setAssistantSource('all')}
-              className={`px-3 py-1.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 border shadow-2xs ${
-                assistantSource === 'all'
-                  ? 'bg-[#1B2A4A] !text-white border-[#1B2A4A]'
-                  : 'bg-[#EFE8DE] text-[#57534E] border-[#E0D5C7] hover:bg-[#E5DACD]'
-              }`}
-            >
-              <Layers size={12} className={assistantSource === 'all' ? '!text-white stroke-white' : ''} />
-              <span className={assistantSource === 'all' ? '!text-white' : ''}>Tất cả nguồn</span>
-            </button>
 
-            <button
-              type="button"
-              onClick={() => setAssistantSource('zlib')}
-              className={`px-3 py-1.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 border shadow-2xs ${
-                assistantSource === 'zlib'
-                  ? 'bg-[#1B2A4A] !text-white border-[#1B2A4A]'
-                  : 'bg-[#EFE8DE] text-[#57534E] border-[#E0D5C7] hover:bg-[#E5DACD]'
-              }`}
-            >
-              <Pencil size={12} className={assistantSource === 'zlib' ? '!text-white stroke-white' : ''} />
-              <span className={assistantSource === 'zlib' ? '!text-white' : ''}>Server bút chì</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setAssistantSource('cloudily')}
-              className={`px-3 py-1.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 border shadow-2xs ${
-                assistantSource === 'cloudily'
-                  ? 'bg-[#1B2A4A] !text-white border-[#1B2A4A]'
-                  : 'bg-[#EFE8DE] text-[#57534E] border-[#E0D5C7] hover:bg-[#E5DACD]'
-              }`}
-            >
-              <PenTool size={12} className={assistantSource === 'cloudily' ? '!text-white stroke-white' : ''} />
-              <span className={assistantSource === 'cloudily' ? '!text-white' : ''}>Server bút mực</span>
-            </button>
-          </div>
-
-          {/* Quick Suggestions Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-shrink-0">
-            {['Higashino Keigo', 'Kinh điển', 'Haruki Murakami', 'Trinh thám', 'Tâm lý học'].map(tag => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => handleAssistantSearch(tag)}
-                className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#EFE8DE] text-[#57534E] hover:text-[#1C1917] hover:bg-[#E2D7C8] border border-[#E0D5C7] whitespace-nowrap transition-all cursor-pointer"
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto no-scrollbar space-y-3.5 pr-1 text-xs">
