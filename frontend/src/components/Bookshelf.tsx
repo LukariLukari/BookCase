@@ -124,14 +124,17 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
       >
         {/* HARDCOVER BOOK CONTAINER */}
         <div className="w-full aspect-[2/3] relative mb-3">
-          <div className="book-hardcover w-full h-full relative">
+          <div className="book-hardcover absolute inset-0">
             <BookCoverImage 
               coverUrl={book.cover_url}
               bookId={book.id}
               title={book.title}
               author={book.author}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover block"
             />
+
+            {/* Left Spine 3D Shadow Overlay */}
+            <div className="absolute top-0 bottom-0 left-0 w-3.5 bg-gradient-to-r from-black/35 via-black/15 to-transparent pointer-events-none z-10" />
 
             {/* Bottom White Paper Edge */}
             <div className="book-paper-edge" />
@@ -141,7 +144,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
               className="ribbon-bookmark"
               style={{ 
                 backgroundColor: ribbonColor,
-                right: '22px'
+                right: '20px'
               }}
             />
 
@@ -247,14 +250,14 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   {authorBooks.length} cuốn
                 </span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-5 gap-y-7">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-5 gap-y-7 pt-3">
                 {authorBooks.map((book, idx) => renderBookItem(book, idx))}
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-5 gap-y-7">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-5 gap-y-7 pt-3">
           {books.map((book, idx) => renderBookItem(book, idx))}
         </div>
       )}
@@ -277,22 +280,25 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
              >
                 {/* Left: Book Cover Preview */}
                 <div className="w-full md:w-1/3 flex flex-col items-center flex-shrink-0">
-                  <div className="book-hardcover w-40 sm:w-48 aspect-[2/3] relative mb-4">
-                    <BookCoverImage 
-                      coverUrl={selectedBook.cover_url}
-                      bookId={selectedBook.id}
-                      title={selectedBook.title}
-                      author={selectedBook.author}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="book-paper-edge" />
-                    <div 
-                      className="ribbon-bookmark"
-                      style={{ 
-                        backgroundColor: getRibbonColor(selectedBook.id),
-                        right: '22px'
-                      }}
-                    />
+                  <div className="w-40 sm:w-48 aspect-[2/3] relative mb-4">
+                    <div className="book-hardcover absolute inset-0">
+                      <BookCoverImage 
+                        coverUrl={selectedBook.cover_url}
+                        bookId={selectedBook.id}
+                        title={selectedBook.title}
+                        author={selectedBook.author}
+                        className="w-full h-full object-cover block"
+                      />
+                      <div className="absolute top-0 bottom-0 left-0 w-3.5 bg-gradient-to-r from-black/35 via-black/15 to-transparent pointer-events-none z-10" />
+                      <div className="book-paper-edge" />
+                      <div 
+                        className="ribbon-bookmark"
+                        style={{ 
+                          backgroundColor: getRibbonColor(selectedBook.id),
+                          right: '20px'
+                        }}
+                      />
+                    </div>
                   </div>
 
                   {/* Rating Summary Pill */}

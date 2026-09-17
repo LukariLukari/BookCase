@@ -120,15 +120,18 @@ export default function MyBooksClient() {
                     onClick={() => setSelectedBook(ub)}
                     whileHover={{ y: -5 }}
                   >
-                    <div className="w-full aspect-[2/3] relative mb-3 book-hardcover">
-                       <BookCoverImage 
-                         coverUrl={coverUrl}
-                         bookId={ub.book_id || ub.id}
-                         title={title}
-                         author={author}
-                         className="w-full h-full object-cover rounded-r-xl"
-                       />
-                       <div className="book-paper-edge" />
+                    <div className="w-full aspect-[2/3] relative mb-3">
+                      <div className="book-hardcover absolute inset-0">
+                         <BookCoverImage 
+                           coverUrl={coverUrl}
+                           bookId={ub.book_id || ub.id}
+                           title={title}
+                           author={author}
+                           className="w-full h-full object-cover block"
+                         />
+                         <div className="absolute top-0 bottom-0 left-0 w-3 bg-gradient-to-r from-black/25 via-black/10 to-transparent pointer-events-none z-10" />
+                         <div className="book-paper-edge" />
+                      </div>
                     </div>
                     <div>
                       <h3 className="text-xs sm:text-sm font-bold text-[#1C1917] leading-tight line-clamp-2 mb-1 group-hover:text-[#1B2A4A] transition-colors">{title}</h3>
@@ -155,15 +158,18 @@ export default function MyBooksClient() {
               >
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex gap-6 w-full relative">
-                    <div className="w-24 md:w-32 aspect-[2/3] flex-shrink-0 book-hardcover">
-                      <BookCoverImage 
-                        coverUrl={selectedBook.custom_cover_url || selectedBook.book?.cover_url}
-                        bookId={selectedBook.book_id || selectedBook.id}
-                        title={selectedBook.custom_title || selectedBook.book?.title}
-                        author={selectedBook.custom_author || selectedBook.book?.author}
-                        className="w-full h-full object-cover rounded-r-xl shadow-lg"
-                      />
-                      <div className="book-paper-edge" />
+                    <div className="w-24 md:w-32 aspect-[2/3] flex-shrink-0 relative">
+                      <div className="book-hardcover absolute inset-0">
+                        <BookCoverImage 
+                          coverUrl={selectedBook.custom_cover_url || selectedBook.book?.cover_url}
+                          bookId={selectedBook.book_id || selectedBook.id}
+                          title={selectedBook.custom_title || selectedBook.book?.title}
+                          author={selectedBook.custom_author || selectedBook.book?.author}
+                          className="w-full h-full object-cover block shadow-lg"
+                        />
+                        <div className="absolute top-0 bottom-0 left-0 w-3 bg-gradient-to-r from-black/25 via-black/10 to-transparent pointer-events-none z-10" />
+                        <div className="book-paper-edge" />
+                      </div>
                     </div>
                     <div className="flex-1 flex flex-col justify-between">
                       <div>

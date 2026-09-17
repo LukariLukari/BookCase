@@ -343,9 +343,9 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
         </div>
 
         {/* SCROLLABLE INNER CONTAINER (ONLY THIS SCROLLS!) */}
-        <div className="flex-1 overflow-y-auto no-scrollbar pr-1 pb-4 space-y-6">
+        <div className="flex-1 overflow-y-auto no-scrollbar pr-1 pt-3.5 pb-6 space-y-6">
           {/* BOOKSHELF DISPLAY */}
-          <section className="min-h-[300px]">
+          <section className="min-h-[300px] pt-1">
             {isLoadingBooks && books.length === 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 animate-pulse pt-2">
                 {[...Array(10)].map((_, i) => (
