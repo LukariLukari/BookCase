@@ -287,7 +287,7 @@ async def search_books_via_telegram(query: str, source: str = None):
         await connect_client()
         
         if not await client.is_user_authorized():
-            print("[Telegram] Client chưa được xác thực.")
+            print("[Telegram] Client chua duoc xac thuc.")
             return []
             
         if source == 'zlib':

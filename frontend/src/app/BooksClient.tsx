@@ -179,23 +179,15 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
     setIsSearchingAssistant(true);
 
     try {
-      const res = await axios.get(`${API_URL}/api/books/search-online`, {
+      // Connect directly to the existing external-search endpoint linked with Telegram Bot & sources
+      const res = await axios.get(`${API_URL}/api/external-search`, {
         params: {
-          query: cleanQuery,
-          source: assistantSource
+          q: cleanQuery,
+          source: 'all'
         }
       });
 
-      const data = res.data;
-      const onlineResults = Array.isArray(data)
-        ? data
-        : (Array.isArray(data?.results) ? data.results : []);
-
-      const aiReplyText = data?.reply || (
-        onlineResults.length > 0
-          ? `Tôi đã tìm thấy ${onlineResults.length} bản sách trực tuyến cho "${cleanQuery}". Bạn có thể bấm "Tải về tủ" để thêm ngay vào kệ sách:`
-          : `Không tìm thấy sách phù hợp với "${cleanQuery}". Bạn thử đổi từ khóa ngắn gọn hơn (tên tác phẩm hoặc họ tên tác giả) nhé!`
-      );
+      const onlineResults = Array.isArray(res.data) ? res.data : [];
 
       // Local matches check
       const localMatches = books.filter(b => 
@@ -203,16 +195,28 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
         (b.author && b.author.toLowerCase().includes(cleanQuery.toLowerCase()))
       ).slice(0, 2);
 
-      setChatMessages(prev => [
-        ...prev,
-        {
-          id: botMsgId,
-          sender: 'bot',
-          text: aiReplyText,
-          onlineResults: onlineResults.slice(0, 6),
-          localResults: localMatches.length > 0 ? localMatches : undefined
-        }
-      ]);
+      if (onlineResults.length > 0) {
+        setChatMessages(prev => [
+          ...prev,
+          {
+            id: botMsgId,
+            sender: 'bot',
+            text: `Tôi đã tìm thấy ${onlineResults.length} bản sách trực tuyến từ các máy chủ liên kết cho "${cleanQuery}". Bạn có thể bấm "Tải về tủ" để thêm ngay vào kệ sách:`,
+            onlineResults: onlineResults.slice(0, 8),
+            localResults: localMatches.length > 0 ? localMatches : undefined
+          }
+        ]);
+      } else {
+        setChatMessages(prev => [
+          ...prev,
+          {
+            id: botMsgId,
+            sender: 'bot',
+            text: `Không tìm thấy sách phù hợp với "${cleanQuery}". Bạn thử đổi từ khóa tìm kiếm (tên tiếng Anh, tên tác phẩm đầy đủ hoặc họ tên tác giả) nhé!`,
+            localResults: localMatches.length > 0 ? localMatches : undefined
+          }
+        ]);
+      }
     } catch (err: any) {
       setChatMessages(prev => [
         ...prev,
@@ -455,6 +459,8 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
                         const isImported = importedBookIds.includes(item.id);
                         const isImporting = importingBookId === item.id;
                         const isPencil = item.id.startsWith('/book_') || item.id.startsWith('zlib|');
+                        const isCloudily = item.id.startsWith('cloudily|');
+                        const sourceLabel = isPencil ? 'Bút chì' : isCloudily ? 'Bút mực' : 'Thư viện mở';
 
                         return (
                           <div 
@@ -470,9 +476,9 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
                               </p>
                               <div className="flex items-center gap-1.5 mt-1">
                                 <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold ${
-                                  isPencil ? 'bg-[#EBF0F7] text-[#1B2A4A]' : 'bg-[#F2ECE4] text-[#57534E]'
+                                  isPencil ? 'bg-[#EBF0F7] text-[#1B2A4A]' : isCloudily ? 'bg-[#F2ECE4] text-[#57534E]' : 'bg-[#E8F5E9] text-emerald-800'
                                 }`}>
-                                  {isPencil ? 'Bút chì' : 'Bút mực'}
+                                  {sourceLabel}
                                 </span>
                                 {(item.extension || item.ext) && (
                                   <span className="text-[9px] px-1.5 py-0.5 rounded-md font-bold bg-[#EFE8DE] text-[#57534E] uppercase">

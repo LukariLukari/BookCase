@@ -805,62 +805,7 @@ async def external_search(q: str, source: Optional[str] = None):
         print(f"[external_search error]: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/books/search-online")
-async def search_books_online(query: Optional[str] = None, q: Optional[str] = None, source: Optional[str] = "all"):
-    import book_search_service
-    search_q = (query or q or "").strip()
-    if not search_q:
-        return {"reply": "Bạn chưa nhập tên sách hoặc tác giả cần tìm!", "results": []}
 
-    ai_reply = None
-    search_keywords = search_q
-
-    # Smart Gemini AI intent parsing if API key is configured
-    gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-    if gemini_key:
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
-            prompt = (
-                f"Bạn là Trợ Lý Tìm Sách AI của ứng dụng đọc sách BookCase. "
-                f"Người dùng nhắn: '{search_q}'. "
-                f"Yêu cầu: "
-                f"1. Tạo lời nhắn trả lời tự nhiên, thân thiện (1-2 câu tiếng Việt). "
-                f"2. Trích xuất tên sách hoặc tên tác giả cốt lõi nhất để tra cứu kho sách online (search_keyword). "
-                f"Trả về DUY NHẤT một chuỗi JSON chuẩn: {{\"reply\": \"lời nhắn\", \"search_keyword\": \"từ khóa\"}}"
-            )
-            req_body = {
-                "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"response_mime_type": "application/json", "temperature": 0.2}
-            }
-            req_data = json.dumps(req_body).encode('utf-8')
-            req = urllib.request.Request(url, data=req_data, headers={"Content-Type": "application/json"}, method="POST")
-            with urllib.request.urlopen(req, timeout=6) as response:
-                res_json = json.loads(response.read().decode('utf-8'))
-                text_content = res_json["candidates"][0]["content"]["parts"][0]["text"]
-                ai_data = json.loads(text_content)
-                if ai_data.get("reply"):
-                    ai_reply = ai_data.get("reply")
-                if ai_data.get("search_keyword"):
-                    search_keywords = ai_data.get("search_keyword")
-        except Exception as e:
-            print(f"[AI Search Gemini Assistant Warning]: {e}")
-
-    # Tìm kiếm đa nguồn (Cloudily, Z-Lib, Open Library)
-    books = await book_search_service.search_all_sources(search_keywords, source=source)
-    if not books and search_keywords != search_q:
-        books = await book_search_service.search_all_sources(search_q, source=source)
-
-    if not ai_reply:
-        if books:
-            ai_reply = f"Tôi đã tìm thấy {len(books)} kết quả sách trực tuyến phù hợp với \"{search_q}\". Bạn có thể nhấn \"Tải về tủ\" để thêm ngay vào kệ sách!"
-        else:
-            ai_reply = f"Không tìm thấy bản sách phù hợp với \"{search_q}\". Bạn thử đổi từ khóa ngắn gọn hơn (tên tác phẩm hoặc họ tên tác giả) nhé!"
-
-    return {
-        "reply": ai_reply,
-        "results": books,
-        "query": search_q
-    }
 
 @app.get("/api/admin/telegram/status")
 async def get_telegram_status_endpoint(current_user: models.User = Depends(auth.get_current_admin_user)):
