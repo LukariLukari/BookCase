@@ -47,65 +47,163 @@ body {
 }
 
 /* Hardcover Book & Ribbon Visual System */
-.book-hardcover-container {
+/* =========================================================
+   ULTRA-REALISTIC 3D HARDCOVER BOOK VISUAL ENGINE
+   ========================================================= */
+
+/* 3D Perspective Wrapper: holds depth, perspective and multi-layer shadows */
+.book-3d-wrapper {
   position: relative;
-  perspective: 800px;
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  perspective: 1200px;
+  filter: drop-shadow(0 10px 16px rgba(45, 30, 20, 0.2)) drop-shadow(0 2px 5px rgba(45, 30, 20, 0.12));
+  transition: filter 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+.group:hover .book-3d-wrapper {
+  filter: drop-shadow(0 20px 28px rgba(45, 30, 20, 0.28)) drop-shadow(0 6px 10px rgba(45, 30, 20, 0.18));
+}
+
+/* 3D Paper Pages Block (Realistic Right Thickness with paper lines) */
+.book-3d-pages-right {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  right: -7px;
+  width: 10px;
+  border-radius: 0 4px 4px 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    #FAF6EE 0px,
+    #FAF6EE 1.5px,
+    #EADFCF 1.5px,
+    #DFD5C0 3px
+  );
+  box-shadow: 
+    inset 1px 0 2px rgba(0, 0, 0, 0.15),
+    2px 0 4px rgba(0, 0, 0, 0.18);
+  z-index: 1;
+  pointer-events-none;
+}
+
+/* 3D Paper Pages Block (Realistic Bottom Thickness) */
+.book-3d-pages-bottom {
+  position: absolute;
+  bottom: -5px;
+  left: 6px;
+  right: -4px;
+  height: 8px;
+  border-radius: 0 0 4px 4px;
+  background: repeating-linear-gradient(
+    to right,
+    #FAF6EE 0px,
+    #FAF6EE 2px,
+    #E8DCB8 2px,
+    #D5C4A0 4px
+  );
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.18),
+    0 3px 5px rgba(0, 0, 0, 0.24);
+  z-index: 1;
+  pointer-events-none;
+}
+
+/* Hardcover Front Board (3D Overhang) */
+.book-3d-cover {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px 10px 10px 3px;
+  overflow: hidden;
+  background-color: #EDE4D8;
+  z-index: 2;
+  box-shadow: 
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    inset -1px 0 2px rgba(0, 0, 0, 0.2);
+  transform-origin: left center;
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.group:hover .book-3d-cover {
+  transform: rotateY(-3.5deg);
+}
+
+/* Realistic 3D Spine Curve & Hinge Indent Crease */
+.book-spine-hinge-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events-none;
+  z-index: 5;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.22) 2.5%,
+    rgba(255, 255, 255, 0.28) 4.5%,
+    rgba(0, 0, 0, 0.12) 6.5%,
+    rgba(0, 0, 0, 0.6) 7.5%,       /* The Hinge Indented Crease */
+    rgba(255, 255, 255, 0.35) 8.5%,  /* Highlight along groove edge */
+    transparent 11%,
+    transparent 88%,
+    rgba(0, 0, 0, 0.12) 97%,
+    rgba(0, 0, 0, 0.38) 100%
+  );
+}
+
+/* Satin / Matte Cover Sheen Reflection */
+.book-cover-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events-none;
+  z-index: 6;
+  background: linear-gradient(
+    115deg,
+    transparent 18%,
+    rgba(255, 255, 255, 0.14) 34%,
+    rgba(255, 255, 255, 0.03) 46%,
+    transparent 62%
+  );
+}
+
+/* Realistic Hanging Silk Ribbon Bookmark (unclipped, swallowtail fork) */
+.book-3d-ribbon {
+  position: absolute;
+  bottom: -18px;
+  right: 22px;
+  width: 14px;
+  height: 34px;
+  border-radius: 1px 1px 0 0;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 80%, 0% 100%);
+  z-index: 10;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.35));
+  transition: height 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+.book-3d-ribbon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.3) 0%,
+    transparent 35%,
+    rgba(255, 255, 255, 0.38) 60%,
+    rgba(0, 0, 0, 0.25) 100%
+  );
+}
+
+.group:hover .book-3d-ribbon {
+  height: 38px;
+  transform: translateY(3px);
+}
+
+/* Legacy class fallback mapping */
 .book-hardcover {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 4px 14px 14px 4px;
-  box-shadow: 
-    -4px 2px 8px rgba(70, 50, 40, 0.15),
-    4px 8px 20px rgba(80, 60, 45, 0.2),
-    inset 4px 0 6px rgba(0, 0, 0, 0.18),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.15);
-  transition: box-shadow 0.25s ease;
+  border-radius: 3px 10px 10px 3px;
   overflow: hidden;
   background-color: #EDE4D8;
-}
-
-.book-hardcover:hover {
-  box-shadow: 
-    -6px 6px 16px rgba(70, 50, 40, 0.22),
-    8px 18px 30px rgba(80, 60, 45, 0.28),
-    inset 4px 0 6px rgba(0, 0, 0, 0.2);
-}
-
-/* Simulated white paper edge trim at bottom */
-.book-paper-edge {
-  position: absolute;
-  bottom: 0;
-  left: 6px;
-  right: 0;
-  height: 7px;
-  background: linear-gradient(180deg, #FAF6EE 0%, #E6DEC8 100%);
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 0 0 12px 0;
-  z-index: 10;
-}
-
-/* Dangling Fabric Ribbon Bookmark */
-.ribbon-bookmark {
-  position: absolute;
-  bottom: -16px;
-  width: 14px;
-  height: 28px;
-  border-radius: 2px 2px 0 0;
-  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 82%, 0% 100%);
-  z-index: 15;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
-  transition: height 0.25s ease, transform 0.25s ease;
-}
-
-.book-hardcover:hover .ribbon-bookmark {
-  height: 32px;
-  bottom: -20px;
 }
 
 /* Navy Accent Button & Pills (Pure Contrast Guarantee) */

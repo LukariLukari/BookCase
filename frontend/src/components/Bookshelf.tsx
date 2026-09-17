@@ -122,9 +122,14 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
         whileHover={{ y: -6 }}
         transition={{ type: "spring", stiffness: 300, damping: 22 }}
       >
-        {/* HARDCOVER BOOK CONTAINER */}
-        <div className="w-full aspect-[2/3] relative mb-3">
-          <div className="book-hardcover absolute inset-0">
+        {/* ULTRA-REALISTIC 3D HARDCOVER BOOK */}
+        <div className="book-3d-wrapper mb-3.5">
+          {/* 1. Realistic Page Thickness on Right & Bottom */}
+          <div className="book-3d-pages-right" />
+          <div className="book-3d-pages-bottom" />
+
+          {/* 2. Main Hardcover Board with 3D Overhang */}
+          <div className="book-3d-cover">
             <BookCoverImage 
               coverUrl={book.cover_url}
               bookId={book.id}
@@ -133,29 +138,26 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
               className="w-full h-full object-cover block"
             />
 
-            {/* Left Spine 3D Shadow Overlay */}
-            <div className="absolute top-0 bottom-0 left-0 w-3.5 bg-gradient-to-r from-black/35 via-black/15 to-transparent pointer-events-none z-10" />
+            {/* 3D Spine Curve & Hinge Indent Crease */}
+            <div className="book-spine-hinge-overlay" />
 
-            {/* Bottom White Paper Edge */}
-            <div className="book-paper-edge" />
-
-            {/* Dangling Ribbon Bookmark */}
-            <div 
-              className="ribbon-bookmark"
-              style={{ 
-                backgroundColor: ribbonColor,
-                right: '20px'
-              }}
-            />
-
-            {/* Rating badge */}
-            {ratingInfo && ratingInfo.count > 0 && (
-              <div className="absolute top-2.5 right-2.5 bg-[#FAF6F0]/95 backdrop-blur-md text-[#1C1917] border border-[#E5DACD] px-2 py-0.5 rounded-full text-[11px] font-extrabold flex items-center gap-1 shadow-sm z-20">
-                <Star size={11} className="fill-[#1B2A4A] text-[#1B2A4A]" />
-                <span>{ratingInfo.average_rating.toFixed(1)}</span>
-              </div>
-            )}
+            {/* Satin/Matte Light Reflection */}
+            <div className="book-cover-sheen" />
           </div>
+
+          {/* 3. Dangling Silk Bookmark Ribbon */}
+          <div 
+            className="book-3d-ribbon"
+            style={{ backgroundColor: ribbonColor }}
+          />
+
+          {/* Rating badge */}
+          {ratingInfo && ratingInfo.count > 0 && (
+            <div className="absolute top-2.5 right-2.5 bg-[#FAF6F0]/95 backdrop-blur-md text-[#1C1917] border border-[#E5DACD] px-2 py-0.5 rounded-full text-[11px] font-extrabold flex items-center gap-1 shadow-sm z-20">
+              <Star size={11} className="fill-[#1B2A4A] text-[#1B2A4A]" />
+              <span>{ratingInfo.average_rating.toFixed(1)}</span>
+            </div>
+          )}
         </div>
 
         {/* BOOK INFO */}
@@ -280,23 +282,24 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
              >
                 {/* Left: Book Cover Preview */}
                 <div className="w-full md:w-1/3 flex flex-col items-center flex-shrink-0">
-                  <div className="w-40 sm:w-48 aspect-[2/3] relative mb-4">
-                    <div className="book-hardcover absolute inset-0">
-                      <BookCoverImage 
-                        coverUrl={selectedBook.cover_url}
-                        bookId={selectedBook.id}
-                        title={selectedBook.title}
-                        author={selectedBook.author}
-                        className="w-full h-full object-cover block"
-                      />
-                      <div className="absolute top-0 bottom-0 left-0 w-3.5 bg-gradient-to-r from-black/35 via-black/15 to-transparent pointer-events-none z-10" />
-                      <div className="book-paper-edge" />
+                  <div className="w-40 sm:w-48 mb-5">
+                    <div className="book-3d-wrapper">
+                      <div className="book-3d-pages-right" />
+                      <div className="book-3d-pages-bottom" />
+                      <div className="book-3d-cover">
+                        <BookCoverImage 
+                          coverUrl={selectedBook.cover_url}
+                          bookId={selectedBook.id}
+                          title={selectedBook.title}
+                          author={selectedBook.author}
+                          className="w-full h-full object-cover block"
+                        />
+                        <div className="book-spine-hinge-overlay" />
+                        <div className="book-cover-sheen" />
+                      </div>
                       <div 
-                        className="ribbon-bookmark"
-                        style={{ 
-                          backgroundColor: getRibbonColor(selectedBook.id),
-                          right: '20px'
-                        }}
+                        className="book-3d-ribbon"
+                        style={{ backgroundColor: getRibbonColor(selectedBook.id) }}
                       />
                     </div>
                   </div>
