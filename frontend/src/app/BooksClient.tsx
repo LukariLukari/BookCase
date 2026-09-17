@@ -8,20 +8,9 @@ import {
   Search, 
   Upload, 
   BookOpen, 
-  ChevronRight, 
   Send, 
-  Eye, 
   Sparkles, 
-  Layers, 
-  Heart, 
-  Compass, 
-  Flame, 
-  Feather, 
-  GraduationCap, 
-  BookMarked,
   X,
-  Pencil,
-  PenTool,
   ExternalLink,
   Download,
   Check,
@@ -31,16 +20,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
-const CATEGORIES = [
-  { id: 'all', label: 'Tất cả', icon: Layers },
-  { id: 'fiction', label: 'Tiểu thuyết', icon: BookOpen },
-  { id: 'bestseller', label: 'Bán chạy', icon: Flame },
-  { id: 'classic', label: 'Kinh điển', icon: Feather },
-  { id: 'selfhelp', label: 'Kỹ năng', icon: GraduationCap },
-  { id: 'romance', label: 'Tình cảm', icon: Heart },
-  { id: 'scifi', label: 'Khoa học', icon: Compass },
-  { id: 'audiobook', label: 'Tuyển chọn', icon: BookMarked },
-];
+
 
 interface AssistantMessage {
   id: string;
@@ -62,7 +42,6 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
     return [];
   });
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [isSearchOnlineOpen, setIsSearchOnlineOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -283,16 +262,8 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
     }
   };
 
-  // Filter books by category
-  const filteredBooks = books.filter(b => {
-    if (selectedCategory === 'all') return true;
-    if (selectedCategory === 'fiction') return (b.genre && /tiểu thuyết|fiction|văn học/i.test(b.genre));
-    if (selectedCategory === 'classic') return (b.genre && /kinh điển|classic/i.test(b.genre));
-    if (selectedCategory === 'selfhelp') return (b.genre && /kỹ năng|self-help|phát triển/i.test(b.genre));
-    if (selectedCategory === 'romance') return (b.genre && /tình cảm|romance/i.test(b.genre));
-    if (selectedCategory === 'scifi') return (b.genre && /khoa học|sci-fi|viễn tưởng/i.test(b.genre));
-    return true;
-  });
+  // Books list
+  const filteredBooks = books;
 
   if (isLoading || !user) {
     return (
@@ -350,35 +321,7 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
           </div>
         </header>
 
-        {/* CATEGORIES / BOOK FORMAT ROW (PINNED) */}
-        <div className="flex-shrink-0 flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1">
-          {CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            const active = selectedCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`flex flex-col items-center gap-1.5 px-3.5 py-2 rounded-2xl transition-all flex-shrink-0 cursor-pointer ${
-                  active 
-                    ? 'bg-[#1B2A4A] !text-white shadow-md border border-[#1B2A4A] scale-105' 
-                    : 'bg-[#EFE8DE] !text-[#1C1917] border border-[#E0D5C7] hover:bg-[#E5DACD] opacity-90 hover:opacity-100'
-                }`}
-              >
-                <div 
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-xs transition-colors ${
-                    active ? 'bg-white/20 text-white' : 'bg-[#E5DACD] !text-[#1C1917]'
-                  }`}
-                >
-                  <Icon size={16} className={active ? '!text-white stroke-white' : '!text-[#1C1917]'} />
-                </div>
-                <span className={`text-[11px] font-bold ${active ? '!text-white font-black' : '!text-[#1C1917]'}`}>
-                  {cat.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+
 
         {/* "POPULAR" SECTION HEADER (PINNED) */}
         <div className="flex-shrink-0 flex items-center justify-between pt-2 pb-2">
