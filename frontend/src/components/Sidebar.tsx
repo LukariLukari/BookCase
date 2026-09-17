@@ -144,7 +144,7 @@ export default function Sidebar() {
       </aside>
 
       {/* MOBILE TOP BAR & SLIDE-OUT MENU */}
-      <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#FAF6F0]/95 backdrop-blur-md border-b border-[#EBE2D5] px-4 flex items-center justify-between z-50 shadow-sm">
+      <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#FAF6F0]/95 backdrop-blur-md border-b border-[#EBE2D5] px-4 flex items-center justify-between z-50 shadow-sm touch-none select-none">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-[#1B2A4A] flex items-center justify-center text-white shadow-sm">
             <BookOpen size={16} />

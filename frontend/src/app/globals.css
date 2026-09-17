@@ -20,6 +20,11 @@
   --font-sans: var(--font-montserrat);
 }
 
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
 body {
   background-color: #D8C9BB;
   color: #1C1917;
