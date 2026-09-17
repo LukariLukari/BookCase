@@ -271,14 +271,14 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
 
   if (isLoading || !user) {
     return (
-      <div className="fixed inset-0 w-full h-[100dvh] bg-[#D8C9BB] flex items-center justify-center font-bold text-[#1C1917] touch-none overscroll-none">
+      <div className="fixed top-0 inset-x-0 w-full h-[100dvh] bg-[#D8C9BB] flex items-center justify-center font-bold text-[#1C1917] touch-none overscroll-none">
         Đang tải BookCase...
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 w-full h-[100dvh] max-h-[100dvh] overflow-hidden overscroll-none touch-none bg-[#D8C9BB] pt-[72px] pb-3 px-3 md:relative md:h-screen md:p-5 md:touch-auto flex flex-col md:flex-row gap-3 md:gap-4 lg:gap-5 font-sans selection:bg-[#1B2A4A]/20 selection:text-[#1C1917]">
+    <div className="fixed top-0 inset-x-0 w-full h-[100dvh] max-h-[100dvh] overflow-hidden overscroll-none touch-none bg-[#D8C9BB] pt-[80px] pb-3 px-3 md:relative md:top-auto md:h-screen md:p-5 md:touch-auto flex flex-col md:flex-row gap-3 md:gap-4 lg:gap-5 font-sans selection:bg-[#1B2A4A]/20 selection:text-[#1C1917]">
       
       {/* 1. LEFT COLUMN: FLOATING PILL DOCK */}
       <Sidebar />

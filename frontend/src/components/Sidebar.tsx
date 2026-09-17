@@ -144,7 +144,7 @@ export default function Sidebar() {
       </aside>
 
       {/* MOBILE TOP BAR & SLIDE-OUT MENU */}
-      <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#FAF6F0]/95 backdrop-blur-md border-b border-[#EBE2D5] px-4 flex items-center justify-between z-50 shadow-sm touch-none select-none">
+      <header className="md:hidden fixed top-3 left-3 right-3 h-14 bg-[#FAF6F0]/95 backdrop-blur-md rounded-2xl sm:rounded-3xl border border-[#ECE2D5] px-4 flex items-center justify-between z-50 shadow-[0_8px_24px_rgba(120,100,85,0.12)] touch-none select-none">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-[#1B2A4A] flex items-center justify-center text-white shadow-sm">
             <BookOpen size={16} />
@@ -155,7 +155,7 @@ export default function Sidebar() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2.5 rounded-xl bg-[#EFE8DE] text-[#1C1917] transition-colors"
+            className="p-2 rounded-xl bg-[#EFE8DE] text-[#1C1917] transition-colors cursor-pointer"
           >
             {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -164,7 +164,7 @@ export default function Sidebar() {
 
       {/* MOBILE DROPDOWN MENU */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-16 bg-[#FAF6F0] border-b border-[#EBE2D5] p-5 shadow-2xl z-40 space-y-3 animate-in fade-in slide-in-from-top-2">
+        <div className="md:hidden fixed inset-x-3 top-[74px] bg-[#FAF6F0] border border-[#ECE2D5] rounded-3xl p-5 shadow-2xl z-50 space-y-3 animate-in fade-in slide-in-from-top-2">
           {user && (
             <div className="flex items-center gap-3 p-3 bg-[#EFE8DE] rounded-2xl mb-2">
               <img 
