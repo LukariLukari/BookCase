@@ -462,18 +462,75 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
                         const isCloudily = item.id.startsWith('cloudily|');
                         const sourceLabel = isPencil ? 'Bút chì' : isCloudily ? 'Bút mực' : 'Thư viện mở';
 
+                        // 1. Clean title
+                        const cleanTitle = (item.title || '')
+                          .replace(/^\[.*?\]\s*/, '')
+                          .replace(/\*\*/g, '')
+                          .replace(/__/g, '')
+                          .trim();
+
+                        // 2. Clean author and hide Cloudily Bot / Z-Library Bot
+                        let rawAuthor = (item.author || '')
+                          .replace(/\*\*/g, '')
+                          .replace(/^__+|__+$/g, '')
+                          .trim();
+
+                        if (
+                          !rawAuthor || 
+                          /cloudily/i.test(rawAuthor) || 
+                          /z-?library/i.test(rawAuthor) || 
+                          /^bot$/i.test(rawAuthor)
+                        ) {
+                          rawAuthor = '';
+                        }
+
+                        // 3. Move file size to the same line as Year / Author separated by |
+                        const fileSize = item.filesize || item.size || '';
+                        let subline = '';
+                        if (rawAuthor && fileSize) {
+                          subline = `${rawAuthor} | ${fileSize}`;
+                        } else if (rawAuthor) {
+                          subline = rawAuthor;
+                        } else if (fileSize) {
+                          subline = fileSize;
+                        }
+
+                        // 4. Format book language
+                        const getBookLanguage = (it: any) => {
+                          const l = (it.language || '').toLowerCase().trim();
+                          if (l.includes('viet') || it.id?.startsWith('cloudily|')) return 'Tiếng Việt';
+                          if (l.includes('eng') || l === 'en') return 'Tiếng Anh';
+                          if (l.includes('fre') || l === 'fr') return 'Tiếng Pháp';
+                          if (l.includes('ger') || l === 'de') return 'Tiếng Đức';
+                          if (l.includes('chi') || l === 'zh') return 'Tiếng Trung';
+                          if (l.includes('jap') || l === 'ja') return 'Tiếng Nhật';
+                          if (l.includes('rus') || l === 'ru') return 'Tiếng Nga';
+                          if (l.includes('kor') || l === 'ko') return 'Tiếng Hàn';
+                          if (l.includes('spa') || l === 'es') return 'Tiếng TBN';
+                          if (it.language && it.language !== 'Đa ngôn ngữ' && it.language !== 'Toàn cầu / Miễn phí') {
+                            return it.language;
+                          }
+                          if (/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(it.title || '')) {
+                            return 'Tiếng Việt';
+                          }
+                          return 'Tiếng Anh';
+                        };
+                        const bookLang = getBookLanguage(item);
+
                         return (
                           <div 
                             key={item.id}
                             className="bg-[#FAF6F0] p-2.5 rounded-xl border border-[#ECE2D5] flex items-center justify-between gap-2.5 hover:border-[#D5C7B8] transition-all"
                           >
                             <div className="min-w-0 flex-1">
-                              <h5 className="font-black text-[11px] text-[#1C1917] truncate" title={item.title}>
-                                {item.title.replace(/^\[.*?\]\s*/, '')}
+                              <h5 className="font-black text-[11px] text-[#1C1917] truncate" title={cleanTitle}>
+                                {cleanTitle}
                               </h5>
-                              <p className="text-[10px] text-[#57534E] truncate mt-0.5">
-                                {item.author || 'Tác giả chưa rõ'}
-                              </p>
+                              {subline && (
+                                <p className="text-[10px] font-semibold text-[#57534E] truncate mt-0.5">
+                                  {subline}
+                                </p>
+                              )}
                               <div className="flex items-center gap-1.5 mt-1">
                                 <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold ${
                                   isPencil ? 'bg-[#EBF0F7] text-[#1B2A4A]' : isCloudily ? 'bg-[#F2ECE4] text-[#57534E]' : 'bg-[#E8F5E9] text-emerald-800'
@@ -485,9 +542,9 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
                                     {item.extension || item.ext}
                                   </span>
                                 )}
-                                {(item.filesize || item.size) && (
-                                  <span className="text-[9px] text-[#8C827A]">
-                                    {item.filesize || item.size}
+                                {bookLang && (
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded-md font-bold bg-[#FAF0E6] text-[#785434] border border-[#E8D8C8]">
+                                    {bookLang}
                                   </span>
                                 )}
                               </div>
@@ -517,7 +574,7 @@ export default function BooksClient({ initialBooks }: { initialBooks: any[] }) {
                               ) : (
                                 <>
                                   <Download size={11} className="!text-white stroke-white" />
-                                  <span className="!text-white">Tải về tủ</span>
+                                  <span className="!text-white">Tải về</span>
                                 </>
                               )}
                             </button>

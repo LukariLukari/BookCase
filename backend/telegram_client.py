@@ -67,7 +67,7 @@ async def search_zlib_bot(query: str):
             if line.startswith('📚'):
                 current_book = {
                     'title': line.replace('📚', '').strip(), 
-                    'author': 'Z-Library Bot', 
+                    'author': None, 
                     'language': '', 
                     'extension': '', 
                     'size': '', 
@@ -231,8 +231,8 @@ async def search_cloudily_bot(query: str, max_pages: int = 7):
 
                 book_item = {
                     'title': full_title,
-                    'author': 'Cloudily Bot',
-                    'language': 'Vietnamese/English',
+                    'author': None,
+                    'language': 'Tiếng Việt',
                     'extension': ext,
                     'size': size,
                     'id': id_str
