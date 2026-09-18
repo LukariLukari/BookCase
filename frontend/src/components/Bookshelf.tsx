@@ -244,14 +244,14 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   {authorBooks.length} cuốn
                 </span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 sm:gap-x-5 gap-y-2.5 sm:gap-y-7 pt-1 sm:pt-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-3.5 sm:gap-x-5 gap-y-5 sm:gap-y-7 pt-2 sm:pt-3">
                 {authorBooks.map((book, idx) => renderBookItem(book, idx))}
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 sm:gap-x-5 gap-y-2.5 sm:gap-y-7 pt-1 sm:pt-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-3.5 sm:gap-x-5 gap-y-5 sm:gap-y-7 pt-2 sm:pt-3">
           {books.map((book, idx) => renderBookItem(book, idx))}
         </div>
       )}
