@@ -209,7 +209,7 @@ export default function ReaderInsightsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#D8C9BB] text-[#2A2320] p-3 sm:p-5 md:p-6 lg:p-7 flex flex-col md:flex-row gap-5 font-sans selection:bg-[#E5DACD]">
+    <div className="min-h-screen bg-[#D8C9BB] text-[#2A2320] pt-[70px] pb-4 px-3 sm:p-5 md:p-6 lg:p-7 flex flex-col md:flex-row gap-4 sm:gap-5 font-sans selection:bg-[#E5DACD]">
       <Sidebar />
 
       <main className="flex-1 min-w-0 bg-[#FBF8F4] rounded-[36px] p-6 md:p-8 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col space-y-6">
