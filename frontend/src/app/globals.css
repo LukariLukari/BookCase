@@ -35,6 +35,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Keep iOS date controls compact instead of using their oversized localized layout. */
+input[type="date"],
+input[type="month"] {
+  min-width: 0;
+  max-width: 100%;
+  font-size: 14px;
+  line-height: 1;
+}
+
+input[type="date"]::-webkit-date-and-time-value,
+input[type="month"]::-webkit-date-and-time-value {
+  min-height: 0;
+  text-align: left;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -178,4 +193,3 @@ body {
 .squircle-btn.active svg {
   stroke: #FFFFFF !important;
 }
-

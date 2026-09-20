@@ -2695,6 +2695,82 @@ def create_business_order(order_in: schemas.BusinessOrderCreate, db: Session = D
     return serialize_business_order(order)
 
 
+@app.put("/api/business/orders/{order_id}", response_model=schemas.BusinessOrderResponse)
+def update_business_order(order_id: str, order_in: schemas.BusinessOrderCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(
+        models.BusinessOrder.id == order_id,
+        models.BusinessOrder.user_id == current_user.id,
+    ).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
+    ledger = db.query(models.BusinessLedger).filter(
+        models.BusinessLedger.id == order_in.ledger_id,
+        models.BusinessLedger.user_id == current_user.id,
+    ).first()
+    if not ledger:
+        raise HTTPException(status_code=404, detail="Không tìm thấy sổ bán hàng")
+    if ledger.is_closed:
+        raise HTTPException(status_code=400, detail="Sổ này đã được khóa")
+    if not order_in.customer_name.strip() or not order_in.items:
+        raise HTTPException(status_code=400, detail="Cần tên khách và ít nhất một sản phẩm")
+
+    product_ids = [item.product_id for item in order_in.items]
+    if len(product_ids) != len(set(product_ids)):
+        raise HTTPException(status_code=400, detail="Một sản phẩm chỉ nên xuất hiện một lần trong đơn")
+    old_quantities = {}
+    for item in order.items:
+        old_quantities[item.product_id] = old_quantities.get(item.product_id, 0) + (item.quantity or 0)
+    all_product_ids = list(set(product_ids + list(old_quantities.keys())))
+    products = db.query(models.BusinessProduct).filter(
+        models.BusinessProduct.user_id == current_user.id,
+        models.BusinessProduct.id.in_(all_product_ids),
+    ).all()
+    product_map = {product.id: product for product in products}
+    if any(product_id not in product_map for product_id in product_ids):
+        raise HTTPException(status_code=404, detail="Có sản phẩm không tồn tại")
+    for item in order_in.items:
+        product = product_map[item.product_id]
+        available = (product.stock_quantity or 0) + old_quantities.get(item.product_id, 0)
+        if item.quantity <= 0:
+            raise HTTPException(status_code=400, detail="Số lượng bán phải lớn hơn 0")
+        if available < item.quantity:
+            raise HTTPException(status_code=409, detail=f"{product.name} chỉ còn {available} sản phẩm")
+
+    for product_id, quantity in old_quantities.items():
+        product = product_map.get(product_id)
+        if product:
+            product.stock_quantity = (product.stock_quantity or 0) + quantity
+    for old_item in list(order.items):
+        db.delete(old_item)
+    db.flush()
+
+    order.ledger_id = ledger.id
+    order.customer_name = order_in.customer_name.strip()
+    order.customer_contact = order_in.customer_contact
+    order.social_link = order_in.social_link
+    order.shipping_fee = max(order_in.shipping_fee, 0)
+    order.shipping_cost = max(order_in.shipping_cost, 0)
+    order.discount = max(order_in.discount, 0)
+    order.other_fee = max(order_in.other_fee, 0)
+    order.payment_status = order_in.payment_status if order_in.payment_status in ["paid", "pending", "partial"] else "pending"
+    order.note = order_in.note
+    order.ordered_at = order_in.ordered_at or order.ordered_at
+    for item in order_in.items:
+        product = product_map[item.product_id]
+        product.stock_quantity = (product.stock_quantity or 0) - item.quantity
+        db.add(models.BusinessOrderItem(
+            order_id=order.id,
+            product_id=product.id,
+            product_name=product.name,
+            quantity=item.quantity,
+            unit_price=product.selling_price if item.unit_price is None else max(item.unit_price, 0),
+            unit_cost=product.unit_cost or 0,
+        ))
+    db.commit()
+    order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(models.BusinessOrder.id == order.id).first()
+    return serialize_business_order(order)
+
+
 @app.delete("/api/business/orders/{order_id}")
 def delete_business_order(order_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(
