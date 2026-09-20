@@ -1,5 +1,5 @@
 import BusinessClient from '../BusinessClient';
 
-export default function BusinessProductsPage() {
+export default function BusinessInventoryPage() {
   return <BusinessClient view="inventory" />;
 }

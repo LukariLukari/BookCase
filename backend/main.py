@@ -3,7 +3,7 @@ import io
 from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy.orm import Session, defer
+from sqlalchemy.orm import Session, defer, selectinload
 from typing import List, Optional
 from fastapi.responses import RedirectResponse, HTMLResponse
 import uvicorn
@@ -189,10 +189,22 @@ def keep_alive_task():
 def ping():
     return {"status": "awake", "message": "Pong!"}
 
+_business_tables_ready = False
+
 def ensure_business_tables(db: Session):
+    global _business_tables_ready
+    if _business_tables_ready:
+        return
     try:
         models.BusinessProduct.__table__.create(bind=engine, checkfirst=True)
         models.BusinessTransaction.__table__.create(bind=engine, checkfirst=True)
+        models.BusinessLedger.__table__.create(bind=engine, checkfirst=True)
+        models.BusinessStockReceipt.__table__.create(bind=engine, checkfirst=True)
+        models.BusinessStockReceiptItem.__table__.create(bind=engine, checkfirst=True)
+        models.BusinessOrder.__table__.create(bind=engine, checkfirst=True)
+        models.BusinessOrderItem.__table__.create(bind=engine, checkfirst=True)
+        models.BusinessExpense.__table__.create(bind=engine, checkfirst=True)
+        _business_tables_ready = True
     except Exception as e:
         print(f"[Business Tables] create/check failed: {e}")
 
@@ -258,6 +270,86 @@ def serialize_business_product(p: models.BusinessProduct, transactions: Optional
         "total_expense": total_expense,
         "total_profit": total_profit,
         "sold_quantity": sold_quantity,
+    }
+
+
+def serialize_business_order(order: models.BusinessOrder) -> dict:
+    items = order.items or []
+    subtotal = sum((item.unit_price or 0) * (item.quantity or 0) for item in items)
+    capital_cost = sum((item.unit_cost or 0) * (item.quantity or 0) for item in items)
+    total = subtotal + (order.shipping_fee or 0) - (order.discount or 0)
+    profit = total - capital_cost - (order.shipping_cost or 0) - (order.other_fee or 0)
+    return {
+        "id": order.id,
+        "ledger_id": order.ledger_id,
+        "code": order.code,
+        "customer_name": order.customer_name,
+        "customer_contact": order.customer_contact,
+        "social_link": order.social_link,
+        "shipping_fee": order.shipping_fee or 0,
+        "shipping_cost": order.shipping_cost or 0,
+        "discount": order.discount or 0,
+        "other_fee": order.other_fee or 0,
+        "payment_status": order.payment_status,
+        "status": order.status,
+        "note": order.note,
+        "ordered_at": order.ordered_at,
+        "created_at": order.created_at,
+        "subtotal": subtotal,
+        "total": total,
+        "capital_cost": capital_cost,
+        "profit": profit,
+        "item_count": sum(item.quantity or 0 for item in items),
+        "items": [{
+            "id": item.id,
+            "product_id": item.product_id,
+            "product_name": item.product_name,
+            "quantity": item.quantity or 0,
+            "unit_price": item.unit_price or 0,
+            "unit_cost": item.unit_cost or 0,
+            "line_total": (item.unit_price or 0) * (item.quantity or 0),
+        } for item in items],
+    }
+
+
+def serialize_stock_receipt(receipt: models.BusinessStockReceipt) -> dict:
+    items = receipt.items or []
+    item_cost = sum((item.unit_cost or 0) * (item.quantity or 0) for item in items)
+    return {
+        "id": receipt.id,
+        "code": receipt.code,
+        "supplier_name": receipt.supplier_name,
+        "extra_cost": receipt.extra_cost or 0,
+        "note": receipt.note,
+        "received_at": receipt.received_at,
+        "created_at": receipt.created_at,
+        "total_cost": item_cost + (receipt.extra_cost or 0),
+        "total_quantity": sum(item.quantity or 0 for item in items),
+        "items": [{
+            "id": item.id,
+            "product_id": item.product_id,
+            "product_name": item.product.name if item.product else "Sản phẩm đã xóa",
+            "quantity": item.quantity or 0,
+            "unit_cost": item.unit_cost or 0,
+        } for item in items],
+    }
+
+
+def serialize_ledger(ledger: models.BusinessLedger) -> dict:
+    orders = [serialize_business_order(order) for order in (ledger.orders or []) if order.status != "cancelled"]
+    expenses = sum(expense.amount or 0 for expense in (ledger.expenses or []))
+    return {
+        "id": ledger.id,
+        "user_id": ledger.user_id,
+        "name": ledger.name,
+        "month": ledger.month,
+        "opening_cash": ledger.opening_cash or 0,
+        "note": ledger.note,
+        "is_closed": ledger.is_closed,
+        "order_count": len(orders),
+        "revenue": sum(order["total"] for order in orders),
+        "profit": sum(order["profit"] for order in orders) - expenses,
+        "created_at": ledger.created_at,
     }
 
 @app.on_event("startup")
@@ -2437,6 +2529,260 @@ def update_reading_progress(
     return serialize_review(review, db)
 
 
+@app.get("/api/business/ledgers", response_model=List[schemas.BusinessLedgerResponse])
+def get_business_ledgers(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    ledgers = (
+        db.query(models.BusinessLedger)
+        .options(selectinload(models.BusinessLedger.orders).selectinload(models.BusinessOrder.items), selectinload(models.BusinessLedger.expenses))
+        .filter(models.BusinessLedger.user_id == current_user.id)
+        .order_by(models.BusinessLedger.month.desc(), models.BusinessLedger.created_at.desc())
+        .all()
+    )
+    return [serialize_ledger(ledger) for ledger in ledgers]
+
+
+@app.post("/api/business/ledgers", response_model=schemas.BusinessLedgerResponse)
+def create_business_ledger(ledger_in: schemas.BusinessLedgerCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    if not re.fullmatch(r"\d{4}-\d{2}", ledger_in.month):
+        raise HTTPException(status_code=400, detail="Tháng phải có định dạng YYYY-MM")
+    existing = db.query(models.BusinessLedger).filter(
+        models.BusinessLedger.user_id == current_user.id,
+        models.BusinessLedger.month == ledger_in.month,
+    ).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="Tháng này đã có sổ bán hàng")
+    ledger = models.BusinessLedger(user_id=current_user.id, **ledger_in.dict())
+    db.add(ledger)
+    db.commit()
+    db.refresh(ledger)
+    return serialize_ledger(ledger)
+
+
+@app.get("/api/business/stock-receipts", response_model=List[schemas.BusinessStockReceiptResponse])
+def get_stock_receipts(limit: int = 30, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    receipts = (
+        db.query(models.BusinessStockReceipt)
+        .options(selectinload(models.BusinessStockReceipt.items).selectinload(models.BusinessStockReceiptItem.product))
+        .filter(models.BusinessStockReceipt.user_id == current_user.id)
+        .order_by(models.BusinessStockReceipt.received_at.desc())
+        .limit(min(max(limit, 1), 100))
+        .all()
+    )
+    return [serialize_stock_receipt(receipt) for receipt in receipts]
+
+
+@app.post("/api/business/stock-receipts", response_model=schemas.BusinessStockReceiptResponse)
+def create_stock_receipt(receipt_in: schemas.BusinessStockReceiptCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    if not receipt_in.items:
+        raise HTTPException(status_code=400, detail="Phiếu nhập cần ít nhất một sản phẩm")
+    product_ids = [item.product_id for item in receipt_in.items]
+    if len(product_ids) != len(set(product_ids)):
+        raise HTTPException(status_code=400, detail="Một sản phẩm chỉ nên xuất hiện một lần trong phiếu")
+    products = db.query(models.BusinessProduct).filter(
+        models.BusinessProduct.user_id == current_user.id,
+        models.BusinessProduct.id.in_(product_ids),
+    ).all()
+    product_map = {product.id: product for product in products}
+    if len(product_map) != len(product_ids):
+        raise HTTPException(status_code=404, detail="Có sản phẩm không tồn tại")
+    if any(item.quantity <= 0 or item.unit_cost < 0 for item in receipt_in.items):
+        raise HTTPException(status_code=400, detail="Số lượng phải lớn hơn 0 và giá vốn không được âm")
+    count = db.query(models.BusinessStockReceipt).filter(models.BusinessStockReceipt.user_id == current_user.id).count() + 1
+    receipt = models.BusinessStockReceipt(
+        user_id=current_user.id,
+        code=f"NK-{datetime.now().strftime('%y%m')}-{count:04d}",
+        supplier_name=receipt_in.supplier_name,
+        extra_cost=max(receipt_in.extra_cost, 0),
+        note=receipt_in.note,
+        received_at=receipt_in.received_at or datetime.now(timezone.utc),
+    )
+    db.add(receipt)
+    db.flush()
+    for item in receipt_in.items:
+        product = product_map[item.product_id]
+        product.stock_quantity = (product.stock_quantity or 0) + item.quantity
+        product.unit_cost = item.unit_cost
+        db.add(models.BusinessStockReceiptItem(
+            receipt_id=receipt.id,
+            product_id=product.id,
+            quantity=item.quantity,
+            unit_cost=item.unit_cost,
+        ))
+    db.commit()
+    receipt = db.query(models.BusinessStockReceipt).options(
+        selectinload(models.BusinessStockReceipt.items).selectinload(models.BusinessStockReceiptItem.product)
+    ).filter(models.BusinessStockReceipt.id == receipt.id).first()
+    return serialize_stock_receipt(receipt)
+
+
+@app.get("/api/business/orders", response_model=List[schemas.BusinessOrderResponse])
+def get_business_orders(
+    ledger_id: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    ensure_business_tables(db)
+    query = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(models.BusinessOrder.user_id == current_user.id)
+    if ledger_id:
+        query = query.filter(models.BusinessOrder.ledger_id == ledger_id)
+    orders = query.order_by(models.BusinessOrder.ordered_at.desc(), models.BusinessOrder.created_at.desc()).offset(max(offset, 0)).limit(min(max(limit, 1), 100)).all()
+    return [serialize_business_order(order) for order in orders]
+
+
+@app.post("/api/business/orders", response_model=schemas.BusinessOrderResponse)
+def create_business_order(order_in: schemas.BusinessOrderCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    ledger = db.query(models.BusinessLedger).filter(models.BusinessLedger.id == order_in.ledger_id, models.BusinessLedger.user_id == current_user.id).first()
+    if not ledger:
+        raise HTTPException(status_code=404, detail="Không tìm thấy sổ bán hàng")
+    if ledger.is_closed:
+        raise HTTPException(status_code=400, detail="Sổ này đã được khóa")
+    if not order_in.customer_name.strip() or not order_in.items:
+        raise HTTPException(status_code=400, detail="Cần tên khách và ít nhất một sản phẩm")
+    product_ids = [item.product_id for item in order_in.items]
+    if len(product_ids) != len(set(product_ids)):
+        raise HTTPException(status_code=400, detail="Một sản phẩm chỉ nên xuất hiện một lần trong đơn")
+    products = db.query(models.BusinessProduct).filter(
+        models.BusinessProduct.user_id == current_user.id,
+        models.BusinessProduct.id.in_(product_ids),
+    ).all()
+    product_map = {product.id: product for product in products}
+    if len(product_map) != len(product_ids):
+        raise HTTPException(status_code=404, detail="Có sản phẩm không tồn tại")
+    for item in order_in.items:
+        product = product_map[item.product_id]
+        if item.quantity <= 0:
+            raise HTTPException(status_code=400, detail="Số lượng bán phải lớn hơn 0")
+        if (product.stock_quantity or 0) < item.quantity:
+            raise HTTPException(status_code=409, detail=f"{product.name} chỉ còn {product.stock_quantity or 0} sản phẩm")
+    order_count = db.query(models.BusinessOrder).filter(models.BusinessOrder.ledger_id == ledger.id).count() + 1
+    order = models.BusinessOrder(
+        user_id=current_user.id,
+        ledger_id=ledger.id,
+        code=f"DH-{ledger.month.replace('-', '')}-{order_count:04d}",
+        customer_name=order_in.customer_name.strip(),
+        customer_contact=order_in.customer_contact,
+        social_link=order_in.social_link,
+        shipping_fee=max(order_in.shipping_fee, 0),
+        shipping_cost=max(order_in.shipping_cost, 0),
+        discount=max(order_in.discount, 0),
+        other_fee=max(order_in.other_fee, 0),
+        payment_status=order_in.payment_status if order_in.payment_status in ["paid", "pending", "partial"] else "pending",
+        note=order_in.note,
+        ordered_at=order_in.ordered_at or datetime.now(timezone.utc),
+    )
+    db.add(order)
+    db.flush()
+    for item in order_in.items:
+        product = product_map[item.product_id]
+        product.stock_quantity = (product.stock_quantity or 0) - item.quantity
+        db.add(models.BusinessOrderItem(
+            order_id=order.id,
+            product_id=product.id,
+            product_name=product.name,
+            quantity=item.quantity,
+            unit_price=product.selling_price if item.unit_price is None else max(item.unit_price, 0),
+            unit_cost=product.unit_cost or 0,
+        ))
+    db.commit()
+    order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(models.BusinessOrder.id == order.id).first()
+    return serialize_business_order(order)
+
+
+@app.delete("/api/business/orders/{order_id}")
+def delete_business_order(order_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(
+        models.BusinessOrder.id == order_id,
+        models.BusinessOrder.user_id == current_user.id,
+    ).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
+    for item in order.items:
+        product = db.query(models.BusinessProduct).filter(models.BusinessProduct.id == item.product_id, models.BusinessProduct.user_id == current_user.id).first()
+        if product:
+            product.stock_quantity = (product.stock_quantity or 0) + (item.quantity or 0)
+    db.delete(order)
+    db.commit()
+    return {"message": "Đã xóa đơn và hoàn lại tồn kho"}
+
+
+@app.post("/api/business/expenses", response_model=schemas.BusinessExpenseResponse)
+def create_business_expense(expense_in: schemas.BusinessExpenseCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ledger = db.query(models.BusinessLedger).filter(models.BusinessLedger.id == expense_in.ledger_id, models.BusinessLedger.user_id == current_user.id).first()
+    if not ledger:
+        raise HTTPException(status_code=404, detail="Không tìm thấy sổ bán hàng")
+    if expense_in.amount <= 0 or not expense_in.category.strip():
+        raise HTTPException(status_code=400, detail="Khoản chi chưa hợp lệ")
+    expense = models.BusinessExpense(
+        user_id=current_user.id,
+        ledger_id=ledger.id,
+        category=expense_in.category.strip(),
+        amount=expense_in.amount,
+        note=expense_in.note,
+        spent_at=expense_in.spent_at or datetime.now(timezone.utc),
+    )
+    db.add(expense)
+    db.commit()
+    db.refresh(expense)
+    return expense
+
+
+@app.get("/api/business/reports/{ledger_id}", response_model=schemas.BusinessReportResponse)
+def get_business_report(ledger_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ledger = db.query(models.BusinessLedger).filter(models.BusinessLedger.id == ledger_id, models.BusinessLedger.user_id == current_user.id).first()
+    if not ledger:
+        raise HTTPException(status_code=404, detail="Không tìm thấy sổ bán hàng")
+    orders = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(
+        models.BusinessOrder.ledger_id == ledger.id,
+        models.BusinessOrder.user_id == current_user.id,
+        models.BusinessOrder.status != "cancelled",
+    ).order_by(models.BusinessOrder.ordered_at.asc()).all()
+    expenses = db.query(models.BusinessExpense).filter(models.BusinessExpense.ledger_id == ledger.id, models.BusinessExpense.user_id == current_user.id).order_by(models.BusinessExpense.spent_at.desc()).all()
+    serialized = [serialize_business_order(order) for order in orders]
+    daily = {}
+    product_stats = {}
+    for order, data in zip(orders, serialized):
+        day = order.ordered_at.strftime("%Y-%m-%d")
+        row = daily.setdefault(day, {"date": day, "orders": 0, "revenue": 0, "profit": 0})
+        row["orders"] += 1
+        row["revenue"] += data["total"]
+        row["profit"] += data["profit"]
+        for item in order.items:
+            product = product_stats.setdefault(item.product_id, {"product_id": item.product_id, "name": item.product_name, "quantity": 0, "revenue": 0, "profit": 0})
+            product["quantity"] += item.quantity or 0
+            product["revenue"] += (item.unit_price or 0) * (item.quantity or 0)
+            product["profit"] += ((item.unit_price or 0) - (item.unit_cost or 0)) * (item.quantity or 0)
+    operating_expense = sum(expense.amount or 0 for expense in expenses)
+    revenue = sum(order["total"] for order in serialized)
+    capital_cost = sum(order["capital_cost"] for order in serialized)
+    shipping_cost = sum(order["shipping_cost"] for order in serialized)
+    other_order_fee = sum(order["other_fee"] for order in serialized)
+    stock_products = db.query(models.BusinessProduct).filter(models.BusinessProduct.user_id == current_user.id, models.BusinessProduct.is_active == True).all()
+    return {
+        "ledger_id": ledger.id,
+        "revenue": revenue,
+        "capital_cost": capital_cost,
+        "shipping_cost": shipping_cost,
+        "other_order_fee": other_order_fee,
+        "operating_expense": operating_expense,
+        "profit": sum(order["profit"] for order in serialized) - operating_expense,
+        "order_count": len(serialized),
+        "sold_units": sum(order["item_count"] for order in serialized),
+        "average_order_value": round(revenue / len(serialized)) if serialized else 0,
+        "stock_units": sum(product.stock_quantity or 0 for product in stock_products),
+        "stock_value": sum((product.stock_quantity or 0) * (product.unit_cost or 0) for product in stock_products),
+        "daily": list(daily.values()),
+        "top_products": sorted(product_stats.values(), key=lambda item: item["revenue"], reverse=True)[:10],
+        "expenses": expenses,
+    }
+
+
 @app.get("/api/business/summary", response_model=schemas.BusinessSummaryResponse)
 def get_business_summary(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     ensure_business_tables(db)
@@ -2478,7 +2824,7 @@ def get_business_summary(db: Session = Depends(get_db), current_user: models.Use
 
 
 @app.get("/api/business/products", response_model=List[schemas.BusinessProductResponse])
-def get_business_products(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+def get_business_products(include_legacy_metrics: bool = False, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     ensure_business_tables(db)
     products = (
         db.query(models.BusinessProduct)
@@ -2486,6 +2832,8 @@ def get_business_products(db: Session = Depends(get_db), current_user: models.Us
         .order_by(models.BusinessProduct.created_at.desc())
         .all()
     )
+    if not include_legacy_metrics:
+        return [serialize_business_product(product, []) for product in products]
     txs = db.query(models.BusinessTransaction).filter(models.BusinessTransaction.user_id == current_user.id).all()
     grouped = {}
     for t in txs:

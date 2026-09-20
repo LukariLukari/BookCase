@@ -400,3 +400,148 @@ class BusinessSummaryResponse(BaseModel):
     sold_units: int = 0
     recent_transactions: list[BusinessTransactionResponse] = []
     top_products: list[BusinessProductResponse] = []
+
+
+class BusinessLedgerCreate(BaseModel):
+    name: str
+    month: str
+    opening_cash: int = 0
+    note: Optional[str] = None
+
+
+class BusinessLedgerResponse(BusinessLedgerCreate):
+    id: str
+    user_id: str
+    is_closed: bool = False
+    order_count: int = 0
+    revenue: int = 0
+    profit: int = 0
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+
+class BusinessStockItemCreate(BaseModel):
+    product_id: str
+    quantity: int
+    unit_cost: int = 0
+
+
+class BusinessStockReceiptCreate(BaseModel):
+    supplier_name: Optional[str] = None
+    extra_cost: int = 0
+    note: Optional[str] = None
+    received_at: Optional[datetime] = None
+    items: list[BusinessStockItemCreate]
+
+
+class BusinessStockItemResponse(BusinessStockItemCreate):
+    id: str
+    product_name: str
+
+
+class BusinessStockReceiptResponse(BaseModel):
+    id: str
+    code: str
+    supplier_name: Optional[str] = None
+    extra_cost: int = 0
+    note: Optional[str] = None
+    received_at: datetime
+    created_at: datetime
+    total_cost: int = 0
+    total_quantity: int = 0
+    items: list[BusinessStockItemResponse] = []
+
+
+class BusinessOrderItemCreate(BaseModel):
+    product_id: str
+    quantity: int
+    unit_price: Optional[int] = None
+
+
+class BusinessOrderCreate(BaseModel):
+    ledger_id: str
+    customer_name: str
+    customer_contact: Optional[str] = None
+    social_link: Optional[str] = None
+    shipping_fee: int = 0
+    shipping_cost: int = 0
+    discount: int = 0
+    other_fee: int = 0
+    payment_status: str = "paid"
+    note: Optional[str] = None
+    ordered_at: Optional[datetime] = None
+    items: list[BusinessOrderItemCreate]
+
+
+class BusinessOrderItemResponse(BaseModel):
+    id: str
+    product_id: str
+    product_name: str
+    quantity: int
+    unit_price: int
+    unit_cost: int
+    line_total: int
+
+
+class BusinessOrderResponse(BaseModel):
+    id: str
+    ledger_id: str
+    code: str
+    customer_name: str
+    customer_contact: Optional[str] = None
+    social_link: Optional[str] = None
+    shipping_fee: int = 0
+    shipping_cost: int = 0
+    discount: int = 0
+    other_fee: int = 0
+    payment_status: str
+    status: str
+    note: Optional[str] = None
+    ordered_at: datetime
+    created_at: datetime
+    subtotal: int = 0
+    total: int = 0
+    capital_cost: int = 0
+    profit: int = 0
+    item_count: int = 0
+    items: list[BusinessOrderItemResponse] = []
+
+
+class BusinessExpenseCreate(BaseModel):
+    ledger_id: str
+    category: str
+    amount: int
+    note: Optional[str] = None
+    spent_at: Optional[datetime] = None
+
+
+class BusinessExpenseResponse(BusinessExpenseCreate):
+    id: str
+    user_id: str
+    spent_at: datetime
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+
+class BusinessReportResponse(BaseModel):
+    ledger_id: str
+    revenue: int = 0
+    capital_cost: int = 0
+    shipping_cost: int = 0
+    other_order_fee: int = 0
+    operating_expense: int = 0
+    profit: int = 0
+    order_count: int = 0
+    sold_units: int = 0
+    average_order_value: int = 0
+    stock_units: int = 0
+    stock_value: int = 0
+    daily: list[dict] = []
+    top_products: list[dict] = []
+    expenses: list[BusinessExpenseResponse] = []

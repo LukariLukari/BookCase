@@ -197,3 +197,103 @@ class BusinessTransaction(Base):
 
     user = relationship("User")
     product = relationship("BusinessProduct", back_populates="transactions")
+
+
+class BusinessLedger(Base):
+    __tablename__ = "business_ledgers"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
+    name = Column(String, nullable=False)
+    month = Column(String, index=True, nullable=False)  # YYYY-MM
+    opening_cash = Column(Integer, default=0)
+    note = Column(Text, nullable=True)
+    is_closed = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    orders = relationship("BusinessOrder", back_populates="ledger", cascade="all, delete-orphan")
+    expenses = relationship("BusinessExpense", back_populates="ledger", cascade="all, delete-orphan")
+
+
+class BusinessStockReceipt(Base):
+    __tablename__ = "business_stock_receipts"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
+    code = Column(String, index=True, nullable=False)
+    supplier_name = Column(String, nullable=True)
+    extra_cost = Column(Integer, default=0)
+    note = Column(Text, nullable=True)
+    received_at = Column(DateTime(timezone=True), index=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    items = relationship("BusinessStockReceiptItem", back_populates="receipt", cascade="all, delete-orphan")
+
+
+class BusinessStockReceiptItem(Base):
+    __tablename__ = "business_stock_receipt_items"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    receipt_id = Column(String, ForeignKey("business_stock_receipts.id", ondelete="CASCADE"), index=True, nullable=False)
+    product_id = Column(String, ForeignKey("business_products.id"), index=True, nullable=False)
+    quantity = Column(Integer, nullable=False)
+    unit_cost = Column(Integer, default=0)
+
+    receipt = relationship("BusinessStockReceipt", back_populates="items")
+    product = relationship("BusinessProduct")
+
+
+class BusinessOrder(Base):
+    __tablename__ = "business_orders"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
+    ledger_id = Column(String, ForeignKey("business_ledgers.id", ondelete="CASCADE"), index=True, nullable=False)
+    code = Column(String, index=True, nullable=False)
+    customer_name = Column(String, index=True, nullable=False)
+    customer_contact = Column(String, nullable=True)
+    social_link = Column(String, nullable=True)
+    shipping_fee = Column(Integer, default=0)  # Tiền ship thu của khách
+    shipping_cost = Column(Integer, default=0)  # Tiền thực trả đơn vị vận chuyển
+    discount = Column(Integer, default=0)
+    other_fee = Column(Integer, default=0)
+    payment_status = Column(String, default="paid", index=True)
+    status = Column(String, default="confirmed", index=True)
+    note = Column(Text, nullable=True)
+    ordered_at = Column(DateTime(timezone=True), index=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    ledger = relationship("BusinessLedger", back_populates="orders")
+    items = relationship("BusinessOrderItem", back_populates="order", cascade="all, delete-orphan")
+
+
+class BusinessOrderItem(Base):
+    __tablename__ = "business_order_items"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    order_id = Column(String, ForeignKey("business_orders.id", ondelete="CASCADE"), index=True, nullable=False)
+    product_id = Column(String, ForeignKey("business_products.id"), index=True, nullable=False)
+    product_name = Column(String, nullable=False)
+    quantity = Column(Integer, nullable=False)
+    unit_price = Column(Integer, default=0)
+    unit_cost = Column(Integer, default=0)
+
+    order = relationship("BusinessOrder", back_populates="items")
+    product = relationship("BusinessProduct")
+
+
+class BusinessExpense(Base):
+    __tablename__ = "business_expenses"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
+    ledger_id = Column(String, ForeignKey("business_ledgers.id", ondelete="CASCADE"), index=True, nullable=False)
+    category = Column(String, index=True, nullable=False)
+    amount = Column(Integer, default=0)
+    note = Column(Text, nullable=True)
+    spent_at = Column(DateTime(timezone=True), index=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    ledger = relationship("BusinessLedger", back_populates="expenses")
