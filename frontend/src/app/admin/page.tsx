@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
+import AdminTabs from '@/components/AdminTabs';
 import { Search, Plus, Edit2, Trash2, Link as LinkIcon, Upload, X, Share2, Check, Loader2, Settings, Download, GripVertical, Save, Link2, Copy, Unlink2, AlertTriangle } from 'lucide-react';
 
 import { getCoverUrl, DEFAULT_COVER_SVG } from '@/utils/image';
@@ -742,19 +743,22 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#D8C9BB] text-[#2A2320] p-3 sm:p-5 md:p-6 lg:p-7 flex flex-col md:flex-row gap-5 font-sans selection:bg-[#E5DACD]">
+    <div className="min-h-screen bg-[#D8C9BB] text-[#2A2320] pt-[70px] pb-4 px-3 sm:p-5 md:p-6 lg:p-7 flex flex-col md:flex-row gap-4 sm:gap-5 font-sans selection:bg-[#E5DACD]">
       <Sidebar />
-      <main className="flex-1 min-w-0 bg-[#FBF8F4] rounded-[36px] p-5 md:p-8 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col">
-        {/* Top Header */}
-        <header className="pb-5 mb-6 border-b border-[#EFE8DE] flex flex-col gap-4">
-          {/* Dòng 1: Tiêu đề Dashboard & Các nút công cụ + Thêm sách */}
+      <div className="flex-1 min-w-0 flex flex-col gap-4 sm:gap-5">
+        {/* Top Header Card (Phần Header) */}
+        <header className="bg-[#FBF8F4] rounded-[28px] md:rounded-[36px] p-4 sm:p-6 shadow-[0_12px_32px_rgba(120,100,85,0.1)] border border-[#EFE8DE] flex flex-col gap-4">
+          {/* Dòng 1: Tiêu đề Dashboard & Admin Navigation Tabs */}
           <div className="flex flex-wrap items-center justify-between gap-3 w-full">
             <div>
               <h1 className="text-xl md:text-2xl font-black text-[#2A2320] tracking-tight">Admin Dashboard</h1>
               <p className="text-xs text-[#7A6F68] font-medium mt-0.5">Quản lý toàn bộ kho sách, kiểm tra liên kết và xử lý dữ liệu</p>
             </div>
+            <AdminTabs />
+          </div>
 
-            {/* Nhóm công cụ kiểm tra, quản trị & Thêm sách */}
+          {/* Dòng 2: Nhóm công cụ kiểm tra, quản trị & Thêm sách */}
+          <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-[#EFE8DE]">
             <div className="flex items-center gap-2 flex-wrap">
               {/* Nút Kiểm tra file bị lỗi / mất liên kết */}
               <button 
@@ -811,7 +815,7 @@ export default function AdminPage() {
                 }}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer shadow-sm border ${
                   isDuplicateFilterActive 
-                    ? 'bg-[#2A2320] text-white border-[#2A2320]' 
+                    ? 'bg-[#1B2A4A] text-white border-[#1B2A4A]' 
                     : 'bg-[#FAF6F0] hover:bg-[#EFE8DE] text-[#2A2320] border-[#E5DACD]'
                 }`}
                 title="Lọc các cuốn sách bị trùng lặp tên & tác giả"
@@ -819,7 +823,7 @@ export default function AdminPage() {
                 <Copy size={15} />
                 <span>Lọc trùng</span>
                 {duplicateRedundantCount > 0 && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none ${isDuplicateFilterActive ? 'bg-white text-[#2A2320]' : 'bg-[#2A2320] text-white'}`}>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none ${isDuplicateFilterActive ? 'bg-white text-[#1B2A4A]' : 'bg-[#1B2A4A] text-white'}`}>
                     {duplicateRedundantCount}
                   </span>
                 )}
@@ -870,20 +874,20 @@ export default function AdminPage() {
 
               {/* Đường phân cách thẩm mỹ */}
               <div className="h-6 w-px bg-[#E5DACD] mx-1 hidden sm:block shrink-0" />
-
-              {/* Nút Hành Động Chính: Thêm Sách */}
-              <button 
-                onClick={() => setIsAddModalOpen(true)}
-                className="btn-gradient flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black text-white hover:opacity-95 transition-all shadow-md cursor-pointer shrink-0 border-none"
-              >
-                <Plus size={16} className="text-white stroke-[3]" />
-                <span>Thêm Sách</span>
-              </button>
             </div>
+
+            {/* Nút Hành Động Chính: Thêm Sách */}
+            <button 
+              onClick={() => setIsAddModalOpen(true)}
+              className="btn-gradient flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black text-white hover:opacity-95 transition-all shadow-md cursor-pointer shrink-0 border-none"
+            >
+              <Plus size={16} className="text-white stroke-[3]" />
+              <span>Thêm Sách</span>
+            </button>
           </div>
 
-          {/* Dòng 2: Số lượng sách & Ô tìm kiếm */}
-          <div className="flex items-center justify-between gap-3 w-full pt-2 border-t border-[#EFE8DE]">
+          {/* Dòng 3: Số lượng sách & Ô tìm kiếm */}
+          <div className="flex items-center justify-between gap-3 w-full pt-3 border-t border-[#EFE8DE]">
             <div className="flex items-center gap-2 shrink-0">
               <span className="text-xs font-bold px-3.5 py-1.5 bg-[#FAF6F0] border border-[#E5DACD] text-[#7A6F68] rounded-full flex items-center gap-2 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
@@ -910,7 +914,9 @@ export default function AdminPage() {
           </div>
         </header>
 
-        <section className="flex-1">
+        {/* Main Content Card (Phần Trang Chính) */}
+        <main className="flex-1 min-w-0 bg-[#FBF8F4] rounded-[28px] md:rounded-[36px] p-4 sm:p-6 md:p-8 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col">
+          <section className="flex-1">
           {/* Banner hướng dẫn và xử lý trùng lặp */}
           {isDuplicateFilterActive && (
             duplicateGroups.length === 0 ? (
@@ -1022,6 +1028,7 @@ export default function AdminPage() {
           )}
         </section>
       </main>
+      </div>
 
       {/* Edit Modal */}
       {isEditModalOpen && (

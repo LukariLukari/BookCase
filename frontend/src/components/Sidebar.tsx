@@ -150,27 +150,27 @@ export default function Sidebar() {
       </aside>
 
       {/* MOBILE TOP BAR & SLIDE-OUT MENU */}
-      <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#FAF6F0]/95 backdrop-blur-md border-b border-[#EBE2D5] px-4 flex items-center justify-between z-50 shadow-sm">
+      <header className="md:hidden fixed top-2 left-2 right-2 h-12 bg-[#FAF6F0]/95 backdrop-blur-md rounded-2xl border border-[#ECE2D5] px-3.5 flex items-center justify-between z-50 shadow-sm touch-none select-none">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-[#1B2A4A] flex items-center justify-center text-white shadow-sm">
-            <BookOpen size={16} />
+          <div className="w-7 h-7 rounded-lg bg-[#1B2A4A] flex items-center justify-center text-white shadow-sm">
+            <BookOpen size={14} />
           </div>
-          <span className="font-extrabold text-lg text-[#1C1917] tracking-tight">BOOKCASE.</span>
+          <span className="font-extrabold text-base text-[#1C1917] tracking-tight">BOOKCASE.</span>
         </Link>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2.5 rounded-xl bg-[#EFE8DE] text-[#1C1917] transition-colors"
+            className="p-1.5 rounded-lg bg-[#EFE8DE] text-[#1C1917] transition-colors cursor-pointer"
           >
-            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </header>
 
       {/* MOBILE DROPDOWN MENU */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-16 bg-[#FAF6F0] border-b border-[#EBE2D5] p-5 shadow-2xl z-40 space-y-3 animate-in fade-in slide-in-from-top-2">
+        <div className="md:hidden fixed inset-x-2 top-[62px] bg-[#FAF6F0] border border-[#ECE2D5] rounded-2xl p-4 shadow-2xl z-50 space-y-3 animate-in fade-in slide-in-from-top-2">
           {user && (
             <div className="flex items-center gap-3 p-3 bg-[#EFE8DE] rounded-2xl mb-2">
               <img 

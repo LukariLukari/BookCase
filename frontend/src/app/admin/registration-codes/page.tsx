@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
+import AdminTabs from '@/components/AdminTabs';
 import { KeyRound, Plus, Copy, Check, Trash2, ShieldCheck, ShieldAlert, Loader2, RefreshCw } from 'lucide-react';
 
 interface RegistrationCode {
@@ -136,31 +137,38 @@ export default function AdminRegistrationCodesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#D8C9BB] text-[#2A2320] p-3 sm:p-5 md:p-6 lg:p-7 flex flex-col md:flex-row gap-5 font-sans selection:bg-[#E5DACD]">
+    <div className="min-h-screen bg-[#D8C9BB] text-[#2A2320] pt-[70px] pb-4 px-3 sm:p-5 md:p-6 lg:p-7 flex flex-col md:flex-row gap-4 sm:gap-5 font-sans selection:bg-[#E5DACD]">
       <Sidebar />
-      <main className="flex-1 min-w-0 bg-[#FBF8F4] rounded-[36px] p-6 md:p-8 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col">
-        
-        {/* Header */}
-        <header className="pb-5 mb-6 flex justify-between items-center border-b border-[#EFE8DE]">
-          <div>
-            <div className="flex items-center gap-2.5 text-xl font-black text-[#1C1917]">
-              <KeyRound size={22} className="text-[#1B2A4A]" />
-              <span>Quản Lý Mã Đăng Ký</span>
+      <div className="flex-1 min-w-0 flex flex-col gap-4 sm:gap-5">
+        {/* Top Header Card (Phần Header) */}
+        <header className="bg-[#FBF8F4] rounded-[28px] md:rounded-[36px] p-4 sm:p-6 shadow-[0_12px_32px_rgba(120,100,85,0.1)] border border-[#EFE8DE] flex flex-col gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 w-full">
+            <div>
+              <div className="flex items-center gap-2.5 text-xl md:text-2xl font-black text-[#1C1917]">
+                <KeyRound size={22} className="text-[#1B2A4A]" />
+                <span>Quản Lý Mã Đăng Ký</span>
+              </div>
+              <p className="text-xs text-[#57534E] font-medium mt-0.5">Tạo và cấp phát mã kích hoạt tài khoản thành viên</p>
             </div>
-            <p className="text-xs text-[#57534E] font-medium mt-0.5">Tạo và cấp phát mã kích hoạt tài khoản thành viên</p>
+            <AdminTabs />
           </div>
-          <button 
-            onClick={handleCreateCode}
-            disabled={isCreating}
-            className="btn-gradient text-white rounded-full py-2.5 px-5 shadow-md flex items-center gap-1.5 font-bold text-xs hover:opacity-95 transition-all cursor-pointer border-none"
-          >
-            {isCreating ? <Loader2 size={16} className="animate-spin text-white" /> : <Plus size={16} className="stroke-[3]" />}
-            <span>Tạo Mã Mới</span>
-          </button>
+
+          <div className="flex justify-end pt-3 border-t border-[#EFE8DE]">
+            <button 
+              onClick={handleCreateCode}
+              disabled={isCreating}
+              className="btn-gradient text-white rounded-full py-2 px-5 shadow-md flex items-center gap-1.5 font-bold text-xs hover:opacity-95 transition-all cursor-pointer border-none"
+            >
+              {isCreating ? <Loader2 size={16} className="animate-spin text-white" /> : <Plus size={16} className="stroke-[3]" />}
+              <span>Tạo Mã Mới</span>
+            </button>
+          </div>
         </header>
 
-        {/* Content */}
-        <section className="flex-1">
+        {/* Main Content Card (Phần Trang Chính) */}
+        <main className="flex-1 min-w-0 bg-[#FBF8F4] rounded-[28px] md:rounded-[36px] p-4 sm:p-6 md:p-8 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col">
+          {/* Content */}
+          <section className="flex-1">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-2xl text-xs font-bold mb-6 text-center">
               {error}
@@ -294,6 +302,7 @@ export default function AdminRegistrationCodesPage() {
           )}
         </section>
       </main>
+      </div>
     </div>
   );
 }

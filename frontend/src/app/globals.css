@@ -20,6 +20,11 @@
   --font-sans: var(--font-montserrat);
 }
 
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
 body {
   background-color: #D8C9BB;
   color: #1C1917;
@@ -47,63 +52,80 @@ body {
 }
 
 /* Hardcover Book & Ribbon Visual System */
-.book-hardcover-container {
-  position: relative;
-  perspective: 800px;
-  display: flex;
-  flex-direction: column;
-}
-
-.book-hardcover {
-  position: relative;
-  border-radius: 4px 14px 14px 4px;
-  box-shadow: 
-    -4px 2px 8px rgba(70, 50, 40, 0.15),
-    4px 8px 20px rgba(80, 60, 45, 0.2),
-    inset 4px 0 6px rgba(0, 0, 0, 0.18),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.15);
-  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease;
+/* Minimalist Realistic 3D Book System */
+.book-card-3d, .book-hardcover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px 12px 12px 4px;
   overflow: hidden;
   background-color: #EDE4D8;
-}
-
-.book-hardcover:hover {
-  transform: translateY(-6px) scale(1.02);
   box-shadow: 
-    -5px 4px 12px rgba(70, 50, 40, 0.2),
-    6px 16px 28px rgba(80, 60, 45, 0.25),
-    inset 4px 0 6px rgba(0, 0, 0, 0.2);
+    -2px 3px 6px rgba(45, 30, 20, 0.12),
+    0 10px 20px -3px rgba(45, 30, 20, 0.18),
+    0 4px 6px -2px rgba(45, 30, 20, 0.08),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* Simulated white paper edge trim at bottom */
-.book-paper-edge {
+.group:hover .book-card-3d,
+.group:hover .book-hardcover {
+  box-shadow: 
+    -4px 6px 12px rgba(45, 30, 20, 0.16),
+    0 20px 32px -6px rgba(45, 30, 20, 0.26),
+    0 8px 12px -3px rgba(45, 30, 20, 0.14),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+/* Subtle Book Spine Crease & Hinge Groove (Gáy sách có độ gập tinh tế) */
+.book-spine-crease {
   position: absolute;
+  top: 0;
   bottom: 0;
-  left: 6px;
-  right: 0;
-  height: 7px;
-  background: linear-gradient(180deg, #FAF6EE 0%, #E6DEC8 100%);
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 0 0 12px 0;
+  left: 0;
+  width: 16px;
+  pointer-events: none;
   z-index: 10;
+  background: linear-gradient(
+    90deg, 
+    rgba(0, 0, 0, 0.28) 0%, 
+    rgba(0, 0, 0, 0.10) 30%, 
+    rgba(0, 0, 0, 0.16) 65%, 
+    rgba(255, 255, 255, 0.22) 78%, 
+    transparent 100%
+  );
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.15);
 }
 
-/* Dangling Fabric Ribbon Bookmark */
-.ribbon-bookmark {
+/* Subtle Paper Page Block Bevel (Mép giấy bên phải tạo độ dày 3D) */
+.book-page-bevel {
   position: absolute;
-  bottom: -16px;
-  width: 14px;
-  height: 28px;
-  border-radius: 2px 2px 0 0;
-  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 82%, 0% 100%);
-  z-index: 15;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
-  transition: height 0.25s ease, transform 0.25s ease;
+  top: 1px;
+  right: 0;
+  bottom: 1px;
+  width: 3px;
+  pointer-events: none;
+  z-index: 10;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.25));
+  border-radius: 0 10px 10px 0;
 }
 
-.book-hardcover:hover .ribbon-bookmark {
-  height: 32px;
-  bottom: -20px;
+/* Subtle Cover Sheen / Light Reflection (Ánh sáng mờ sang trọng trên mặt bìa) */
+.book-cover-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.05) 25%,
+    transparent 45%,
+    rgba(0, 0, 0, 0.02) 75%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
 }
 
 /* Navy Accent Button & Pills (Pure Contrast Guarantee) */

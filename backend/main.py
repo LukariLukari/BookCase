@@ -877,6 +877,8 @@ async def external_search(q: str, source: Optional[str] = None):
         print(f"[external_search error]: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
 @app.get("/api/admin/telegram/status")
 async def get_telegram_status_endpoint(current_user: models.User = Depends(auth.get_current_admin_user)):
     import telegram_client
