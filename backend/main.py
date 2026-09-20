@@ -189,6 +189,77 @@ def keep_alive_task():
 def ping():
     return {"status": "awake", "message": "Pong!"}
 
+def ensure_business_tables(db: Session):
+    try:
+        models.BusinessProduct.__table__.create(bind=engine, checkfirst=True)
+        models.BusinessTransaction.__table__.create(bind=engine, checkfirst=True)
+    except Exception as e:
+        print(f"[Business Tables] create/check failed: {e}")
+
+def validate_business_transaction(tx_type: str, category: str):
+    if tx_type not in ["income", "expense"]:
+        raise HTTPException(status_code=400, detail="type must be income or expense")
+    if not category or not category.strip():
+        raise HTTPException(status_code=400, detail="category is required")
+
+def transaction_net_profit(t: models.BusinessTransaction) -> int:
+    if t.type == "income":
+        return (t.amount or 0) - (t.capital_cost or 0) - (t.shipping_fee or 0) - (t.other_fee or 0)
+    return -(t.amount or 0)
+
+def serialize_business_transaction(t: models.BusinessTransaction) -> dict:
+    return {
+        "id": t.id,
+        "user_id": t.user_id,
+        "product_id": t.product_id,
+        "type": t.type,
+        "category": t.category,
+        "amount": t.amount or 0,
+        "quantity": t.quantity or 0,
+        "capital_cost": t.capital_cost or 0,
+        "shipping_fee": t.shipping_fee or 0,
+        "other_fee": t.other_fee or 0,
+        "customer_name": t.customer_name,
+        "customer_contact": t.customer_contact,
+        "social_link": t.social_link,
+        "note": t.note,
+        "transaction_date": t.transaction_date,
+        "created_at": t.created_at,
+        "updated_at": t.updated_at,
+        "product_name": t.product.name if t.product else None,
+        "product_image_url": t.product.image_url if t.product else None,
+        "net_profit": transaction_net_profit(t),
+    }
+
+def serialize_business_product(p: models.BusinessProduct, transactions: Optional[list] = None) -> dict:
+    txs = transactions if transactions is not None else p.transactions
+    total_income = sum((t.amount or 0) for t in txs if t.type == "income")
+    total_expense = sum((t.amount or 0) for t in txs if t.type == "expense")
+    total_profit = sum(transaction_net_profit(t) for t in txs)
+    sold_quantity = sum((t.quantity or 0) for t in txs if t.type == "income")
+    return {
+        "id": p.id,
+        "user_id": p.user_id,
+        "name": p.name,
+        "sku": p.sku,
+        "category": p.category,
+        "image_url": p.image_url,
+        "selling_price": p.selling_price or 0,
+        "unit_cost": p.unit_cost or 0,
+        "stock_quantity": p.stock_quantity or 0,
+        "social_link": p.social_link,
+        "supplier_info": p.supplier_info,
+        "customer_info": p.customer_info,
+        "notes": p.notes,
+        "is_active": p.is_active,
+        "created_at": p.created_at,
+        "updated_at": p.updated_at,
+        "total_income": total_income,
+        "total_expense": total_expense,
+        "total_profit": total_profit,
+        "sold_quantity": sold_quantity,
+    }
+
 @app.on_event("startup")
 def startup_event():
     # Khởi động tiến trình chống ngủ
@@ -200,6 +271,7 @@ def startup_event():
     from sqlalchemy import text
     db = SessionLocal()
     try:
+        ensure_business_tables(db)
         db.execute(text("ALTER TABLE users ADD COLUMN email VARCHAR;"))
         db.commit()
     except Exception:
@@ -2361,6 +2433,164 @@ def update_reading_progress(
     db.commit()
     db.refresh(review)
     return serialize_review(review, db)
+
+
+@app.get("/api/business/summary", response_model=schemas.BusinessSummaryResponse)
+def get_business_summary(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    products = db.query(models.BusinessProduct).filter(models.BusinessProduct.user_id == current_user.id).all()
+    transactions = (
+        db.query(models.BusinessTransaction)
+        .filter(models.BusinessTransaction.user_id == current_user.id)
+        .order_by(models.BusinessTransaction.transaction_date.desc(), models.BusinessTransaction.created_at.desc())
+        .all()
+    )
+    total_income = sum((t.amount or 0) for t in transactions if t.type == "income")
+    total_expense = sum((t.amount or 0) for t in transactions if t.type == "expense")
+    total_capital = sum((t.capital_cost or 0) for t in transactions if t.type == "income")
+    total_shipping = sum((t.shipping_fee or 0) for t in transactions if t.type == "income")
+    total_other_fee = sum((t.other_fee or 0) for t in transactions if t.type == "income")
+    product_txs = {}
+    for t in transactions:
+        if t.product_id:
+            product_txs.setdefault(t.product_id, []).append(t)
+    ranked_products = sorted(
+        [serialize_business_product(p, product_txs.get(p.id, [])) for p in products],
+        key=lambda item: item["total_profit"],
+        reverse=True
+    )
+    return {
+        "total_income": total_income,
+        "total_expense": total_expense,
+        "total_capital": total_capital,
+        "total_shipping": total_shipping,
+        "total_other_fee": total_other_fee,
+        "gross_profit": total_income - total_capital,
+        "net_profit": total_income - total_expense - total_capital - total_shipping - total_other_fee,
+        "active_products": len([p for p in products if p.is_active]),
+        "stock_units": sum((p.stock_quantity or 0) for p in products),
+        "sold_units": sum((t.quantity or 0) for t in transactions if t.type == "income"),
+        "recent_transactions": [serialize_business_transaction(t) for t in transactions[:8]],
+        "top_products": ranked_products[:5],
+    }
+
+
+@app.get("/api/business/products", response_model=List[schemas.BusinessProductResponse])
+def get_business_products(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    products = (
+        db.query(models.BusinessProduct)
+        .filter(models.BusinessProduct.user_id == current_user.id)
+        .order_by(models.BusinessProduct.created_at.desc())
+        .all()
+    )
+    txs = db.query(models.BusinessTransaction).filter(models.BusinessTransaction.user_id == current_user.id).all()
+    grouped = {}
+    for t in txs:
+        if t.product_id:
+            grouped.setdefault(t.product_id, []).append(t)
+    return [serialize_business_product(p, grouped.get(p.id, [])) for p in products]
+
+
+@app.post("/api/business/products", response_model=schemas.BusinessProductResponse)
+def create_business_product(product_in: schemas.BusinessProductCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    product = models.BusinessProduct(user_id=current_user.id, **product_in.dict())
+    db.add(product)
+    db.commit()
+    db.refresh(product)
+    return serialize_business_product(product, [])
+
+
+@app.put("/api/business/products/{product_id}", response_model=schemas.BusinessProductResponse)
+def update_business_product(product_id: str, product_in: schemas.BusinessProductUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    product = db.query(models.BusinessProduct).filter(models.BusinessProduct.id == product_id, models.BusinessProduct.user_id == current_user.id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    for key, value in product_in.dict(exclude_unset=True).items():
+        setattr(product, key, value)
+    db.commit()
+    db.refresh(product)
+    return serialize_business_product(product)
+
+
+@app.delete("/api/business/products/{product_id}")
+def delete_business_product(product_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    product = db.query(models.BusinessProduct).filter(models.BusinessProduct.id == product_id, models.BusinessProduct.user_id == current_user.id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    db.delete(product)
+    db.commit()
+    return {"message": "Product deleted"}
+
+
+@app.get("/api/business/transactions", response_model=List[schemas.BusinessTransactionResponse])
+def get_business_transactions(
+    tx_type: Optional[str] = None,
+    product_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    ensure_business_tables(db)
+    query = db.query(models.BusinessTransaction).filter(models.BusinessTransaction.user_id == current_user.id)
+    if tx_type in ["income", "expense"]:
+        query = query.filter(models.BusinessTransaction.type == tx_type)
+    if product_id:
+        query = query.filter(models.BusinessTransaction.product_id == product_id)
+    transactions = query.order_by(models.BusinessTransaction.transaction_date.desc(), models.BusinessTransaction.created_at.desc()).all()
+    return [serialize_business_transaction(t) for t in transactions]
+
+
+@app.post("/api/business/transactions", response_model=schemas.BusinessTransactionResponse)
+def create_business_transaction(transaction_in: schemas.BusinessTransactionCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    validate_business_transaction(transaction_in.type, transaction_in.category)
+    payload = transaction_in.dict()
+    if payload.get("product_id"):
+        product = db.query(models.BusinessProduct).filter(models.BusinessProduct.id == payload["product_id"], models.BusinessProduct.user_id == current_user.id).first()
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+    if not payload.get("transaction_date"):
+        payload["transaction_date"] = datetime.now(timezone.utc)
+    transaction = models.BusinessTransaction(user_id=current_user.id, **payload)
+    db.add(transaction)
+    db.commit()
+    db.refresh(transaction)
+    return serialize_business_transaction(transaction)
+
+
+@app.put("/api/business/transactions/{transaction_id}", response_model=schemas.BusinessTransactionResponse)
+def update_business_transaction(transaction_id: str, transaction_in: schemas.BusinessTransactionUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    transaction = db.query(models.BusinessTransaction).filter(models.BusinessTransaction.id == transaction_id, models.BusinessTransaction.user_id == current_user.id).first()
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    payload = transaction_in.dict(exclude_unset=True)
+    next_type = payload.get("type", transaction.type)
+    next_category = payload.get("category", transaction.category)
+    validate_business_transaction(next_type, next_category)
+    if payload.get("product_id"):
+        product = db.query(models.BusinessProduct).filter(models.BusinessProduct.id == payload["product_id"], models.BusinessProduct.user_id == current_user.id).first()
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+    for key, value in payload.items():
+        setattr(transaction, key, value)
+    db.commit()
+    db.refresh(transaction)
+    return serialize_business_transaction(transaction)
+
+
+@app.delete("/api/business/transactions/{transaction_id}")
+def delete_business_transaction(transaction_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    transaction = db.query(models.BusinessTransaction).filter(models.BusinessTransaction.id == transaction_id, models.BusinessTransaction.user_id == current_user.id).first()
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    db.delete(transaction)
+    db.commit()
+    return {"message": "Transaction deleted"}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

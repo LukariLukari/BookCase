@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime
+from sqlalchemy import Column, String, Integer, DateTime, Text
 from sqlalchemy.sql import func
 import uuid
 from database import Base
@@ -149,3 +149,51 @@ class BookReview(Base):
     book = relationship("Book")
     user_book = relationship("UserBook")
 
+
+class BusinessProduct(Base):
+    __tablename__ = "business_products"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
+    name = Column(String, index=True, nullable=False)
+    sku = Column(String, nullable=True, index=True)
+    category = Column(String, nullable=True, index=True)
+    image_url = Column(Text, nullable=True)
+    selling_price = Column(Integer, default=0)
+    unit_cost = Column(Integer, default=0)
+    stock_quantity = Column(Integer, default=0)
+    social_link = Column(String, nullable=True)
+    supplier_info = Column(Text, nullable=True)
+    customer_info = Column(Text, nullable=True)
+    notes = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    user = relationship("User")
+    transactions = relationship("BusinessTransaction", back_populates="product", cascade="all, delete-orphan")
+
+
+class BusinessTransaction(Base):
+    __tablename__ = "business_transactions"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
+    product_id = Column(String, ForeignKey("business_products.id", ondelete="SET NULL"), nullable=True, index=True)
+    type = Column(String, index=True, nullable=False)  # "income" or "expense"
+    category = Column(String, index=True, nullable=False)
+    amount = Column(Integer, default=0)
+    quantity = Column(Integer, default=1)
+    capital_cost = Column(Integer, default=0)
+    shipping_fee = Column(Integer, default=0)
+    other_fee = Column(Integer, default=0)
+    customer_name = Column(String, nullable=True)
+    customer_contact = Column(String, nullable=True)
+    social_link = Column(String, nullable=True)
+    note = Column(Text, nullable=True)
+    transaction_date = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    user = relationship("User")
+    product = relationship("BusinessProduct", back_populates="transactions")

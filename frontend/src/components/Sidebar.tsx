@@ -14,7 +14,8 @@ import {
   LogIn, 
   Loader2,
   Menu,
-  X
+  X,
+  WalletCards
 } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
@@ -48,6 +49,11 @@ export default function Sidebar() {
       icon: <Heart size={20} />, 
       label: 'Trích dẫn hay', 
       href: '/quotes',
+    },
+    { 
+      icon: <WalletCards size={20} />, 
+      label: 'Thu chi shop', 
+      href: '/business',
     },
   ];
 

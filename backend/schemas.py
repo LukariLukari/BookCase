@@ -294,3 +294,109 @@ class ReaderDashboardResponse(BaseModel):
     key_takeaways: list[KeyTakeawayItem] = []
     current_reads: list[ActiveReadItem] = []
     recent_reviews: list[BookReviewResponse] = []
+
+
+class BusinessProductBase(BaseModel):
+    name: str
+    sku: Optional[str] = None
+    category: Optional[str] = None
+    image_url: Optional[str] = None
+    selling_price: int = 0
+    unit_cost: int = 0
+    stock_quantity: int = 0
+    social_link: Optional[str] = None
+    supplier_info: Optional[str] = None
+    customer_info: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: bool = True
+
+class BusinessProductCreate(BusinessProductBase):
+    pass
+
+class BusinessProductUpdate(BaseModel):
+    name: Optional[str] = None
+    sku: Optional[str] = None
+    category: Optional[str] = None
+    image_url: Optional[str] = None
+    selling_price: Optional[int] = None
+    unit_cost: Optional[int] = None
+    stock_quantity: Optional[int] = None
+    social_link: Optional[str] = None
+    supplier_info: Optional[str] = None
+    customer_info: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: Optional[bool] = None
+
+class BusinessProductResponse(BusinessProductBase):
+    id: str
+    user_id: str
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    total_income: int = 0
+    total_expense: int = 0
+    total_profit: int = 0
+    sold_quantity: int = 0
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+class BusinessTransactionBase(BaseModel):
+    product_id: Optional[str] = None
+    type: str
+    category: str
+    amount: int = 0
+    quantity: int = 1
+    capital_cost: int = 0
+    shipping_fee: int = 0
+    other_fee: int = 0
+    customer_name: Optional[str] = None
+    customer_contact: Optional[str] = None
+    social_link: Optional[str] = None
+    note: Optional[str] = None
+    transaction_date: Optional[datetime] = None
+
+class BusinessTransactionCreate(BusinessTransactionBase):
+    pass
+
+class BusinessTransactionUpdate(BaseModel):
+    product_id: Optional[str] = None
+    type: Optional[str] = None
+    category: Optional[str] = None
+    amount: Optional[int] = None
+    quantity: Optional[int] = None
+    capital_cost: Optional[int] = None
+    shipping_fee: Optional[int] = None
+    other_fee: Optional[int] = None
+    customer_name: Optional[str] = None
+    customer_contact: Optional[str] = None
+    social_link: Optional[str] = None
+    note: Optional[str] = None
+    transaction_date: Optional[datetime] = None
+
+class BusinessTransactionResponse(BusinessTransactionBase):
+    id: str
+    user_id: str
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    product_name: Optional[str] = None
+    product_image_url: Optional[str] = None
+    net_profit: int = 0
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+class BusinessSummaryResponse(BaseModel):
+    total_income: int = 0
+    total_expense: int = 0
+    total_capital: int = 0
+    total_shipping: int = 0
+    total_other_fee: int = 0
+    gross_profit: int = 0
+    net_profit: int = 0
+    active_products: int = 0
+    stock_units: int = 0
+    sold_units: int = 0
+    recent_transactions: list[BusinessTransactionResponse] = []
+    top_products: list[BusinessProductResponse] = []
