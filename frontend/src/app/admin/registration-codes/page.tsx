@@ -47,6 +47,26 @@ export default function AdminRegistrationCodesPage() {
     return { Authorization: `Bearer ${authToken}` };
   };
 
+  const writeClipboard = async (value: string) => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+        return true;
+      }
+      const textarea = document.createElement('textarea');
+      textarea.value = value;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      const copied = document.execCommand('copy');
+      textarea.remove();
+      return copied;
+    } catch {
+      return false;
+    }
+  };
+
   const fetchCodes = async () => {
     try {
       setLoading(true);
@@ -74,10 +94,10 @@ export default function AdminRegistrationCodesPage() {
         headers: getHeaders()
       });
       const newCode = res.data.code;
-      navigator.clipboard.writeText(newCode);
-      setSuccessNotice(`Đã tạo thành công và tự động sao chép mã: ${newCode}`);
+      const copied = await writeClipboard(newCode);
+      setCodes(prev => [res.data, ...prev]);
+      setSuccessNotice(copied ? `Đã tạo và sao chép mã: ${newCode}` : `Đã tạo mã: ${newCode}. Bấm Copy để sao chép.`);
       setTimeout(() => setSuccessNotice(null), 5000);
-      await fetchCodes();
     } catch (err: any) {
       if (err.response?.status === 401) {
         logout();
@@ -96,8 +116,8 @@ export default function AdminRegistrationCodesPage() {
         headers: getHeaders()
       });
       const newCode = res.data.code;
-      navigator.clipboard.writeText(newCode);
-      setSuccessNotice(`Đã tạo lại thành công & tự động sao chép mã mới: ${newCode}`);
+      const copied = await writeClipboard(newCode);
+      setSuccessNotice(copied ? `Đã tạo lại và sao chép mã: ${newCode}` : `Đã tạo lại mã: ${newCode}. Bấm Copy để sao chép.`);
       setTimeout(() => setSuccessNotice(null), 5000);
       setCodes(prev => prev.map(c => c.id === id ? res.data : c));
     } catch (err: any) {
@@ -126,10 +146,14 @@ export default function AdminRegistrationCodesPage() {
     }
   };
 
-  const copyToClipboard = (code: string, id: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+  const copyToClipboard = async (code: string, id: string) => {
+    const copied = await writeClipboard(code);
+    if (copied) {
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } else {
+      setError('Trình duyệt không cho phép sao chép tự động. Hãy chọn và sao chép mã thủ công.');
+    }
   };
 
   if (isAuthLoading || !user || user.role !== 'admin') {

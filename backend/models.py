@@ -94,6 +94,7 @@ class RegistrationCode(Base):
     is_used = Column(Boolean, default=False)
     used_by_username = Column(String, nullable=True)
     created_by = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
 
 class UserBook(Base):
     __tablename__ = "user_books"

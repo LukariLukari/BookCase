@@ -379,6 +379,20 @@ def startup_event():
         db.rollback()
 
     try:
+        timestamp_type = "TIMESTAMP WITH TIME ZONE" if engine.dialect.name == "postgresql" else "DATETIME"
+        db.execute(text(f"ALTER TABLE registration_codes ADD COLUMN created_at {timestamp_type};"))
+        db.commit()
+    except Exception:
+        db.rollback()
+
+    try:
+        db.execute(text("UPDATE registration_codes SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL;"))
+        db.commit()
+    except Exception as e:
+        print(f"Error initializing registration code dates: {e}")
+        db.rollback()
+
+    try:
         # Initialize display_order if all are 0
         count_zero = db.execute(text("SELECT COUNT(*) FROM books WHERE display_order = 0")).scalar()
         total = db.execute(text("SELECT COUNT(*) FROM books")).scalar()
@@ -1566,7 +1580,8 @@ def create_registration_code(db: Session = Depends(get_db), current_user: models
             
     reg_code = models.RegistrationCode(
         code=code_str,
-        created_by=current_user.username
+        created_by=current_user.username,
+        created_at=datetime.now(timezone.utc),
     )
     db.add(reg_code)
     db.commit()
