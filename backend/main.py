@@ -2905,6 +2905,7 @@ def get_business_products(include_legacy_metrics: bool = False, db: Session = De
     products = (
         db.query(models.BusinessProduct)
         .filter(models.BusinessProduct.user_id == current_user.id)
+        .filter(models.BusinessProduct.is_active.isnot(False))
         .order_by(models.BusinessProduct.created_at.desc())
         .all()
     )
@@ -2946,10 +2947,25 @@ def delete_business_product(product_id: str, db: Session = Depends(get_db), curr
     ensure_business_tables(db)
     product = db.query(models.BusinessProduct).filter(models.BusinessProduct.id == product_id, models.BusinessProduct.user_id == current_user.id).first()
     if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    db.delete(product)
-    db.commit()
-    return {"message": "Product deleted"}
+        raise HTTPException(status_code=404, detail="Không tìm thấy sản phẩm")
+
+    has_receipts = db.query(models.BusinessStockReceiptItem).filter(models.BusinessStockReceiptItem.product_id == product.id).first()
+    has_orders = db.query(models.BusinessOrderItem).filter(models.BusinessOrderItem.product_id == product.id).first()
+
+    if has_receipts or has_orders:
+        product.is_active = False
+        product.stock_quantity = 0
+        db.commit()
+    else:
+        try:
+            db.delete(product)
+            db.commit()
+        except Exception:
+            db.rollback()
+            product.is_active = False
+            product.stock_quantity = 0
+            db.commit()
+    return {"message": "Đã xóa sản phẩm thành công"}
 
 
 @app.get("/api/business/transactions", response_model=List[schemas.BusinessTransactionResponse])
