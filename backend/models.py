@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, Text
+from sqlalchemy import Column, String, Integer, DateTime, Text, Index
 from sqlalchemy.sql import func
 import uuid
 from database import Base
@@ -152,6 +152,7 @@ class BookReview(Base):
 
 class BusinessProduct(Base):
     __tablename__ = "business_products"
+    __table_args__ = (Index("ix_business_products_user_active", "user_id", "is_active"),)
 
     id = Column(String, primary_key=True, default=generate_uuid, index=True)
     user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
@@ -246,6 +247,7 @@ class BusinessStockReceiptItem(Base):
 
 class BusinessOrder(Base):
     __tablename__ = "business_orders"
+    __table_args__ = (Index("ix_business_orders_user_ledger_date", "user_id", "ledger_id", "ordered_at"),)
 
     id = Column(String, primary_key=True, default=generate_uuid, index=True)
     user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
@@ -286,6 +288,7 @@ class BusinessOrderItem(Base):
 
 class BusinessExpense(Base):
     __tablename__ = "business_expenses"
+    __table_args__ = (Index("ix_business_expenses_user_ledger_date", "user_id", "ledger_id", "spent_at"),)
 
     id = Column(String, primary_key=True, default=generate_uuid, index=True)
     user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)

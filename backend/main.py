@@ -27,7 +27,7 @@ import unicodedata
 
 import sqlite3
 
-from sqlalchemy import text
+from sqlalchemy import text, func
 
 try:
     models.Base.metadata.create_all(bind=engine)
@@ -204,6 +204,9 @@ def ensure_business_tables(db: Session):
         models.BusinessOrder.__table__.create(bind=engine, checkfirst=True)
         models.BusinessOrderItem.__table__.create(bind=engine, checkfirst=True)
         models.BusinessExpense.__table__.create(bind=engine, checkfirst=True)
+        for table in [models.BusinessProduct.__table__, models.BusinessOrder.__table__, models.BusinessExpense.__table__]:
+            for index in table.indexes:
+                index.create(bind=engine, checkfirst=True)
         _business_tables_ready = True
     except Exception as e:
         print(f"[Business Tables] create/check failed: {e}")
@@ -2534,12 +2537,29 @@ def get_business_ledgers(db: Session = Depends(get_db), current_user: models.Use
     ensure_business_tables(db)
     ledgers = (
         db.query(models.BusinessLedger)
-        .options(selectinload(models.BusinessLedger.orders).selectinload(models.BusinessOrder.items), selectinload(models.BusinessLedger.expenses))
         .filter(models.BusinessLedger.user_id == current_user.id)
         .order_by(models.BusinessLedger.month.desc(), models.BusinessLedger.created_at.desc())
         .all()
     )
-    return [serialize_ledger(ledger) for ledger in ledgers]
+    order_counts = dict(
+        db.query(models.BusinessOrder.ledger_id, func.count(models.BusinessOrder.id))
+        .filter(models.BusinessOrder.user_id == current_user.id, models.BusinessOrder.status != "cancelled")
+        .group_by(models.BusinessOrder.ledger_id)
+        .all()
+    )
+    return [{
+        "id": ledger.id,
+        "user_id": ledger.user_id,
+        "name": ledger.name,
+        "month": ledger.month,
+        "opening_cash": ledger.opening_cash or 0,
+        "note": ledger.note,
+        "is_closed": ledger.is_closed,
+        "order_count": order_counts.get(ledger.id, 0),
+        "revenue": 0,
+        "profit": 0,
+        "created_at": ledger.created_at,
+    } for ledger in ledgers]
 
 
 @app.post("/api/business/ledgers", response_model=schemas.BusinessLedgerResponse)
