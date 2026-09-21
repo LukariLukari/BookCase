@@ -325,51 +325,117 @@ export default function AdminCollectionsPage() {
 
       {/* Manage Books Modal */}
       {isManageModalOpen && activeCollection && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-           <div className="bg-[#FBF8F4] text-[#1C1917] border border-[#ECE2D5] rounded-[36px] w-full max-w-4xl p-6 md:p-8 shadow-2xl relative h-[90vh] flex flex-col">
-              <button onClick={() => setIsManageModalOpen(false)} className="absolute top-6 right-6 p-2 bg-[#EFE8DE] hover:bg-[#E5DACD] rounded-full text-[#57534E] hover:text-[#1C1917] transition-colors border border-[#ECE2D5] z-10 cursor-pointer"><X size={16}/></button>
-              <h2 className="text-xl md:text-2xl font-black text-[#1C1917] mb-1 pr-10">Thêm sách vào: {activeCollection.name}</h2>
-              <p className="text-[#57534E] mb-6 text-xs font-medium">Bấm vào sách để thêm hoặc xóa khỏi tệp.</p>
-              
-              <div className="flex-1 overflow-y-auto pr-2">
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {allBooks.map(book => {
-                    const isAdded = activeCollection.books.some((b: any) => b.id === book.id);
-                    return (
-                      <div 
-                        key={book.id} 
-                        onClick={() => toggleBookInCollection(book.id)}
-                        className={`cursor-pointer group relative rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isAdded ? 'border-[#1B2A4A] shadow-md ring-2 ring-[#1B2A4A]/30' : 'border-[#ECE2D5] hover:border-[#D8C9BB]'}`}
-                      >
-                         <div className="w-full aspect-[2/3] relative">
-                            <BookCoverImage 
-                              coverUrl={book.cover_url}
-                              bookId={book.id}
-                              title={book.title}
-                              author={book.author}
-                              className={`w-full h-full object-cover transition-all ${isAdded ? 'brightness-105' : 'brightness-90 group-hover:brightness-100'}`}
-                            />
-                           
-                            {/* Checkmark overlay */}
-                            {isAdded && (
-                              <div className="absolute inset-0 bg-[#1B2A4A]/20 flex items-center justify-center">
-                                <div className="btn-gradient text-white rounded-full p-2 shadow-lg">
-                                  <Check size={20} strokeWidth={3} />
-                                </div>
-                              </div>
-                            )}
-                         </div>
-                         <div className="p-2.5 bg-white border-t border-[#ECE2D5]">
-                           <h3 className="text-xs font-bold text-[#1C1917] line-clamp-1">{book.title}</h3>
-                         </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-           </div>
-        </div>
+        <ManageBooksModal 
+          activeCollection={activeCollection} 
+          allBooks={allBooks} 
+          onClose={() => setIsManageModalOpen(false)} 
+          toggleBook={toggleBookInCollection} 
+        />
       )}
+    </div>
+  );
+}
+
+function ManageBooksModal({ activeCollection, allBooks, onClose, toggleBook }: any) {
+  const [mode, setMode] = useState<'view' | 'add'>('view');
+  const [search, setSearch] = useState('');
+
+  const collectionBookIds = new Set(activeCollection.books.map((b: any) => b.id));
+  
+  const booksToShow = mode === 'view' 
+    ? activeCollection.books 
+    : allBooks.filter((b: any) => 
+        (b.title.toLowerCase().includes(search.toLowerCase()) || 
+         b.author?.toLowerCase().includes(search.toLowerCase()))
+      );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-[#FBF8F4] text-[#1C1917] border border-[#ECE2D5] rounded-[36px] w-full max-w-4xl p-6 md:p-8 shadow-2xl relative h-[90vh] flex flex-col">
+        <button onClick={onClose} className="absolute top-6 right-6 p-2 bg-[#EFE8DE] hover:bg-[#E5DACD] rounded-full text-[#57534E] hover:text-[#1C1917] transition-colors border border-[#ECE2D5] z-10 cursor-pointer">
+          <X size={16}/>
+        </button>
+        
+        <div className="mb-6 pr-10">
+          <h2 className="text-xl md:text-2xl font-black text-[#1C1917] mb-2">
+            {mode === 'view' ? `Quản lý sách: ${activeCollection.name}` : `Thêm sách vào: ${activeCollection.name}`}
+          </h2>
+          
+          {mode === 'view' ? (
+            <div className="flex items-center justify-between">
+              <p className="text-[#57534E] text-xs font-medium">Đang có {activeCollection.books.length} cuốn sách trong tệp này.</p>
+              <button 
+                onClick={() => setMode('add')} 
+                className="btn-gradient text-white rounded-full py-2 px-4 shadow-sm flex items-center gap-1.5 font-bold text-xs hover:opacity-95 transition-all cursor-pointer border-none"
+              >
+                <Plus size={14} className="stroke-[3]" /> Thêm sách mới
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => { setMode('view'); setSearch(''); }}
+                  className="text-xs font-bold text-[#57534E] hover:text-[#1C1917] flex items-center gap-1 cursor-pointer py-1"
+                >
+                  &larr; Quay lại
+                </button>
+                <p className="text-[#57534E] text-xs font-medium flex-1">Tìm kiếm và chọn sách để thêm.</p>
+              </div>
+              <input 
+                type="text" 
+                value={search} 
+                onChange={(e) => setSearch(e.target.value)} 
+                placeholder="Tìm kiếm theo tên sách, tác giả..." 
+                className="w-full bg-white border border-[#E5DACD] text-[#1C1917] text-xs rounded-xl focus:border-[#1B2A4A] block p-3 outline-none transition-all placeholder-[#A0958C]"
+              />
+            </div>
+          )}
+        </div>
+        
+        <div className="flex-1 overflow-y-auto pr-2">
+          {booksToShow.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-[#A0958C]">
+              <Library size={48} className="mb-4 opacity-50" />
+              <p className="text-sm font-bold text-[#7A6F68]">Không tìm thấy cuốn sách nào.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {booksToShow.map((book: any) => {
+                const isAdded = collectionBookIds.has(book.id);
+                return (
+                  <div 
+                    key={book.id} 
+                    onClick={() => toggleBook(book.id)}
+                    className={`cursor-pointer group relative rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isAdded ? 'border-[#1B2A4A] shadow-md ring-2 ring-[#1B2A4A]/30' : 'border-[#ECE2D5] hover:border-[#D8C9BB]'}`}
+                  >
+                    <div className="w-full aspect-[2/3] relative">
+                      <BookCoverImage 
+                        coverUrl={book.cover_url}
+                        bookId={book.id}
+                        title={book.title}
+                        author={book.author}
+                        className={`w-full h-full object-cover transition-all ${isAdded ? 'brightness-105' : 'brightness-90 group-hover:brightness-100'}`}
+                      />
+                      
+                      {isAdded && (
+                        <div className="absolute inset-0 bg-[#1B2A4A]/20 flex items-center justify-center">
+                          <div className="btn-gradient text-white rounded-full p-2 shadow-lg">
+                            <Check size={20} strokeWidth={3} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-2.5 bg-white border-t border-[#ECE2D5]">
+                      <h3 className="text-xs font-bold text-[#1C1917] line-clamp-1">{book.title}</h3>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

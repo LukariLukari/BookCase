@@ -74,7 +74,7 @@ export default function Sidebar() {
   return (
     <>
       {/* DESKTOP FLOATING PILL DOCK */}
-      <aside className="hidden md:flex flex-col items-center justify-between w-20 py-7 px-2.5 bg-[#FAF6F0] rounded-[36px] shadow-[0_16px_40px_rgba(120,100,85,0.14)] border border-[#ECE2D5] flex-shrink-0 sticky top-6 h-[calc(100vh-48px)] z-40 transition-all">
+      <aside className="hidden md:flex flex-col items-center justify-between w-20 py-7 px-2.5 bg-[#FAF6F0] rounded-[36px] shadow-[0_16px_40px_rgba(120,100,85,0.14)] border border-[#ECE2D5] flex-shrink-0 self-start sticky top-6 h-[calc(100vh-48px)] z-40 transition-all">
         {/* Top: Avatar */}
         <div className="flex flex-col items-center gap-2">
           <Link href={user ? "/my-books" : "/login"} title={user ? user.username : "Đăng nhập"}>
