@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -60,6 +60,271 @@ export default function BusinessClient({view='dashboard'}:{view?:View}){
 }
 
 function Modal({close,title,children}:{close:()=>void;title:string;children:ReactNode}){return <div className="fixed inset-0 z-[100] flex items-end bg-black/30 backdrop-blur-[2px] md:items-center md:justify-center md:p-5" onMouseDown={close}><div className="max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-[#FAF7F2] p-5 md:max-w-lg md:rounded-2xl" onMouseDown={e=>e.stopPropagation()}><div className="mb-5 flex items-center justify-between"><h2 className="text-lg font-black">{title}</h2><button onClick={close} className="flex h-10 w-10 items-center justify-center rounded-xl border bg-white"><X/></button></div>{children}</div></div>}
+
+function MinimalEdit({ size = 15, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </svg>
+  );
+}
+
+function MinimalTrash({ size = 15, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M3 6h18" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <line x1="10" y1="11" x2="10" y2="17" />
+      <line x1="14" y1="11" x2="14" y2="17" />
+    </svg>
+  );
+}
+
+function ConfirmModal({
+  title,
+  message,
+  confirmText = 'Xóa',
+  cancelText = 'Hủy',
+  isDanger = true,
+  onConfirm,
+  onClose
+}: {
+  title: string;
+  message?: string;
+  confirmText?: string;
+  cancelText?: string;
+  isDanger?: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[3px]"
+      onMouseDown={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl bg-[#FAF7F2] border border-[#E8DEC8] p-5 shadow-2xl text-center"
+        onMouseDown={e => e.stopPropagation()}
+      >
+        <div className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl ${isDanger ? 'bg-[#FFF0EE] text-[#C4554B]' : 'bg-[#EAF3ED] text-[#277044]'}`}>
+          {isDanger ? <MinimalTrash size={22} /> : <Check size={22} />}
+        </div>
+        <h3 className="text-base font-black text-[#203354]">{title}</h3>
+        {message && (
+          <p className="mt-2 text-xs font-semibold leading-relaxed text-[#776C64]">
+            {message}
+          </p>
+        )}
+        <div className="mt-5 grid grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-11 rounded-xl border border-[#D8CCC0] bg-white text-sm font-bold text-[#57534E] hover:bg-[#F2ECE3] active:scale-95 transition-all cursor-pointer"
+          >
+            {cancelText}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              onConfirm();
+            }}
+            className={`h-11 rounded-xl text-sm font-bold text-white shadow-sm active:scale-95 transition-all cursor-pointer ${
+              isDanger ? 'bg-[#C4554B] hover:bg-[#B3453B]' : 'bg-[#203354] hover:bg-[#18263F]'
+            }`}
+          >
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SwipeableItem({
+  children,
+  onEdit,
+  onDelete,
+  editTitle = "Sửa",
+  deleteTitle = "Xóa"
+}: {
+  children: ReactNode;
+  onEdit?: () => void;
+  onDelete: () => void;
+  editTitle?: string;
+  deleteTitle?: string;
+}) {
+  const [offsetX, setOffsetX] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const scrollDirectionRef = useRef<'horizontal' | 'vertical' | null>(null);
+  const isSwipingRef = useRef(false);
+  const mouseStartRef = useRef<{ x: number } | null>(null);
+
+  const actionsWidth = onEdit ? 130 : 65;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY
+    };
+    isSwipingRef.current = false;
+    scrollDirectionRef.current = null;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const dx = e.touches[0].clientX - touchStartRef.current.x;
+    const dy = e.touches[0].clientY - touchStartRef.current.y;
+
+    if (!scrollDirectionRef.current) {
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
+        scrollDirectionRef.current = 'horizontal';
+        isSwipingRef.current = true;
+      } else if (Math.abs(dy) > 8) {
+        scrollDirectionRef.current = 'vertical';
+        return;
+      }
+    }
+
+    if (scrollDirectionRef.current === 'horizontal') {
+      const base = isOpen ? -actionsWidth : 0;
+      let nextOffset = base + dx;
+      if (nextOffset > 0) nextOffset = nextOffset * 0.15;
+      if (nextOffset < -(actionsWidth + 25)) nextOffset = -actionsWidth - 25 + (nextOffset + actionsWidth + 25) * 0.15;
+      setOffsetX(nextOffset);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (scrollDirectionRef.current === 'horizontal') {
+      if (offsetX < -actionsWidth * 0.4) {
+        setOffsetX(-actionsWidth);
+        setIsOpen(true);
+      } else {
+        setOffsetX(0);
+        setIsOpen(false);
+      }
+    }
+    touchStartRef.current = null;
+    isSwipingRef.current = false;
+    scrollDirectionRef.current = null;
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button, a, input, select, textarea')) return;
+    mouseStartRef.current = { x: e.clientX };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!mouseStartRef.current) return;
+    const dx = e.clientX - mouseStartRef.current.x;
+    if (Math.abs(dx) > 5) {
+      const base = isOpen ? -actionsWidth : 0;
+      let nextOffset = base + dx;
+      if (nextOffset > 0) nextOffset = nextOffset * 0.15;
+      if (nextOffset < -(actionsWidth + 25)) nextOffset = -actionsWidth - 25;
+      setOffsetX(nextOffset);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (mouseStartRef.current) {
+      if (offsetX < -actionsWidth * 0.4) {
+        setOffsetX(-actionsWidth);
+        setIsOpen(true);
+      } else {
+        setOffsetX(0);
+        setIsOpen(false);
+      }
+      mouseStartRef.current = null;
+    }
+  };
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-xl border border-[#E5DBD0] bg-[#FAF7F2] select-none"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+    >
+      <div className="absolute inset-y-0 right-0 flex items-stretch z-0">
+        {onEdit && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOffsetX(0);
+              setIsOpen(false);
+              onEdit();
+            }}
+            className="flex w-[65px] flex-col items-center justify-center gap-1 bg-[#203354] text-white hover:bg-[#18263F] active:bg-[#121d30] transition-colors cursor-pointer"
+            title={editTitle}
+          >
+            <MinimalEdit size={16} />
+            <span className="text-[10px] font-bold">Sửa</span>
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOffsetX(0);
+            setIsOpen(false);
+            onDelete();
+          }}
+          className="flex w-[65px] flex-col items-center justify-center gap-1 bg-[#C4554B] text-white hover:bg-[#b0453c] active:bg-[#9a3b33] transition-colors cursor-pointer"
+          title={deleteTitle}
+        >
+          <MinimalTrash size={16} />
+          <span className="text-[10px] font-bold">Xóa</span>
+        </button>
+      </div>
+
+      <div
+        style={{
+          transform: `translateX(${offsetX}px)`,
+          transition: isSwipingRef.current ? 'none' : 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onClick={() => {
+          if (isOpen) {
+            setOffsetX(0);
+            setIsOpen(false);
+          }
+        }}
+        className="relative z-10 bg-white"
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function HelpMenu(){const [open,setOpen]=useState(false);const steps=[['1. Tạo sổ bán hàng','Mở Tổng quan, bấm dấu + cạnh ô chọn sổ và tạo một sổ cho tháng đang bán. Mọi đơn và chi phí trong tháng sẽ nằm trong sổ này.'],['2. Tạo danh mục sản phẩm','Vào Kho hàng → Sản phẩm mới. Thêm tên, ảnh, SKU, nhóm hàng, giá bán và giá vốn mặc định.'],['3. Nhập hàng vào kho','Trong Kho hàng, chọn Nhập lô hàng. Chọn ngày, nguồn hàng, từng sản phẩm, số lượng và vốn thực tế. Có thể thêm nhiều sản phẩm trong cùng một phiếu.'],['4. Chốt đơn cho khách','Bấm nút + lớn giữa thanh điều hướng. Chọn hàng từ kho, số lượng, giá bán, thông tin khách, ship và giảm giá rồi xác nhận. Kho sẽ tự trừ.'],['5. Sửa hoặc xóa đơn','Trong danh sách Đơn hàng, dùng nút bút để sửa hoặc thùng rác để xóa. Hệ thống tự hoàn tồn cũ và tính lại tồn mới.'],['6. Ghi các khoản chi','Vào Thống kê → Ghi chi phí để thêm quảng cáo, đóng gói, thuê kho hoặc chi phí vận hành khác.'],['7. Xem và xuất báo cáo','Thống kê hiển thị doanh thu, vốn, ship, lãi và sản phẩm bán tốt. Tại Đơn hàng, bấm Xuất Excel để lưu bảng dữ liệu về máy.']];return <><button type="button" onClick={()=>setOpen(true)} aria-label="Hướng dẫn sử dụng" title="Hướng dẫn sử dụng" className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-[#D8CCC0] bg-[#FAF7F2] text-[#203354] shadow-sm"><HelpCircle size={19}/></button>{open&&<Modal close={()=>setOpen(false)} title="Hướng dẫn sử dụng"><p className="mb-4 text-sm font-medium leading-6 text-[#6F655E]">Làm lần lượt theo quy trình dưới đây để tồn kho và lợi nhuận luôn chính xác.</p><div className="space-y-3">{steps.map(([title,text],index)=><div key={title} className="flex gap-3 rounded-xl border border-[#E4D9CE] bg-white p-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#203354] text-xs font-black text-white">{index+1}</span><div><b className="text-sm">{title}</b><p className="mt-1 text-sm font-medium leading-5 text-[#70665E]">{text}</p></div></div>)}</div><div className="mt-4 rounded-xl bg-[#EDF0F4] p-3 text-xs font-bold leading-5 text-[#526078]">Quy trình chuẩn: Tạo sổ → Tạo sản phẩm → Nhập kho → Tạo đơn → Ghi chi phí → Xem báo cáo.</div></Modal>}</>}
 type Shared={ledgers:Ledger[];ledger:string;choose:(v:string)=>void;addBook:()=>void;headers:Record<string,string>;notify:(s:string)=>void;fail:(e:unknown,s:string)=>void};
 function Dashboard({ledgers,ledger,choose,addBook,report,orders,loading}:Shared&{report:Report|null;orders:Order[];loading:boolean}){return <><Panel><Title small="Bán hàng" title="Hôm nay cần làm gì?" text="Chọn sổ tháng, nhập hàng vào kho rồi tạo đơn khi khách chốt."/><Picker ledgers={ledgers} id={ledger} set={choose} add={addBook}/>{!ledgers.length?<div className="mt-5"><Empty icon={<ClipboardList size={30}/>} title="Bắt đầu bằng một sổ bán hàng" text="Mỗi tháng dùng một sổ để số liệu không bị trộn."/></div>:loading?<div className="mt-5"><Loading/></div>:<div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">{[['Doanh thu',cash(report?.revenue),<TrendingUp key="1"/>],['Lãi thực',cash(report?.profit),<CircleDollarSign key="2"/>],['Đơn hàng',`${report?.order_count||0} đơn`,<ReceiptText key="3"/>],['Tồn kho',`${report?.stock_units||0} món`,<Boxes key="4"/>]].map(x=><div key={String(x[0])} className="rounded-xl border bg-white p-3"><span className="text-[#203354] [&_svg]:h-5">{x[2]}</span><p className="mt-3 text-[11px] font-bold text-[#776C64]">{x[0]}</p><b className="mt-1 block break-words">{x[1]}</b></div>)}</div>}</Panel><div className="mt-4 grid gap-3 md:grid-cols-3"><Action href="/business/inventory" n="1" title="Nhập kho" text="Tạo sản phẩm và nhập lô hàng" icon={<Boxes/>}/><Action href="/business/orders" n="2" title="Tạo đơn" text="Chọn hàng trong kho cho khách" icon={<ShoppingBag/>}/><Action href="/business/reports" n="3" title="Xem thống kê" text="Doanh thu, chi phí và lãi" icon={<BarChart3/>}/></div><Panel className="mt-4"><h2 className="mb-2 font-black">Đơn gần đây</h2>{orders.length?orders.map(o=><OrderRow key={o.id} o={o}/>):<p className="rounded-xl bg-white p-5 text-center text-sm font-semibold text-[#776C64]">Chưa có đơn trong sổ này.</p>}</Panel></>}
@@ -67,35 +332,32 @@ function Action({href,n,title,text,icon}:{href:string;n:string;title:string;text
 
 function Inventory({products,setProducts,receipts,setReceipts,headers,notify,fail}:{products:Product[];setProducts:React.Dispatch<React.SetStateAction<Product[]>>;receipts:Receipt[];setReceipts:React.Dispatch<React.SetStateAction<Receipt[]>>;headers:Record<string,string>;notify:(s:string)=>void;fail:(e:unknown,s:string)=>void}){
  const [mode,setMode]=useState<'list'|'product'|'stock'>('list'),[saving,setSaving]=useState(false),[search,setSearch]=useState('');
- const [p,setP]=useState({id:'',name:'',sku:'',category:'',image_url:'',selling_price:'',unit_cost:'',notes:''});
+ const [p,setP]=useState({id:'',name:'',sku:'',category:'',image_url:'',selling_price:'',unit_cost:'',stock_quantity:'0',notes:''});
+ const [deleteTarget,setDeleteTarget]=useState<Product|null>(null);
  const [stock,setStock]=useState({supplier_name:'',extra_cost:'',note:'',received_at:nowDate()}),[lines,setLines]=useState([{product_id:'',quantity:1,unit_cost:''}]);
  const image=(file?:File)=>{if(!file)return;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,900/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=img.width*scale;c.height=img.height*scale;c.getContext('2d')?.drawImage(img,0,0,c.width,c.height);setP(x=>({...x,image_url:c.toDataURL('image/jpeg',.75)}))};img.src=String(r.result)};r.readAsDataURL(file)};
- const saveProduct=async()=>{if(!p.name.trim())return notify('Nhập tên sản phẩm.');setSaving(true);try{const payload={...p,selling_price:num(p.selling_price),unit_cost:num(p.unit_cost)};const r=p.id?await axios.put<Product>(`${API}/api/business/products/${p.id}`,payload,{headers}):await axios.post<Product>(`${API}/api/business/products`,{...payload,stock_quantity:0,is_active:true},{headers});setProducts(x=>p.id?x.map(item=>item.id===p.id?r.data:item):[r.data,...x]);setMode('list');setP({id:'',name:'',sku:'',category:'',image_url:'',selling_price:'',unit_cost:'',notes:''});notify(p.id?'Đã sửa sản phẩm.':'Đã thêm sản phẩm.')}catch(e){fail(e,p.id?'Không sửa được sản phẩm.':'Không thêm được sản phẩm.')}finally{setSaving(false)}};
- const deleteProduct=async(id:string)=>{if(!confirm('Xóa sản phẩm này?'))return;try{await axios.delete(`${API}/api/business/products/${id}`,{headers});setProducts(x=>x.filter(item=>item.id!==id));notify('Đã xóa sản phẩm.')}catch(e){fail(e,'Không xóa được sản phẩm.')}};
+ const saveProduct=async()=>{if(!p.name.trim())return notify('Nhập tên sản phẩm.');setSaving(true);try{const payload={...p,selling_price:num(p.selling_price),unit_cost:num(p.unit_cost),stock_quantity:Math.max(0,num(p.stock_quantity))};const r=p.id?await axios.put<Product>(`${API}/api/business/products/${p.id}`,payload,{headers}):await axios.post<Product>(`${API}/api/business/products`,{...payload,is_active:true},{headers});setProducts(x=>p.id?x.map(item=>item.id===p.id?r.data:item):[r.data,...x]);setMode('list');setP({id:'',name:'',sku:'',category:'',image_url:'',selling_price:'',unit_cost:'',stock_quantity:'0',notes:''});notify(p.id?'Đã sửa sản phẩm.':'Đã thêm sản phẩm.')}catch(e){fail(e,p.id?'Không sửa được sản phẩm.':'Không thêm được sản phẩm.')}finally{setSaving(false)}};
  const line=(i:number,v:object)=>setLines(x=>x.map((a,j)=>j===i?{...a,...v}:a));
  const saveStock=async()=>{const valid=lines.filter(x=>x.product_id&&x.quantity>0);if(!valid.length)return notify('Chọn sản phẩm cần nhập.');setSaving(true);try{const r=await axios.post<Receipt>(`${API}/api/business/stock-receipts`,{...stock,extra_cost:num(stock.extra_cost),received_at:new Date(stock.received_at+'T12:00:00').toISOString(),items:valid.map(x=>({...x,unit_cost:num(x.unit_cost)}))},{headers});setReceipts(x=>[r.data,...x]);setProducts(old=>old.map(item=>{const l=valid.find(x=>x.product_id===item.id);return l?{...item,stock_quantity:item.stock_quantity+l.quantity,unit_cost:num(l.unit_cost)}:item}));setMode('list');setLines([{product_id:'',quantity:1,unit_cost:''}]);notify('Đã nhập hàng vào kho.')}catch(e){fail(e,'Không lưu được phiếu nhập.')}finally{setSaving(false)}};
  const list=products.filter(x=>`${x.name} ${x.sku||''} ${x.category||''}`.toLowerCase().includes(search.toLowerCase()));
- return <><Title small="Kho hàng" title="Sản phẩm & tồn kho" text="Tạo danh mục sản phẩm trước, sau đó nhập từng lô hàng."/>{mode==='list'&&<><div className="mb-4 grid grid-cols-2 gap-2 md:flex"><Button light onClick={()=>{setP({id:'',name:'',sku:'',category:'',image_url:'',selling_price:'',unit_cost:'',notes:''});setMode('product')}}><Plus/> Sản phẩm mới</Button><Button onClick={()=>setMode('stock')} disabled={!products.length}><Boxes/> Nhập lô hàng</Button></div><div className="grid gap-4 lg:grid-cols-[1.25fr_.75fr]"><Panel><div className="relative mb-3"><Search className="absolute left-3 top-3.5 h-5 text-[#81756C]"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Tìm tên, SKU, nhóm hàng" className={`${input} pl-10`}/></div>{list.length?<div className="space-y-2">{list.map(x=><div key={x.id} className="flex items-center gap-3 rounded-xl border bg-white p-3"><div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border text-[#887B71]">{x.image_url?<img src={x.image_url} alt={x.name} className="h-full w-full object-cover"/>:<PackageOpen/>}</div><div className="min-w-0 flex-1"><b className="block truncate text-sm">{x.name}</b><p className="text-xs font-semibold text-[#776C64]">{x.sku||x.category||'Chưa phân loại'}</p><p className="mt-1 text-xs font-bold text-[#203354]">Bán {cash(x.selling_price)} · Vốn {cash(x.unit_cost)}</p></div><div className="flex flex-col gap-1 items-end"><div className={`rounded-lg px-2 py-1 text-center ${x.stock_quantity<=5?'bg-[#FFF0EE] text-[#A53B35]':'bg-[#EAF3ED] text-[#277044]'}`}><b>{x.stock_quantity}</b><p className="text-[9px] font-black">TỒN</p></div><div className="flex gap-1 mt-1"><button onClick={()=>{setP({id:x.id,name:x.name,sku:x.sku||'',category:x.category||'',image_url:x.image_url||'',selling_price:String(x.selling_price),unit_cost:String(x.unit_cost),notes:x.notes||''});setMode('product')}} className="p-1.5 text-[#57534E] hover:text-[#1C1917] hover:bg-gray-100 rounded-lg cursor-pointer" title="Sửa"><Pencil size={14}/></button><button onClick={()=>deleteProduct(x.id)} className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg cursor-pointer" title="Xóa"><Trash2 size={14}/></button></div></div></div>)}</div>:<Empty icon={<Boxes/>} title="Chưa có sản phẩm" text="Thêm sản phẩm đầu tiên để nhập kho."/>}</Panel><Panel><h2 className="mb-3 font-black">Phiếu nhập gần đây</h2>{receipts.length?receipts.map(x=><div key={x.id} className="mb-2 rounded-xl bg-white p-3"><div className="flex justify-between"><div><b className="text-sm">{x.code}</b><p className="text-xs text-[#776C64]">{dateText(x.received_at)} · {x.supplier_name||'Không ghi nguồn'}</p></div><b className="text-sm text-[#203354]">{cash(x.total_cost)}</b></div><p className="mt-2 text-xs font-bold text-[#776C64]">{x.total_quantity} món · {x.items.length} loại</p></div>):<p className="text-sm text-[#776C64]">Chưa có phiếu nhập.</p>}</Panel></div></>}
- {mode==='product'&&<Panel><Back title="Thêm sản phẩm" go={()=>setMode('list')}/><div className="grid gap-4 md:grid-cols-2"><label className="md:row-span-2"><span className="mb-2 block text-xs font-extrabold">Ảnh sản phẩm</span><input id="photo" type="file" accept="image/*" capture="environment" onChange={e=>image(e.target.files?.[0])} className="hidden"/><label htmlFor="photo" className="flex h-40 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed bg-white">{p.image_url?<img src={p.image_url} alt="" className="h-full w-full object-cover"/>:<span className="flex flex-col items-center gap-2 text-sm font-bold text-[#81756C]"><Camera/> Chụp hoặc chọn ảnh</span>}</label></label><Field label="Tên sản phẩm"><input value={p.name} onChange={e=>setP({...p,name:e.target.value})} className={input}/></Field><div className="grid grid-cols-2 gap-3"><Field label="Mã / SKU"><input value={p.sku} onChange={e=>setP({...p,sku:e.target.value})} className={input}/></Field><Field label="Nhóm"><input value={p.category} onChange={e=>setP({...p,category:e.target.value})} className={input}/></Field></div><Money label="Giá bán" value={p.selling_price} set={v=>setP({...p,selling_price:v})}/><Money label="Giá vốn" value={p.unit_cost} set={v=>setP({...p,unit_cost:v})}/></div><div className="mt-4"><Field label="Ghi chú"><textarea value={p.notes} onChange={e=>setP({...p,notes:e.target.value})} className={area}/></Field></div><div className="mt-5"><Button onClick={saveProduct} disabled={saving}>{saving?<Loader2 className="animate-spin"/>:<Check/>} Lưu sản phẩm</Button></div></Panel>}
- {mode==='stock'&&<Panel><Back title="Nhập lô hàng" go={()=>setMode('list')}/><div className="grid min-w-0 gap-4 md:grid-cols-2"><DateField label="Ngày nhập" value={stock.received_at} set={v=>setStock({...stock,received_at:v})}/><Field label="Nguồn hàng"><input value={stock.supplier_name} onChange={e=>setStock({...stock,supplier_name:e.target.value})} className={input}/></Field></div><h3 className="mb-3 mt-5 text-sm font-black">Sản phẩm trong lô</h3><div className="min-w-0 space-y-3">{lines.map((x,i)=><div key={i} className="min-w-0 rounded-xl border bg-white p-3"><div className="flex min-w-0 gap-2"><div className="min-w-0 flex-1"><CustomSelect value={x.product_id} onChange={value=>{const product=products.find(p=>p.id===value);line(i,{product_id:value,unit_cost:String(product?.unit_cost||'')})}} placeholder="Chọn sản phẩm" options={products.filter(p=>!lines.some((a,j)=>j!==i&&a.product_id===p.id)).map(p=>({value:p.id,label:p.name,description:`Tồn ${p.stock_quantity} · Vốn ${cash(p.unit_cost)}`}))}/></div>{lines.length>1&&<button onClick={()=>setLines(a=>a.filter((_,j)=>j!==i))} className="w-12 shrink-0 rounded-xl border text-red-600"><Trash2 className="mx-auto"/></button>}</div><div className="mt-3 grid min-w-0 grid-cols-2 gap-3"><Field label="Số lượng"><input type="number" min="1" value={x.quantity} onChange={e=>line(i,{quantity:Math.max(1,+e.target.value)})} className={input}/></Field><Money label="Vốn / món" value={x.unit_cost} set={v=>line(i,{unit_cost:v})}/></div></div>)}</div><button onClick={()=>setLines(x=>[...x,{product_id:'',quantity:1,unit_cost:''}])} className="mt-3 flex h-11 items-center gap-2 text-sm font-black text-[#203354]"><Plus/> Thêm sản phẩm</button><div className="mt-4 grid min-w-0 gap-4 md:grid-cols-2"><Money label="Phí nhập khác" value={stock.extra_cost} set={v=>setStock({...stock,extra_cost:v})}/><Field label="Ghi chú"><textarea value={stock.note} onChange={e=>setStock({...stock,note:e.target.value})} className={area}/></Field></div><div className="mt-4 rounded-xl bg-[#EDF0F4] p-3 text-right text-sm font-bold">Tổng vốn: <b className="ml-2 text-[#203354]">{cash(lines.reduce((s,x)=>s+x.quantity*num(x.unit_cost),num(stock.extra_cost)))}</b></div><div className="mb-10 mt-5"><Button onClick={saveStock} disabled={saving}>{saving?<Loader2 className="animate-spin"/>:<Check/>} Xác nhận nhập kho</Button></div></Panel>}</>;
+ return <><Title small="Kho hàng" title="Sản phẩm & tồn kho" text="Tạo danh mục sản phẩm trước, sau đó nhập từng lô hàng."/>{mode==='list'&&<><div className="mb-4 grid grid-cols-2 gap-2 md:flex"><Button light onClick={()=>{setP({id:'',name:'',sku:'',category:'',image_url:'',selling_price:'',unit_cost:'',stock_quantity:'0',notes:''});setMode('product')}}><Plus/> Sản phẩm mới</Button><Button onClick={()=>setMode('stock')} disabled={!products.length}><Boxes/> Nhập lô hàng</Button></div><div className="grid gap-4 lg:grid-cols-[1.25fr_.75fr]"><Panel><div className="relative mb-3"><Search className="absolute left-3 top-3.5 h-5 text-[#81756C]"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Tìm tên, SKU, nhóm hàng" className={`${input} pl-10`}/></div>{list.length?<div className="space-y-2">{list.map(x=><SwipeableItem key={x.id} onEdit={()=>{setP({id:x.id,name:x.name,sku:x.sku||'',category:x.category||'',image_url:x.image_url||'',selling_price:String(x.selling_price),unit_cost:String(x.unit_cost),stock_quantity:String(x.stock_quantity??0),notes:x.notes||''});setMode('product')}} onDelete={()=>setDeleteTarget(x)}><div className="flex items-center gap-3 p-3"><div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border text-[#887B71]">{x.image_url?<img src={x.image_url} alt={x.name} className="h-full w-full object-cover"/>:<PackageOpen/>}</div><div className="min-w-0 flex-1"><b className="block truncate text-sm">{x.name}</b><p className="text-xs font-semibold text-[#776C64]">{x.sku||x.category||'Chưa phân loại'}</p><p className="mt-1 text-xs font-bold text-[#203354]">Bán {cash(x.selling_price)} · Vốn {cash(x.unit_cost)}</p></div><div className="flex flex-col gap-1 items-end shrink-0"><div className={`rounded-lg px-2 py-1 text-center ${x.stock_quantity<=5?'bg-[#FFF0EE] text-[#A53B35]':'bg-[#EAF3ED] text-[#277044]'}`}><b>{x.stock_quantity}</b><p className="text-[9px] font-black">TỒN</p></div><div className="flex gap-1 mt-1"><button type="button" onClick={(e)=>{e.stopPropagation();setP({id:x.id,name:x.name,sku:x.sku||'',category:x.category||'',image_url:x.image_url||'',selling_price:String(x.selling_price),unit_cost:String(x.unit_cost),stock_quantity:String(x.stock_quantity??0),notes:x.notes||''});setMode('product')}} className="p-1.5 text-[#6E6359] hover:text-[#1C1917] hover:bg-stone-100 rounded-lg transition-colors cursor-pointer" title="Sửa"><MinimalEdit size={14}/></button><button type="button" onClick={(e)=>{e.stopPropagation();setDeleteTarget(x)}} className="p-1.5 text-[#C4554B] hover:text-[#A33B32] hover:bg-red-50 rounded-lg transition-colors cursor-pointer" title="Xóa"><MinimalTrash size={14}/></button></div></div></div></SwipeableItem>)}</div>:<Empty icon={<Boxes/>} title="Chưa có sản phẩm" text="Thêm sản phẩm đầu tiên để nhập kho."/>}</Panel><Panel><h2 className="mb-3 font-black">Phiếu nhập gần đây</h2>{receipts.length?receipts.map(x=><div key={x.id} className="mb-2 rounded-xl bg-white p-3"><div className="flex justify-between"><div><b className="text-sm">{x.code}</b><p className="text-xs text-[#776C64]">{dateText(x.received_at)} · {x.supplier_name||'Không ghi nguồn'}</p></div><b className="text-sm text-[#203354]">{cash(x.total_cost)}</b></div><p className="mt-2 text-xs font-bold text-[#776C64]">{x.total_quantity} món · {x.items.length} loại</p></div>):<p className="text-sm text-[#776C64]">Chưa có phiếu nhập.</p>}</Panel></div></>}{mode==='product'&&<Panel><Back title={p.id?'Sửa sản phẩm':'Thêm sản phẩm'} go={()=>setMode('list')}/><div className="grid gap-4 md:grid-cols-2"><label className="md:row-span-3"><span className="mb-2 block text-xs font-extrabold">Ảnh sản phẩm</span><input id="photo" type="file" accept="image/*" capture="environment" onChange={e=>image(e.target.files?.[0])} className="hidden"/><label htmlFor="photo" className="flex h-44 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed bg-white">{p.image_url?<img src={p.image_url} alt="" className="h-full w-full object-cover"/>:<span className="flex flex-col items-center gap-2 text-sm font-bold text-[#81756C]"><Camera/> Chụp hoặc chọn ảnh</span>}</label></label><Field label="Tên sản phẩm"><input value={p.name} onChange={e=>setP({...p,name:e.target.value})} className={input}/></Field><div className="grid grid-cols-2 gap-3"><Field label="Mã / SKU"><input value={p.sku} onChange={e=>setP({...p,sku:e.target.value})} className={input}/></Field><Field label="Nhóm"><input value={p.category} onChange={e=>setP({...p,category:e.target.value})} className={input}/></Field></div><div className="grid grid-cols-2 gap-3"><Money label="Giá bán" value={p.selling_price} set={v=>setP({...p,selling_price:v})}/><Money label="Giá vốn" value={p.unit_cost} set={v=>setP({...p,unit_cost:v})}/></div><Field label="Số lượng tồn kho"><div className="space-y-2"><input type="number" min="0" value={p.stock_quantity} onChange={e=>setP({...p,stock_quantity:e.target.value})} placeholder="0" className={input}/><div className="flex flex-wrap items-center gap-1.5"><span className="text-xs font-bold text-[#81756C]">Chọn nhanh:</span>{[0,1,2,3,5,10].map(qty=><button key={qty} type="button" onClick={()=>setP({...p,stock_quantity:String(qty)})} className={`h-7 px-3 rounded-lg text-xs font-black transition-all ${String(p.stock_quantity)===String(qty)?'bg-[#203354] text-white shadow-sm':'bg-[#EDE8E1] text-[#554B42] hover:bg-[#E2DDD5]'}`}>{qty}</button>)}</div></div></Field></div><div className="mt-4"><Field label="Ghi chú"><textarea value={p.notes} onChange={e=>setP({...p,notes:e.target.value})} className={area}/></Field></div><div className="mt-5"><Button onClick={saveProduct} disabled={saving}>{saving?<Loader2 className="animate-spin"/>:<Check/>} Lưu sản phẩm</Button></div></Panel>}{mode==='stock'&&<Panel><Back title="Nhập lô hàng" go={()=>setMode('list')}/><div className="grid min-w-0 gap-4 md:grid-cols-2"><DateField label="Ngày nhập" value={stock.received_at} set={v=>setStock({...stock,received_at:v})}/><Field label="Nguồn hàng"><input value={stock.supplier_name} onChange={e=>setStock({...stock,supplier_name:e.target.value})} className={input}/></Field></div><h3 className="mb-3 mt-5 text-sm font-black">Sản phẩm trong lô</h3><div className="min-w-0 space-y-3">{lines.map((x,i)=><div key={i} className="min-w-0 rounded-xl border bg-white p-3"><div className="flex min-w-0 gap-2"><div className="min-w-0 flex-1"><CustomSelect value={x.product_id} onChange={value=>{const product=products.find(p=>p.id===value);line(i,{product_id:value,unit_cost:String(product?.unit_cost||'')})}} placeholder="Chọn sản phẩm" options={products.filter(p=>!lines.some((a,j)=>j!==i&&a.product_id===p.id)).map(p=>({value:p.id,label:p.name,description:`Tồn ${p.stock_quantity} · Vốn ${cash(p.unit_cost)}`}))}/></div>{lines.length>1&&<button onClick={()=>setLines(a=>a.filter((_,j)=>j!==i))} className="w-12 shrink-0 rounded-xl border text-red-600"><Trash2 className="mx-auto"/></button>}</div><div className="mt-3 grid min-w-0 grid-cols-2 gap-3"><Field label="Số lượng"><input type="number" min="1" value={x.quantity} onChange={e=>line(i,{quantity:Math.max(1,+e.target.value)})} className={input}/></Field><Money label="Vốn / món" value={x.unit_cost} set={v=>line(i,{unit_cost:v})}/></div></div>)}</div><button onClick={()=>setLines(x=>[...x,{product_id:'',quantity:1,unit_cost:''}])} className="mt-3 flex h-11 items-center gap-2 text-sm font-black text-[#203354]"><Plus/> Thêm sản phẩm</button><div className="mt-4 grid min-w-0 gap-4 md:grid-cols-2"><Money label="Phí nhập khác" value={stock.extra_cost} set={v=>setStock({...stock,extra_cost:v})}/><Field label="Ghi chú"><textarea value={stock.note} onChange={e=>setStock({...stock,note:e.target.value})} className={area}/></Field></div><div className="mt-4 rounded-xl bg-[#EDF0F4] p-3 text-right text-sm font-bold">Tổng vốn: <b className="ml-2 text-[#203354]">{cash(lines.reduce((s,x)=>s+x.quantity*num(x.unit_cost),num(stock.extra_cost)))}</b></div><div className="mb-10 mt-5"><Button onClick={saveStock} disabled={saving}>{saving?<Loader2 className="animate-spin"/>:<Check/>} Xác nhận nhập kho</Button></div></Panel>}{deleteTarget&&<ConfirmModal title="Xóa sản phẩm này?" message={`Sản phẩm "${deleteTarget.name}" sẽ bị xóa khỏi danh sách.`} confirmText="Xóa sản phẩm" cancelText="Hủy" isDanger onConfirm={async()=>{const id=deleteTarget.id;setDeleteTarget(null);try{await axios.delete(`${API}/api/business/products/${id}`,{headers});setProducts(x=>x.filter(item=>item.id!==id));notify('Đã xóa sản phẩm.')}catch(e){fail(e,'Không xóa được sản phẩm.')}}} onClose={()=>setDeleteTarget(null)}/>}</>;
 }
 function Back({title,go}:{title:string;go:()=>void}){const display=title==='Tạo đơn mới'&&typeof window!=='undefined'&&location.hash.startsWith('#edit-')?'Sửa đơn hàng':title;return <div className="mb-5 flex items-center gap-3"><button onClick={go} className="flex h-11 w-11 items-center justify-center rounded-xl border bg-white"><ArrowLeft/></button><h2 className="text-lg font-black">{display}</h2></div>}
 
 function OrdersV2({ledgers,ledger,choose,addBook,headers,notify,fail,products,setProducts,orders,setOrders,loading}:Shared&{products:Product[];setProducts:React.Dispatch<React.SetStateAction<Product[]>>;orders:Order[];setOrders:React.Dispatch<React.SetStateAction<Order[]>>;loading:boolean}){
  const blank={customer_name:'',customer_contact:'',social_link:'',shipping_fee:'',shipping_cost:'',discount:'',other_fee:'',payment_status:'paid',note:'',ordered_at:nowDate()};
  const [creating,setCreating]=useState(false),[saving,setSaving]=useState(false),[search,setSearch]=useState(''),[editing,setEditing]=useState<Order|null>(null),[draft,setDraft]=useState(blank),[lines,setLines]=useState([{product_id:'',quantity:1,unit_price:''}]);
+ const [deleteOrderTarget,setDeleteOrderTarget]=useState<Order|null>(null);
  const update=(i:number,v:object)=>setLines(old=>old.map((line,index)=>index===i?{...line,...v}:line));
  const chosen=lines.filter(line=>line.product_id&&line.quantity>0),subtotal=lines.reduce((sum,line)=>sum+line.quantity*num(line.unit_price),0),total=subtotal+num(draft.shipping_fee)-num(draft.discount),cost=lines.reduce((sum,line)=>sum+line.quantity*(products.find(p=>p.id===line.product_id)?.unit_cost||0),0)+num(draft.shipping_cost)+num(draft.other_fee);
  const reset=()=>{setDraft(blank);setLines([{product_id:'',quantity:1,unit_price:''}]);setEditing(null);setCreating(false);if(typeof window!=='undefined')history.replaceState(null,'',location.pathname)};
  const save=async()=>{if(!ledger)return notify('Chọn sổ bán hàng.');if(!draft.customer_name.trim()||!chosen.length)return notify('Nhập tên khách và chọn sản phẩm.');setSaving(true);try{const payload={...draft,ledger_id:ledger,shipping_fee:num(draft.shipping_fee),shipping_cost:num(draft.shipping_cost),discount:num(draft.discount),other_fee:num(draft.other_fee),ordered_at:new Date(draft.ordered_at+'T12:00:00').toISOString(),items:chosen.map(line=>({...line,unit_price:num(line.unit_price)}))};const response=editing?await axios.put<Order>(`${API}/api/business/orders/${editing.id}`,payload,{headers}):await axios.post<Order>(`${API}/api/business/orders`,payload,{headers});setOrders(old=>editing?old.map(order=>order.id===editing.id?response.data:order):[response.data,...old]);setProducts(old=>old.map(product=>{const before=editing?.items.find(item=>item.product_id===product.id)?.quantity||0,after=chosen.find(line=>line.product_id===product.id)?.quantity||0;return {...product,stock_quantity:product.stock_quantity+before-after}}));const message=editing?`Đã cập nhật đơn ${response.data.code}.`:`Đã tạo đơn ${response.data.code}.`;reset();notify(message)}catch(error){fail(error,editing?'Không sửa được đơn.':'Không tạo được đơn.')}finally{setSaving(false)}};
- const remove=async(order:Order)=>{if(!confirm(`Xóa đơn ${order.code}? Tồn kho sẽ được hoàn lại.`))return;try{await axios.delete(`${API}/api/business/orders/${order.id}`,{headers});setOrders(old=>old.filter(item=>item.id!==order.id));setProducts(old=>old.map(product=>{const sold=order.items.find(item=>item.product_id===product.id);return sold?{...product,stock_quantity:product.stock_quantity+sold.quantity}:product}));notify('Đã xóa đơn và hoàn kho.')}catch(error){fail(error,'Không xóa được đơn.')}};
  const shown=orders.filter(order=>`${order.code} ${order.customer_name} ${order.customer_contact||''}`.toLowerCase().includes(search.toLowerCase()));
  const editOrder=(order:Order)=>{setEditing(order);setDraft({customer_name:order.customer_name||'',customer_contact:order.customer_contact||'',social_link:order.social_link||'',shipping_fee:String(order.shipping_fee||''),shipping_cost:String(order.shipping_cost||''),discount:String(order.discount||''),other_fee:String(order.other_fee||''),payment_status:order.payment_status||'paid',note:order.note||'',ordered_at:order.ordered_at.slice(0,10)});setLines(order.items.map(item=>({product_id:item.product_id,quantity:item.quantity,unit_price:String(item.unit_price)})));setCreating(true);window.scrollTo({top:0,behavior:'smooth'})};
  useEffect(()=>{const quick=()=>{setEditing(null);setDraft(blank);setLines([{product_id:'',quantity:1,unit_price:''}]);setCreating(true)},exportFile=()=>{const name=ledgers.find(item=>item.id===ledger)?.name||nowMonth();if(!orders.length)return notify('Chưa có đơn để xuất.');exportOrdersExcel(orders,name)},route=()=>{if(location.hash==='#new-order')quick();else if(location.hash.startsWith('#edit-')){const order=orders.find(item=>item.id===location.hash.slice(6));if(order)editOrder(order)}};window.addEventListener('quick-order',quick);window.addEventListener('export-orders',exportFile);window.addEventListener('hashchange',route);route();return()=>{window.removeEventListener('quick-order',quick);window.removeEventListener('export-orders',exportFile);window.removeEventListener('hashchange',route)}},[orders,ledger,ledgers]);
- if(creating)return <><Title small="Đơn hàng" title="Chốt đơn cho khách" text="Mỗi đơn tự trừ tồn kho và vào thống kê đúng ngày."/><Panel><Back title="Tạo đơn mới" go={reset}/><div className="grid min-w-0 gap-4 md:grid-cols-2"><DateField label="Ngày chốt" value={draft.ordered_at} set={v=>setDraft({...draft,ordered_at:v})}/><Field label="Tên khách"><input value={draft.customer_name} onChange={e=>setDraft({...draft,customer_name:e.target.value})} placeholder="Tên để tìm lại" className={input}/></Field><Field label="SĐT / tài khoản social"><input value={draft.customer_contact} onChange={e=>setDraft({...draft,customer_contact:e.target.value})} className={input}/></Field><Field label="Link tin nhắn"><input value={draft.social_link} onChange={e=>setDraft({...draft,social_link:e.target.value})} className={input}/></Field></div><h3 className="mb-3 mt-5 text-sm font-black">Sản phẩm khách mua</h3><div className="min-w-0 space-y-3">{lines.map((line,index)=>{const product=products.find(p=>p.id===line.product_id);return <div key={index} className="min-w-0 rounded-xl border bg-white p-3"><div className="flex min-w-0 gap-2"><div className="min-w-0 flex-1"><CustomSelect value={line.product_id} onChange={value=>{const picked=products.find(p=>p.id===value);update(index,{product_id:value,unit_price:String(picked?.selling_price||'')})}} placeholder="Chọn hàng trong kho" options={products.filter(p=>p.stock_quantity>0&&!lines.some((item,i)=>i!==index&&item.product_id===p.id)).map(p=>({value:p.id,label:p.name,description:`Còn ${p.stock_quantity} · Giá ${cash(p.selling_price)}`}))}/></div>{lines.length>1&&<button onClick={()=>setLines(old=>old.filter((_,i)=>i!==index))} className="w-12 shrink-0 rounded-xl border text-red-600"><Trash2 className="mx-auto h-5"/></button>}</div><div className="mt-3 grid min-w-0 grid-cols-[minmax(0,120px)_minmax(0,1fr)] gap-3"><Field label="Số lượng"><div className="flex h-12 min-w-0 items-center rounded-xl border"><button onClick={()=>update(index,{quantity:Math.max(1,line.quantity-1)})} className="w-9 shrink-0"><Minus className="mx-auto h-4"/></button><input value={line.quantity} onChange={e=>update(index,{quantity:Math.max(1,+e.target.value)})} inputMode="numeric" className="min-w-0 flex-1 text-center font-black outline-none"/><button onClick={()=>update(index,{quantity:Math.min(product?.stock_quantity||1,line.quantity+1)})} className="w-9 shrink-0"><Plus className="mx-auto h-4"/></button></div></Field><Money label="Giá / món" value={line.unit_price} set={value=>update(index,{unit_price:value})}/></div>{product&&<p className="mt-2 text-xs font-bold text-[#776C64]">Kho còn {product.stock_quantity} · vốn {cash(product.unit_cost)}</p>}</div>})}</div><button onClick={()=>setLines(old=>[...old,{product_id:'',quantity:1,unit_price:''}])} className="mt-3 flex h-11 items-center gap-2 text-sm font-black text-[#203354]"><Plus/> Thêm món</button><div className="mt-4 grid min-w-0 grid-cols-2 gap-4 lg:grid-cols-4"><Money label="Ship thu khách" value={draft.shipping_fee} set={value=>setDraft({...draft,shipping_fee:value})}/><Money label="Ship thực trả" value={draft.shipping_cost} set={value=>setDraft({...draft,shipping_cost:value})}/><Money label="Giảm giá" value={draft.discount} set={value=>setDraft({...draft,discount:value})}/><Money label="Phí khác" value={draft.other_fee} set={value=>setDraft({...draft,other_fee:value})}/></div><div className="mt-4 grid min-w-0 gap-4 md:grid-cols-2"><Field label="Thanh toán"><CustomSelect value={draft.payment_status} onChange={value=>setDraft({...draft,payment_status:value})} placeholder="Trạng thái thanh toán" options={[{value:'paid',label:'Đã thanh toán'},{value:'pending',label:'Chưa thanh toán'},{value:'partial',label:'Thanh toán một phần'}]}/></Field><Field label="Ghi chú"><textarea value={draft.note} onChange={e=>setDraft({...draft,note:e.target.value})} className={area}/></Field></div><div className="mt-4 grid grid-cols-2 rounded-xl bg-[#EDF0F4] p-4"><div><p className="text-xs font-bold">Khách trả</p><b className="break-words text-lg text-[#203354]">{cash(total)}</b></div><div><p className="text-xs font-bold">Lãi dự kiến</p><b className="break-words text-lg text-[#277044]">{cash(total-cost)}</b></div></div><div className="mb-12 mt-5"><Button onClick={save} disabled={saving}>{saving?<Loader2 className="animate-spin"/>:<Check/>} Xác nhận tạo đơn</Button></div></Panel></>;
- return <><Title small="Đơn hàng" title="Chốt đơn cho khách" text="Mỗi đơn tự trừ tồn kho và vào thống kê đúng ngày."/><div className="mb-4 flex min-w-0 flex-col gap-3 md:flex-row md:justify-between"><Picker ledgers={ledgers} id={ledger} set={choose} add={addBook}/><Button onClick={()=>setCreating(true)} disabled={!ledger||!products.length}><Plus/> Tạo đơn mới</Button></div>{!ledger?<Empty icon={<ClipboardList/>} title="Chưa có sổ bán hàng" text="Tạo sổ tháng trước khi chốt đơn."/>:<Panel><div className="relative mb-3"><Search className="absolute left-3 top-3.5 h-5"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Tìm mã đơn, tên khách" className={`${input} pl-10`}/></div>{loading?<Loading/>:shown.length?shown.map(order=><div key={order.id} className="flex min-w-0 items-center gap-2 border-b last:border-0"><div className="min-w-0 flex-1"><OrderRow o={order}/></div><button onClick={()=>remove(order)} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-red-600"><Trash2 className="h-4"/></button></div>):<Empty icon={<ReceiptText/>} title="Chưa có đơn" text="Bấm Tạo đơn mới khi khách chốt mua."/>}</Panel>}</>;
+ if(creating)return <><Title small="Đơn hàng" title="Chốt đơn cho khách" text="Mỗi đơn tự trừ tồn kho và vào thống kê đúng ngày."/><Panel><Back title="Tạo đơn mới" go={reset}/><div className="grid min-w-0 gap-4 md:grid-cols-2"><DateField label="Ngày chốt" value={draft.ordered_at} set={v=>setDraft({...draft,ordered_at:v})}/><Field label="Tên khách"><input value={draft.customer_name} onChange={e=>setDraft({...draft,customer_name:e.target.value})} placeholder="Tên để tìm lại" className={input}/></Field><Field label="SĐT / tài khoản social"><input value={draft.customer_contact} onChange={e=>setDraft({...draft,customer_contact:e.target.value})} className={input}/></Field><Field label="Link tin nhắn"><input value={draft.social_link} onChange={e=>setDraft({...draft,social_link:e.target.value})} className={input}/></Field></div><h3 className="mb-3 mt-5 text-sm font-black">Sản phẩm khách mua</h3><div className="min-w-0 space-y-3">{lines.map((line,index)=>{const product=products.find(p=>p.id===line.product_id);return <div key={index} className="min-w-0 rounded-xl border bg-white p-3"><div className="flex min-w-0 gap-2"><div className="min-w-0 flex-1"><CustomSelect value={line.product_id} onChange={value=>{const picked=products.find(p=>p.id===value);update(index,{product_id:value,unit_price:String(picked?.selling_price||'')})}} placeholder="Chọn hàng trong kho" options={products.filter(p=>p.stock_quantity>0&&!lines.some((item,i)=>i!==index&&item.product_id===p.id)).map(p=>({value:p.id,label:p.name,description:`Còn ${p.stock_quantity} · Giá ${cash(p.selling_price)}`}))}/></div>{lines.length>1&&<button onClick={()=>setLines(old=>old.filter((_,i)=>i!==index))} className="w-12 shrink-0 rounded-xl border text-red-600"><Trash2 className="mx-auto h-5"/></button>}</div><div className="mt-3 grid min-w-0 grid-cols-[minmax(0,120px)_minmax(0,1fr)] gap-3"><Field label="Số lượng"><div className="space-y-1.5"><div className="flex h-12 min-w-0 items-center rounded-xl border bg-white"><button type="button" onClick={()=>update(index,{quantity:Math.max(1,line.quantity-1)})} className="w-9 shrink-0 flex items-center justify-center text-[#554B42] hover:text-[#203354]"><Minus className="mx-auto h-4"/></button><input value={line.quantity} onChange={e=>update(index,{quantity:Math.max(1,+e.target.value)})} inputMode="numeric" className="min-w-0 flex-1 text-center font-black outline-none"/><button type="button" onClick={()=>update(index,{quantity:Math.min(product?.stock_quantity||9999,line.quantity+1)})} className="w-9 shrink-0 flex items-center justify-center text-[#554B42] hover:text-[#203354]"><Plus className="mx-auto h-4"/></button></div><div className="flex flex-wrap items-center gap-1"><span className="text-[10px] font-bold text-[#81756C]">Chọn nhanh:</span>{[1,2,3,5,10].map(qty=><button key={qty} type="button" onClick={()=>update(index,{quantity:qty})} className={`h-6 px-2 rounded-md text-[11px] font-bold transition-all ${line.quantity===qty?'bg-[#203354] text-white shadow-xs':'bg-[#EDE8E1] text-[#554B42] hover:bg-[#E2DDD5]'}`}>{qty}</button>)}</div></div></Field><Money label="Giá / món" value={line.unit_price} set={value=>update(index,{unit_price:value})}/></div>{product&&<p className="mt-2 text-xs font-bold text-[#776C64]">Kho còn {product.stock_quantity} · vốn {cash(product.unit_cost)}</p>}</div>})}</div><button onClick={()=>setLines(old=>[...old,{product_id:'',quantity:1,unit_price:''}])} className="mt-3 flex h-11 items-center gap-2 text-sm font-black text-[#203354]"><Plus/> Thêm món</button><div className="mt-4 grid min-w-0 grid-cols-2 gap-4 lg:grid-cols-4"><Money label="Ship thu khách" value={draft.shipping_fee} set={value=>setDraft({...draft,shipping_fee:value})}/><Money label="Ship thực trả" value={draft.shipping_cost} set={value=>setDraft({...draft,shipping_cost:value})}/><Money label="Giảm giá" value={draft.discount} set={value=>setDraft({...draft,discount:value})}/><Money label="Phí khác" value={draft.other_fee} set={value=>setDraft({...draft,other_fee:value})}/></div><div className="mt-4 grid min-w-0 gap-4 md:grid-cols-2"><Field label="Thanh toán"><CustomSelect value={draft.payment_status} onChange={value=>setDraft({...draft,payment_status:value})} placeholder="Trạng thái thanh toán" options={[{value:'paid',label:'Đã thanh toán'},{value:'pending',label:'Chưa thanh toán'},{value:'partial',label:'Thanh toán một phần'}]}/></Field><Field label="Ghi chú"><textarea value={draft.note} onChange={e=>setDraft({...draft,note:e.target.value})} className={area}/></Field></div><div className="mt-4 grid grid-cols-2 rounded-xl bg-[#EDF0F4] p-4"><div><p className="text-xs font-bold">Khách trả</p><b className="break-words text-lg text-[#203354]">{cash(total)}</b></div><div><p className="text-xs font-bold">Lãi dự kiến</p><b className="break-words text-lg text-[#277044]">{cash(total-cost)}</b></div></div><div className="mb-12 mt-5"><Button onClick={save} disabled={saving}>{saving?<Loader2 className="animate-spin"/>:<Check/>} Xác nhận tạo đơn</Button></div></Panel></>;
+ return <><Title small="Đơn hàng" title="Chốt đơn cho khách" text="Mỗi đơn tự trừ tồn kho và vào thống kê đúng ngày."/><div className="mb-4 flex min-w-0 flex-col gap-3 md:flex-row md:justify-between"><Picker ledgers={ledgers} id={ledger} set={choose} add={addBook}/><Button onClick={()=>setCreating(true)} disabled={!ledger||!products.length}><Plus/> Tạo đơn mới</Button></div>{!ledger?<Empty icon={<ClipboardList/>} title="Chưa có sổ bán hàng" text="Tạo sổ tháng trước khi chốt đơn."/>:<Panel><div className="relative mb-3"><Search className="absolute left-3 top-3.5 h-5"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Tìm mã đơn, tên khách" className={`${input} pl-10`}/></div>{loading?<Loading/>:shown.length?<div className="space-y-2">{shown.map(order=><SwipeableItem key={order.id} onEdit={()=>editOrder(order)} onDelete={()=>setDeleteOrderTarget(order)}><div className="flex min-w-0 items-center gap-3 p-3"><div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${order.payment_status==='paid'?'bg-[#EAF3ED] text-[#277044]':'bg-[#FFF3DF] text-[#9A641A]'}`}><ReceiptText className="h-5"/></div><div className="min-w-0 flex-1"><b className="block truncate text-sm">{order.customer_name} <small className="text-[#887C72]">{order.code}</small></b><p className="truncate text-xs font-semibold text-[#776C64]">{dateText(order.ordered_at)} · {order.item_count} món · {order.items.map(x=>x.product_name).join(', ')}</p></div><div className="shrink-0 text-right"><b className="text-sm text-[#203354]">{cash(order.total)}</b><p className="text-[10px] font-black text-[#277044]">Lãi {cash(order.profit)}</p></div><div className="flex items-center gap-1 shrink-0 ml-1"><button type="button" onClick={(e)=>{e.stopPropagation();editOrder(order)}} className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6E6359] hover:text-[#203354] hover:bg-[#F2ECE3] transition-colors cursor-pointer" title="Sửa đơn"><MinimalEdit size={14}/></button><button type="button" onClick={(e)=>{e.stopPropagation();setDeleteOrderTarget(order)}} className="flex h-8 w-8 items-center justify-center rounded-lg text-[#C4554B] hover:text-[#A33B32] hover:bg-[#FFF0EE] transition-colors cursor-pointer" title="Xóa đơn"><MinimalTrash size={14}/></button></div></div></SwipeableItem>)}</div>:<Empty icon={<ReceiptText/>} title="Chưa có đơn" text="Bấm Tạo đơn mới khi khách chốt mua."/>}</Panel>}{deleteOrderTarget&&<ConfirmModal title="Xóa đơn hàng?" message={`Xóa đơn ${deleteOrderTarget.code}? Tồn kho các sản phẩm trong đơn sẽ được tự động hoàn lại.`} confirmText="Xóa đơn" cancelText="Hủy" isDanger onConfirm={async()=>{const order=deleteOrderTarget;setDeleteOrderTarget(null);try{await axios.delete(`${API}/api/business/orders/${order.id}`,{headers});setOrders(old=>old.filter(item=>item.id!==order.id));setProducts(old=>old.map(product=>{const sold=order.items.find(item=>item.product_id===product.id);return sold?{...product,stock_quantity:product.stock_quantity+sold.quantity}:product}));notify('Đã xóa đơn và hoàn kho.')}catch(error){fail(error,'Không xóa được đơn.')}}} onClose={()=>setDeleteOrderTarget(null)}/>}</>;
 }
-
 function Orders({ledgers,ledger,choose,addBook,headers,notify,fail,products,setProducts,orders,setOrders,loading}:Shared&{products:Product[];setProducts:React.Dispatch<React.SetStateAction<Product[]>>;orders:Order[];setOrders:React.Dispatch<React.SetStateAction<Order[]>>;loading:boolean}){
  const blank={customer_name:'',customer_contact:'',social_link:'',shipping_fee:'',shipping_cost:'',discount:'',other_fee:'',payment_status:'paid',note:'',ordered_at:nowDate()};
  const [create,setCreate]=useState(false),[saving,setSaving]=useState(false),[search,setSearch]=useState(''),[d,setD]=useState(blank),[lines,setLines]=useState([{product_id:'',quantity:1,unit_price:''}]);
@@ -107,7 +369,7 @@ function Orders({ledgers,ledger,choose,addBook,headers,notify,fail,products,setP
  const shown=orders.filter(o=>`${o.code} ${o.customer_name} ${o.customer_contact||''}`.toLowerCase().includes(search.toLowerCase()));
  return <><Title small="Đơn hàng" title="Chốt đơn cho khách" text="Mỗi đơn tự trừ tồn kho và vào thống kê đúng ngày."/><div className="mb-4 flex flex-col gap-3 md:flex-row md:justify-between"><Picker ledgers={ledgers} id={ledger} set={choose} add={addBook}/><Button onClick={()=>setCreate(true)} disabled={!ledger||!products.length}><Plus/> Tạo đơn mới</Button></div>{!ledger?<Empty icon={<ClipboardList/>} title="Chưa có sổ bán hàng" text="Tạo sổ tháng trước khi chốt đơn."/>:create?<Panel><Back title="Tạo đơn mới" go={reset}/><div className="grid gap-4 md:grid-cols-2"><Field label="Ngày chốt"><input type="date" value={d.ordered_at} onChange={e=>setD({...d,ordered_at:e.target.value})} className={input}/></Field><Field label="Tên khách"><input value={d.customer_name} onChange={e=>setD({...d,customer_name:e.target.value})} placeholder="Tên để tìm lại" className={input}/></Field><Field label="SĐT / tài khoản social"><input value={d.customer_contact} onChange={e=>setD({...d,customer_contact:e.target.value})} className={input}/></Field><Field label="Link tin nhắn"><input value={d.social_link} onChange={e=>setD({...d,social_link:e.target.value})} className={input}/></Field></div><h3 className="mb-3 mt-5 text-sm font-black">Sản phẩm khách mua</h3><div className="space-y-3">{lines.map((x,i)=>{const picked=products.find(p=>p.id===x.product_id);return <div key={i} className="rounded-xl border bg-white p-3"><div className="flex gap-2"><select value={x.product_id} onChange={e=>{const p=products.find(a=>a.id===e.target.value);line(i,{product_id:e.target.value,unit_price:String(p?.selling_price||'')})}} className={`${input} min-w-0 flex-1`}><option value="">Chọn hàng trong kho</option>{products.filter(p=>p.stock_quantity>0&&!lines.some((a,j)=>j!==i&&a.product_id===p.id)).map(p=><option key={p.id} value={p.id}>{p.name} · còn {p.stock_quantity}</option>)}</select>{lines.length>1&&<button onClick={()=>setLines(a=>a.filter((_,j)=>j!==i))} className="w-12 rounded-xl border text-red-600"><Trash2 className="mx-auto"/></button>}</div><div className="mt-3 grid grid-cols-[120px_1fr] gap-3"><Field label="Số lượng"><div className="flex h-12 items-center rounded-xl border"><button onClick={()=>line(i,{quantity:Math.max(1,x.quantity-1)})} className="w-10"><Minus className="mx-auto h-4"/></button><input value={x.quantity} onChange={e=>line(i,{quantity:Math.max(1,+e.target.value)})} className="min-w-0 flex-1 text-center font-black outline-none"/><button onClick={()=>line(i,{quantity:Math.min(picked?.stock_quantity||1,x.quantity+1)})} className="w-10"><Plus className="mx-auto h-4"/></button></div></Field><Money label="Giá / món" value={x.unit_price} set={v=>line(i,{unit_price:v})}/></div>{picked&&<p className="mt-2 text-xs font-bold text-[#776C64]">Kho còn {picked.stock_quantity} · vốn {cash(picked.unit_cost)}</p>}</div>})}</div><button onClick={()=>setLines(x=>[...x,{product_id:'',quantity:1,unit_price:''}])} className="mt-3 flex h-11 items-center gap-2 text-sm font-black text-[#203354]"><Plus/> Thêm món</button><div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4"><Money label="Ship thu khách" value={d.shipping_fee} set={v=>setD({...d,shipping_fee:v})}/><Money label="Ship thực trả" value={d.shipping_cost} set={v=>setD({...d,shipping_cost:v})}/><Money label="Giảm giá" value={d.discount} set={v=>setD({...d,discount:v})}/><Money label="Phí khác" value={d.other_fee} set={v=>setD({...d,other_fee:v})}/></div><div className="mt-4 grid gap-4 md:grid-cols-2"><Field label="Thanh toán"><select value={d.payment_status} onChange={e=>setD({...d,payment_status:e.target.value})} className={input}><option value="paid">Đã thanh toán</option><option value="pending">Chưa thanh toán</option><option value="partial">Một phần</option></select></Field><Field label="Ghi chú"><textarea value={d.note} onChange={e=>setD({...d,note:e.target.value})} className={area}/></Field></div><div className="mt-4 grid grid-cols-2 rounded-xl bg-[#EDF0F4] p-4"><div><p className="text-xs font-bold">Khách trả</p><b className="text-lg text-[#203354]">{cash(total)}</b></div><div><p className="text-xs font-bold">Lãi dự kiến</p><b className="text-lg text-[#277044]">{cash(total-cost)}</b></div></div><div className="mt-5"><Button onClick={save} disabled={saving}>{saving?<Loader2 className="animate-spin"/>:<Check/>} Xác nhận tạo đơn</Button></div></Panel>:<Panel><div className="relative mb-3"><Search className="absolute left-3 top-3.5 h-5"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Tìm mã đơn, tên khách" className={`${input} pl-10`}/></div>{loading?<Loading/>:shown.length?shown.map(o=><div key={o.id} className="flex items-center gap-2 border-b last:border-0"><div className="min-w-0 flex-1"><OrderRow o={o}/></div><button onClick={()=>remove(o)} className="flex h-10 w-10 items-center justify-center rounded-xl border text-red-600"><Trash2 className="h-4"/></button></div>):<Empty icon={<ReceiptText/>} title="Chưa có đơn" text="Bấm Tạo đơn mới khi khách chốt mua."/>}</Panel>}</>;
 }
-function OrderRow({o}:{o:Order}){return <div className="flex min-w-0 items-center gap-2 py-3"><div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${o.payment_status==='paid'?'bg-[#EAF3ED] text-[#277044]':'bg-[#FFF3DF] text-[#9A641A]'}`}><ReceiptText className="h-5"/></div><div className="min-w-0 flex-1"><b className="block truncate text-sm">{o.customer_name} <small className="text-[#887C72]">{o.code}</small></b><p className="truncate text-xs font-semibold text-[#776C64]">{dateText(o.ordered_at)} · {o.item_count} món · {o.items.map(x=>x.product_name).join(', ')}</p></div><div className="shrink-0 text-right"><b className="text-sm text-[#203354]">{cash(o.total)}</b><p className="text-[10px] font-black text-[#277044]">Lãi {cash(o.profit)}</p></div><Link href={`/business/orders#edit-${o.id}`} aria-label={`Sửa đơn ${o.code}`} title="Sửa đơn" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#D8CCC0] bg-white text-[#203354]"><Pencil size={15}/></Link></div>}
+function OrderRow({o}:{o:Order}){return <div className="flex min-w-0 items-center gap-2 py-3"><div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${o.payment_status==='paid'?'bg-[#EAF3ED] text-[#277044]':'bg-[#FFF3DF] text-[#9A641A]'}`}><ReceiptText className="h-5"/></div><div className="min-w-0 flex-1"><b className="block truncate text-sm">{o.customer_name} <small className="text-[#887C72]">{o.code}</small></b><p className="truncate text-xs font-semibold text-[#776C64]">{dateText(o.ordered_at)} · {o.item_count} món · {o.items.map(x=>x.product_name).join(', ')}</p></div><div className="shrink-0 text-right"><b className="text-sm text-[#203354]">{cash(o.total)}</b><p className="text-[10px] font-black text-[#277044]">Lãi {cash(o.profit)}</p></div><Link href={`/business/orders#edit-${o.id}`} aria-label={`Sửa đơn ${o.code}`} title="Sửa đơn" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#D8CCC0] bg-white text-[#203354] hover:bg-[#F2ECE3] transition-colors"><MinimalEdit size={14}/></Link></div>}
 
 function Reports({ledgers,ledger,choose,addBook,headers,notify,fail,report,setReport,loading}:Shared&{report:Report|null;setReport:React.Dispatch<React.SetStateAction<Report|null>>;loading:boolean}){
  const [open,setOpen]=useState(false),[saving,setSaving]=useState(false),[e,setE]=useState({category:'',amount:'',note:'',spent_at:nowDate()});
