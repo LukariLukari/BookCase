@@ -15,7 +15,7 @@ import {
   Loader2,
   Menu,
   X,
-  WalletCards
+  ShoppingBag
 } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
@@ -51,7 +51,7 @@ export default function Sidebar() {
       href: '/quotes',
     },
     { 
-      icon: <WalletCards size={20} />, 
+      icon: <ShoppingBag size={20} />,
       label: 'Thu chi shop', 
       href: '/business',
     },

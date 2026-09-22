@@ -1,55 +1,43 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import bcrypt from 'bcryptjs';
-import { signJwt } from '@/lib/auth';
+
+const backend = () => (
+  process.env.BACKEND_API_URL ||
+  (process.env.NODE_ENV === 'production'
+    ? 'https://virtual-bookshelf-api.onrender.com'
+    : 'http://localhost:8000')
+).replace(/\/$/, '');
 
 export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
-
     if (!username || !password) {
-      return NextResponse.json(
-        { detail: 'Username and password are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ detail: 'Vui lòng nhập tên đăng nhập và mật khẩu.' }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { username },
+    const form = new URLSearchParams({ username: username.trim(), password });
+    const authResponse = await fetch(`${backend()}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form,
+      cache: 'no-store',
     });
-
-    if (!user) {
-      return NextResponse.json(
-        { detail: 'Incorrect username or password' },
-        { status: 401 }
-      );
+    const authBody = await authResponse.json().catch(() => ({}));
+    if (!authResponse.ok) {
+      return NextResponse.json(authBody, { status: authResponse.status });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { detail: 'Incorrect username or password' },
-        { status: 401 }
-      );
-    }
-
-    const token = signJwt({ sub: user.username, id: user.id, role: user.role });
-
-    return NextResponse.json({
-      access_token: token,
-      token_type: 'bearer',
-      user: {
-        id: user.id,
-        username: user.username,
-        role: user.role,
-      },
+    const meResponse = await fetch(`${backend()}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${authBody.access_token}` },
+      cache: 'no-store',
     });
+    const user = await meResponse.json().catch(() => null);
+    if (!meResponse.ok || !user) {
+      return NextResponse.json({ detail: 'Không thể tải thông tin tài khoản.' }, { status: 502 });
+    }
+
+    return NextResponse.json({ ...authBody, user });
   } catch (error) {
-    console.error('Login error:', error);
-    return NextResponse.json(
-      { detail: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Login gateway error:', error);
+    return NextResponse.json({ detail: 'Máy chủ dữ liệu đang tạm thời không phản hồi.' }, { status: 503 });
   }
 }

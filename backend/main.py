@@ -22,6 +22,7 @@ from email_service import send_otp_email
 from datetime import datetime, timezone
 import random
 import string
+import secrets
 import time
 import unicodedata
 
@@ -187,7 +188,8 @@ def keep_alive_task():
 
 @app.get("/api/ping")
 def ping():
-    return {"status": "awake", "message": "Pong!"}
+    storage = "postgresql" if engine.url.get_backend_name().startswith("postgresql") else "local-sqlite"
+    return {"status": "awake", "message": "Pong!", "storage": storage}
 
 _business_tables_ready = False
 
@@ -1573,7 +1575,10 @@ def remove_book_from_collection(collection_id: str, book_id: str, db: Session = 
 @app.post("/api/admin/registration-codes", response_model=schemas.RegistrationCodeResponse)
 def create_registration_code(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
     while True:
-        code_str = "BC-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        # Cryptographically secure, 60-bit invite key. Avoid ambiguous chars
+        # (0/O and 1/I) when an admin reads the key to a user.
+        alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+        code_str = "BC-" + ''.join(secrets.choice(alphabet) for _ in range(12))
         exists = db.query(models.RegistrationCode).filter(models.RegistrationCode.code == code_str).first()
         if not exists:
             break
@@ -1614,7 +1619,8 @@ def regenerate_registration_code(code_id: str, db: Session = Depends(get_db), cu
         raise HTTPException(status_code=400, detail="Không thể đổi mã đã được sử dụng.")
         
     while True:
-        code_str = "BC-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+        code_str = "BC-" + ''.join(secrets.choice(alphabet) for _ in range(12))
         exists = db.query(models.RegistrationCode).filter(models.RegistrationCode.code == code_str).first()
         if not exists:
             break
@@ -1670,23 +1676,26 @@ def send_otp(otp_request: schemas.OTPRequest, db: Session = Depends(get_db)):
 
 @app.post("/api/auth/register")
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    username = user.username.strip()
+    email = user.email.strip().lower()
     # Check registration code
     if not user.registration_code:
         raise HTTPException(status_code=400, detail="Vui lòng cung cấp mã đăng ký do Admin cấp.")
         
+    # Lock the row so two simultaneous requests cannot redeem one key twice.
     reg_code = db.query(models.RegistrationCode).filter(
         models.RegistrationCode.code == user.registration_code.strip().upper(),
         models.RegistrationCode.is_used == False
-    ).first()
+    ).with_for_update().first()
     if not reg_code:
         raise HTTPException(status_code=400, detail="Mã đăng ký không hợp lệ hoặc đã được sử dụng.")
 
     # Check username
-    db_user_by_username = db.query(models.User).filter(models.User.username == user.username).first()
+    db_user_by_username = db.query(models.User).filter(models.User.username == username).first()
     if db_user_by_username:
         raise HTTPException(status_code=400, detail="Tên đăng nhập đã tồn tại.")
         
-    db_user_by_email = db.query(models.User).filter(models.User.email == user.email).first()
+    db_user_by_email = db.query(models.User).filter(func.lower(models.User.email) == email).first()
     if db_user_by_email:
         raise HTTPException(status_code=400, detail="Email này đã được đăng ký.")
         
@@ -1707,10 +1716,12 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     
     # Mark registration code as used
     reg_code.is_used = True
-    reg_code.used_by_username = user.username
+    reg_code.used_by_username = username
     
     hashed_password = auth.get_password_hash(user.password)
-    new_user = models.User(username=user.username, email=user.email, password_hash=hashed_password, role=user.role)
+    # Registration keys only create normal users. Never trust a public payload
+    # to grant the admin role.
+    new_user = models.User(username=username, email=email, password_hash=hashed_password, role="user")
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

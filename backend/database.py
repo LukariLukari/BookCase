@@ -8,6 +8,11 @@ DEFAULT_DB_PATH = os.path.join(BASE_DIR, "bookshelf.db")
 
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_DB_PATH}").strip().replace("\n", "").replace("\r", "")
 
+if os.getenv("RENDER") and "DATABASE_URL" not in os.environ:
+    raise RuntimeError(
+        "DATABASE_URL is required on Render. Local SQLite is ephemeral and cannot sync data across devices."
+    )
+
 if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
     SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
