@@ -1,46 +1,34 @@
 import { NextResponse } from 'next/server';
-
-const backend = () => (
-  process.env.BACKEND_API_URL ||
-  (process.env.NODE_ENV === 'production'
-    ? 'https://bookcase-api.onrender.com'
-    : 'http://localhost:8000')
-).replace(/\/$/, '');
+import bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/db';
+import { signJwt } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
-    if (!username || !password) {
+    const normalized = String(username || '').trim();
+    if (!normalized || !password) {
       return NextResponse.json({ detail: 'Vui lòng nhập tên đăng nhập và mật khẩu.' }, { status: 400 });
     }
-
-    const form = new URLSearchParams({ username: username.trim(), password });
-    const authResponse = await fetch(`${backend()}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: form,
-      cache: 'no-store',
-    });
-    const authBody = await authResponse.json().catch(() => ({}));
-    if (!authResponse.ok) {
-      const detail = authBody.detail || (authResponse.status >= 500
-        ? 'Máy chủ dữ liệu đang tạm ngừng hoặc chưa sẵn sàng. Vui lòng bật lại backend Render.'
-        : 'Tên đăng nhập hoặc mật khẩu không đúng.');
-      return NextResponse.json({ ...authBody, detail }, { status: authResponse.status });
+    let user = await prisma.user.findUnique({ where: { username: normalized } });
+    // One-time, environment-controlled bootstrap for a brand-new Vercel DB.
+    // No default production password is stored in source code.
+    if (!user && normalized === (process.env.ADMIN_USERNAME || 'admin') && process.env.ADMIN_SETUP_KEY && password === process.env.ADMIN_SETUP_KEY) {
+      user = await prisma.user.create({
+        data: { username: normalized, password_hash: await bcrypt.hash(password, 12), role: 'admin' },
+      });
     }
-
-    const meResponse = await fetch(`${backend()}/api/auth/me`, {
-      headers: { Authorization: `Bearer ${authBody.access_token}` },
-      cache: 'no-store',
-    });
-    const user = await meResponse.json().catch(() => null);
-    if (!meResponse.ok || !user) {
-      return NextResponse.json({ detail: 'Không thể tải thông tin tài khoản.' }, { status: 502 });
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+      return NextResponse.json({ detail: 'Tên đăng nhập hoặc mật khẩu không đúng.' }, { status: 401 });
     }
-
-    return NextResponse.json({ ...authBody, user });
+    const access_token = signJwt({ sub: user.username, id: user.id, role: user.role });
+    return NextResponse.json({
+      access_token,
+      token_type: 'bearer',
+      user: { id: user.id, username: user.username, email: user.email, role: user.role },
+    });
   } catch (error) {
-    console.error('Login gateway error:', error);
-    return NextResponse.json({ detail: 'Máy chủ dữ liệu đang tạm thời không phản hồi.' }, { status: 503 });
+    console.error('Login error:', error);
+    return NextResponse.json({ detail: 'Không thể kết nối cơ sở dữ liệu Vercel.' }, { status: 503 });
   }
 }

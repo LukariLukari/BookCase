@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Client code only sees the same-origin gateway. BACKEND_API_URL remains a
-  // server-side deployment secret and can be changed without rebuilding URLs
-  // into every browser bundle.
+  // Existing clients use this prefix; the route is implemented locally by
+  // Next.js/Prisma on Vercel and never proxies to an external server.
   env: {
     NEXT_PUBLIC_API_URL: '/api/backend',
   },

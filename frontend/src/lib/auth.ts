@@ -1,14 +1,19 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+function jwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (secret) return secret;
+  if (process.env.NODE_ENV !== 'production') return 'bookcase-local-development-only';
+  throw new Error('JWT_SECRET is required in production');
+}
 
 export function signJwt(payload: any, expiresIn: string = '7d') {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: expiresIn as any });
+  return jwt.sign(payload, jwtSecret(), { expiresIn: expiresIn as any });
 }
 
 export function verifyJwt(token: string) {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, jwtSecret());
   } catch (error) {
     return null;
   }
