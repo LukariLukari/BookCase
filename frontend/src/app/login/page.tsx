@@ -40,6 +40,8 @@ export default function LoginPage() {
     } catch (err: any) {
       if (!err.response) {
         setError(`Không thể kết nối tới Backend API (${API_URL}). Vui lòng kiểm tra địa chỉ Backend API hoặc kiểm tra server đã được khởi động chưa!`);
+      } else if (err.response.status === 503 || (typeof err.response.data === 'string' && err.response.data.includes('suspended'))) {
+        setError('Máy chủ Backend (Render) đang bị tạm dừng (Service Suspended). Vui lòng vào Render Dashboard để kích hoạt lại (Resume) dịch vụ.');
       } else {
         setError(err.response?.data?.detail || 'Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản & mật khẩu.');
       }
