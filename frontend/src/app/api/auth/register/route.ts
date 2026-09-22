@@ -32,6 +32,7 @@ export async function POST(request: Request) {
     if (message === 'INVALID_CODE') return NextResponse.json({ detail: 'Mã đăng ký không hợp lệ hoặc đã được sử dụng.' }, { status: 400 });
     if (message === 'DUPLICATE_USER') return NextResponse.json({ detail: 'Tên đăng nhập hoặc email đã tồn tại.' }, { status: 400 });
     console.error('Registration error:', error);
-    return NextResponse.json({ detail: 'Không thể kết nối cơ sở dữ liệu Vercel.' }, { status: 503 });
+    const hasDatabase = Boolean(process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING);
+    return NextResponse.json({ detail: hasDatabase ? 'Không thể kết nối PostgreSQL hoặc schema chưa được đồng bộ.' : 'Vercel chưa được gắn PostgreSQL.' }, { status: 503 });
   }
 }

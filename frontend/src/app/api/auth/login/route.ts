@@ -29,6 +29,13 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Login error:', error);
-    return NextResponse.json({ detail: 'Không thể kết nối cơ sở dữ liệu Vercel.' }, { status: 503 });
+    const hasDatabase = Boolean(process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING);
+    const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : undefined;
+    const detail = !hasDatabase
+      ? 'Vercel chưa được gắn PostgreSQL. Hãy thêm DATABASE_URL trong Environment Variables.'
+      : code === 'P2021'
+        ? 'Database chưa có bảng dữ liệu. Redeploy để hệ thống tự đồng bộ Prisma schema.'
+        : 'Vercel có cấu hình database nhưng không thể kết nối. Kiểm tra URL và quyền truy cập PostgreSQL.';
+    return NextResponse.json({ detail, code: code || 'DATABASE_CONNECTION_FAILED' }, { status: 503 });
   }
 }
