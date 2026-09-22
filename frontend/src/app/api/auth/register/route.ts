@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 const backend = () => (
   process.env.BACKEND_API_URL ||
   (process.env.NODE_ENV === 'production'
-    ? 'https://virtual-bookshelf-api.onrender.com'
+    ? 'https://bookcase-api.onrender.com'
     : 'http://localhost:8000')
 ).replace(/\/$/, '');
 
@@ -16,7 +16,11 @@ export async function POST(request: Request) {
       body: JSON.stringify({ ...body, registration_code: body.registration_code?.trim().toUpperCase(), role: 'user' }),
       cache: 'no-store',
     });
-    const result = await response.json().catch(() => ({ detail: 'Phản hồi máy chủ không hợp lệ.' }));
+    const result = await response.json().catch(() => ({
+      detail: response.status >= 500
+        ? 'Máy chủ dữ liệu đang tạm ngừng hoặc chưa sẵn sàng. Vui lòng bật lại backend Render.'
+        : 'Phản hồi máy chủ không hợp lệ.',
+    }));
     return NextResponse.json(result, { status: response.status });
   } catch (error) {
     console.error('Registration gateway error:', error);

@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 const BACKEND_URL = (
   process.env.BACKEND_API_URL ||
   (process.env.NODE_ENV === 'production'
-    ? 'https://virtual-bookshelf-api.onrender.com'
+    ? 'https://bookcase-api.onrender.com'
     : 'http://localhost:8000')
 ).replace(/\/$/, '');
 

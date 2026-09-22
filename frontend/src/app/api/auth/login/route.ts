@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 const backend = () => (
   process.env.BACKEND_API_URL ||
   (process.env.NODE_ENV === 'production'
-    ? 'https://virtual-bookshelf-api.onrender.com'
+    ? 'https://bookcase-api.onrender.com'
     : 'http://localhost:8000')
 ).replace(/\/$/, '');
 
@@ -23,7 +23,10 @@ export async function POST(request: Request) {
     });
     const authBody = await authResponse.json().catch(() => ({}));
     if (!authResponse.ok) {
-      return NextResponse.json(authBody, { status: authResponse.status });
+      const detail = authBody.detail || (authResponse.status >= 500
+        ? 'Máy chủ dữ liệu đang tạm ngừng hoặc chưa sẵn sàng. Vui lòng bật lại backend Render.'
+        : 'Tên đăng nhập hoặc mật khẩu không đúng.');
+      return NextResponse.json({ ...authBody, detail }, { status: authResponse.status });
     }
 
     const meResponse = await fetch(`${backend()}/api/auth/me`, {
