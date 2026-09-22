@@ -373,6 +373,7 @@ export default function AdminPage() {
       setIsFetchingBooks(true);
       setDownloadProgress(0);
       const response = await axios.get(`${baseUrl}/api/books`, {
+        headers: getHeaders(),
         timeout: 15000,
         onDownloadProgress: (progressEvent) => {
           if (progressEvent.total) {
@@ -389,11 +390,8 @@ export default function AdminPage() {
       setError(null);
     } catch (err: any) {
       console.error('Lỗi lấy dữ liệu sách:', err);
-      if (err.response?.status === 401) {
-        logout();
-      } else {
-        setError(err.message || 'Lỗi kết nối API');
-      }
+      // Lỗi của API dữ liệu phụ không được phép xóa phiên đăng nhập hợp lệ.
+      setError(err.response?.data?.detail || err.message || 'Không thể tải dữ liệu sách');
       setIsFetchingBooks(false);
     }
   };
