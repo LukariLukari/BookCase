@@ -25,7 +25,7 @@ export default function RegisterPage() {
     setIsLoading(true);
     
     try {
-      const res = await axios.post(`${baseUrl}/api/auth/register`, {
+      const res = await axios.post('/api/auth/register', {
         username,
         email,
         password,
@@ -33,16 +33,13 @@ export default function RegisterPage() {
         role: 'user'
       });
       
-      // Auto-login after successful registration
       const token = res.data.access_token;
       const user = res.data.user;
       login(token, user);
       
     } catch (err: any) {
       if (!err.response) {
-        setError(`Không thể kết nối tới Backend API (${baseUrl}). Vui lòng kiểm tra kết nối mạng hoặc server.`);
-      } else if (err.response.status === 503 || (typeof err.response.data === 'string' && err.response.data.includes('suspended'))) {
-        setError('Máy chủ Backend (Render) đang bị tạm dừng (Service Suspended). Vui lòng vào Render Dashboard để kích hoạt lại (Resume) dịch vụ.');
+        setError('Không thể kết nối tới server. Vui lòng kiểm tra mạng!');
       } else if (typeof err.response.data?.detail === 'string') {
         setError(err.response.data.detail);
       } else if (Array.isArray(err.response.data?.detail)) {

@@ -1,6 +1,5 @@
-import BooksClient from './BooksClient';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return <BooksClient initialBooks={[]} />;
+  redirect('/business');
 }
-

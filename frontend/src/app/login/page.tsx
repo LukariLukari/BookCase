@@ -20,28 +20,13 @@ export default function LoginPage() {
     setError('');
     
     try {
-      const formData = new URLSearchParams();
-      formData.append('username', username);
-      formData.append('password', password);
-
-      // Login to get token
-      const res = await axios.post(`${baseUrl}/api/auth/login`, formData, {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-      });
-      
+      const res = await axios.post('/api/auth/login', { username, password });
       const token = res.data.access_token;
       
-      // Fetch user profile
-      const userRes = await axios.get(`${baseUrl}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      login(token, userRes.data);
+      login(token, res.data.user);
     } catch (err: any) {
       if (!err.response) {
-        setError(`Không thể kết nối tới Backend API (${API_URL}). Vui lòng kiểm tra địa chỉ Backend API hoặc kiểm tra server đã được khởi động chưa!`);
-      } else if (err.response.status === 503 || (typeof err.response.data === 'string' && err.response.data.includes('suspended'))) {
-        setError('Máy chủ Backend (Render) đang bị tạm dừng (Service Suspended). Vui lòng vào Render Dashboard để kích hoạt lại (Resume) dịch vụ.');
+        setError('Không thể kết nối tới server. Vui lòng kiểm tra mạng!');
       } else {
         setError(err.response?.data?.detail || 'Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản & mật khẩu.');
       }

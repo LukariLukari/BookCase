@@ -78,6 +78,10 @@ export default function AdminRegistrationCodesPage() {
       console.error(err);
       if (err.response?.status === 401) {
         logout();
+      } else if (!err.response) {
+        setError(`Không thể kết nối tới Backend API (${baseUrl}). Vui lòng kiểm tra server.`);
+      } else if (err.response?.status === 503 || (typeof err.response?.data === 'string' && err.response?.data.includes('suspended'))) {
+        setError('Máy chủ Backend (Render) đang bị tạm dừng (Service Suspended). Vui lòng vào Render Dashboard để kích hoạt lại (Resume) dịch vụ.');
       } else {
         setError(err.response?.data?.detail || 'Không thể tải danh sách mã đăng ký.');
       }
