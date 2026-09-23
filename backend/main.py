@@ -198,6 +198,7 @@ def ensure_business_tables(db: Session):
     if _business_tables_ready:
         return
     try:
+        models.BusinessInventoryBatch.__table__.create(bind=engine, checkfirst=True)
         models.BusinessProduct.__table__.create(bind=engine, checkfirst=True)
         models.BusinessTransaction.__table__.create(bind=engine, checkfirst=True)
         models.BusinessLedger.__table__.create(bind=engine, checkfirst=True)
@@ -206,12 +207,50 @@ def ensure_business_tables(db: Session):
         models.BusinessOrder.__table__.create(bind=engine, checkfirst=True)
         models.BusinessOrderItem.__table__.create(bind=engine, checkfirst=True)
         models.BusinessExpense.__table__.create(bind=engine, checkfirst=True)
-        for table in [models.BusinessProduct.__table__, models.BusinessOrder.__table__, models.BusinessExpense.__table__]:
+        # Existing installations predate batches, so add the nullable links in place.
+        for table_name, column_name in [("business_products", "batch_id"), ("business_stock_receipts", "batch_id")]:
+            try:
+                db.execute(text(f"ALTER TABLE {table_name} ADD COLUMN batch_id VARCHAR"))
+                db.commit()
+            except Exception:
+                db.rollback()
+        for table in [models.BusinessInventoryBatch.__table__, models.BusinessProduct.__table__, models.BusinessOrder.__table__, models.BusinessExpense.__table__]:
             for index in table.indexes:
                 index.create(bind=engine, checkfirst=True)
         _business_tables_ready = True
     except Exception as e:
         print(f"[Business Tables] create/check failed: {e}")
+
+
+def ensure_default_inventory_batch(db: Session, user_id: str) -> models.BusinessInventoryBatch:
+    batch = (
+        db.query(models.BusinessInventoryBatch)
+        .filter(models.BusinessInventoryBatch.user_id == user_id)
+        .order_by(models.BusinessInventoryBatch.created_at.desc())
+        .first()
+    )
+    if not batch:
+        batch = models.BusinessInventoryBatch(user_id=user_id, name="Lô hàng 1")
+        db.add(batch)
+        db.flush()
+    db.query(models.BusinessProduct).filter(
+        models.BusinessProduct.user_id == user_id,
+        models.BusinessProduct.batch_id.is_(None),
+    ).update({models.BusinessProduct.batch_id: batch.id}, synchronize_session=False)
+    db.commit()
+    db.refresh(batch)
+    return batch
+
+
+def serialize_inventory_batch(batch: models.BusinessInventoryBatch) -> dict:
+    active_products = [product for product in (batch.products or []) if product.is_active is not False]
+    return {
+        "id": batch.id,
+        "name": batch.name,
+        "product_count": len(active_products),
+        "stock_quantity": sum(product.stock_quantity or 0 for product in active_products),
+        "created_at": batch.created_at,
+    }
 
 def validate_business_transaction(tx_type: str, category: str):
     if tx_type not in ["income", "expense"]:
@@ -257,6 +296,8 @@ def serialize_business_product(p: models.BusinessProduct, transactions: Optional
     return {
         "id": p.id,
         "user_id": p.user_id,
+        "batch_id": p.batch_id,
+        "batch_name": p.batch.name if p.batch else None,
         "name": p.name,
         "sku": p.sku,
         "category": p.category,
@@ -322,6 +363,8 @@ def serialize_stock_receipt(receipt: models.BusinessStockReceipt) -> dict:
     item_cost = sum((item.unit_cost or 0) * (item.quantity or 0) for item in items)
     return {
         "id": receipt.id,
+        "batch_id": receipt.batch_id,
+        "batch_name": receipt.batch.name if receipt.batch else None,
         "code": receipt.code,
         "supplier_name": receipt.supplier_name,
         "extra_cost": receipt.extra_cost or 0,
@@ -2606,6 +2649,67 @@ def create_business_ledger(ledger_in: schemas.BusinessLedgerCreate, db: Session 
     return serialize_ledger(ledger)
 
 
+@app.get("/api/business/inventory-batches", response_model=List[schemas.BusinessInventoryBatchResponse])
+def get_inventory_batches(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    ensure_default_inventory_batch(db, current_user.id)
+    batches = (
+        db.query(models.BusinessInventoryBatch)
+        .options(selectinload(models.BusinessInventoryBatch.products))
+        .filter(models.BusinessInventoryBatch.user_id == current_user.id)
+        .order_by(models.BusinessInventoryBatch.created_at.desc())
+        .all()
+    )
+    return [serialize_inventory_batch(batch) for batch in batches]
+
+
+@app.post("/api/business/inventory-batches", response_model=schemas.BusinessInventoryBatchResponse)
+def create_inventory_batch(batch_in: schemas.BusinessInventoryBatchCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    name = batch_in.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Tên lô hàng không được để trống")
+    batch = models.BusinessInventoryBatch(user_id=current_user.id, name=name)
+    db.add(batch)
+    db.commit()
+    db.refresh(batch)
+    return serialize_inventory_batch(batch)
+
+
+@app.put("/api/business/inventory-batches/{batch_id}", response_model=schemas.BusinessInventoryBatchResponse)
+def update_inventory_batch(batch_id: str, batch_in: schemas.BusinessInventoryBatchCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    batch = db.query(models.BusinessInventoryBatch).filter(models.BusinessInventoryBatch.id == batch_id, models.BusinessInventoryBatch.user_id == current_user.id).first()
+    if not batch:
+        raise HTTPException(status_code=404, detail="Không tìm thấy lô hàng")
+    name = batch_in.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Tên lô hàng không được để trống")
+    batch.name = name
+    db.commit()
+    db.refresh(batch)
+    return serialize_inventory_batch(batch)
+
+
+@app.delete("/api/business/inventory-batches/{batch_id}")
+def delete_inventory_batch(batch_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    batch = db.query(models.BusinessInventoryBatch).filter(models.BusinessInventoryBatch.id == batch_id, models.BusinessInventoryBatch.user_id == current_user.id).first()
+    if not batch:
+        raise HTTPException(status_code=404, detail="Không tìm thấy lô hàng")
+    replacement = (
+        db.query(models.BusinessInventoryBatch)
+        .filter(models.BusinessInventoryBatch.user_id == current_user.id, models.BusinessInventoryBatch.id != batch.id)
+        .order_by(models.BusinessInventoryBatch.created_at.desc())
+        .first()
+    )
+    if not replacement:
+        raise HTTPException(status_code=400, detail="Cần giữ lại ít nhất một lô hàng")
+    db.query(models.BusinessProduct).filter(models.BusinessProduct.batch_id == batch.id).update({models.BusinessProduct.batch_id: replacement.id}, synchronize_session=False)
+    db.query(models.BusinessStockReceipt).filter(models.BusinessStockReceipt.batch_id == batch.id).update({models.BusinessStockReceipt.batch_id: replacement.id}, synchronize_session=False)
+    db.delete(batch)
+    db.commit()
+    return {"message": "Đã xóa lô hàng và chuyển sản phẩm sang lô gần nhất", "replacement_batch_id": replacement.id}
+
+
 @app.get("/api/business/stock-receipts", response_model=List[schemas.BusinessStockReceiptResponse])
 def get_stock_receipts(limit: int = 30, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     ensure_business_tables(db)
@@ -2637,9 +2741,17 @@ def create_stock_receipt(receipt_in: schemas.BusinessStockReceiptCreate, db: Ses
         raise HTTPException(status_code=404, detail="Có sản phẩm không tồn tại")
     if any(item.quantity <= 0 or item.unit_cost < 0 for item in receipt_in.items):
         raise HTTPException(status_code=400, detail="Số lượng phải lớn hơn 0 và giá vốn không được âm")
+    batch = None
+    if receipt_in.batch_id:
+        batch = db.query(models.BusinessInventoryBatch).filter(models.BusinessInventoryBatch.id == receipt_in.batch_id, models.BusinessInventoryBatch.user_id == current_user.id).first()
+        if not batch:
+            raise HTTPException(status_code=404, detail="Không tìm thấy lô hàng")
+    else:
+        batch = ensure_default_inventory_batch(db, current_user.id)
     count = db.query(models.BusinessStockReceipt).filter(models.BusinessStockReceipt.user_id == current_user.id).count() + 1
     receipt = models.BusinessStockReceipt(
         user_id=current_user.id,
+        batch_id=batch.id,
         code=f"NK-{datetime.now().strftime('%y%m')}-{count:04d}",
         supplier_name=receipt_in.supplier_name,
         extra_cost=max(receipt_in.extra_cost, 0),
@@ -2652,6 +2764,7 @@ def create_stock_receipt(receipt_in: schemas.BusinessStockReceiptCreate, db: Ses
         product = product_map[item.product_id]
         product.stock_quantity = (product.stock_quantity or 0) + item.quantity
         product.unit_cost = item.unit_cost
+        product.batch_id = batch.id
         db.add(models.BusinessStockReceiptItem(
             receipt_id=receipt.id,
             product_id=product.id,
@@ -2663,6 +2776,26 @@ def create_stock_receipt(receipt_in: schemas.BusinessStockReceiptCreate, db: Ses
         selectinload(models.BusinessStockReceipt.items).selectinload(models.BusinessStockReceiptItem.product)
     ).filter(models.BusinessStockReceipt.id == receipt.id).first()
     return serialize_stock_receipt(receipt)
+
+
+@app.delete("/api/business/stock-receipts/{receipt_id}")
+def delete_stock_receipt(receipt_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    receipt = db.query(models.BusinessStockReceipt).options(selectinload(models.BusinessStockReceipt.items)).filter(models.BusinessStockReceipt.id == receipt_id, models.BusinessStockReceipt.user_id == current_user.id).first()
+    if not receipt:
+        raise HTTPException(status_code=404, detail="Không tìm thấy phiếu nhập")
+    products = db.query(models.BusinessProduct).filter(models.BusinessProduct.user_id == current_user.id, models.BusinessProduct.id.in_([item.product_id for item in receipt.items])).all()
+    product_map = {product.id: product for product in products}
+    for item in receipt.items:
+        product = product_map.get(item.product_id)
+        if product and (product.stock_quantity or 0) < (item.quantity or 0):
+            raise HTTPException(status_code=409, detail=f'Không thể xóa vì một phần "{product.name}" trong phiếu đã được bán')
+    for item in receipt.items:
+        product = product_map.get(item.product_id)
+        if product:
+            product.stock_quantity = (product.stock_quantity or 0) - (item.quantity or 0)
+    db.delete(receipt)
+    db.commit()
+    return {"message": "Đã xóa phiếu nhập và hoàn tác tồn kho"}
 
 
 @app.get("/api/business/orders", response_model=List[schemas.BusinessOrderResponse])
@@ -2948,6 +3081,7 @@ def get_business_summary(db: Session = Depends(get_db), current_user: models.Use
 @app.get("/api/business/products", response_model=List[schemas.BusinessProductResponse])
 def get_business_products(include_legacy_metrics: bool = False, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     ensure_business_tables(db)
+    ensure_default_inventory_batch(db, current_user.id)
     products = (
         db.query(models.BusinessProduct)
         .filter(models.BusinessProduct.user_id == current_user.id)
@@ -2968,7 +3102,12 @@ def get_business_products(include_legacy_metrics: bool = False, db: Session = De
 @app.post("/api/business/products", response_model=schemas.BusinessProductResponse)
 def create_business_product(product_in: schemas.BusinessProductCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     ensure_business_tables(db)
-    product = models.BusinessProduct(user_id=current_user.id, **product_in.dict())
+    payload = product_in.dict()
+    batch_id = payload.pop("batch_id", None)
+    batch = db.query(models.BusinessInventoryBatch).filter(models.BusinessInventoryBatch.id == batch_id, models.BusinessInventoryBatch.user_id == current_user.id).first() if batch_id else ensure_default_inventory_batch(db, current_user.id)
+    if batch_id and not batch:
+        raise HTTPException(status_code=404, detail="Không tìm thấy lô hàng")
+    product = models.BusinessProduct(user_id=current_user.id, batch_id=batch.id, **payload)
     db.add(product)
     db.commit()
     db.refresh(product)
@@ -2981,7 +3120,12 @@ def update_business_product(product_id: str, product_in: schemas.BusinessProduct
     product = db.query(models.BusinessProduct).filter(models.BusinessProduct.id == product_id, models.BusinessProduct.user_id == current_user.id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    for key, value in product_in.dict(exclude_unset=True).items():
+    updates = product_in.dict(exclude_unset=True)
+    if "batch_id" in updates:
+        batch = db.query(models.BusinessInventoryBatch).filter(models.BusinessInventoryBatch.id == updates["batch_id"], models.BusinessInventoryBatch.user_id == current_user.id).first()
+        if not batch:
+            raise HTTPException(status_code=404, detail="Không tìm thấy lô hàng")
+    for key, value in updates.items():
         setattr(product, key, value)
     db.commit()
     db.refresh(product)

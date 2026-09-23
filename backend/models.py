@@ -151,12 +151,27 @@ class BookReview(Base):
     user_book = relationship("UserBook")
 
 
+class BusinessInventoryBatch(Base):
+    __tablename__ = "business_inventory_batches"
+    __table_args__ = (Index("ix_business_inventory_batches_user_created", "user_id", "created_at"),)
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
+    name = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    products = relationship("BusinessProduct", back_populates="batch")
+    receipts = relationship("BusinessStockReceipt", back_populates="batch")
+
+
 class BusinessProduct(Base):
     __tablename__ = "business_products"
     __table_args__ = (Index("ix_business_products_user_active", "user_id", "is_active"),)
 
     id = Column(String, primary_key=True, default=generate_uuid, index=True)
     user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
+    batch_id = Column(String, ForeignKey("business_inventory_batches.id", ondelete="SET NULL"), index=True, nullable=True)
     name = Column(String, index=True, nullable=False)
     sku = Column(String, nullable=True, index=True)
     category = Column(String, nullable=True, index=True)
@@ -173,6 +188,7 @@ class BusinessProduct(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     user = relationship("User")
+    batch = relationship("BusinessInventoryBatch", back_populates="products")
     transactions = relationship("BusinessTransaction", back_populates="product", cascade="all, delete-orphan")
 
 
@@ -223,6 +239,7 @@ class BusinessStockReceipt(Base):
 
     id = Column(String, primary_key=True, default=generate_uuid, index=True)
     user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
+    batch_id = Column(String, ForeignKey("business_inventory_batches.id", ondelete="SET NULL"), index=True, nullable=True)
     code = Column(String, index=True, nullable=False)
     supplier_name = Column(String, nullable=True)
     extra_cost = Column(Integer, default=0)
@@ -231,6 +248,7 @@ class BusinessStockReceipt(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     items = relationship("BusinessStockReceiptItem", back_populates="receipt", cascade="all, delete-orphan")
+    batch = relationship("BusinessInventoryBatch", back_populates="receipts")
 
 
 class BusinessStockReceiptItem(Base):

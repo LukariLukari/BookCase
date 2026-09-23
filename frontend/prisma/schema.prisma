@@ -16,59 +16,77 @@ model User {
   createdAt     DateTime @default(now())
 
   // Relations
-  products      BusinessProduct[]
-  transactions  BusinessTransaction[]
-  ledgers       BusinessLedger[]
-  receipts      BusinessStockReceipt[]
-  orders        BusinessOrder[]
-  expenses      BusinessExpense[]
-  customers     BusinessCustomer[]
-  orderPayments BusinessOrderPayment[]
-  statusHistory BusinessOrderStatusHistory[]
-  stockMovements BusinessInventoryMovement[]
+  products         BusinessProduct[]
+  transactions     BusinessTransaction[]
+  ledgers          BusinessLedger[]
+  receipts         BusinessStockReceipt[]
+  orders           BusinessOrder[]
+  expenses         BusinessExpense[]
+  customers        BusinessCustomer[]
+  orderPayments    BusinessOrderPayment[]
+  statusHistory    BusinessOrderStatusHistory[]
+  stockMovements   BusinessInventoryMovement[]
+  inventoryBatches BusinessInventoryBatch[]
 }
 
 model RegistrationCode {
-  id               String   @id @default(uuid())
-  code             String   @unique
-  isUsed           Boolean  @default(false)
-  usedByUsername   String?
-  createdBy        String?
-  createdAt        DateTime @default(now())
+  id             String   @id @default(uuid())
+  code           String   @unique
+  isUsed         Boolean  @default(false)
+  usedByUsername String?
+  createdBy      String?
+  createdAt      DateTime @default(now())
 }
 
 model BusinessProduct {
-  id              String   @id @default(uuid())
-  userId          String
-  name            String
-  sku             String?
-  category        String?
-  imageUrl        String?
-  sellingPrice    Int      @default(0)
-  unitCost        Int      @default(0)
-  stockQuantity   Int      @default(0)
-  socialLink      String?
-  supplierInfo    String?
-  customerInfo    String?
-  notes           String?
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String   @id @default(uuid())
+  userId        String
+  name          String
+  sku           String?
+  category      String?
+  imageUrl      String?
+  sellingPrice  Int      @default(0)
+  unitCost      Int      @default(0)
+  stockQuantity Int      @default(0)
+  batchId       String?
+  socialLink    String?
+  supplierInfo  String?
+  customerInfo  String?
+  notes         String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  user            User     @relation(fields: [userId], references: [id])
-  transactions    BusinessTransaction[]
-  receiptItems    BusinessStockReceiptItem[]
-  orderItems      BusinessOrderItem[]
-  stockMovements  BusinessInventoryMovement[]
+  user           User                        @relation(fields: [userId], references: [id])
+  transactions   BusinessTransaction[]
+  receiptItems   BusinessStockReceiptItem[]
+  orderItems     BusinessOrderItem[]
+  stockMovements BusinessInventoryMovement[]
+  batch          BusinessInventoryBatch?     @relation(fields: [batchId], references: [id], onDelete: SetNull)
 
   @@index([userId, isActive])
+  @@index([userId, batchId])
+}
+
+model BusinessInventoryBatch {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products BusinessProduct[]
+  receipts BusinessStockReceipt[]
+
+  @@index([userId, createdAt])
 }
 
 model BusinessTransaction {
   id              String   @id @default(uuid())
   userId          String
   productId       String?
-  type            String   // "income" or "expense"
+  type            String // "income" or "expense"
   category        String
   amount          Int      @default(0)
   quantity        Int      @default(1)
@@ -83,29 +101,30 @@ model BusinessTransaction {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  user            User             @relation(fields: [userId], references: [id])
-  product         BusinessProduct? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  user    User             @relation(fields: [userId], references: [id])
+  product BusinessProduct? @relation(fields: [productId], references: [id], onDelete: SetNull)
 }
 
 model BusinessLedger {
   id          String   @id @default(uuid())
   userId      String
   name        String
-  month       String   // YYYY-MM
+  month       String // YYYY-MM
   openingCash Int      @default(0)
   note        String?
   isClosed    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id])
-  orders      BusinessOrder[]
-  expenses    BusinessExpense[]
+  user     User              @relation(fields: [userId], references: [id])
+  orders   BusinessOrder[]
+  expenses BusinessExpense[]
 }
 
 model BusinessStockReceipt {
   id           String   @id @default(uuid())
   userId       String
+  batchId      String?
   code         String
   supplierName String?
   extraCost    Int      @default(0)
@@ -113,19 +132,22 @@ model BusinessStockReceipt {
   receivedAt   DateTime
   createdAt    DateTime @default(now())
 
-  user         User     @relation(fields: [userId], references: [id])
-  items        BusinessStockReceiptItem[]
+  user  User                       @relation(fields: [userId], references: [id])
+  batch BusinessInventoryBatch?    @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  items BusinessStockReceiptItem[]
+
+  @@index([userId, batchId])
 }
 
 model BusinessStockReceiptItem {
-  id         String   @id @default(uuid())
-  receiptId  String
-  productId  String
-  quantity   Int
-  unitCost   Int      @default(0)
+  id        String @id @default(uuid())
+  receiptId String
+  productId String
+  quantity  Int
+  unitCost  Int    @default(0)
 
-  receipt    BusinessStockReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
-  product    BusinessProduct      @relation(fields: [productId], references: [id])
+  receipt BusinessStockReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  product BusinessProduct      @relation(fields: [productId], references: [id])
 }
 
 model BusinessOrder {
@@ -148,31 +170,31 @@ model BusinessOrder {
   updatedAt       DateTime @updatedAt
   customerId      String?
 
-  user            User            @relation(fields: [userId], references: [id])
-  ledger          BusinessLedger  @relation(fields: [ledgerId], references: [id], onDelete: Cascade)
-  items           BusinessOrderItem[]
-  customer        BusinessCustomer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  payments        BusinessOrderPayment[]
-  statusHistory   BusinessOrderStatusHistory[]
+  user          User                         @relation(fields: [userId], references: [id])
+  ledger        BusinessLedger               @relation(fields: [ledgerId], references: [id], onDelete: Cascade)
+  items         BusinessOrderItem[]
+  customer      BusinessCustomer?            @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  payments      BusinessOrderPayment[]
+  statusHistory BusinessOrderStatusHistory[]
 
   @@index([userId, ledgerId, orderedAt])
 }
 
 model BusinessCustomer {
-  id          String   @id @default(uuid())
-  userId      String
-  name        String
-  phone       String?
-  email       String?
-  socialLink  String?
-  address     String?
-  tags        String[] @default([])
-  note        String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(uuid())
+  userId     String
+  name       String
+  phone      String?
+  email      String?
+  socialLink String?
+  address    String?
+  tags       String[] @default([])
+  note       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orders      BusinessOrder[]
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders BusinessOrder[]
 
   @@unique([userId, phone])
   @@index([userId, name])
@@ -188,70 +210,70 @@ model BusinessOrderPayment {
   paidAt    DateTime @default(now())
   createdAt DateTime @default(now())
 
-  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  order     BusinessOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order BusinessOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([userId, orderId, paidAt])
 }
 
 model BusinessOrderStatusHistory {
-  id        String   @id @default(uuid())
-  userId    String
-  orderId   String
+  id         String   @id @default(uuid())
+  userId     String
+  orderId    String
   fromStatus String?
-  toStatus  String
-  note      String?
-  createdAt DateTime @default(now())
+  toStatus   String
+  note       String?
+  createdAt  DateTime @default(now())
 
-  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  order     BusinessOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order BusinessOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([userId, orderId, createdAt])
 }
 
 model BusinessInventoryMovement {
-  id          String   @id @default(uuid())
-  userId      String
-  productId   String
-  type        String
-  quantity    Int
-  balanceAfter Int
+  id            String   @id @default(uuid())
+  userId        String
+  productId     String
+  type          String
+  quantity      Int
+  balanceAfter  Int
   referenceType String?
-  referenceId String?
-  note        String?
-  createdAt   DateTime @default(now())
+  referenceId   String?
+  note          String?
+  createdAt     DateTime @default(now())
 
-  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product     BusinessProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product BusinessProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([userId, productId, createdAt])
 }
 
 model BusinessOrderItem {
-  id           String   @id @default(uuid())
-  orderId      String
-  productId    String
-  productName  String
-  quantity     Int
-  unitPrice    Int      @default(0)
-  unitCost     Int      @default(0)
+  id          String @id @default(uuid())
+  orderId     String
+  productId   String
+  productName String
+  quantity    Int
+  unitPrice   Int    @default(0)
+  unitCost    Int    @default(0)
 
-  order        BusinessOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product      BusinessProduct @relation(fields: [productId], references: [id])
+  order   BusinessOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product BusinessProduct @relation(fields: [productId], references: [id])
 }
 
 model BusinessExpense {
-  id          String   @id @default(uuid())
-  userId      String
-  ledgerId    String
-  category    String
-  amount      Int      @default(0)
-  note        String?
-  spentAt     DateTime
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  ledgerId  String
+  category  String
+  amount    Int      @default(0)
+  note      String?
+  spentAt   DateTime
+  createdAt DateTime @default(now())
 
-  user        User           @relation(fields: [userId], references: [id])
-  ledger      BusinessLedger @relation(fields: [ledgerId], references: [id], onDelete: Cascade)
+  user   User           @relation(fields: [userId], references: [id])
+  ledger BusinessLedger @relation(fields: [ledgerId], references: [id], onDelete: Cascade)
 
   @@index([userId, ledgerId, spentAt])
 }

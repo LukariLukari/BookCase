@@ -298,6 +298,7 @@ class ReaderDashboardResponse(BaseModel):
 
 class BusinessProductBase(BaseModel):
     name: str
+    batch_id: Optional[str] = None
     sku: Optional[str] = None
     category: Optional[str] = None
     image_url: Optional[str] = None
@@ -315,6 +316,7 @@ class BusinessProductCreate(BusinessProductBase):
 
 class BusinessProductUpdate(BaseModel):
     name: Optional[str] = None
+    batch_id: Optional[str] = None
     sku: Optional[str] = None
     category: Optional[str] = None
     image_url: Optional[str] = None
@@ -330,6 +332,7 @@ class BusinessProductUpdate(BaseModel):
 class BusinessProductResponse(BusinessProductBase):
     id: str
     user_id: str
+    batch_name: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     total_income: int = 0
@@ -423,6 +426,21 @@ class BusinessLedgerResponse(BusinessLedgerCreate):
         from_attributes = True
 
 
+class BusinessInventoryBatchCreate(BaseModel):
+    name: str
+
+
+class BusinessInventoryBatchResponse(BusinessInventoryBatchCreate):
+    id: str
+    product_count: int = 0
+    stock_quantity: int = 0
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+
 class BusinessStockItemCreate(BaseModel):
     product_id: str
     quantity: int
@@ -430,6 +448,7 @@ class BusinessStockItemCreate(BaseModel):
 
 
 class BusinessStockReceiptCreate(BaseModel):
+    batch_id: Optional[str] = None
     supplier_name: Optional[str] = None
     extra_cost: int = 0
     note: Optional[str] = None
@@ -444,6 +463,8 @@ class BusinessStockItemResponse(BusinessStockItemCreate):
 
 class BusinessStockReceiptResponse(BaseModel):
     id: str
+    batch_id: Optional[str] = None
+    batch_name: Optional[str] = None
     code: str
     supplier_name: Optional[str] = None
     extra_cost: int = 0
