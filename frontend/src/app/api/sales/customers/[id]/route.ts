@@ -1,0 +1,5 @@
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { getRequestUser } from '@/lib/auth';
+
+export async function PUT(request:Request,context:RouteContext<'/api/sales/customers/[id]'>){const user=getRequestUser(request);if(!user)return NextResponse.json({detail:'Phiên đăng nhập không hợp lệ.'},{status:401});const {id}=await context.params;const current=await prisma.businessCustomer.findFirst({where:{id,userId:user.id}});if(!current)return NextResponse.json({detail:'Không tìm thấy khách hàng.'},{status:404});const body=await request.json();const row=await prisma.businessCustomer.update({where:{id},data:{name:String(body.name||current.name).trim(),phone:String(body.phone||'').trim()||null,email:String(body.email||'').trim().toLowerCase()||null,socialLink:body.social_link||null,address:body.address||null,tags:Array.isArray(body.tags)?body.tags:[],note:body.note||null}});return NextResponse.json({id:row.id,name:row.name,phone:row.phone,email:row.email,social_link:row.socialLink,address:row.address,tags:row.tags,note:row.note});}

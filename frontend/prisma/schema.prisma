@@ -22,6 +22,10 @@ model User {
   receipts      BusinessStockReceipt[]
   orders        BusinessOrder[]
   expenses      BusinessExpense[]
+  customers     BusinessCustomer[]
+  orderPayments BusinessOrderPayment[]
+  statusHistory BusinessOrderStatusHistory[]
+  stockMovements BusinessInventoryMovement[]
 }
 
 model RegistrationCode {
@@ -55,6 +59,7 @@ model BusinessProduct {
   transactions    BusinessTransaction[]
   receiptItems    BusinessStockReceiptItem[]
   orderItems      BusinessOrderItem[]
+  stockMovements  BusinessInventoryMovement[]
 
   @@index([userId, isActive])
 }
@@ -141,12 +146,85 @@ model BusinessOrder {
   orderedAt       DateTime
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  customerId      String?
 
   user            User            @relation(fields: [userId], references: [id])
   ledger          BusinessLedger  @relation(fields: [ledgerId], references: [id], onDelete: Cascade)
   items           BusinessOrderItem[]
+  customer        BusinessCustomer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  payments        BusinessOrderPayment[]
+  statusHistory   BusinessOrderStatusHistory[]
 
   @@index([userId, ledgerId, orderedAt])
+}
+
+model BusinessCustomer {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  phone       String?
+  email       String?
+  socialLink  String?
+  address     String?
+  tags        String[] @default([])
+  note        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders      BusinessOrder[]
+
+  @@unique([userId, phone])
+  @@index([userId, name])
+}
+
+model BusinessOrderPayment {
+  id        String   @id @default(uuid())
+  userId    String
+  orderId   String
+  amount    Int
+  method    String   @default("cash")
+  note      String?
+  paidAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order     BusinessOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([userId, orderId, paidAt])
+}
+
+model BusinessOrderStatusHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  orderId   String
+  fromStatus String?
+  toStatus  String
+  note      String?
+  createdAt DateTime @default(now())
+
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order     BusinessOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([userId, orderId, createdAt])
+}
+
+model BusinessInventoryMovement {
+  id          String   @id @default(uuid())
+  userId      String
+  productId   String
+  type        String
+  quantity    Int
+  balanceAfter Int
+  referenceType String?
+  referenceId String?
+  note        String?
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product     BusinessProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([userId, productId, createdAt])
 }
 
 model BusinessOrderItem {
