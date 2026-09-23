@@ -1,336 +1,47 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { Check, Copy, KeyRound, Loader2, Plus, RefreshCw, Trash2, UserPlus } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
 import AdminTabs from '@/components/AdminTabs';
-import { KeyRound, Plus, Copy, Check, Trash2, ShieldCheck, ShieldAlert, Loader2, RefreshCw } from 'lucide-react';
 
-interface RegistrationCode {
-  id: string;
-  code: string;
-  is_used: boolean;
-  used_by_username: string | null;
-  created_at: string;
-  created_by: string | null;
-}
+type Code = { id:string; code:string; is_used:boolean; used_by_username:string|null; created_at:string; created_by:string|null };
 
-export default function AdminRegistrationCodesPage() {
-  const { user, token, logout, isLoading: isAuthLoading } = useAuth();
+export default function RegistrationCodesPage() {
+  const { user, token, logout, isLoading: authLoading } = useAuth();
   const router = useRouter();
-
-  const [codes, setCodes] = useState<RegistrationCode[]>([]);
+  const [codes, setCodes] = useState<Code[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isCreating, setIsCreating] = useState(false);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [successNotice, setSuccessNotice] = useState<string | null>(null);
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-  const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
-
+  const [creating, setCreating] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [error, setError] = useState('');
+  const headers = { Authorization: `Bearer ${token || ''}` };
+  const reportError = (value: unknown, fallback: string) => {
+    if (axios.isAxiosError(value) && value.response?.status === 401) logout();
+    setError(axios.isAxiosError(value) && typeof value.response?.data?.detail === 'string' ? value.response.data.detail : fallback);
+  };
+  useEffect(() => { if (!authLoading && (!user || user.role !== 'admin')) router.replace('/business'); }, [authLoading, user, router]);
   useEffect(() => {
-    if (!isAuthLoading && (!user || user.role !== 'admin')) {
-      router.push('/');
-    }
-  }, [user, isAuthLoading, router]);
-
-  useEffect(() => {
-    if (!isAuthLoading && user?.role === 'admin') {
-      fetchCodes();
-    }
-  }, [isAuthLoading, user]);
-
-  const getHeaders = () => {
-    const authToken = token || localStorage.getItem('access_token') || localStorage.getItem('token');
-    return { Authorization: `Bearer ${authToken}` };
-  };
-
-  const writeClipboard = async (value: string) => {
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(value);
-        return true;
-      }
-      const textarea = document.createElement('textarea');
-      textarea.value = value;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
-      const copied = document.execCommand('copy');
-      textarea.remove();
-      return copied;
-    } catch {
-      return false;
-    }
-  };
-
-  const fetchCodes = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${baseUrl}/api/admin/registration-codes`, {
-        headers: getHeaders()
-      });
-      setCodes(res.data);
-    } catch (err: any) {
-      console.error(err);
-      if (err.response?.status === 401) {
-        logout();
-      } else if (!err.response) {
-        setError(`Không thể kết nối tới Backend API (${baseUrl}). Vui lòng kiểm tra server.`);
-      } else if (err.response?.status === 503) {
-        setError('Không thể kết nối cơ sở dữ liệu. Vui lòng kiểm tra DATABASE_URL trên Vercel.');
-      } else {
-        setError(err.response?.data?.detail || 'Không thể tải danh sách mã đăng ký.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateCode = async () => {
-    try {
-      setIsCreating(true);
-      setError(null);
-      const res = await axios.post(`${baseUrl}/api/admin/registration-codes`, {}, {
-        headers: getHeaders()
-      });
-      const newCode = res.data.code;
-      const copied = await writeClipboard(newCode);
-      setCodes(prev => [res.data, ...prev]);
-      setSuccessNotice(copied ? `Đã tạo và sao chép mã: ${newCode}` : `Đã tạo mã: ${newCode}. Bấm Copy để sao chép.`);
-      setTimeout(() => setSuccessNotice(null), 5000);
-    } catch (err: any) {
-      if (err.response?.status === 401) {
-        logout();
-      } else {
-        setError(err.response?.data?.detail || 'Lỗi khi tạo mã đăng ký.');
-      }
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const handleRegenerateCode = async (id: string) => {
-    try {
-      setError(null);
-      const res = await axios.put(`${baseUrl}/api/admin/registration-codes/${id}/regenerate`, {}, {
-        headers: getHeaders()
-      });
-      const newCode = res.data.code;
-      const copied = await writeClipboard(newCode);
-      setSuccessNotice(copied ? `Đã tạo lại và sao chép mã: ${newCode}` : `Đã tạo lại mã: ${newCode}. Bấm Copy để sao chép.`);
-      setTimeout(() => setSuccessNotice(null), 5000);
-      setCodes(prev => prev.map(c => c.id === id ? res.data : c));
-    } catch (err: any) {
-      if (err.response?.status === 401) {
-        logout();
-      } else {
-        setError(err.response?.data?.detail || 'Lỗi khi đổi mã mới.');
-      }
-    }
-  };
-
-  const handleDeleteCode = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa mã đăng ký này?')) return;
-    try {
-      setError(null);
-      await axios.delete(`${baseUrl}/api/admin/registration-codes/${id}`, {
-        headers: getHeaders()
-      });
-      setCodes(prev => prev.filter(c => c.id !== id));
-    } catch (err: any) {
-      if (err.response?.status === 401) {
-        logout();
-      } else {
-        setError(err.response?.data?.detail || 'Lỗi khi xóa mã.');
-      }
-    }
-  };
-
-  const copyToClipboard = async (code: string, id: string) => {
-    const copied = await writeClipboard(code);
-    if (copied) {
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), 2000);
-    } else {
-      setError('Trình duyệt không cho phép sao chép tự động. Hãy chọn và sao chép mã thủ công.');
-    }
-  };
-
-  if (isAuthLoading || !user || user.role !== 'admin') {
-    return <div className="min-h-screen bg-[#D8C9BB] flex items-center justify-center font-bold text-[#7A6F68]">Đang tải...</div>;
-  }
-
-  return (
-    <div className="min-h-screen bg-[#D8C9BB] text-[#2A2320] pt-[70px] pb-4 px-3 sm:p-5 md:p-6 lg:p-7 flex flex-col md:flex-row gap-4 sm:gap-5 font-sans selection:bg-[#E5DACD]">
-      <Sidebar />
-      <div className="flex-1 min-w-0 flex flex-col gap-4 sm:gap-5">
-        {/* Top Header Card (Phần Header) */}
-        <header className="bg-[#FBF8F4] rounded-[28px] md:rounded-[36px] p-4 sm:p-6 shadow-[0_12px_32px_rgba(120,100,85,0.1)] border border-[#EFE8DE] flex flex-col gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 w-full">
-            <div>
-              <div className="flex items-center gap-2.5 text-xl md:text-2xl font-black text-[#1C1917]">
-                <KeyRound size={22} className="text-[#1B2A4A]" />
-                <span>Quản Lý Mã Đăng Ký</span>
-              </div>
-              <p className="text-xs text-[#57534E] font-medium mt-0.5">Tạo và cấp phát mã kích hoạt tài khoản thành viên</p>
-            </div>
-            <AdminTabs />
-          </div>
-
-          <div className="flex justify-end pt-3 border-t border-[#EFE8DE]">
-            <button 
-              onClick={handleCreateCode}
-              disabled={isCreating}
-              className="btn-gradient text-white rounded-full py-2 px-5 shadow-md flex items-center gap-1.5 font-bold text-xs hover:opacity-95 transition-all cursor-pointer border-none"
-            >
-              {isCreating ? <Loader2 size={16} className="animate-spin text-white" /> : <Plus size={16} className="stroke-[3]" />}
-              <span>Tạo Mã Mới</span>
-            </button>
-          </div>
-        </header>
-
-        {/* Main Content Card (Phần Trang Chính) */}
-        <main className="flex-1 min-w-0 bg-[#FBF8F4] rounded-[28px] md:rounded-[36px] p-4 sm:p-6 md:p-8 shadow-[0_16px_40px_rgba(120,100,85,0.12)] border border-[#EFE8DE] flex flex-col">
-          {/* Content */}
-          <section className="flex-1">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-2xl text-xs font-bold mb-6 text-center">
-              {error}
-            </div>
-          )}
-
-          {successNotice && (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-2xl text-xs font-bold mb-6 text-center flex items-center justify-center gap-2">
-              <Check size={16} className="text-emerald-700" />
-              <span>{successNotice}</span>
-            </div>
-          )}
-
-          {loading ? (
-            <div className="flex justify-center mt-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#1B2A4A] border-t-transparent"></div>
-            </div>
-          ) : (
-            <div className="bg-[#FAF6F0] rounded-3xl p-6 md:p-8 shadow-sm border border-[#ECE2D5]">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-lg font-black text-[#1C1917]">Danh sách mã đăng ký</h2>
-                  <p className="text-xs text-[#57534E] mt-0.5 font-medium">Mã ngẫu nhiên được Admin cấp cho thành viên để đăng ký tài khoản.</p>
-                </div>
-                <span className="text-xs font-bold px-3 py-1 bg-white text-[#57534E] border border-[#ECE2D5] rounded-full shadow-sm">
-                  Tổng: {codes.length} mã
-                </span>
-              </div>
-
-              {codes.length === 0 ? (
-                <div className="text-center py-16 border border-dashed border-[#D8C9BB] rounded-2xl">
-                  <KeyRound size={48} className="text-[#57534E] mx-auto mb-3" />
-                  <p className="text-xs text-[#57534E] font-bold mb-4">Chưa có mã đăng ký nào.</p>
-                  <button 
-                    onClick={handleCreateCode}
-                    disabled={isCreating}
-                    className="btn-gradient text-white rounded-full py-2.5 px-5 font-bold text-xs shadow-md border-none cursor-pointer"
-                  >
-                    <Plus size={16} />
-                    <span>Tạo mã ngay</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-[#EFE8DE] text-xs font-bold text-[#57534E] uppercase tracking-wider">
-                        <th className="pb-3.5 pl-4">Mã Code</th>
-                        <th className="pb-3.5">Trạng thái</th>
-                        <th className="pb-3.5">Người sử dụng</th>
-                        <th className="pb-3.5">Ngày tạo</th>
-                        <th className="pb-3.5 pr-4 text-right">Thao tác</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#EFE8DE] text-xs">
-                      {codes.map((item) => (
-                        <tr key={item.id} className="hover:bg-white/60 transition-colors">
-                          <td className="py-3.5 pl-4 font-mono font-bold text-sm text-[#1B2A4A]">
-                            {item.code}
-                          </td>
-                          <td className="py-3.5">
-                            {item.is_used ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-gray-100 text-gray-500 border border-gray-200 rounded-full text-[11px] font-bold">
-                                <ShieldAlert size={12} className="text-gray-400" />
-                                Đã sử dụng
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[11px] font-bold">
-                                <ShieldCheck size={12} className="text-emerald-600" />
-                                Có thể dùng
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-3.5 font-medium text-[#1C1917]">
-                            {item.used_by_username ? (
-                              <span className="font-bold text-[#1C1917]">@{item.used_by_username}</span>
-                            ) : (
-                              <span className="text-[#8C827A] font-normal">—</span>
-                            )}
-                          </td>
-                          <td className="py-3.5 text-[#57534E]">
-                            {new Date(item.created_at).toLocaleString('vi-VN')}
-                          </td>
-                          <td className="py-3.5 pr-4 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button 
-                                onClick={() => copyToClipboard(item.code, item.id)}
-                                className="p-1.5 rounded-full text-[#57534E] hover:text-[#1C1917] hover:bg-white transition-colors flex items-center gap-1 text-xs font-bold border border-[#ECE2D5] cursor-pointer"
-                                title="Sao chép mã"
-                              >
-                                {copiedId === item.id ? (
-                                  <>
-                                    <Check size={14} className="text-emerald-600" />
-                                    <span className="text-emerald-600">Đã chép</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Copy size={14} />
-                                    <span>Copy</span>
-                                  </>
-                                )}
-                              </button>
-
-                              {!item.is_used && (
-                                <>
-                                  <button 
-                                    onClick={() => handleRegenerateCode(item.id)}
-                                    className="p-1.5 rounded-full text-[#1B2A4A] hover:bg-white transition-colors border border-[#ECE2D5] cursor-pointer"
-                                    title="Tạo lại mã ngẫu nhiên mới"
-                                  >
-                                    <RefreshCw size={14} />
-                                  </button>
-                                  <button 
-                                    onClick={() => handleDeleteCode(item.id)}
-                                    className="p-1.5 rounded-full text-red-500 hover:bg-red-50 transition-colors border border-red-200 cursor-pointer"
-                                    title="Xóa mã"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-        </section>
-      </main>
-      </div>
-    </div>
-  );
+    if (user?.role !== 'admin' || !token) return;
+    let active = true;
+    axios.get<Code[]>('/api/admin/registration-codes', { headers: { Authorization: `Bearer ${token}` } })
+      .then(response => { if (active) setCodes(response.data); })
+      .catch(value => { if (active) setError(axios.isAxiosError(value) && typeof value.response?.data?.detail === 'string' ? value.response.data.detail : 'Không thể tải danh sách mã đăng ký.'); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [user?.role, token]);
+  const copy = async (code: string) => { try { await navigator.clipboard.writeText(code); setNotice(`Đã sao chép mã ${code}`); } catch { setNotice(`Mã mới: ${code}`); } };
+  const create = async () => { setCreating(true); setError(''); try { const item=(await axios.post<Code>('/api/admin/registration-codes',{}, {headers})).data; setCodes(v=>[item,...v]); await copy(item.code); } catch(e){reportError(e,'Không thể tạo mã.');} finally{setCreating(false);} };
+  const regenerate = async (item: Code) => { setError(''); try { const next=(await axios.put<Code>(`/api/admin/registration-codes/${item.id}`,{}, {headers})).data; setCodes(v=>v.map(x=>x.id===item.id?next:x)); await copy(next.code); } catch(e){reportError(e,'Không thể đổi mã.');} };
+  const remove = async (item: Code) => { if (!confirm(`Xóa mã ${item.code}?`)) return; try { await axios.delete(`/api/admin/registration-codes/${item.id}`,{headers}); setCodes(v=>v.filter(x=>x.id!==item.id)); setNotice('Đã xóa mã chưa sử dụng.'); } catch(e){reportError(e,'Không thể xóa mã.');} };
+  if (authLoading || !user || user.role !== 'admin') return <div className="min-h-screen bg-[#D8C9BB]"/>;
+  const unused = codes.filter(x=>!x.is_used).length;
+  return <div className="min-h-[100dvh] bg-[#D8C9BB] p-3 pb-24 pt-20 text-[#292421] md:flex md:gap-5 md:p-6"><Sidebar/><main className="min-w-0 flex-1"><div className="mx-auto max-w-6xl space-y-4">
+    <header className="rounded-3xl border border-[#E7DED4] bg-[#FAF7F2] p-5 shadow-sm md:p-7"><div className="flex flex-col justify-between gap-4 md:flex-row md:items-start"><div><p className="text-xs font-black uppercase tracking-[.15em] text-[#766B63]">Quản trị người dùng</p><h1 className="mt-1 text-2xl font-black md:text-3xl">Cấp tài khoản bán hàng</h1><p className="mt-1 text-sm font-medium text-[#6F655E]">Tạo mã dùng một lần, gửi cho nhân viên rồi họ đăng ký tại trang đăng ký.</p></div><AdminTabs/></div></header>
+    <section className="rounded-3xl border border-[#E7DED4] bg-[#FAF7F2] p-4 shadow-sm md:p-6"><div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div className="flex gap-2"><span className="rounded-full bg-white px-3 py-2 text-xs font-black">{unused} mã có thể dùng</span><span className="rounded-full bg-white px-3 py-2 text-xs font-black">{codes.length} mã tất cả</span></div><button onClick={create} disabled={creating} className="flex h-12 items-center justify-center gap-2 rounded-xl bg-[#203354] px-5 text-sm font-black text-white disabled:opacity-50">{creating?<Loader2 className="animate-spin"/>:<Plus/>} Tạo và sao chép mã</button></div>
+    {error&&<div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700">{error}</div>}{notice&&<div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-bold text-emerald-700"><Check size={17}/>{notice}</div>}
+    {loading?<div className="flex min-h-48 items-center justify-center"><Loader2 className="animate-spin text-[#203354]"/></div>:codes.length===0?<div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-[#D5C9BC] bg-white/50 p-6 text-center"><UserPlus size={36} className="mb-3 text-[#766B63]"/><b>Chưa có mã đăng ký</b><p className="mt-1 text-sm text-[#766B63]">Tạo mã đầu tiên để cấp tài khoản cho người bán hàng.</p></div>:<div className="space-y-2">{codes.map(item=><article key={item.id} className="flex flex-col gap-3 rounded-2xl border border-[#E4D9CE] bg-white p-4 sm:flex-row sm:items-center"><div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${item.is_used?'bg-gray-100 text-gray-500':'bg-emerald-50 text-emerald-700'}`}><KeyRound size={20}/></div><div className="min-w-0 flex-1"><button onClick={()=>copy(item.code)} className="font-mono text-base font-black tracking-wider text-[#203354] hover:underline">{item.code}</button><p className="mt-1 text-xs font-semibold text-[#766B63]">{item.is_used?`Đã dùng bởi @${item.used_by_username||'không rõ'}`:'Sẵn sàng sử dụng'} · {new Date(item.created_at).toLocaleString('vi-VN')}</p></div><div className="flex gap-2"><button onClick={()=>copy(item.code)} title="Sao chép" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D9CFC4]"><Copy size={17}/></button>{!item.is_used&&<><button onClick={()=>regenerate(item)} title="Đổi mã" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D9CFC4]"><RefreshCw size={17}/></button><button onClick={()=>remove(item)} title="Xóa mã" className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 text-red-600"><Trash2 size={17}/></button></>}</div></article>)}</div>}
+    </section></div></main></div>;
 }

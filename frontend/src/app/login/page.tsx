@@ -58,7 +58,7 @@ export default function LoginPage() {
               <LogIn size={22} strokeWidth={2.3} />
             </span>
             <h1 className="text-2xl font-black tracking-[-0.03em] sm:text-3xl">Đăng nhập</h1>
-            <p className="mt-2 text-sm font-medium text-[#6D625A]">Truy cập kệ sách và dữ liệu bán hàng của bạn.</p>
+            <p className="mt-2 text-sm font-medium text-[#6D625A]">Truy cập đơn hàng, tồn kho và dữ liệu bán hàng của bạn.</p>
           </div>
 
           {error && (

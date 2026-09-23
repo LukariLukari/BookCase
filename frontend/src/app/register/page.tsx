@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { BookOpen, ArrowLeft, Mail, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Store, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
 export default function RegisterPage() {
@@ -16,8 +16,6 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   
   const { login } = useAuth();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-  const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,13 +35,13 @@ export default function RegisterPage() {
       const user = res.data.user;
       login(token, user);
       
-    } catch (err: any) {
-      if (!err.response) {
+    } catch (err: unknown) {
+      if (!axios.isAxiosError(err) || !err.response) {
         setError('Không thể kết nối tới server. Vui lòng kiểm tra mạng!');
       } else if (typeof err.response.data?.detail === 'string') {
         setError(err.response.data.detail);
       } else if (Array.isArray(err.response.data?.detail)) {
-        setError(err.response.data.detail.map((d: any) => d.msg).join(', '));
+        setError(err.response.data.detail.map((d: { msg?: string }) => d.msg || 'Dữ liệu không hợp lệ').join(', '));
       } else {
         setError('Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.');
       }
@@ -56,9 +54,9 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-[#1F1D20] text-[#F5ECDC] flex flex-col justify-center items-center p-4">
       <Link href="/">
         <div className="flex items-center gap-2 mb-8 cursor-pointer hover:opacity-80">
-          <BookOpen size={32} className="text-orange-500" />
+          <Store size={32} className="text-orange-500" />
           <h1 className="text-4xl font-extrabold text-[#F5ECDC]">
-            BookCase<span className="text-orange-500">.</span>
+            BC Sales<span className="text-orange-500">.</span>
           </h1>
         </div>
       </Link>
@@ -66,7 +64,7 @@ export default function RegisterPage() {
       <div className="bg-[#2A272A] p-8 md:p-10 rounded-3xl shadow-2xl border border-[#4D4845]/50 w-full max-w-md relative overflow-hidden">
         <h2 className="text-2xl font-bold mb-2 text-center text-[#F5ECDC] mt-2">Đăng ký tài khoản</h2>
         <p className="text-[#D7C9B2] text-sm text-center mb-6">
-          Khám phá thế giới sách không giới hạn
+          Tạo tài khoản để quản lý đơn hàng và bán hàng
         </p>
         
         {error && (
