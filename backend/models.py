@@ -319,3 +319,15 @@ class BusinessExpense(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     ledger = relationship("BusinessLedger", back_populates="expenses")
+
+
+class BusinessDataBackup(Base):
+    __tablename__ = "business_data_backups"
+    __table_args__ = (Index("ix_business_backups_user_created", "user_id", "created_at"),)
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
+    label = Column(String, nullable=False, default="Tự động")
+    source = Column(String, nullable=False, default="automatic")
+    payload = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

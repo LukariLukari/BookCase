@@ -566,3 +566,7 @@ class BusinessReportResponse(BaseModel):
     daily: list[dict] = []
     top_products: list[dict] = []
     expenses: list[BusinessExpenseResponse] = []
+
+
+class BusinessBackupRestore(BaseModel):
+    payload: dict

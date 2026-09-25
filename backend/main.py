@@ -207,6 +207,7 @@ def ensure_business_tables(db: Session):
         models.BusinessOrder.__table__.create(bind=engine, checkfirst=True)
         models.BusinessOrderItem.__table__.create(bind=engine, checkfirst=True)
         models.BusinessExpense.__table__.create(bind=engine, checkfirst=True)
+        models.BusinessDataBackup.__table__.create(bind=engine, checkfirst=True)
         # Existing installations predate batches, so add the nullable links in place.
         for table_name, column_name in [("business_products", "batch_id"), ("business_stock_receipts", "batch_id")]:
             try:
@@ -214,7 +215,7 @@ def ensure_business_tables(db: Session):
                 db.commit()
             except Exception:
                 db.rollback()
-        for table in [models.BusinessInventoryBatch.__table__, models.BusinessProduct.__table__, models.BusinessOrder.__table__, models.BusinessExpense.__table__]:
+        for table in [models.BusinessInventoryBatch.__table__, models.BusinessProduct.__table__, models.BusinessOrder.__table__, models.BusinessExpense.__table__, models.BusinessDataBackup.__table__]:
             for index in table.indexes:
                 index.create(bind=engine, checkfirst=True)
         _business_tables_ready = True
@@ -240,6 +241,166 @@ def ensure_default_inventory_batch(db: Session, user_id: str) -> models.Business
     db.commit()
     db.refresh(batch)
     return batch
+
+
+BUSINESS_BACKUP_VERSION = 1
+BUSINESS_BACKUP_TABLES = (
+    ("inventory_batches", models.BusinessInventoryBatch),
+    ("products", models.BusinessProduct),
+    ("transactions", models.BusinessTransaction),
+    ("ledgers", models.BusinessLedger),
+    ("stock_receipts", models.BusinessStockReceipt),
+    ("stock_receipt_items", models.BusinessStockReceiptItem),
+    ("orders", models.BusinessOrder),
+    ("order_items", models.BusinessOrderItem),
+    ("expenses", models.BusinessExpense),
+)
+
+
+def _backup_row(row) -> dict:
+    result = {}
+    for column in row.__table__.columns:
+        value = getattr(row, column.name)
+        result[column.name] = value.isoformat() if isinstance(value, datetime) else value
+    return result
+
+
+def build_business_backup_payload(db: Session, user_id: str) -> dict:
+    receipts = db.query(models.BusinessStockReceipt.id).filter(models.BusinessStockReceipt.user_id == user_id)
+    orders = db.query(models.BusinessOrder.id).filter(models.BusinessOrder.user_id == user_id)
+    data = {
+        "inventory_batches": [_backup_row(row) for row in db.query(models.BusinessInventoryBatch).filter(models.BusinessInventoryBatch.user_id == user_id).all()],
+        "products": [_backup_row(row) for row in db.query(models.BusinessProduct).filter(models.BusinessProduct.user_id == user_id).all()],
+        "transactions": [_backup_row(row) for row in db.query(models.BusinessTransaction).filter(models.BusinessTransaction.user_id == user_id).all()],
+        "ledgers": [_backup_row(row) for row in db.query(models.BusinessLedger).filter(models.BusinessLedger.user_id == user_id).all()],
+        "stock_receipts": [_backup_row(row) for row in db.query(models.BusinessStockReceipt).filter(models.BusinessStockReceipt.user_id == user_id).all()],
+        "stock_receipt_items": [_backup_row(row) for row in db.query(models.BusinessStockReceiptItem).filter(models.BusinessStockReceiptItem.receipt_id.in_(receipts)).all()],
+        "orders": [_backup_row(row) for row in db.query(models.BusinessOrder).filter(models.BusinessOrder.user_id == user_id).all()],
+        "order_items": [_backup_row(row) for row in db.query(models.BusinessOrderItem).filter(models.BusinessOrderItem.order_id.in_(orders)).all()],
+        "expenses": [_backup_row(row) for row in db.query(models.BusinessExpense).filter(models.BusinessExpense.user_id == user_id).all()],
+    }
+    return {
+        "format": "bookcase-business-backup",
+        "version": BUSINESS_BACKUP_VERSION,
+        "exported_at": datetime.now(timezone.utc).isoformat(),
+        "data": data,
+    }
+
+
+def create_business_backup(db: Session, user_id: str, label: str = "Tự động", source: str = "automatic") -> models.BusinessDataBackup:
+    backup = models.BusinessDataBackup(
+        user_id=user_id,
+        label=label,
+        source=source,
+        payload=json.dumps(build_business_backup_payload(db, user_id), ensure_ascii=False),
+    )
+    db.add(backup)
+    db.flush()
+    old_backups = (
+        db.query(models.BusinessDataBackup)
+        .filter(models.BusinessDataBackup.user_id == user_id)
+        .order_by(models.BusinessDataBackup.created_at.desc(), models.BusinessDataBackup.id.desc())
+        .offset(20)
+        .all()
+    )
+    for old_backup in old_backups:
+        db.delete(old_backup)
+    db.commit()
+    db.refresh(backup)
+    return backup
+
+
+def create_automatic_business_backup(db: Session, user_id: str, label: str):
+    try:
+        create_business_backup(db, user_id, label, "automatic")
+    except Exception as error:
+        db.rollback()
+        print(f"[Business Backup] automatic snapshot failed: {error}")
+
+
+def _restore_value(column, value):
+    if value is None:
+        return None
+    if column.name.endswith("_at") and isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Ngày giờ không hợp lệ: {column.name}")
+    return value
+
+
+def restore_business_backup_payload(db: Session, user_id: str, payload: dict):
+    if payload.get("format") != "bookcase-business-backup" or payload.get("version") != BUSINESS_BACKUP_VERSION:
+        raise HTTPException(status_code=400, detail="File sao lưu không đúng định dạng hoặc không được hỗ trợ")
+    data = payload.get("data")
+    if not isinstance(data, dict) or any(not isinstance(data.get(name), list) for name, _ in BUSINESS_BACKUP_TABLES):
+        raise HTTPException(status_code=400, detail="File sao lưu bị thiếu dữ liệu")
+
+    id_sets = {}
+    for name, _ in BUSINESS_BACKUP_TABLES:
+        ids = [row.get("id") for row in data[name] if isinstance(row, dict)]
+        if len(ids) != len(data[name]) or any(not isinstance(row_id, str) or not row_id for row_id in ids) or len(ids) != len(set(ids)):
+            raise HTTPException(status_code=400, detail=f"Dữ liệu {name} có mã ID không hợp lệ")
+        id_sets[name] = set(ids)
+
+    def require_reference(table_name: str, field_name: str, target_name: str, nullable: bool = False):
+        for row in data[table_name]:
+            value = row.get(field_name)
+            if value is None and nullable:
+                continue
+            if value not in id_sets[target_name]:
+                raise HTTPException(status_code=400, detail=f"Liên kết {table_name}.{field_name} không hợp lệ")
+
+    require_reference("products", "batch_id", "inventory_batches", nullable=True)
+    require_reference("transactions", "product_id", "products", nullable=True)
+    require_reference("stock_receipts", "batch_id", "inventory_batches", nullable=True)
+    require_reference("stock_receipt_items", "receipt_id", "stock_receipts")
+    require_reference("stock_receipt_items", "product_id", "products")
+    require_reference("orders", "ledger_id", "ledgers")
+    require_reference("order_items", "order_id", "orders")
+    require_reference("order_items", "product_id", "products")
+    require_reference("expenses", "ledger_id", "ledgers")
+
+    create_business_backup(db, user_id, "Trước khi phục hồi", "pre_restore")
+    receipt_ids = db.query(models.BusinessStockReceipt.id).filter(models.BusinessStockReceipt.user_id == user_id)
+    order_ids = db.query(models.BusinessOrder.id).filter(models.BusinessOrder.user_id == user_id)
+    try:
+        db.query(models.BusinessStockReceiptItem).filter(models.BusinessStockReceiptItem.receipt_id.in_(receipt_ids)).delete(synchronize_session=False)
+        db.query(models.BusinessOrderItem).filter(models.BusinessOrderItem.order_id.in_(order_ids)).delete(synchronize_session=False)
+        for model in (models.BusinessExpense, models.BusinessOrder, models.BusinessStockReceipt, models.BusinessTransaction, models.BusinessProduct, models.BusinessLedger, models.BusinessInventoryBatch):
+            db.query(model).filter(model.user_id == user_id).delete(synchronize_session=False)
+        db.flush()
+
+        for name, model in BUSINESS_BACKUP_TABLES:
+            allowed_columns = {column.name: column for column in model.__table__.columns}
+            for raw_row in data[name]:
+                if not isinstance(raw_row, dict):
+                    raise HTTPException(status_code=400, detail=f"Dữ liệu {name} không hợp lệ")
+                row = {key: _restore_value(allowed_columns[key], value) for key, value in raw_row.items() if key in allowed_columns}
+                if "user_id" in allowed_columns:
+                    row["user_id"] = user_id
+                db.add(model(**row))
+            db.flush()
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as error:
+        db.rollback()
+        print(f"[Business Backup] restore failed: {error}")
+        raise HTTPException(status_code=409, detail="Không thể phục hồi vì dữ liệu trong file không còn nhất quán")
+
+
+def serialize_business_backup(backup: models.BusinessDataBackup, include_payload: bool = False) -> dict:
+    result = {
+        "id": backup.id,
+        "label": backup.label,
+        "source": backup.source,
+        "created_at": backup.created_at,
+    }
+    if include_payload:
+        result["payload"] = json.loads(backup.payload)
+    return result
 
 
 def serialize_inventory_batch(batch: models.BusinessInventoryBatch) -> dict:
@@ -2601,6 +2762,46 @@ def update_reading_progress(
     return serialize_review(review, db)
 
 
+@app.get("/api/business/backups")
+def get_business_backups(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    backups = (
+        db.query(models.BusinessDataBackup)
+        .filter(models.BusinessDataBackup.user_id == current_user.id)
+        .order_by(models.BusinessDataBackup.created_at.desc())
+        .limit(20)
+        .all()
+    )
+    return [serialize_business_backup(backup) for backup in backups]
+
+
+@app.post("/api/business/backups")
+def create_manual_business_backup(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    backup = create_business_backup(db, current_user.id, "Sao lưu thủ công", "manual")
+    return serialize_business_backup(backup, include_payload=True)
+
+
+@app.post("/api/business/backups/restore")
+def restore_uploaded_business_backup(restore_in: schemas.BusinessBackupRestore, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    restore_business_backup_payload(db, current_user.id, restore_in.payload)
+    return {"message": "Đã phục hồi toàn bộ dữ liệu kinh doanh"}
+
+
+@app.post("/api/business/backups/{backup_id}/restore")
+def restore_saved_business_backup(backup_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    ensure_business_tables(db)
+    backup = db.query(models.BusinessDataBackup).filter(
+        models.BusinessDataBackup.id == backup_id,
+        models.BusinessDataBackup.user_id == current_user.id,
+    ).first()
+    if not backup:
+        raise HTTPException(status_code=404, detail="Không tìm thấy bản sao lưu")
+    restore_business_backup_payload(db, current_user.id, json.loads(backup.payload))
+    return {"message": "Đã phục hồi toàn bộ dữ liệu kinh doanh"}
+
+
 @app.get("/api/business/ledgers", response_model=List[schemas.BusinessLedgerResponse])
 def get_business_ledgers(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     ensure_business_tables(db)
@@ -2673,6 +2874,7 @@ def create_inventory_batch(batch_in: schemas.BusinessInventoryBatchCreate, db: S
     db.add(batch)
     db.commit()
     db.refresh(batch)
+    create_automatic_business_backup(db, current_user.id, "Sau khi thêm lô hàng")
     return serialize_inventory_batch(batch)
 
 
@@ -2687,6 +2889,7 @@ def update_inventory_batch(batch_id: str, batch_in: schemas.BusinessInventoryBat
     batch.name = name
     db.commit()
     db.refresh(batch)
+    create_automatic_business_backup(db, current_user.id, "Sau khi sửa lô hàng")
     return serialize_inventory_batch(batch)
 
 
@@ -2707,6 +2910,7 @@ def delete_inventory_batch(batch_id: str, db: Session = Depends(get_db), current
     db.query(models.BusinessStockReceipt).filter(models.BusinessStockReceipt.batch_id == batch.id).update({models.BusinessStockReceipt.batch_id: replacement.id}, synchronize_session=False)
     db.delete(batch)
     db.commit()
+    create_automatic_business_backup(db, current_user.id, "Sau khi xóa lô hàng")
     return {"message": "Đã xóa lô hàng và chuyển sản phẩm sang lô gần nhất", "replacement_batch_id": replacement.id}
 
 
@@ -2775,6 +2979,7 @@ def create_stock_receipt(receipt_in: schemas.BusinessStockReceiptCreate, db: Ses
     receipt = db.query(models.BusinessStockReceipt).options(
         selectinload(models.BusinessStockReceipt.items).selectinload(models.BusinessStockReceiptItem.product)
     ).filter(models.BusinessStockReceipt.id == receipt.id).first()
+    create_automatic_business_backup(db, current_user.id, "Sau khi nhập kho")
     return serialize_stock_receipt(receipt)
 
 
@@ -2795,6 +3000,7 @@ def delete_stock_receipt(receipt_id: str, db: Session = Depends(get_db), current
             product.stock_quantity = (product.stock_quantity or 0) - (item.quantity or 0)
     db.delete(receipt)
     db.commit()
+    create_automatic_business_backup(db, current_user.id, "Sau khi xóa phiếu nhập")
     return {"message": "Đã xóa phiếu nhập và hoàn tác tồn kho"}
 
 
@@ -3111,6 +3317,7 @@ def create_business_product(product_in: schemas.BusinessProductCreate, db: Sessi
     db.add(product)
     db.commit()
     db.refresh(product)
+    create_automatic_business_backup(db, current_user.id, "Sau khi thêm sản phẩm")
     return serialize_business_product(product, [])
 
 
@@ -3129,6 +3336,7 @@ def update_business_product(product_id: str, product_in: schemas.BusinessProduct
         setattr(product, key, value)
     db.commit()
     db.refresh(product)
+    create_automatic_business_backup(db, current_user.id, "Sau khi sửa sản phẩm")
     return serialize_business_product(product)
 
 
@@ -3155,6 +3363,7 @@ def delete_business_product(product_id: str, db: Session = Depends(get_db), curr
             product.is_active = False
             product.stock_quantity = 0
             db.commit()
+    create_automatic_business_backup(db, current_user.id, "Sau khi xóa sản phẩm")
     return {"message": "Đã xóa sản phẩm thành công"}
 
 
