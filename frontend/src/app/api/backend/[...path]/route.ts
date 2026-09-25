@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomInt } from 'crypto';
 import { prisma } from '@/lib/db';
 import { verifyJwt } from '@/lib/auth';
+import { createAutomaticBusinessBackup, createBusinessBackup, restoreBusinessBackup } from '@/lib/businessBackup';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,6 +48,12 @@ async function handle(request:NextRequest, context:RouteContext<'/api/backend/[.
   }
   if(parts[0]!=='business')return bad('API này chưa được chuyển sang Vercel.',404);
   const resource=parts[1],id=parts[2];
+  if(resource==='backups'){
+   if(method==='GET'){const rows=await prisma.businessDataBackup.findMany({where:{userId:user.id},orderBy:{createdAt:'desc'},take:20,select:{id:true,label:true,source:true,createdAt:true}});return json(rows.map(row=>({id:row.id,label:row.label,source:row.source,created_at:row.createdAt})));}
+   if(method==='POST'&&id==='restore'){await restoreBusinessBackup(user.id,body.payload);return json({message:'Đã phục hồi toàn bộ dữ liệu kinh doanh.'});}
+   if(method==='POST'&&id&&parts[3]==='restore'){const saved=await prisma.businessDataBackup.findFirst({where:{id,userId:user.id}});if(!saved)return bad('Không tìm thấy bản sao lưu.',404);await restoreBusinessBackup(user.id,saved.payload);return json({message:'Đã phục hồi toàn bộ dữ liệu kinh doanh.'});}
+   if(method==='POST'&&!id){const backup=await createBusinessBackup(user.id,'Sao lưu thủ công','manual');return json({id:backup.id,label:backup.label,source:backup.source,created_at:backup.createdAt,payload:backup.payload});}
+  }
   if(resource==='ledgers'){
    if(method==='GET'){const rows=await prisma.businessLedger.findMany({where:{userId:user.id},include:{orders:{include:{items:true}},expenses:true},orderBy:{createdAt:'desc'}});return json(rows.map(ledgerJson));}
    if(method==='POST'){const row=await prisma.businessLedger.create({data:{userId:user.id,name:String(body.name||'').trim(),month:String(body.month||''),openingCash:n(body.opening_cash),note:body.note||null},include:{orders:{include:{items:true}},expenses:true}});return json(ledgerJson(row));}
@@ -117,4 +124,13 @@ async function handleOrders(request:NextRequest,user:Session,id:string|undefined
 
 async function report(userId:string,ledgerId:string){const ledger=await prisma.businessLedger.findFirst({where:{id:ledgerId,userId},include:{orders:{where:{status:{not:'cancelled'}},include:{items:true}},expenses:true}});if(!ledger)return bad('Không tìm thấy sổ.',404);const totals=ledger.orders.map(orderTotals),revenue=totals.reduce((s,x)=>s+x.total,0),capital=totals.reduce((s,x)=>s+x.capital_cost,0),shipping=ledger.orders.reduce((s,o)=>s+o.shippingCost,0),other=ledger.orders.reduce((s,o)=>s+o.otherFee,0),operating=ledger.expenses.reduce((s,e)=>s+e.amount,0);const products=await prisma.businessProduct.findMany({where:{userId,isActive:true}});const daily=new Map<string,{orders:number;revenue:number;profit:number}>(),top=new Map<string,{name:string;quantity:number;revenue:number}>();ledger.orders.forEach((o,i)=>{const d=o.orderedAt.toISOString().slice(0,10),v=daily.get(d)||{orders:0,revenue:0,profit:0};v.orders++;v.revenue+=totals[i].total;v.profit+=totals[i].profit;daily.set(d,v);o.items.forEach(x=>{const v=top.get(x.productId)||{name:x.productName,quantity:0,revenue:0};v.quantity+=x.quantity;v.revenue+=x.quantity*x.unitPrice;top.set(x.productId,v)})});return json({revenue,capital_cost:capital,shipping_cost:shipping,other_order_fee:other,operating_expense:operating,profit:revenue-capital-shipping-other-operating,order_count:ledger.orders.length,sold_units:ledger.orders.flatMap(o=>o.items).reduce((s,i)=>s+i.quantity,0),average_order_value:ledger.orders.length?Math.round(revenue/ledger.orders.length):0,stock_units:products.reduce((s,p)=>s+p.stockQuantity,0),stock_value:products.reduce((s,p)=>s+p.stockQuantity*p.unitCost,0),daily:[...daily].map(([date,v])=>({date,...v})).sort((a,b)=>a.date.localeCompare(b.date)),top_products:[...top].map(([product_id,v])=>({product_id,...v})).sort((a,b)=>b.quantity-a.quantity).slice(0,10),expenses:ledger.expenses.map(e=>({id:e.id,category:e.category,amount:e.amount,note:e.note,spent_at:e.spentAt}))})}
 
-export const GET=handle;export const POST=handle;export const PUT=handle;export const PATCH=handle;export const DELETE=handle;
+async function mutateWithBackup(request:NextRequest,context:RouteContext<'/api/backend/[...path]'>){
+ const response=await handle(request,context);
+ if(response.ok&&!request.nextUrl.pathname.includes('/business/backups')){
+  const user=await session(request);
+  if(user)await createAutomaticBusinessBackup(user.id);
+ }
+ return response;
+}
+
+export const GET=handle;export const POST=mutateWithBackup;export const PUT=mutateWithBackup;export const PATCH=mutateWithBackup;export const DELETE=mutateWithBackup;

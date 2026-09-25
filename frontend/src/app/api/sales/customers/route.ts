@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getRequestUser } from '@/lib/auth';
 import type { Prisma } from '@prisma/client';
+import { createAutomaticBusinessBackup } from '@/lib/businessBackup';
 
 const deny = () => NextResponse.json({ detail: 'Phiên đăng nhập không hợp lệ.' }, { status: 401 });
 type CustomerWithOrders = Prisma.BusinessCustomerGetPayload<{ include: { orders: { include: { items: true } } } }>;
@@ -23,5 +24,6 @@ export async function POST(request: Request) {
   const body = await request.json(); const name=String(body.name||'').trim(),phone=String(body.phone||'').trim()||null;
   if(!name)return NextResponse.json({detail:'Vui lòng nhập tên khách hàng.'},{status:400});
   const customer=await prisma.businessCustomer.create({data:{userId:user.id,name,phone,email:String(body.email||'').trim().toLowerCase()||null,socialLink:body.social_link||null,address:body.address||null,tags:Array.isArray(body.tags)?body.tags:[],note:body.note||null},include:{orders:{include:{items:true}}}});
+  await createAutomaticBusinessBackup(user.id,'Sau khi thêm khách hàng');
   return NextResponse.json(customerJson(customer),{status:201});
 }

@@ -27,6 +27,7 @@ model User {
   statusHistory    BusinessOrderStatusHistory[]
   stockMovements   BusinessInventoryMovement[]
   inventoryBatches BusinessInventoryBatch[]
+  businessBackups   BusinessDataBackup[]
 }
 
 model RegistrationCode {
@@ -276,4 +277,17 @@ model BusinessExpense {
   ledger BusinessLedger @relation(fields: [ledgerId], references: [id], onDelete: Cascade)
 
   @@index([userId, ledgerId, spentAt])
+}
+
+model BusinessDataBackup {
+  id        String   @id @default(uuid())
+  userId    String
+  label     String
+  source    String   @default("automatic")
+  payload   Json
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }

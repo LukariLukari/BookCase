@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getRequestUser } from '@/lib/auth';
+import { createAutomaticBusinessBackup } from '@/lib/businessBackup';
 
 const unauthorized = () => NextResponse.json({ detail: 'Phiên đăng nhập không hợp lệ.' }, { status: 401 });
 
@@ -30,5 +31,6 @@ export async function POST(request: Request, context: RouteContext<'/api/sales/o
     await tx.businessOrder.update({ where:{id}, data:{paymentStatus:paid+amount>=total?'paid':'partial'} });
     return created;
   });
+  await createAutomaticBusinessBackup(user.id,'Sau khi ghi nhận thanh toán');
   return NextResponse.json({ ...payment, remaining: Math.max(0, remaining - amount) }, { status: 201 });
 }
