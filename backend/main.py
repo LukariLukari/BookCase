@@ -3224,6 +3224,8 @@ def get_business_report(ledger_id: str, db: Session = Depends(get_db), current_u
     capital_cost = sum(order["capital_cost"] for order in serialized)
     shipping_cost = sum(order["shipping_cost"] for order in serialized)
     other_order_fee = sum(order["other_fee"] for order in serialized)
+    gross_profit = revenue - capital_cost
+    net_profit = gross_profit - shipping_cost - other_order_fee - operating_expense
     stock_products = db.query(models.BusinessProduct).filter(models.BusinessProduct.user_id == current_user.id, models.BusinessProduct.is_active == True).all()
     return {
         "ledger_id": ledger.id,
@@ -3232,7 +3234,10 @@ def get_business_report(ledger_id: str, db: Session = Depends(get_db), current_u
         "shipping_cost": shipping_cost,
         "other_order_fee": other_order_fee,
         "operating_expense": operating_expense,
-        "profit": sum(order["profit"] for order in serialized) - operating_expense,
+        "gross_profit": gross_profit,
+        "net_profit": net_profit,
+        # Backwards-compatible alias for older clients.
+        "profit": net_profit,
         "order_count": len(serialized),
         "sold_units": sum(order["item_count"] for order in serialized),
         "average_order_value": round(revenue / len(serialized)) if serialized else 0,
