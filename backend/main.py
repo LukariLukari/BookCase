@@ -3232,6 +3232,8 @@ def get_business_report(ledger_id: str, db: Session = Depends(get_db), current_u
     # costs and taxes are included when they are entered as ledger expenses.
     net_profit = revenue - capital_cost - shipping_cost - other_order_fee - operating_expense
     stock_products = db.query(models.BusinessProduct).filter(models.BusinessProduct.user_id == current_user.id, models.BusinessProduct.is_active == True).all()
+    stock_value = sum((product.stock_quantity or 0) * (product.unit_cost or 0) for product in stock_products)
+    profit_after_inventory = net_profit - stock_value
     return {
         "ledger_id": ledger.id,
         "revenue": revenue,
@@ -3242,13 +3244,14 @@ def get_business_report(ledger_id: str, db: Session = Depends(get_db), current_u
         "operating_expense": operating_expense,
         "gross_profit": gross_profit,
         "net_profit": net_profit,
+        "profit_after_inventory": profit_after_inventory,
         # Backwards-compatible alias for older clients.
         "profit": net_profit,
         "order_count": len(serialized),
         "sold_units": sum(order["item_count"] for order in serialized),
         "average_order_value": round(revenue / len(serialized)) if serialized else 0,
         "stock_units": sum(product.stock_quantity or 0 for product in stock_products),
-        "stock_value": sum((product.stock_quantity or 0) * (product.unit_cost or 0) for product in stock_products),
+        "stock_value": stock_value,
         "daily": list(daily.values()),
         "top_products": sorted(product_stats.values(), key=lambda item: item["revenue"], reverse=True)[:10],
         "expenses": expenses,

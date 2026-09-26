@@ -560,6 +560,7 @@ class BusinessReportResponse(BaseModel):
     operating_expense: int = 0
     gross_profit: int = 0
     net_profit: int = 0
+    profit_after_inventory: int = 0
     profit: int = 0
     order_count: int = 0
     sold_units: int = 0
