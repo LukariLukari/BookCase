@@ -553,6 +553,7 @@ class BusinessExpenseResponse(BusinessExpenseCreate):
 class BusinessReportResponse(BaseModel):
     ledger_id: str
     revenue: int = 0
+    net_revenue: int = 0
     capital_cost: int = 0
     shipping_cost: int = 0
     other_order_fee: int = 0

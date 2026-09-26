@@ -3221,15 +3221,21 @@ def get_business_report(ledger_id: str, db: Session = Depends(get_db), current_u
             product["profit"] += ((item.unit_price or 0) - (item.unit_cost or 0)) * (item.quantity or 0)
     operating_expense = sum(expense.amount or 0 for expense in expenses)
     revenue = sum(order["total"] for order in serialized)
+    net_revenue = sum(order["subtotal"] - order["discount"] for order in serialized)
     capital_cost = sum(order["capital_cost"] for order in serialized)
     shipping_cost = sum(order["shipping_cost"] for order in serialized)
     other_order_fee = sum(order["other_fee"] for order in serialized)
-    gross_profit = revenue - capital_cost
-    net_profit = gross_profit - shipping_cost - other_order_fee - operating_expense
+    # Gross profit only measures product sales: net sales (after discounts)
+    # minus COGS. Shipping collected from customers is excluded here.
+    gross_profit = net_revenue - capital_cost
+    # Net profit includes every receipt and deducts all recorded costs. Financial
+    # costs and taxes are included when they are entered as ledger expenses.
+    net_profit = revenue - capital_cost - shipping_cost - other_order_fee - operating_expense
     stock_products = db.query(models.BusinessProduct).filter(models.BusinessProduct.user_id == current_user.id, models.BusinessProduct.is_active == True).all()
     return {
         "ledger_id": ledger.id,
         "revenue": revenue,
+        "net_revenue": net_revenue,
         "capital_cost": capital_cost,
         "shipping_cost": shipping_cost,
         "other_order_fee": other_order_fee,
