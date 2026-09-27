@@ -9,6 +9,7 @@ import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { ArrowLeft, BarChart3, Boxes, CalendarDays, Camera, Check, ChevronDown, CircleDollarSign, ClipboardList, Download, FileSpreadsheet, HelpCircle, Loader2, Minus, PackageOpen, Pencil, Plus, ReceiptText, RotateCcw, Search, ShieldCheck, ShoppingBag, Store, Trash2, TrendingUp, Upload, X } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/app/contexts/AuthContext';
+import { generateBankQrDataUrl, renderBankQrToCanvas, findBank, ensureMontserratLoaded, VIETNAM_BANKS } from '@/lib/vietqr';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 type View = 'dashboard' | 'inventory' | 'orders' | 'reports';
@@ -21,7 +22,7 @@ type Expense = { id:string; category:string; amount:number; note?:string; spent_
 type Customer = { id:string; name:string; phone?:string; email?:string; social_link?:string; address?:string; order_count?:number };
 type Report = { revenue:number; net_revenue:number; capital_cost:number; shipping_cost:number; other_order_fee:number; operating_expense:number; gross_profit:number; net_profit:number; profit_after_inventory:number; profit:number; order_count:number; sold_units:number; average_order_value:number; stock_units:number; stock_value:number; daily:{date:string;orders:number;revenue:number;profit:number}[]; top_products:{product_id:string;name:string;quantity:number;revenue:number}[]; expenses:Expense[] };
 type BusinessBackup = { id:string; label:string; source:string; created_at:string; payload?:unknown };
-type PaymentSettings = { shopName:string; bankName:string; accountNumber:string; accountName:string; qrImage:string; note:string };
+type PaymentSettings = { shopName:string; bankName:string; bankCode?:string; accountNumber:string; accountName:string; qrImage?:string; note:string; tagline?:string };
 
 type CacheEntry<T>={value:T;savedAt:number};
 const businessMemoryCache=new Map<string,CacheEntry<unknown>>(),CACHE_MAX_AGE=5*60*1000,DURABLE_CACHE_MAX_AGE=30*24*60*60*1000;
@@ -36,28 +37,184 @@ const raw=(v:string|number)=>String(v??'').replace(/\D/g,''), num=(v:string|numb
 const cash=(v=0)=>`${Math.round(v).toLocaleString('en-US')} đ`, cashInput=(v:string)=>raw(v)?Number(raw(v)).toLocaleString('en-US'):'';
 const dateText=(v:string)=>new Intl.DateTimeFormat('vi-VN').format(new Date(v));
 const exportOrdersExcel=(orders:Order[],ledgerName:string)=>{if(!orders.length)return;const esc=(value:unknown)=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');const rows=orders.map(order=>`<tr><td>${esc(order.code)}</td><td>${esc(dateText(order.ordered_at))}</td><td>${esc(order.customer_name)}</td><td>${esc(order.customer_contact)}</td><td>${esc(order.items.map(item=>`${item.product_name} x${item.quantity}`).join('; '))}</td><td>${order.total}</td><td>${order.capital_cost}</td><td>${order.shipping_fee}</td><td>${order.shipping_cost}</td><td>${order.discount}</td><td>${order.other_fee}</td><td>${order.profit}</td><td>${esc(order.payment_status)}</td><td>${esc(order.note)}</td></tr>`).join('');const html=`<html><head><meta charset="UTF-8"></head><body><table border="1"><tr><th>Mã đơn</th><th>Ngày</th><th>Khách hàng</th><th>Liên hệ</th><th>Sản phẩm</th><th>Khách trả</th><th>Giá vốn</th><th>Ship thu khách</th><th>Ship thực trả</th><th>Giảm giá</th><th>Phí khác</th><th>Lợi nhuận</th><th>Thanh toán</th><th>Ghi chú</th></tr>${rows}</table></body></html>`;const url=URL.createObjectURL(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8'})),link=document.createElement('a');link.href=url;link.download=`don-hang-${ledgerName||nowMonth()}.xls`;link.click();URL.revokeObjectURL(url)};
-const defaultPaymentSettings:PaymentSettings={shopName:'BookCase Shop',bankName:'',accountNumber:'',accountName:'',qrImage:'',note:'Cảm ơn bạn đã ủng hộ shop.'};
+const defaultPaymentSettings:PaymentSettings={shopName:'BookCase Shop',bankName:'MB Bank',bankCode:'MB',accountNumber:'',accountName:'',qrImage:'',note:'',tagline:'Coffeeshop and bakery'};
 const paymentSettingsKey='bookcase:business:payment-settings';
-function loadPaymentSettings(){if(typeof window==='undefined')return defaultPaymentSettings;try{return {...defaultPaymentSettings,...JSON.parse(localStorage.getItem(paymentSettingsKey)||'{}')}}catch{return defaultPaymentSettings}}
-function wrapCanvasText(ctx:CanvasRenderingContext2D,text:string,x:number,y:number,maxWidth:number,lineHeight:number,maxLines=3){const words=String(text||'').split(' ');let line='',lines=0;for(const word of words){const test=line?`${line} ${word}`:word;if(ctx.measureText(test).width>maxWidth&&line){ctx.fillText(line,x,y);line=word;y+=lineHeight;lines++;if(lines>=maxLines-1)break}else line=test}if(line)ctx.fillText(line,x,y);return y+lineHeight}
-function loadCanvasImage(src:string){return new Promise<HTMLImageElement>((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=src})}
-function drawContainImage(ctx:CanvasRenderingContext2D,image:HTMLImageElement,x:number,y:number,w:number,h:number){const scale=Math.min(w/image.width,h/image.height),dw=image.width*scale,dh=image.height*scale;ctx.drawImage(image,x+(w-dw)/2,y+(h-dh)/2,dw,dh)}
+function loadPaymentSettings():PaymentSettings{if(typeof window==='undefined')return defaultPaymentSettings;try{return {...defaultPaymentSettings,...JSON.parse(localStorage.getItem(paymentSettingsKey)||'{}')}}catch{return defaultPaymentSettings}}
+function loadCanvasImage(src:string){return new Promise<HTMLImageElement>((resolve,reject)=>{const image=new Image();if(!src.startsWith('data:')&&!src.startsWith('blob:'))image.crossOrigin='anonymous';image.onload=()=>resolve(image);image.onerror=reject;image.src=src})}
+
+function drawScallopedSeal(ctx:CanvasRenderingContext2D,cx:number,cy:number,shopName:string){
+ ctx.save();
+ ctx.beginPath();
+ const lobes=24,rBase=52,rWave=4.5;
+ for(let i=0;i<=360;i++){
+  const angle=(i*Math.PI)/180,r=rBase+Math.sin(angle*lobes)*rWave,px=cx+r*Math.cos(angle),py=cy+r*Math.sin(angle);
+  if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+ }
+ ctx.closePath();
+ ctx.fillStyle='#203354';
+ ctx.fill();
+
+ ctx.fillStyle='#FFF7E6';
+ ctx.textAlign='center';
+ ctx.font='800 12px Montserrat, sans-serif';
+ const shortShop=(shopName.split(' ')[0]||'SHOP').slice(0,10).toUpperCase();
+ ctx.fillText(shortShop,cx,cy-14);
+
+ ctx.strokeStyle='#FFF7E6';
+ ctx.lineWidth=1.6;
+ ctx.beginPath();
+ ctx.arc(cx,cy+2,4,0,Math.PI*2);
+ ctx.stroke();
+ ctx.beginPath();
+ ctx.arc(cx,cy+2,11,-0.6,Math.PI+0.6);
+ ctx.stroke();
+
+ ctx.font='600 9px Montserrat, sans-serif';
+ ctx.fillText('ORIGINAL',cx,cy+24);
+ ctx.restore();
+}
+
+function drawFormattedQuote(ctx:CanvasRenderingContext2D,text:string,highlight:string,x:number,startY:number,maxWidth:number,lineHeight:number){
+ ctx.save();
+ const words=text.split(/\s+/);
+ let curX=x,curY=startY;
+ const regFont='italic 500 21px Montserrat, sans-serif',boldFont='italic 800 21px Montserrat, sans-serif';
+ const normHighlight=highlight.trim().toLowerCase();
+
+ for(let i=0;i<words.length;i++){
+  const rawWord=words[i],cleanWord=rawWord.toLowerCase().replace(/[^a-z0-9àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/g,'');
+  const isHighlight=Boolean(normHighlight&&cleanWord&&(normHighlight.includes(cleanWord)||cleanWord.includes(normHighlight)));
+  ctx.font=isHighlight?boldFont:regFont;
+  ctx.fillStyle='#203354';
+  const wordWidth=ctx.measureText(rawWord).width,spaceWidth=ctx.measureText(' ').width;
+  if(curX+wordWidth>x+maxWidth&&curX>x){curX=x;curY+=lineHeight}
+  ctx.fillText(rawWord,curX,curY);
+  curX+=wordWidth+spaceWidth;
+ }
+ ctx.restore();
+}
+
 async function createOrderCloseImage(order:Order,settings:PaymentSettings,ledgerName:string){
- const width=1200,height=1723,blue='#203354',paper='#FFF9ED',muted='rgba(32,51,84,.55)',canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
- canvas.width=width;canvas.height=height;if(!ctx)throw new Error('Canvas không khả dụng.');
- const shopName=(settings.shopName||'BookCase Shop').trim()||'BookCase Shop',items=order.items.slice(0,5),left=210,right=990;
- const dotted=(y:number)=>{ctx.save();ctx.strokeStyle=blue;ctx.lineWidth=4;ctx.setLineDash([3,12]);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();ctx.restore()};
- ctx.fillStyle='#8BC5F4';ctx.fillRect(0,0,width,height);ctx.fillStyle=paper;ctx.beginPath();ctx.moveTo(180,104);ctx.lineTo(1012,76);ctx.lineTo(1072,1605);ctx.lineTo(248,1670);ctx.closePath();ctx.fill();
- ctx.save();ctx.translate(34,0);ctx.rotate(-.025);ctx.fillStyle=blue;ctx.textAlign='center';ctx.font='900 96px Arial Rounded MT Bold, Arial';wrapCanvasText(ctx,shopName,600,275,560,94,1);
- ctx.textAlign='left';ctx.font='800 24px Courier New';ctx.fillText('SẢN PHẨM',left,420);ctx.fillText('SL',650,420);ctx.fillText('THÀNH TIỀN',840,420);dotted(438);
- let y=506;ctx.font='700 22px Courier New';items.forEach((item,index)=>{ctx.fillStyle=muted;ctx.fillText(String(index+1).padStart(2,'0'),left+20,y);ctx.fillStyle=blue;ctx.font='900 42px Georgia';wrapCanvasText(ctx,item.product_name,left+78,y,360,44,1);ctx.font='700 22px Courier New';ctx.fillText(order.customer_name||'Khách hàng',left+82,y+48);ctx.fillText(`SL: ${item.quantity}`,650,y+46);ctx.textAlign='right';ctx.font='800 29px Courier New';ctx.fillText(cash(item.unit_price*item.quantity),right,y+16);ctx.textAlign='left';dotted(y+86);y+=136});
- y=Math.max(y+36,930);const subtotal=order.total-order.shipping_fee+order.discount,summary:[string,number][]=[['TẠM TÍNH:',subtotal],['SHIP:',order.shipping_fee],['GIẢM GIÁ:',-order.discount]].filter(([,value])=>Number(value)) as [string,number][];
- ctx.font='800 25px Courier New';ctx.fillStyle=blue;summary.forEach(([label,value])=>{ctx.fillText(label,left+38,y);ctx.textAlign='right';ctx.fillText(cash(value),right,y);ctx.textAlign='left';y+=44});
- y+=28;ctx.font='900 31px Courier New';ctx.fillText('TỔNG THANH TOÁN:',left+38,y);ctx.textAlign='right';ctx.font='900 36px Courier New';ctx.fillText(cash(order.total),right,y);ctx.textAlign='left';y+=58;dotted(y);
- y+=72;ctx.font='700 22px Courier New';ctx.fillText(dateText(order.ordered_at),left+30,y);ctx.fillText(ledgerName,560,y);ctx.textAlign='right';ctx.fillText(order.code,right,y);ctx.textAlign='left';
- const qrSize=260,qrX=(width-qrSize)/2+30,qrY=y+78;if(settings.qrImage){try{const qr=await loadCanvasImage(settings.qrImage);ctx.fillStyle='#FFFFFF';ctx.fillRect(qrX-20,qrY-20,qrSize+40,qrSize+40);drawContainImage(ctx,qr,qrX,qrY,qrSize,qrSize)}catch{}}else{ctx.strokeStyle=blue;ctx.lineWidth=5;ctx.strokeRect(qrX,qrY,qrSize,qrSize);ctx.font='800 24px Courier New';ctx.textAlign='center';ctx.fillText('QR',qrX+qrSize/2,qrY+qrSize/2)}
- ctx.textAlign='center';ctx.font='800 24px Courier New';ctx.fillText(`${shopName.toUpperCase()} - ${order.code}`,600,qrY+qrSize+58);ctx.font='900 24px Courier New';ctx.fillText(settings.bankName||'THÔNG TIN CHUYỂN KHOẢN',600,qrY+qrSize+128);ctx.font='700 22px Courier New';ctx.fillText([settings.accountNumber,settings.accountName||shopName].filter(Boolean).join(' | '),600,qrY+qrSize+162);wrapCanvasText(ctx,settings.note||'Cảm ơn bạn đã ủng hộ shop.',360,qrY+qrSize+198,520,28,2);
- ctx.restore();return canvas.toDataURL('image/png')
+ await ensureMontserratLoaded();
+ const width=800,itemRowHeight=52,itemsCount=Math.max(order.items.length,1),extraHeight=Math.max(0,itemsCount-7)*itemRowHeight,height=1600+extraHeight;
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas không khả dụng.');
+
+ const navy='#203354',muted='rgba(32, 51, 84, 0.65)',paper='#FFF7E6';
+ const shopName=(settings.shopName||'BookCase Shop').trim()||'BookCase Shop';
+ const xLeft=56,xQty=440,xRight=744;
+
+ ctx.fillStyle=paper;
+ ctx.fillRect(0,0,width,height);
+
+ const headerY=120;
+ ctx.fillStyle=navy;
+ ctx.font='800 38px Montserrat, sans-serif';
+ ctx.textAlign='left';
+ ctx.fillText('Items',xLeft,headerY);
+ ctx.textAlign='center';
+ ctx.fillText('Qty',xQty,headerY);
+ ctx.textAlign='right';
+ ctx.fillText('Price',xRight,headerY);
+
+ let curY=195;
+ ctx.font='500 28px Montserrat, sans-serif';
+ for(const item of order.items){
+  ctx.fillStyle=navy;
+  ctx.textAlign='left';
+  let name=item.product_name||'Sản phẩm';
+  const maxNameW=340;
+  if(ctx.measureText(name).width>maxNameW){
+   while(name.length>3&&ctx.measureText(name+'...').width>maxNameW){name=name.slice(0,-1)}
+   name=name+'...';
+  }
+  ctx.fillText(name,xLeft,curY);
+
+  ctx.textAlign='center';
+  ctx.fillText(String(item.quantity),xQty,curY);
+
+  ctx.textAlign='right';
+  ctx.fillText(cash(item.unit_price*item.quantity),xRight,curY);
+  curY+=itemRowHeight;
+ }
+
+ if(order.shipping_fee>0||order.discount>0){
+  curY+=16;
+  ctx.font='500 24px Montserrat, sans-serif';
+  ctx.fillStyle=muted;
+  ctx.textAlign='right';
+  const subtotal=order.total-order.shipping_fee+order.discount;
+  ctx.fillText('Tạm tính',xQty+60,curY);
+  ctx.fillText(cash(subtotal),xRight,curY);
+  curY+=36;
+  if(order.shipping_fee>0){ctx.fillText('Phí ship',xQty+60,curY);ctx.fillText(cash(order.shipping_fee),xRight,curY);curY+=36}
+  if(order.discount>0){ctx.fillText('Giảm giá',xQty+60,curY);ctx.fillText('-'+cash(order.discount),xRight,curY);curY+=36}
+ }
+
+ curY+=32;
+ ctx.fillStyle=navy;
+ ctx.font='900 44px Montserrat, sans-serif';
+ ctx.textAlign='right';
+ ctx.fillText('Total',xQty+60,curY);
+ ctx.fillText(cash(order.total),xRight,curY);
+
+ const midY=Math.max(curY+70,680),qrSize=185,qrX=xLeft,qrY=midY;
+ try{
+  const qrCanvas=document.createElement('canvas');
+  await renderBankQrToCanvas(qrCanvas,{
+   bankCodeOrName:settings.bankCode||settings.bankName,
+   accountNumber:settings.accountNumber,
+   accountName:settings.accountName,
+   amount:order.total,
+   memo:order.code,
+   color:navy,
+   width:qrSize
+  });
+  ctx.drawImage(qrCanvas,qrX,qrY,qrSize,qrSize);
+ }catch(err){
+  console.error('QR generation error:',err);
+  ctx.strokeStyle=navy;ctx.lineWidth=3;ctx.strokeRect(qrX,qrY,qrSize,qrSize);
+  ctx.font='700 20px Montserrat, sans-serif';ctx.fillStyle=navy;ctx.textAlign='center';
+  ctx.fillText('QR CODE',qrX+qrSize/2,qrY+qrSize/2);
+ }
+
+ if(settings.accountNumber){
+  const bName=settings.bankName||settings.bankCode||'Ngân hàng';
+  ctx.textAlign='left';
+  ctx.font='700 15px Montserrat, sans-serif';
+  ctx.fillStyle=navy;
+  ctx.fillText(`${bName} · ${settings.accountNumber}`,qrX,qrY+qrSize+24);
+  if(settings.accountName){
+   ctx.font='600 13px Montserrat, sans-serif';
+   ctx.fillStyle=muted;
+   ctx.fillText(settings.accountName.toUpperCase(),qrX,qrY+qrSize+44);
+  }
+ }
+
+ const quoteX=qrX+qrSize+32,quoteY=qrY+28,maxQuoteWidth=xRight-quoteX;
+ const quoteTemplate=settings.note&&settings.note.trim()?settings.note.trim():`Every visit to ${shopName} is a chance to slow down, savor quality, and enjoy life's fleeting moments.`;
+ drawFormattedQuote(ctx,quoteTemplate,shopName,quoteX,quoteY,maxQuoteWidth,34);
+
+ const bottomY=height-200,brandX=xLeft,maxBrandW=480;
+ let brandFontSize=84;
+ ctx.font=`900 ${brandFontSize}px Montserrat, sans-serif`;
+ while(ctx.measureText(shopName).width>maxBrandW&&brandFontSize>36){
+  brandFontSize-=4;
+  ctx.font=`900 ${brandFontSize}px Montserrat, sans-serif`;
+ }
+ ctx.fillStyle=navy;
+ ctx.textAlign='left';
+ ctx.fillText(shopName,brandX,bottomY);
+
+ const tagline=(settings.tagline||'Coffeeshop and bakery').trim();
+ ctx.font='italic 500 24px Montserrat, sans-serif';
+ ctx.fillStyle='rgba(32, 51, 84, 0.85)';
+ ctx.fillText(tagline,brandX+2,bottomY+44);
+
+ const sealX=xRight-65,sealY=bottomY-10;
+ drawScallopedSeal(ctx,sealX,sealY,shopName);
+
+ return canvas.toDataURL('image/png');
 }
 const input='block h-12 min-w-0 max-w-full w-full rounded-xl border border-[#DED4C8] bg-white px-3 text-[16px] font-semibold outline-none focus:border-[#203354] focus:ring-2 focus:ring-[#203354]/10';
 const area='block min-h-24 min-w-0 max-w-full w-full resize-none rounded-xl border border-[#DED4C8] bg-white p-3 text-[16px] font-semibold outline-none focus:border-[#203354]';
@@ -499,11 +656,23 @@ function OrdersV3({ledgers,ledger,choose,addBook,headers,notify,fail,products,se
  const loadCustomers=()=>axios.get<Customer[]>('/api/sales/customers',{headers}).then(response=>setCustomers(response.data)).catch(()=>undefined);
  useEffect(()=>{loadCustomers()},[headers]);
  const ledgerName=ledgers.find(item=>item.id===ledger)?.name||nowMonth();
+ const [previewQr,setPreviewQr]=useState('');
+ useEffect(()=>{
+  let active=true;
+  generateBankQrDataUrl({
+   bankCodeOrName:paymentSettings.bankCode||paymentSettings.bankName,
+   accountNumber:paymentSettings.accountNumber,
+   accountName:paymentSettings.accountName,
+   amount:150000,
+   memo:'BOOKCASE',
+   color:'#203354'
+  }).then(url=>{if(active)setPreviewQr(url)}).catch(()=>undefined);
+  return()=>{active=false};
+ },[paymentSettings.bankCode,paymentSettings.bankName,paymentSettings.accountNumber,paymentSettings.accountName]);
  const savePaymentSettings=()=>{localStorage.setItem(paymentSettingsKey,JSON.stringify(paymentSettings));setPaymentOpen(false);notify('Đã lưu thông tin nhận chuyển khoản.')};
- const setQrFile=(file?:File)=>{if(!file)return;const reader=new FileReader();reader.onload=()=>setPaymentSettings(current=>({...current,qrImage:String(reader.result||'')}));reader.readAsDataURL(file)};
  useEffect(()=>{let active=true;if(!shareOrder){setShareUrl('');return}setShareBusy(true);createOrderCloseImage(shareOrder,paymentSettings,ledgerName).then(url=>{if(active)setShareUrl(url)}).catch(()=>notify('Không tạo được ảnh chốt đơn.')).finally(()=>{if(active)setShareBusy(false)});return()=>{active=false}},[shareOrder,paymentSettings,ledgerName]);
- const downloadCloseImage=()=>{if(!shareOrder||!shareUrl)return;const link=document.createElement('a');link.href=shareUrl;link.download=`chot-don-${shareOrder.code}.png`;link.click();notify('Đã tải ảnh chốt đơn về máy.')};
- const shareCloseImage=async()=>{if(!shareOrder||!shareUrl)return;try{const blob=await (await fetch(shareUrl)).blob(),file=new File([blob],`chot-don-${shareOrder.code}.png`,{type:'image/png'});if(navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:`Chốt đơn ${shareOrder.code}`});notify('Đã mở bảng chia sẻ ảnh.')}else downloadCloseImage()}catch{downloadCloseImage()}};
+ const downloadCloseImage=()=>{if(!shareOrder||!shareUrl)return;const link=document.createElement('a');link.href=shareUrl;link.download=`hoa-don-${shareOrder.code}.png`;link.click();notify('Đã tải ảnh hoá đơn về máy.')};
+ const shareCloseImage=async()=>{if(!shareOrder||!shareUrl)return;try{const blob=await (await fetch(shareUrl)).blob(),file=new File([blob],`hoa-don-${shareOrder.code}.png`,{type:'image/png'});if(navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:`Hoá đơn ${shareOrder.code}`});notify('Đã mở bảng chia sẻ ảnh.')}else downloadCloseImage()}catch{downloadCloseImage()}};
  const reset=()=>{handledRoute.current='';setDraft(freshDraft());setLines([{product_id:'',quantity:1,unit_price:''}]);setEditing(null);setCreating(false);if(typeof window!=='undefined')history.replaceState(null,'',location.pathname)};
  const selectCustomer=(customerId:string)=>{const customer=customers.find(item=>item.id===customerId);if(!customer){setDraft({...draft,customer_id:''});return}setDraft({...draft,customer_id:customer.id,customer_name:customer.name,customer_contact:customer.phone||'',social_link:customer.social_link||''})};
  const save=async()=>{
@@ -523,7 +692,42 @@ function OrdersV3({ledgers,ledger,choose,addBook,headers,notify,fail,products,se
  const shown=orders.filter(order=>`${order.code} ${order.customer_name} ${order.customer_contact||''}`.toLowerCase().includes(search.toLowerCase()));
  const editOrder=(order:Order)=>{setEditing(order);setDraft({customer_id:order.customer_id||'',customer_name:order.customer_name||'',customer_contact:order.customer_contact||'',social_link:order.social_link||'',shipping_fee:String(order.shipping_fee||''),shipping_cost:String(order.shipping_cost||''),discount:String(order.discount||''),other_fee:String(order.other_fee||''),payment_status:order.payment_status||'paid',note:order.note||'',ordered_at:order.ordered_at.slice(0,10)});setLines(order.items.map(item=>({product_id:item.product_id,quantity:item.quantity,unit_price:String(item.unit_price)})));setCreating(true);window.scrollTo({top:0,behavior:'smooth'})};
  useEffect(()=>{const quick=()=>{handledRoute.current=location.hash||'#new-order';setEditing(null);setDraft(freshDraft());setLines([{product_id:'',quantity:1,unit_price:''}]);setCreating(true)},exportFile=()=>{const name=ledgers.find(item=>item.id===ledger)?.name||nowMonth();if(!orders.length)return notify('Chưa có đơn để xuất.');exportOrdersExcel(orders,name)},route=()=>{const hash=location.hash;if(!hash||handledRoute.current===hash)return;if(hash==='#new-order')quick();else if(hash.startsWith('#edit-')){const order=orders.find(item=>item.id===hash.slice(6));if(order){handledRoute.current=hash;editOrder(order)}}};window.addEventListener('quick-order',quick);window.addEventListener('export-orders',exportFile);window.addEventListener('hashchange',route);route();return()=>{window.removeEventListener('quick-order',quick);window.removeEventListener('export-orders',exportFile);window.removeEventListener('hashchange',route)}},[orders,ledger,ledgers]);
- const paymentModals=<>{paymentOpen&&<Modal close={()=>setPaymentOpen(false)} title="Thông tin nhận tiền"><div className="space-y-4 pb-24"><Field label="Tên shop hiển thị trên ảnh"><input value={paymentSettings.shopName} onChange={event=>setPaymentSettings({...paymentSettings,shopName:event.target.value})} placeholder="VD: BookCase Shop" className={input}/></Field><div className="grid gap-4 md:grid-cols-2"><Field label="Ngân hàng / ví"><input value={paymentSettings.bankName} onChange={event=>setPaymentSettings({...paymentSettings,bankName:event.target.value})} placeholder="VD: Vietcombank" className={input}/></Field><Field label="Số tài khoản"><input value={paymentSettings.accountNumber} onChange={event=>setPaymentSettings({...paymentSettings,accountNumber:event.target.value})} className={input}/></Field></div><Field label="Chủ tài khoản"><input value={paymentSettings.accountName} onChange={event=>setPaymentSettings({...paymentSettings,accountName:event.target.value})} className={input}/></Field><Field label="Lời nhắn trên ảnh"><textarea value={paymentSettings.note} onChange={event=>setPaymentSettings({...paymentSettings,note:event.target.value})} className={area}/></Field><div><span className="mb-2 block text-xs font-extrabold text-[#625850]">Ảnh QR chuyển khoản</span><label className="flex min-h-52 cursor-pointer items-center justify-center rounded-xl border border-dashed border-[#CFC2B5] bg-white p-3 text-center text-sm font-bold text-[#6F655E]">{paymentSettings.qrImage?<span className="relative flex aspect-square w-52 max-w-full items-center justify-center overflow-hidden rounded-lg bg-[#EDF1F5] p-2"><img src={paymentSettings.qrImage} alt="QR chuyển khoản" className="h-full w-full object-cover"/><span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#277044] text-white shadow-lg"><Check size={18} strokeWidth={3}/></span><span className="absolute bottom-2 left-2 rounded-lg bg-white/95 px-2 py-1 text-[11px] font-black text-[#277044]">Đã chọn QR</span></span>:<span><Upload className="mx-auto mb-2"/> Chọn ảnh QR từ máy</span>}<input type="file" accept="image/*" onChange={event=>setQrFile(event.target.files?.[0])} className="hidden"/></label>{paymentSettings.qrImage&&<button type="button" onClick={()=>setPaymentSettings({...paymentSettings,qrImage:''})} className="mt-2 text-xs font-bold text-red-600">Xóa QR</button>}</div><div className="sticky bottom-[-1.25rem] -mx-5 border-t border-[#E4D9CE] bg-[#FAF7F2]/95 px-5 py-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] backdrop-blur"><button type="button" onClick={savePaymentSettings} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#203354] text-sm font-black text-white"><Check size={20} strokeWidth={3}/> Lưu thông tin</button></div></div></Modal>}{shareOrder&&<Modal close={()=>setShareOrder(null)} title={`Ảnh chốt đơn ${shareOrder.code}`}><div className="space-y-4"><div className="rounded-xl border bg-white p-2">{shareBusy?<div className="flex h-80 items-center justify-center"><Loader2 className="animate-spin text-[#203354]"/></div>:shareUrl?<img src={shareUrl} alt={`Ảnh chốt đơn ${shareOrder.code}`} className="max-h-[52dvh] w-full rounded-lg object-contain md:max-h-[65vh]"/>:<p className="p-8 text-center text-sm font-semibold text-[#776C64]">Chưa tạo được ảnh.</p>}</div><div className="grid grid-cols-2 gap-2"><Button light onClick={()=>setPaymentOpen(true)}><Upload/> Sửa QR/STK</Button><Button onClick={shareCloseImage} disabled={!shareUrl||shareBusy}><Download/> Gửi / tải ảnh</Button></div><button type="button" onClick={downloadCloseImage} disabled={!shareUrl||shareBusy} className="h-11 w-full rounded-xl border bg-white text-sm font-black text-[#203354] disabled:opacity-40">Tải PNG về máy</button></div></Modal>}</>;
+ const paymentModals=<>{paymentOpen&&<Modal close={()=>setPaymentOpen(false)} title="Cài đặt hoá đơn & Nhận tiền"><div className="space-y-4 pb-24">
+  <Field label="Tên shop hiển thị trên hoá đơn (thay chữ Mujo)"><input value={paymentSettings.shopName} onChange={event=>setPaymentSettings({...paymentSettings,shopName:event.target.value})} placeholder="VD: BookCase Shop" className={input}/></Field>
+  <Field label="Dòng phụ dưới tên shop (Tagline / Danh mục)"><input value={paymentSettings.tagline||''} onChange={event=>setPaymentSettings({...paymentSettings,tagline:event.target.value})} placeholder="VD: Coffeeshop and bakery" className={input}/></Field>
+  <div className="grid gap-4 md:grid-cols-2">
+   <Field label="Ngân hàng thụ hưởng">
+    <CustomSelect value={paymentSettings.bankCode||findBank(paymentSettings.bankName)?.code||'MB'} onChange={val=>{const b=VIETNAM_BANKS.find(x=>x.code===val);setPaymentSettings({...paymentSettings,bankCode:val,bankName:b?.shortName||val})}} placeholder="Chọn ngân hàng" options={VIETNAM_BANKS.map(b=>({value:b.code,label:`${b.shortName} (${b.code})`,description:b.name}))}/>
+   </Field>
+   <Field label="Số tài khoản ngân hàng (STK)"><input value={paymentSettings.accountNumber} onChange={event=>setPaymentSettings({...paymentSettings,accountNumber:event.target.value.replace(/\D/g,'')})} placeholder="VD: 0123456789" className={input}/></Field>
+  </div>
+  <Field label="Tên chủ tài khoản"><input value={paymentSettings.accountName} onChange={event=>setPaymentSettings({...paymentSettings,accountName:event.target.value.toUpperCase()})} placeholder="VD: NGUYEN VAN A" className={input}/></Field>
+  <Field label="Lời nhắn trích dẫn (bên cạnh mã QR)"><textarea value={paymentSettings.note} onChange={event=>setPaymentSettings({...paymentSettings,note:event.target.value})} placeholder={`Mặc định: Every visit to ${paymentSettings.shopName||'Shop'} is a chance to slow down, savor quality, and enjoy life's fleeting moments.`} className={area}/></Field>
+  <div>
+   <span className="mb-2 block text-xs font-extrabold text-[#625850]">Mã QR thanh toán tự động (VietQR chuẩn ngân hàng)</span>
+   <div className="flex flex-col items-center justify-center rounded-2xl border border-[#D8CCC0] bg-[#FFF7E6] p-5 text-center shadow-xs">
+    {previewQr?<div className="relative flex aspect-square w-48 max-w-full items-center justify-center rounded-xl bg-transparent p-2"><img src={previewQr} alt="QR ngân hàng" className="h-full w-full object-contain"/></div>:<div className="flex h-48 w-48 items-center justify-center rounded-xl border border-dashed border-[#D8CCC0] text-xs font-bold text-[#887B71]">Nhập STK để xem trước QR</div>}
+    <div className="mt-3">
+     <b className="block text-sm text-[#203354]">{paymentSettings.bankName||'Ngân hàng'} · {paymentSettings.accountNumber||'Chưa nhập STK'}</b>
+     {paymentSettings.accountName&&<p className="text-xs font-bold text-[#57534E]">{paymentSettings.accountName.toUpperCase()}</p>}
+     <p className="mt-1 text-[11px] font-medium text-[#7A6F66]">QR tự động tạo theo STK. Khi chốt đơn, mã QR sẽ tự động điền đúng số tiền và mã đơn để khách quét là chuyển được ngay.</p>
+    </div>
+   </div>
+  </div>
+  <div className="sticky bottom-[-1.25rem] -mx-5 border-t border-[#E4D9CE] bg-[#FAF7F2]/95 px-5 py-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] backdrop-blur">
+   <button type="button" onClick={savePaymentSettings} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#203354] text-sm font-black text-white cursor-pointer"><Check size={20} strokeWidth={3}/> Lưu thông tin</button>
+  </div>
+ </div></Modal>}
+ {shareOrder&&<Modal close={()=>setShareOrder(null)} title={`Hoá đơn ${shareOrder.code}`}><div className="space-y-4">
+  <div className="rounded-xl border bg-white p-2">
+   {shareBusy?<div className="flex h-80 items-center justify-center"><Loader2 className="animate-spin text-[#203354]"/></div>:shareUrl?<img src={shareUrl} alt={`Hoá đơn ${shareOrder.code}`} className="max-h-[58dvh] w-full rounded-lg object-contain md:max-h-[70vh]"/>:<p className="p-8 text-center text-sm font-semibold text-[#776C64]">Chưa tạo được ảnh hoá đơn.</p>}
+  </div>
+  <div className="grid grid-cols-2 gap-2">
+   <Button light onClick={()=>setPaymentOpen(true)}><ReceiptText/> Sửa QR/STK</Button>
+   <Button onClick={shareCloseImage} disabled={!shareUrl||shareBusy}><Download/> Gửi / chia sẻ</Button>
+  </div>
+  <button type="button" onClick={downloadCloseImage} disabled={!shareUrl||shareBusy} className="h-11 w-full rounded-xl border bg-white text-sm font-black text-[#203354] disabled:opacity-40 cursor-pointer">Tải ảnh PNG về máy</button>
+ </div></Modal>}</>;
  if(creating)return <><Title small="Đơn hàng" title="Chốt đơn cho khách" text="Chọn khách có sẵn hoặc nhập khách mới; dữ liệu khách hàng sẽ được liên kết tự động."/><Panel><Back title="Tạo đơn mới" go={reset}/>
   <div className="mb-4 rounded-xl border border-[#DCE3ED] bg-[#F2F5F9] p-3"><Field label="Chọn khách hàng có sẵn (không bắt buộc)"><CustomSelect value={draft.customer_id} onChange={selectCustomer} placeholder="Tìm và chọn khách hàng" options={customers.map(customer=>({value:customer.id,label:customer.name,description:[customer.phone,customer.email,customer.order_count?`${customer.order_count} đơn`:null].filter(Boolean).join(' · ')}))}/></Field></div>
   <div className="grid min-w-0 gap-4 md:grid-cols-2"><DateField label="Ngày chốt" value={draft.ordered_at} set={value=>setDraft({...draft,ordered_at:value})}/><Field label="Tên khách"><input value={draft.customer_name} onChange={event=>setDraft({...draft,customer_name:event.target.value})} placeholder="Tên để tìm lại" className={input}/></Field><Field label="SĐT / tài khoản social"><input value={draft.customer_contact} onChange={event=>setDraft({...draft,customer_contact:event.target.value})} className={input}/></Field><Field label="Link tin nhắn"><input value={draft.social_link} onChange={event=>setDraft({...draft,social_link:event.target.value})} className={input}/></Field></div>
