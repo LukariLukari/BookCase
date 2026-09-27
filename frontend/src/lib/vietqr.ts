@@ -110,8 +110,8 @@ export async function generateBankQrDataUrl({
   if (!cleanAcc) {
     const text = [bankCodeOrName, accountName, memo].filter(Boolean).join(' ') || 'VIETQR';
     return QRCode.toDataURL(text, {
-      color: { dark: color, light: '#00000000' },
-      margin: 1,
+      color: { dark: color, light: '#FFFFFF' },
+      margin: 2,
       width: 400,
       errorCorrectionLevel: 'M',
     });
@@ -130,9 +130,9 @@ export async function generateBankQrDataUrl({
   return QRCode.toDataURL(payload, {
     color: {
       dark: color,
-      light: '#00000000',
+      light: '#FFFFFF',
     },
-    margin: 1,
+    margin: 2,
     width: 400,
     errorCorrectionLevel: 'M',
   });
@@ -166,8 +166,8 @@ export async function renderBankQrToCanvas(
     : [bankCodeOrName, accountName, memo].filter(Boolean).join(' ') || 'VIETQR';
 
   await QRCode.toCanvas(targetCanvas, payload, {
-    color: { dark: color, light: '#00000000' },
-    margin: 0,
+    color: { dark: color, light: '#FFFFFF' },
+    margin: 1,
     width,
     errorCorrectionLevel: 'M',
   });

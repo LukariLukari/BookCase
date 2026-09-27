@@ -94,20 +94,85 @@ function drawFormattedQuote(ctx:CanvasRenderingContext2D,text:string,highlight:s
  ctx.restore();
 }
 
+function drawRoundedRect(ctx:CanvasRenderingContext2D,x:number,y:number,w:number,h:number,r:number){
+ ctx.beginPath();
+ ctx.moveTo(x+r,y);
+ ctx.lineTo(x+w-r,y);
+ ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+ ctx.lineTo(x+w,y+h-r);
+ ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+ ctx.lineTo(x+r,y+h);
+ ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+ ctx.lineTo(x,y+r);
+ ctx.quadraticCurveTo(x,y,x+r,y);
+ ctx.closePath();
+}
+
+function drawContainImage(ctx:CanvasRenderingContext2D,img:HTMLImageElement,x:number,y:number,w:number,h:number){
+ const imgW=img.naturalWidth||img.width||1,imgH=img.naturalHeight||img.height||1;
+ const scale=Math.min(w/imgW,h/imgH);
+ const drawW=imgW*scale,drawH=imgH*scale;
+ const drawX=x+(w-drawW)/2,drawY=y+(h-drawH)/2;
+ ctx.drawImage(img,drawX,drawY,drawW,drawH);
+}
+
 async function createOrderCloseImage(order:Order,settings:PaymentSettings,ledgerName:string){
  await ensureMontserratLoaded();
- const width=800,itemRowHeight=52,itemsCount=Math.max(order.items.length,1),extraHeight=Math.max(0,itemsCount-7)*itemRowHeight,height=1600+extraHeight;
- const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
- const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas không khả dụng.');
-
  const navy='#203354',muted='rgba(32, 51, 84, 0.65)',paper='#FFF7E6';
  const shopName=(settings.shopName||'BookCase Shop').trim()||'BookCase Shop';
- const xLeft=56,xQty=440,xRight=744;
+ const width=800,xLeft=56,xQty=440,xRight=744;
+
+ // Bottom-up layout calculations
+ const brandSectionHeight=130;
+ const gapBrandToQr=55;
+ const qrCardSize=210;
+ const hasBankText=Boolean(settings.accountNumber);
+ const bankTextHeight=hasBankText?(settings.accountName?46:24):0;
+ const qrBlockHeight=qrCardSize+(hasBankText?14+bankTextHeight:0);
+ const gapQrToTotal=55;
+
+ const hasSubtotal=order.shipping_fee>0||order.discount>0;
+ let summaryLinesCount=0;
+ if(hasSubtotal){
+  summaryLinesCount=1;
+  if(order.shipping_fee>0)summaryLinesCount++;
+  if(order.discount>0)summaryLinesCount++;
+ }
+ const summaryHeight=hasSubtotal?(18+summaryLinesCount*36):0;
+ const totalBlockHeight=44+summaryHeight;
+ const gapTotalToItems=45;
+
+ const itemRowHeight=52;
+ const itemsCount=Math.max(order.items.length,1);
+ const itemsBlockHeight=(itemsCount-1)*itemRowHeight;
+ const gapItemsToHeader=55;
+ const headerBlockHeight=38;
+
+ const minTopPadding=140,bottomPadding=90;
+ const totalContentHeight=headerBlockHeight+gapItemsToHeader+itemsBlockHeight+gapTotalToItems+totalBlockHeight+gapQrToTotal+qrBlockHeight+gapBrandToQr+brandSectionHeight;
+ const height=Math.max(1600,Math.ceil(minTopPadding+totalContentHeight+bottomPadding));
+
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas không khả dụng.');
 
  ctx.fillStyle=paper;
  ctx.fillRect(0,0,width,height);
 
- const headerY=120;
+ // Bottom-up Y coordinates:
+ const bottomY=height-130;
+ const brandTop=bottomY-65;
+
+ const qrSectionBottom=brandTop-gapBrandToQr;
+ const qrY=qrSectionBottom-qrBlockHeight;
+
+ const totalLineY=qrY-gapQrToTotal;
+
+ const lastItemY=(totalLineY-44-summaryHeight)-gapTotalToItems;
+ const firstItemY=lastItemY-(itemsCount-1)*itemRowHeight;
+
+ const headerY=firstItemY-gapItemsToHeader;
+
+ // 1. Header (Items, Qty, Price)
  ctx.fillStyle=navy;
  ctx.font='800 38px Montserrat, sans-serif';
  ctx.textAlign='left';
@@ -117,8 +182,9 @@ async function createOrderCloseImage(order:Order,settings:PaymentSettings,ledger
  ctx.textAlign='right';
  ctx.fillText('Price',xRight,headerY);
 
- let curY=195;
+ // 2. Product Items
  ctx.font='500 28px Montserrat, sans-serif';
+ let curY=firstItemY;
  for(const item of order.items){
   ctx.fillStyle=navy;
   ctx.textAlign='left';
@@ -138,44 +204,79 @@ async function createOrderCloseImage(order:Order,settings:PaymentSettings,ledger
   curY+=itemRowHeight;
  }
 
- if(order.shipping_fee>0||order.discount>0){
-  curY+=16;
+ // 3. Summary Lines (Tạm tính / Ship / Giảm giá) above Total line
+ if(hasSubtotal){
+  let sumY=totalLineY-44-(summaryLinesCount*36);
   ctx.font='500 24px Montserrat, sans-serif';
   ctx.fillStyle=muted;
   ctx.textAlign='right';
   const subtotal=order.total-order.shipping_fee+order.discount;
-  ctx.fillText('Tạm tính',xQty+60,curY);
-  ctx.fillText(cash(subtotal),xRight,curY);
-  curY+=36;
-  if(order.shipping_fee>0){ctx.fillText('Phí ship',xQty+60,curY);ctx.fillText(cash(order.shipping_fee),xRight,curY);curY+=36}
-  if(order.discount>0){ctx.fillText('Giảm giá',xQty+60,curY);ctx.fillText('-'+cash(order.discount),xRight,curY);curY+=36}
+  ctx.fillText('Tạm tính',xQty+60,sumY);
+  ctx.fillText(cash(subtotal),xRight,sumY);
+  sumY+=36;
+  if(order.shipping_fee>0){ctx.fillText('Phí ship',xQty+60,sumY);ctx.fillText(cash(order.shipping_fee),xRight,sumY);sumY+=36}
+  if(order.discount>0){ctx.fillText('Giảm giá',xQty+60,sumY);ctx.fillText('-'+cash(order.discount),xRight,sumY);sumY+=36}
  }
 
- curY+=32;
+ // 4. Total Line
  ctx.fillStyle=navy;
  ctx.font='900 44px Montserrat, sans-serif';
  ctx.textAlign='right';
- ctx.fillText('Total',xQty+60,curY);
- ctx.fillText(cash(order.total),xRight,curY);
+ ctx.fillText('Total',xQty+60,totalLineY);
+ ctx.fillText(cash(order.total),xRight,totalLineY);
 
- const midY=Math.max(curY+70,680),qrSize=185,qrX=xLeft,qrY=midY;
- try{
-  const qrCanvas=document.createElement('canvas');
-  await renderBankQrToCanvas(qrCanvas,{
-   bankCodeOrName:settings.bankCode||settings.bankName,
-   accountNumber:settings.accountNumber,
-   accountName:settings.accountName,
-   amount:order.total,
-   memo:order.code,
-   color:navy,
-   width:qrSize
-  });
-  ctx.drawImage(qrCanvas,qrX,qrY,qrSize,qrSize);
- }catch(err){
-  console.error('QR generation error:',err);
-  ctx.strokeStyle=navy;ctx.lineWidth=3;ctx.strokeRect(qrX,qrY,qrSize,qrSize);
-  ctx.font='700 20px Montserrat, sans-serif';ctx.fillStyle=navy;ctx.textAlign='center';
-  ctx.fillText('QR CODE',qrX+qrSize/2,qrY+qrSize/2);
+ // 5. QR Code Card + Bank Information
+ const qrX=xLeft;
+ let qrDrawn=false;
+
+ if(settings.qrImage){
+  try{
+   const userQrImg=await loadCanvasImage(settings.qrImage);
+   ctx.save();
+   ctx.fillStyle='#FFFFFF';
+   drawRoundedRect(ctx,qrX,qrY,qrCardSize,qrCardSize,16);
+   ctx.fill();
+   ctx.strokeStyle='#E2D8CC';
+   ctx.lineWidth=1.5;
+   ctx.stroke();
+   drawContainImage(ctx,userQrImg,qrX+12,qrY+12,qrCardSize-24,qrCardSize-24);
+   ctx.restore();
+   qrDrawn=true;
+  }catch(err){
+   console.error('Failed to load user QR image, falling back to VietQR:',err);
+  }
+ }
+
+ if(!qrDrawn){
+  try{
+   const qrCanvas=document.createElement('canvas');
+   await renderBankQrToCanvas(qrCanvas,{
+    bankCodeOrName:settings.bankCode||settings.bankName,
+    accountNumber:settings.accountNumber,
+    accountName:settings.accountName,
+    amount:order.total,
+    memo:order.code,
+    color:'#10223D',
+    width:qrCardSize-24
+   });
+   ctx.save();
+   ctx.fillStyle='#FFFFFF';
+   drawRoundedRect(ctx,qrX,qrY,qrCardSize,qrCardSize,16);
+   ctx.fill();
+   ctx.strokeStyle='#E2D8CC';
+   ctx.lineWidth=1.5;
+   ctx.stroke();
+   ctx.drawImage(qrCanvas,qrX+12,qrY+12,qrCardSize-24,qrCardSize-24);
+   ctx.restore();
+   qrDrawn=true;
+  }catch(err){
+   console.error('QR generation error:',err);
+   ctx.strokeStyle=navy;ctx.lineWidth=2;
+   drawRoundedRect(ctx,qrX,qrY,qrCardSize,qrCardSize,16);
+   ctx.stroke();
+   ctx.font='700 20px Montserrat, sans-serif';ctx.fillStyle=navy;ctx.textAlign='center';
+   ctx.fillText('QR CODE',qrX+qrCardSize/2,qrY+qrCardSize/2);
+  }
  }
 
  if(settings.accountNumber){
@@ -183,19 +284,21 @@ async function createOrderCloseImage(order:Order,settings:PaymentSettings,ledger
   ctx.textAlign='left';
   ctx.font='700 15px Montserrat, sans-serif';
   ctx.fillStyle=navy;
-  ctx.fillText(`${bName} · ${settings.accountNumber}`,qrX,qrY+qrSize+24);
+  ctx.fillText(`${bName} · ${settings.accountNumber}`,qrX,qrY+qrCardSize+24);
   if(settings.accountName){
    ctx.font='600 13px Montserrat, sans-serif';
    ctx.fillStyle=muted;
-   ctx.fillText(settings.accountName.toUpperCase(),qrX,qrY+qrSize+44);
+   ctx.fillText(settings.accountName.toUpperCase(),qrX,qrY+qrCardSize+44);
   }
  }
 
- const quoteX=qrX+qrSize+32,quoteY=qrY+28,maxQuoteWidth=xRight-quoteX;
+ // 6. Quote / Thank you message beside QR
+ const quoteX=qrX+qrCardSize+32,quoteY=qrY+28,maxQuoteWidth=xRight-quoteX;
  const quoteTemplate=settings.note&&settings.note.trim()?settings.note.trim():`Every visit to ${shopName} is a chance to slow down, savor quality, and enjoy life's fleeting moments.`;
  drawFormattedQuote(ctx,quoteTemplate,shopName,quoteX,quoteY,maxQuoteWidth,34);
 
- const bottomY=height-200,brandX=xLeft,maxBrandW=480;
+ // 7. Bottom Branding (Shop Name, Tagline, Scalloped Badge)
+ const brandX=xLeft,maxBrandW=480;
  let brandFontSize=84;
  ctx.font=`900 ${brandFontSize}px Montserrat, sans-serif`;
  while(ctx.measureText(shopName).width>maxBrandW&&brandFontSize>36){
@@ -704,13 +807,60 @@ function OrdersV3({ledgers,ledger,choose,addBook,headers,notify,fail,products,se
   <Field label="Tên chủ tài khoản"><input value={paymentSettings.accountName} onChange={event=>setPaymentSettings({...paymentSettings,accountName:event.target.value.toUpperCase()})} placeholder="VD: NGUYEN VAN A" className={input}/></Field>
   <Field label="Lời nhắn trích dẫn (bên cạnh mã QR)"><textarea value={paymentSettings.note} onChange={event=>setPaymentSettings({...paymentSettings,note:event.target.value})} placeholder={`Mặc định: Every visit to ${paymentSettings.shopName||'Shop'} is a chance to slow down, savor quality, and enjoy life's fleeting moments.`} className={area}/></Field>
   <div>
-   <span className="mb-2 block text-xs font-extrabold text-[#625850]">Mã QR thanh toán tự động (VietQR chuẩn ngân hàng)</span>
+   <span className="mb-2 block text-xs font-extrabold text-[#625850]">Ảnh mã QR thanh toán (Khuyên dùng)</span>
+   <div className="rounded-2xl border border-[#D8CCC0] bg-[#FFF7E6] p-4 text-center shadow-xs">
+    {paymentSettings.qrImage ? (
+     <div className="flex flex-col items-center">
+      <div className="relative flex aspect-square w-48 max-w-full items-center justify-center overflow-hidden rounded-xl border border-[#D8CCC0] bg-white p-2">
+       <img src={paymentSettings.qrImage} alt="QR thanh toán" className="h-full w-full object-contain" />
+      </div>
+      <div className="mt-3 flex items-center justify-center gap-2">
+       <label className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-[#DDD1C5] bg-white px-3 text-xs font-bold text-[#203354] hover:bg-[#F2ECE4]">
+        <Upload size={14}/> Đổi ảnh QR khác
+        <input type="file" accept="image/*" className="hidden" onChange={e=>{
+         const file=e.target.files?.[0];
+         if(!file)return;
+         const reader=new FileReader();
+         reader.onload=ev=>setPaymentSettings(prev=>({...prev,qrImage:ev.target?.result as string}));
+         reader.readAsDataURL(file);
+         e.target.value='';
+        }}/>
+       </label>
+       <button type="button" onClick={()=>setPaymentSettings(prev=>({...prev,qrImage:''}))} className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-red-600 hover:bg-red-50">
+        <Trash2 size={14}/> Xóa ảnh
+       </button>
+      </div>
+      <p className="mt-2 text-[11px] font-semibold text-[#277044]">✓ Đang ưu tiên dùng ảnh QR này trên hoá đơn.</p>
+     </div>
+    ) : (
+     <div>
+      <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#C8BCB0] bg-white/80 p-5 transition hover:border-[#203354] hover:bg-white">
+       <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EAE4DD] text-[#203354]">
+        <Upload size={20}/>
+       </div>
+       <b className="mt-2 text-sm text-[#203354]">Tải ảnh mã QR từ app ngân hàng</b>
+       <p className="mt-1 text-xs text-[#7A6F66]">Chụp màn hình mã QR tài khoản trong app Techcombank, MB, VCB... rồi bấm vào đây để tải lên</p>
+       <input type="file" accept="image/*" className="hidden" onChange={e=>{
+        const file=e.target.files?.[0];
+        if(!file)return;
+        const reader=new FileReader();
+        reader.onload=ev=>setPaymentSettings(prev=>({...prev,qrImage:ev.target?.result as string}));
+        reader.readAsDataURL(file);
+        e.target.value='';
+       }}/>
+      </label>
+     </div>
+    )}
+   </div>
+  </div>
+  <div>
+   <span className="mb-2 block text-xs font-extrabold text-[#625850]">{paymentSettings.qrImage ? 'Xem trước VietQR tự động (Dự phòng)' : 'Hoặc mã QR tự động theo STK (VietQR)'}</span>
    <div className="flex flex-col items-center justify-center rounded-2xl border border-[#D8CCC0] bg-[#FFF7E6] p-5 text-center shadow-xs">
-    {previewQr?<div className="relative flex aspect-square w-48 max-w-full items-center justify-center rounded-xl bg-transparent p-2"><img src={previewQr} alt="QR ngân hàng" className="h-full w-full object-contain"/></div>:<div className="flex h-48 w-48 items-center justify-center rounded-xl border border-dashed border-[#D8CCC0] text-xs font-bold text-[#887B71]">Nhập STK để xem trước QR</div>}
+    {previewQr?<div className="relative flex aspect-square w-48 max-w-full items-center justify-center rounded-xl border border-[#E2D8CC] bg-white p-2"><img src={previewQr} alt="QR ngân hàng" className="h-full w-full object-contain"/></div>:<div className="flex h-48 w-48 items-center justify-center rounded-xl border border-dashed border-[#D8CCC0] text-xs font-bold text-[#887B71]">Nhập STK để xem trước QR</div>}
     <div className="mt-3">
      <b className="block text-sm text-[#203354]">{paymentSettings.bankName||'Ngân hàng'} · {paymentSettings.accountNumber||'Chưa nhập STK'}</b>
      {paymentSettings.accountName&&<p className="text-xs font-bold text-[#57534E]">{paymentSettings.accountName.toUpperCase()}</p>}
-     <p className="mt-1 text-[11px] font-medium text-[#7A6F66]">QR tự động tạo theo STK. Khi chốt đơn, mã QR sẽ tự động điền đúng số tiền và mã đơn để khách quét là chuyển được ngay.</p>
+     <p className="mt-1 text-[11px] font-medium text-[#7A6F66]">{paymentSettings.qrImage ? 'Khi có ảnh QR tải lên ở trên, hoá đơn sẽ ưu tiên dùng ảnh bạn tải lên.' : 'QR tự động tạo theo STK. Nếu app quét khó nhận diện, hãy tải ảnh chụp QR từ app ngân hàng ở phía trên.'}</p>
     </div>
    </div>
   </div>
