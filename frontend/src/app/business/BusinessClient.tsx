@@ -116,7 +116,7 @@ function drawContainImage(ctx:CanvasRenderingContext2D,img:HTMLImageElement,x:nu
  ctx.drawImage(img,drawX,drawY,drawW,drawH);
 }
 
-async function createOrderCloseImage(order:Order,settings:PaymentSettings,ledgerName:string){
+async function createOrderCloseImageLegacy(order:Order,settings:PaymentSettings,ledgerName:string){
  await ensureMontserratLoaded();
  const navy='#203354',muted='rgba(32, 51, 84, 0.65)',paper='#FFF7E6';
  const shopName=(settings.shopName||'BookCase Shop').trim()||'BookCase Shop';
@@ -317,6 +317,89 @@ async function createOrderCloseImage(order:Order,settings:PaymentSettings,ledger
  const sealX=xRight-65,sealY=bottomY-10;
  drawScallopedSeal(ctx,sealX,sealY,shopName);
 
+ return canvas.toDataURL('image/png');
+}
+
+async function createOrderCloseImage(order:Order,settings:PaymentSettings,ledgerName:string){
+ await ensureMontserratLoaded();
+ const navy='#203354',muted='rgba(32, 51, 84, 0.62)',paper='#FFF7E6',line='#E5D8C4',white='#FFFFFF';
+ const shopName=(settings.shopName||'BookCase Shop').trim()||'BookCase Shop';
+ const width=800,pad=48,contentWidth=width-pad*2,qrSize=300,itemRowHeight=62;
+ const rows=order.items.length?order.items:[{product_name:'Sản phẩm',quantity:1,unit_price:order.total}];
+ const summaryLines=2+(order.shipping_fee>0?1:0)+(order.discount>0?1:0);
+ const paymentTop=128,paymentHeight=440,orderTop=608;
+ const orderCardHeight=130+rows.length*itemRowHeight+summaryLines*38+58;
+ const footerHeight=settings.note?.trim()?170:126;
+ const height=orderTop+orderCardHeight+footerHeight;
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas không khả dụng.');
+ const text=(value:string,x:number,y:number,font:string,color=navy,align:CanvasTextAlign='left')=>{ctx.font=font;ctx.fillStyle=color;ctx.textAlign=align;ctx.fillText(value,x,y)};
+
+ ctx.fillStyle=paper;ctx.fillRect(0,0,width,height);
+
+ // Compact shop header
+ let shopFont=34;ctx.font=`900 ${shopFont}px Montserrat, sans-serif`;
+ while(ctx.measureText(shopName).width>430&&shopFont>22){shopFont-=2;ctx.font=`900 ${shopFont}px Montserrat, sans-serif`}
+ text(shopName,pad,61,`900 ${shopFont}px Montserrat, sans-serif`);
+ text((settings.tagline||'Coffeeshop and bakery').trim(),pad,88,'italic 500 15px Montserrat, sans-serif',muted);
+ text(`ORDER  /  ${order.code}`,width-pad,62,'800 14px Montserrat, sans-serif',navy,'right');
+ text(dateText(order.ordered_at),width-pad,88,'600 13px Montserrat, sans-serif',muted,'right');
+
+ // Payment hero — the entire upper half focuses on payment.
+ ctx.fillStyle=navy;drawRoundedRect(ctx,pad,paymentTop,contentWidth,paymentHeight,30);ctx.fill();
+ const qrX=pad+30,qrY=paymentTop+70;
+ ctx.fillStyle='rgba(255,255,255,.14)';drawRoundedRect(ctx,qrX-10,qrY-10,qrSize+20,qrSize+20,24);ctx.fill();
+ let qrDrawn=false;
+ if(settings.qrImage){
+  try{const image=await loadCanvasImage(settings.qrImage);ctx.fillStyle=white;drawRoundedRect(ctx,qrX,qrY,qrSize,qrSize,18);ctx.fill();drawContainImage(ctx,image,qrX+16,qrY+16,qrSize-32,qrSize-32);qrDrawn=true}catch(err){console.error('Failed to load QR image:',err)}
+ }
+ if(!qrDrawn){
+  try{const qrCanvas=document.createElement('canvas');await renderBankQrToCanvas(qrCanvas,{bankCodeOrName:settings.bankCode||settings.bankName,accountNumber:settings.accountNumber,accountName:settings.accountName,amount:order.total,memo:order.code,color:'#10223D',width:qrSize-32});ctx.fillStyle=white;drawRoundedRect(ctx,qrX,qrY,qrSize,qrSize,18);ctx.fill();ctx.drawImage(qrCanvas,qrX+16,qrY+16,qrSize-32,qrSize-32);qrDrawn=true}catch(err){console.error('QR generation error:',err)}
+ }
+ if(!qrDrawn){ctx.fillStyle=white;drawRoundedRect(ctx,qrX,qrY,qrSize,qrSize,18);ctx.fill();text('QR CODE',qrX+qrSize/2,qrY+qrSize/2,'700 20px Montserrat, sans-serif',navy,'center')}
+ text('QUÉT MÃ ĐỂ THANH TOÁN',qrX,qrY-27,'800 13px Montserrat, sans-serif','#FFF7E6');
+
+ const infoX=qrX+qrSize+42,infoRight=width-pad-30;
+ text('SỐ TIỀN CẦN CHUYỂN',infoX,qrY+18,'700 11px Montserrat, sans-serif','rgba(255,247,230,.62)');
+ let amountFont=35;ctx.font=`900 ${amountFont}px Montserrat, sans-serif`;
+ while(ctx.measureText(cash(order.total)).width>infoRight-infoX&&amountFont>25){amountFont-=2;ctx.font=`900 ${amountFont}px Montserrat, sans-serif`}
+ text(cash(order.total),infoX,qrY+60,`900 ${amountFont}px Montserrat, sans-serif`,'#FFF7E6');
+ ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(infoX,qrY+90);ctx.lineTo(infoRight,qrY+90);ctx.stroke();
+ const detail=(label:string,value:string,y:number)=>{text(label,infoX,y,'700 10px Montserrat, sans-serif','rgba(255,247,230,.55)');let shown=value||'Chưa cập nhật';ctx.font='800 16px Montserrat, sans-serif';while(shown.length>3&&ctx.measureText(shown+'…').width>infoRight-infoX)shown=shown.slice(0,-1);if(shown!==value&&value)shown+='…';text(shown,infoX,y+24,'800 16px Montserrat, sans-serif','#FFF7E6')};
+ detail('NGÂN HÀNG',settings.bankName||settings.bankCode||'',qrY+128);
+ detail('SỐ TÀI KHOẢN',settings.accountNumber,qrY+193);
+ detail('CHỦ TÀI KHOẢN',settings.accountName.toUpperCase(),qrY+258);
+ detail('NỘI DUNG CHUYỂN KHOẢN',order.code,qrY+323);
+
+ // Order information card
+ ctx.fillStyle=white;drawRoundedRect(ctx,pad,orderTop,contentWidth,orderCardHeight,26);ctx.fill();ctx.strokeStyle=line;ctx.lineWidth=1.5;ctx.stroke();
+ text('Chi tiết đơn hàng',pad+28,orderTop+45,'900 25px Montserrat, sans-serif');
+ text(ledgerName||order.customer_name||'',width-pad-28,orderTop+43,'700 13px Montserrat, sans-serif',muted,'right');
+ const tableLeft=pad+28,qtyX=540,priceX=width-pad-28,tableHeaderY=orderTop+92;
+ text('SẢN PHẨM',tableLeft,tableHeaderY,'800 12px Montserrat, sans-serif',muted);
+ text('SL',qtyX,tableHeaderY,'800 12px Montserrat, sans-serif',muted,'center');
+ text('THÀNH TIỀN',priceX,tableHeaderY,'800 12px Montserrat, sans-serif',muted,'right');
+ ctx.strokeStyle=line;ctx.beginPath();ctx.moveTo(tableLeft,tableHeaderY+19);ctx.lineTo(priceX,tableHeaderY+19);ctx.stroke();
+ let y=tableHeaderY+58;
+ for(const item of rows){
+  ctx.font='700 17px Montserrat, sans-serif';let name=item.product_name||'Sản phẩm';while(name.length>3&&ctx.measureText(name+'…').width>390)name=name.slice(0,-1);if(name!==item.product_name)name+='…';
+  text(name,tableLeft,y,'700 17px Montserrat, sans-serif');text(String(item.quantity),qtyX,y,'600 16px Montserrat, sans-serif',navy,'center');text(cash(item.unit_price*item.quantity),priceX,y,'600 16px Montserrat, sans-serif',navy,'right');y+=itemRowHeight;
+ }
+ ctx.strokeStyle=line;ctx.beginPath();ctx.moveTo(tableLeft,y-27);ctx.lineTo(priceX,y-27);ctx.stroke();
+ const subtotal=order.total-order.shipping_fee+order.discount,summaryX=535;
+ const summary=(label:string,value:string,strong=false)=>{text(label,summaryX,y,`${strong?900:600} ${strong?22:15}px Montserrat, sans-serif`,strong?navy:muted,'right');text(value,priceX,y,`${strong?900:600} ${strong?22:15}px Montserrat, sans-serif`,strong?navy:muted,'right');y+=strong?43:38};
+ summary('Tạm tính',cash(subtotal));
+ if(order.shipping_fee>0)summary('Phí ship',cash(order.shipping_fee));
+ if(order.discount>0)summary('Giảm giá','-'+cash(order.discount));
+ summary('Tổng cộng',cash(order.total),true);
+
+ const footerTop=orderTop+orderCardHeight;
+ if(settings.note?.trim())drawFormattedQuote(ctx,settings.note.trim(),shopName,pad,footerTop+52,560,27);
+ const brandY=height-48;
+ let footerShopFont=22;ctx.font=`900 ${footerShopFont}px Montserrat, sans-serif`;while(ctx.measureText(shopName).width>300&&footerShopFont>14){footerShopFont--;ctx.font=`900 ${footerShopFont}px Montserrat, sans-serif`}
+ text(shopName,pad,brandY,`900 ${footerShopFont}px Montserrat, sans-serif`);
+ text(`Cảm ơn ${order.customer_name||'bạn'} đã mua hàng`,width-pad-82,brandY-3,'600 12px Montserrat, sans-serif',muted,'right');
+ drawScallopedSeal(ctx,width-pad-32,brandY-9,shopName);
  return canvas.toDataURL('image/png');
 }
 const input='block h-12 min-w-0 max-w-full w-full rounded-xl border border-[#DED4C8] bg-white px-3 text-[16px] font-semibold outline-none focus:border-[#203354] focus:ring-2 focus:ring-[#203354]/10';
