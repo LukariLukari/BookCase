@@ -76,6 +76,7 @@ function drawScallopedSeal(ctx:CanvasRenderingContext2D,cx:number,cy:number,shop
 
 function drawFormattedQuote(ctx:CanvasRenderingContext2D,text:string,highlight:string,x:number,startY:number,maxWidth:number,lineHeight:number){
  ctx.save();
+ ctx.textAlign='left';
  const words=text.split(/\s+/);
  let curX=x,curY=startY;
  const regFont='italic 500 21px Montserrat, sans-serif',boldFont='italic 800 21px Montserrat, sans-serif';
