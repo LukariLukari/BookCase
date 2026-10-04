@@ -139,7 +139,7 @@ export default function WorkflowClient() {
   const pending = orders.filter((o) => o.payment_status !== 'paid' && o.status !== 'cancelled');
 
   return (
-    <div className="min-h-screen bg-[#D8C9BB] p-3 pb-[calc(12rem+env(safe-area-inset-bottom))] pt-20 text-[#292421] md:flex md:gap-5 md:p-6 md:pb-8 md:pt-6">
+    <div className="min-h-screen bg-[#D8C9BB] p-3 pb-[calc(12rem+env(safe-area-inset-bottom))] pt-[calc(4.75rem+env(safe-area-inset-top,0px))] text-[#292421] md:flex md:gap-5 md:p-6 md:pb-8 md:pt-6">
       <Sidebar />
       <main className="min-w-0 flex-1">
         <div className="mx-auto max-w-[1500px]">

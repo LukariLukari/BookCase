@@ -92,16 +92,20 @@ export default function Sidebar() {
           </button>
         </div>
       </aside>
-      <header className="fixed inset-x-2 top-2 z-50 flex h-12 items-center justify-between card-push px-4 rounded-2xl md:hidden">
-        <Link href="/business" className="font-black text-[#203354]">BILLY · BÁN HÀNG</Link>
-        <button onClick={() => setOpen(v => !v)} aria-label="Mở menu" className="btn-push flex h-9 w-9 items-center justify-center rounded-xl">
-          {open ? <X size={18}/> : <Menu size={18}/>}
+      <header className="fixed inset-x-3.5 top-[max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))] z-50 flex h-13 items-center justify-between card-push px-4 rounded-2xl md:hidden">
+        <Link href="/business" className="font-black text-[#203354] tracking-wide text-sm">BILLY · BÁN HÀNG</Link>
+        <button
+          onClick={() => setOpen(v => !v)}
+          aria-label={open ? 'Đóng menu' : 'Mở menu'}
+          className="btn-push flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[#203354]"
+        >
+          {open ? <X size={19}/> : <Menu size={19}/>}
         </button>
       </header>
       {open && (
-        <div className="card-push fixed inset-x-2 top-[62px] z-50 p-3.5 shadow-2xl md:hidden">
-          <nav className="grid grid-cols-2 gap-2">{mobileLinks}</nav>
-          <button onClick={logout} className="btn-push-danger mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-black text-[#9B3B30]">
+        <div className="card-push fixed inset-x-3.5 top-[calc(max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))+3.85rem)] z-50 p-4 shadow-2xl md:hidden">
+          <nav className="grid grid-cols-2 gap-2.5">{mobileLinks}</nav>
+          <button onClick={logout} className="btn-push-danger mt-3.5 flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-black text-[#9B3B30]">
             <LogOut size={18}/> Đăng xuất
           </button>
         </div>

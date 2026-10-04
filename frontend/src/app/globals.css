@@ -186,6 +186,14 @@ input[type="month"]::-webkit-date-and-time-value {
   cursor: pointer;
 }
 
+.btn-push.absolute, .btn-3d.absolute, .neu-btn.absolute {
+  position: absolute;
+}
+
+.btn-push.fixed, .btn-3d.fixed, .neu-btn.fixed {
+  position: fixed;
+}
+
 .btn-push:hover, .btn-3d:hover, .neu-btn:hover {
   transform: translateY(-1.5px);
   box-shadow: 0 5.5px 0 0 #203354;
