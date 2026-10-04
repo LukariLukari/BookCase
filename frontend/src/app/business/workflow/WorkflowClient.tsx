@@ -1,10 +1,379 @@
 'use client';
-import { useEffect,useMemo,useState } from 'react';
+
+import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { Banknote,Check,ChevronRight,Clock3,Loader2,PackageCheck,Search,Truck,WalletCards,X } from 'lucide-react';
+import {
+  Banknote,
+  Check,
+  ChevronRight,
+  Clock3,
+  Loader2,
+  PackageCheck,
+  Search,
+  Truck,
+  WalletCards,
+  X,
+} from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/app/contexts/AuthContext';
-type Order={id:string;code:string;customer_name:string;customer_contact?:string;status:string;payment_status:string;ordered_at:string;total:number;items:{product_name:string;quantity:number}[]};
-const states=[{key:'confirmed',label:'Mới xác nhận',icon:Clock3,color:'bg-blue-50 text-blue-700'},{key:'packing',label:'Đang đóng gói',icon:PackageCheck,color:'bg-amber-50 text-amber-700'},{key:'shipping',label:'Đang giao',icon:Truck,color:'bg-purple-50 text-purple-700'},{key:'completed',label:'Hoàn tất',icon:Check,color:'bg-emerald-50 text-emerald-700'}];
-const money=(v=0)=>`${v.toLocaleString('vi-VN')} đ`;
-export default function WorkflowClient(){const {user,token,isLoading}=useAuth(),headers=useMemo(()=>({Authorization:`Bearer ${token}`}),[token]);const [orders,setOrders]=useState<Order[]>([]),[loading,setLoading]=useState(true),[search,setSearch]=useState(''),[payment,setPayment]=useState<Order|null>(null),[amount,setAmount]=useState(''),[method,setMethod]=useState('transfer'),[saving,setSaving]=useState(false),[toast,setToast]=useState('');useEffect(()=>{if(!token)return;let active=true;axios.get<Order[]>('/api/backend/api/business/orders?limit=100',{headers}).then(r=>{if(active)setOrders(r.data)}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[token,headers]);const shown=orders.filter(o=>o.status!=='cancelled'&&`${o.code} ${o.customer_name} ${o.customer_contact||''}`.toLowerCase().includes(search.toLowerCase()));const move=async(order:Order,status:string)=>{try{await axios.patch(`/api/sales/orders/${order.id}/status`,{status},{headers});setOrders(old=>old.map(o=>o.id===order.id?{...o,status}:o));setToast('Đã cập nhật trạng thái đơn.');setTimeout(()=>setToast(''),1800)}catch(e){setToast(axios.isAxiosError(e)?e.response?.data?.detail||'Không thể cập nhật.':'Không thể cập nhật.')}};const pay=async()=>{if(!payment||!Number(amount))return;setSaving(true);try{await axios.post(`/api/sales/orders/${payment.id}/payments`,{amount:Number(amount),method},{headers});setOrders(old=>old.map(o=>o.id===payment.id?{...o,payment_status:Number(amount)>=o.total?'paid':'partial'}:o));setPayment(null);setAmount('');setToast('Đã ghi nhận thanh toán.');setTimeout(()=>setToast(''),1800)}finally{setSaving(false)}};if(isLoading||!user)return <div className="min-h-screen bg-[#D8C9BB]"/>;const pending=orders.filter(o=>o.payment_status!=='paid'&&o.status!=='cancelled');return <div className="min-h-[100dvh] bg-[#D8C9BB] p-3 pb-24 pt-20 text-[#292421] md:flex md:gap-5 md:p-6 md:pt-6"><Sidebar/><main className="min-w-0 flex-1"><div className="mx-auto max-w-[1500px]"><header className="mb-4 rounded-3xl border border-[#E5DBD0] bg-[#FAF7F2] p-5 md:p-7"><p className="text-[11px] font-black uppercase tracking-[.16em] text-[#766B63]">Trung tâm vận hành</p><h1 className="mt-1 text-2xl font-black md:text-3xl">Theo dõi và xử lý đơn</h1><p className="mt-1 text-sm font-medium text-[#6F655E]">Nhìn toàn bộ tiến độ, chuyển bước và thu công nợ ngay tại một màn hình.</p><div className="mt-5 grid grid-cols-2 gap-2 md:grid-cols-4">{[['Cần đóng gói',orders.filter(o=>o.status==='confirmed').length],['Đang giao',orders.filter(o=>o.status==='shipping').length],['Chưa thu đủ',pending.length],['Công nợ',money(pending.reduce((s,o)=>s+o.total,0))]].map(([l,v])=><div key={String(l)} className="rounded-xl bg-white p-3"><p className="text-[10px] font-black uppercase text-[#7B7067]">{l}</p><b className="mt-1 block text-lg text-[#203354]">{v}</b></div>)}</div></header><div className="relative mb-4"><Search className="absolute left-3 top-3.5 h-5 text-[#81756C]"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Tìm mã đơn, khách hàng hoặc liên hệ" className="h-12 w-full rounded-xl border border-[#DED4C8] bg-white pl-10 pr-3 text-base font-semibold outline-none"/></div>{loading?<Loader2 className="mx-auto my-20 animate-spin"/>:<section className="grid gap-3 xl:grid-cols-4">{states.map((state,index)=>{const Icon=state.icon,list=shown.filter(o=>(o.status||'confirmed')===state.key);return <div key={state.key} className="min-w-0 rounded-2xl border border-[#E2D8CD] bg-[#F5EFE8] p-3"><div className="mb-3 flex items-center justify-between"><div className="flex items-center gap-2"><span className={`rounded-lg p-2 ${state.color}`}><Icon size={17}/></span><b className="text-sm">{state.label}</b></div><span className="rounded-full bg-white px-2 py-1 text-xs font-black">{list.length}</span></div><div className="space-y-2">{list.map(order=><article key={order.id} className="rounded-xl border border-[#E4D9CE] bg-white p-3 shadow-sm"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><b className="block truncate text-sm">{order.customer_name}</b><p className="text-[10px] font-black text-[#7B7067]">{order.code} · {new Date(order.ordered_at).toLocaleDateString('vi-VN')}</p></div><b className="shrink-0 text-xs text-[#203354]">{money(order.total)}</b></div><p className="mt-2 line-clamp-2 text-xs font-semibold text-[#70665E]">{order.items.map(i=>`${i.product_name} ×${i.quantity}`).join(', ')}</p><div className="mt-3 flex gap-2">{order.payment_status!=='paid'?<button onClick={()=>{setPayment(order);setAmount(String(order.total))}} className="flex h-9 flex-1 items-center justify-center gap-1 rounded-lg bg-[#FFF3DF] text-xs font-black text-[#8B5A16]"><Banknote size={15}/> Thu tiền</button>:<span className="flex h-9 flex-1 items-center justify-center gap-1 rounded-lg bg-emerald-50 text-xs font-black text-emerald-700"><Check size={14}/> Đã thu</span>}{index<states.length-1&&<button onClick={()=>move(order,states[index+1].key)} title={`Chuyển sang ${states[index+1].label}`} className="flex h-9 w-10 items-center justify-center rounded-lg bg-[#203354] text-white"><ChevronRight size={17}/></button>}</div></article>)}{!list.length&&<div className="rounded-xl border border-dashed border-[#D2C5B8] p-5 text-center text-xs font-bold text-[#887B71]">Không có đơn</div>}</div></div>})}</section>}</div></main>{toast&&<div className="fixed left-1/2 top-20 z-[120] -translate-x-1/2 rounded-xl bg-[#203354] px-4 py-3 text-sm font-black text-white">{toast}</div>}{payment&&<div className="fixed inset-0 z-[100] flex items-end bg-black/35 md:items-center md:justify-center md:p-5" onMouseDown={()=>setPayment(null)}><div className="w-full rounded-t-3xl bg-[#FAF7F2] p-5 md:max-w-md md:rounded-2xl" onMouseDown={e=>e.stopPropagation()}><div className="mb-5 flex justify-between"><div><h2 className="font-black">Ghi nhận thanh toán</h2><p className="text-xs font-semibold text-[#70665E]">{payment.code} · {payment.customer_name}</p></div><button onClick={()=>setPayment(null)}><X/></button></div><label className="block"><span className="mb-1.5 block text-xs font-black">Số tiền</span><input value={Number(amount||0).toLocaleString('vi-VN')} onChange={e=>setAmount(e.target.value.replace(/\D/g,''))} inputMode="numeric" className="h-12 w-full rounded-xl border bg-white px-3 text-lg font-black"/></label><label className="mt-4 block"><span className="mb-1.5 block text-xs font-black">Phương thức</span><select value={method} onChange={e=>setMethod(e.target.value)} className="h-12 w-full rounded-xl border bg-white px-3 font-bold"><option value="transfer">Chuyển khoản</option><option value="cash">Tiền mặt</option><option value="cod">COD</option><option value="wallet">Ví điện tử</option></select></label><button onClick={pay} disabled={saving} className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#203354] font-black text-white"><WalletCards/>{saving?'Đang lưu...':'Xác nhận thanh toán'}</button></div></div>}</div>}
+
+type Order = {
+  id: string;
+  code: string;
+  customer_name: string;
+  customer_contact?: string;
+  status: string;
+  payment_status: string;
+  ordered_at: string;
+  total: number;
+  items: { product_name: string; quantity: number }[];
+};
+
+const states = [
+  {
+    key: 'confirmed',
+    label: 'Mới xác nhận',
+    icon: Clock3,
+    color: 'bg-blue-50/90 text-blue-700 border-blue-200/50',
+  },
+  {
+    key: 'packing',
+    label: 'Đang đóng gói',
+    icon: PackageCheck,
+    color: 'bg-amber-50/90 text-amber-800 border-amber-200/50',
+  },
+  {
+    key: 'shipping',
+    label: 'Đang giao',
+    icon: Truck,
+    color: 'bg-purple-50/90 text-purple-800 border-purple-200/50',
+  },
+  {
+    key: 'completed',
+    label: 'Hoàn tất',
+    icon: Check,
+    color: 'bg-emerald-50/90 text-emerald-800 border-emerald-200/50',
+  },
+];
+
+const money = (v = 0) => `${v.toLocaleString('vi-VN')} đ`;
+
+export default function WorkflowClient() {
+  const { user, token, isLoading } = useAuth();
+  const headers = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [payment, setPayment] = useState<Order | null>(null);
+  const [amount, setAmount] = useState('');
+  const [method, setMethod] = useState('transfer');
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState('');
+
+  useEffect(() => {
+    if (!token) return;
+    let active = true;
+    axios
+      .get<Order[]>('/api/backend/api/business/orders?limit=100', { headers })
+      .then((r) => {
+        if (active) setOrders(r.data);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [token, headers]);
+
+  const shown = orders.filter(
+    (o) =>
+      o.status !== 'cancelled' &&
+      `${o.code} ${o.customer_name} ${o.customer_contact || ''}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
+  );
+
+  const move = async (order: Order, status: string) => {
+    try {
+      await axios.patch(`/api/sales/orders/${order.id}/status`, { status }, { headers });
+      setOrders((old) => old.map((o) => (o.id === order.id ? { ...o, status } : o)));
+      setToast('Đã cập nhật trạng thái đơn.');
+      setTimeout(() => setToast(''), 1800);
+    } catch (e) {
+      setToast(
+        axios.isAxiosError(e)
+          ? e.response?.data?.detail || 'Không thể cập nhật.'
+          : 'Không thể cập nhật.'
+      );
+    }
+  };
+
+  const pay = async () => {
+    if (!payment || !Number(amount)) return;
+    setSaving(true);
+    try {
+      await axios.post(
+        `/api/sales/orders/${payment.id}/payments`,
+        { amount: Number(amount), method },
+        { headers }
+      );
+      setOrders((old) =>
+        old.map((o) =>
+          o.id === payment.id
+            ? { ...o, payment_status: Number(amount) >= o.total ? 'paid' : 'partial' }
+            : o
+        )
+      );
+      setPayment(null);
+      setAmount('');
+      setToast('Đã ghi nhận thanh toán.');
+      setTimeout(() => setToast(''), 1800);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (isLoading || !user) return <div className="min-h-screen bg-[#D8C9BB]" />;
+
+  const pending = orders.filter((o) => o.payment_status !== 'paid' && o.status !== 'cancelled');
+
+  return (
+    <div className="min-h-[100dvh] bg-[#D8C9BB] p-3 pb-24 pt-20 text-[#292421] md:flex md:gap-5 md:p-6 md:pt-6">
+      <Sidebar />
+      <main className="min-w-0 flex-1">
+        <div className="mx-auto max-w-[1500px]">
+          {/* Header Card */}
+          <header className="neu-surface mb-6 p-5 md:p-7">
+            <p className="text-[11px] font-black uppercase tracking-[.18em] text-[#766B63]">
+              Trung tâm vận hành
+            </p>
+            <h1 className="mt-1 text-2xl font-black md:text-3xl text-[#203354]">
+              Theo dõi và xử lý đơn
+            </h1>
+            <p className="mt-1 text-sm font-medium text-[#6F655E]">
+              Nhìn toàn bộ tiến độ, chuyển bước và thu công nợ ngay tại một màn hình.
+            </p>
+
+            {/* 4 Neumorphic Stat Cards */}
+            <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
+              {[
+                ['Cần đóng gói', orders.filter((o) => o.status === 'confirmed').length],
+                ['Đang giao', orders.filter((o) => o.status === 'shipping').length],
+                ['Chưa thu đủ', pending.length],
+                ['Công nợ', money(pending.reduce((s, o) => s + o.total, 0))],
+              ].map(([l, v]) => (
+                <div
+                  key={String(l)}
+                  className="neu-surface-subtle p-3.5 flex flex-col justify-between"
+                >
+                  <p className="text-[10px] font-black uppercase tracking-wider text-[#7B7067]">
+                    {l}
+                  </p>
+                  <b className="mt-1.5 block text-lg font-black text-[#203354] md:text-xl">
+                    {v}
+                  </b>
+                </div>
+              ))}
+            </div>
+          </header>
+
+          {/* Sunken Neumorphic Search Bar */}
+          <div className="neu-inset mb-6 flex items-center px-4 py-1">
+            <Search className="h-5 w-5 shrink-0 text-[#81756C]" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Tìm mã đơn, khách hàng hoặc số điện thoại liên hệ..."
+              className="h-11 w-full bg-transparent pl-3 pr-2 text-sm font-semibold text-[#292421] placeholder-[#8E8379] outline-none"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="neu-press p-1 text-[#887B71] hover:text-[#203354]"
+                title="Xóa tìm kiếm"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+
+          {/* Kanban Board Columns */}
+          {loading ? (
+            <div className="neu-surface my-12 flex min-h-[300px] items-center justify-center p-8">
+              <Loader2 className="animate-spin text-[#203354]" size={32} />
+            </div>
+          ) : (
+            <section className="grid gap-4 xl:grid-cols-4">
+              {states.map((state, index) => {
+                const Icon = state.icon;
+                const list = shown.filter((o) => (o.status || 'confirmed') === state.key);
+                return (
+                  <div
+                    key={state.key}
+                    className="min-w-0 rounded-3xl border border-[#FAF7F2]/80 bg-[#EDE5DB]/75 p-3.5 shadow-[inset_2px_2px_6px_rgba(150,135,120,0.18),inset_-2px_-2px_6px_rgba(255,255,255,0.7)]"
+                  >
+                    {/* Column Header */}
+                    <div className="mb-3.5 flex items-center justify-between">
+                      <div className="neu-badge flex items-center gap-2 px-3 py-1.5 shadow-sm">
+                        <span className={`rounded-lg p-1.5 ${state.color} border`}>
+                          <Icon size={16} />
+                        </span>
+                        <b className="text-xs font-black text-[#292421]">{state.label}</b>
+                      </div>
+                      <span className="neu-badge-sunken bg-[#E4DACF] px-2.5 py-1 text-xs font-black text-[#203354]">
+                        {list.length}
+                      </span>
+                    </div>
+
+                    {/* Order Cards List */}
+                    <div className="space-y-3">
+                      {list.map((order) => (
+                        <article
+                          key={order.id}
+                          className="neu-surface-subtle p-4 space-y-3 transition-transform"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <b className="block truncate text-sm font-bold text-[#203354]">
+                                {order.customer_name}
+                              </b>
+                              <p className="text-[10px] font-black text-[#7B7067]">
+                                {order.code} · {new Date(order.ordered_at).toLocaleDateString('vi-VN')}
+                              </p>
+                            </div>
+                            <b className="shrink-0 text-xs font-black text-[#203354]">
+                              {money(order.total)}
+                            </b>
+                          </div>
+
+                          <p className="line-clamp-2 text-xs font-semibold text-[#70665E]">
+                            {order.items.map((i) => `${i.product_name} ×${i.quantity}`).join(', ')}
+                          </p>
+
+                          {/* Action Buttons with Neumorphic Tactile Effects */}
+                          <div className="flex items-center gap-2 pt-1">
+                            {order.payment_status !== 'paid' ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setPayment(order);
+                                  setAmount(String(order.total));
+                                }}
+                                className="neu-btn-amber flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl text-xs font-black"
+                              >
+                                <Banknote size={15} /> Thu tiền
+                              </button>
+                            ) : (
+                              <span className="neu-badge-sunken flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-emerald-200/50 bg-emerald-50/80 text-xs font-black text-emerald-800">
+                                <Check size={14} /> Đã thu
+                              </span>
+                            )}
+
+                            {index < states.length - 1 && (
+                              <button
+                                type="button"
+                                onClick={() => move(order, states[index + 1].key)}
+                                title={`Chuyển sang ${states[index + 1].label}`}
+                                className="neu-btn-primary flex h-10 w-11 shrink-0 items-center justify-center rounded-xl"
+                              >
+                                <ChevronRight size={18} />
+                              </button>
+                            )}
+                          </div>
+                        </article>
+                      ))}
+
+                      {!list.length && (
+                        <div className="rounded-2xl border border-dashed border-[#D2C5B8] p-6 text-center text-xs font-bold text-[#887B71]">
+                          Không có đơn
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </section>
+          )}
+        </div>
+      </main>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="neu-btn-primary fixed left-1/2 top-20 z-[120] flex -translate-x-1/2 items-center gap-2 px-5 py-3 text-sm font-black shadow-2xl">
+          <Check size={18} />
+          {toast}
+        </div>
+      )}
+
+      {/* Payment Modal with Neumorphic Elevation */}
+      {payment && (
+        <div
+          className="fixed inset-0 z-[100] flex items-end bg-black/35 backdrop-blur-[2px] md:items-center md:justify-center md:p-5"
+          onMouseDown={() => setPayment(null)}
+        >
+          <div
+            className="neu-surface w-full max-h-[92vh] overflow-y-auto rounded-t-3xl p-6 md:max-w-md md:rounded-[32px]"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="mb-5 flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-black text-[#203354]">Ghi nhận thanh toán</h2>
+                <p className="text-xs font-semibold text-[#70665E]">
+                  {payment.code} · {payment.customer_name}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPayment(null)}
+                className="neu-btn flex h-9 w-9 items-center justify-center rounded-xl text-[#766B63] hover:text-[#203354]"
+                title="Đóng"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-black text-[#6F655E]">Số tiền</span>
+              <div className="neu-inset px-3 py-1">
+                <input
+                  value={Number(amount || 0).toLocaleString('vi-VN')}
+                  onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
+                  inputMode="numeric"
+                  className="h-11 w-full bg-transparent text-lg font-black text-[#203354] outline-none"
+                />
+              </div>
+            </label>
+
+            <label className="mt-4 block">
+              <span className="mb-1.5 block text-xs font-black text-[#6F655E]">Phương thức</span>
+              <div className="neu-inset px-3 py-1">
+                <select
+                  value={method}
+                  onChange={(e) => setMethod(e.target.value)}
+                  className="h-11 w-full bg-transparent text-sm font-bold text-[#292421] outline-none"
+                >
+                  <option value="transfer">Chuyển khoản</option>
+                  <option value="cash">Tiền mặt</option>
+                  <option value="cod">COD</option>
+                  <option value="wallet">Ví điện tử</option>
+                </select>
+              </div>
+            </label>
+
+            <button
+              type="button"
+              onClick={pay}
+              disabled={saving}
+              className="neu-btn-primary mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-black disabled:opacity-50"
+            >
+              <WalletCards size={18} />
+              {saving ? 'Đang lưu...' : 'Xác nhận thanh toán'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

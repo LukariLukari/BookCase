@@ -29,10 +29,10 @@ export default function Sidebar() {
           href={href}
           onClick={() => setOpen(false)}
           title={label}
-          className={`flex h-11 items-center gap-3 rounded-2xl px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-3.5 ${
+          className={`neu-press flex h-11 items-center gap-3 rounded-2xl px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-3.5 ${
             active(href)
-              ? 'bg-[#203354] text-white shadow-sm'
-              : 'text-[#5F554E] hover:bg-[#EEE7DF] hover:text-[#203354]'
+              ? 'neu-btn-primary'
+              : 'text-[#5F554E] hover:bg-[#FAF7F2] hover:shadow-[3px_3px_8px_rgba(170,155,140,0.2),-3px_-3px_8px_rgba(255,255,255,0.9)] hover:text-[#203354] active:shadow-[inset_2px_2px_4px_rgba(150,135,120,0.25)]'
           }`}
         >
           <Icon size={19} className="shrink-0" />
@@ -44,11 +44,11 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col rounded-[28px] border border-[#ECE2D5] bg-[#FAF7F2] p-2.5 pt-3.5 pb-3 shadow-lg no-scrollbar overflow-y-auto md:flex xl:w-52">
+      <aside className="sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col neu-surface p-2.5 pt-3.5 pb-3 no-scrollbar overflow-y-auto md:flex xl:w-52">
         <Link
           href="/business"
           title="BookCase · Bán Hàng"
-          className="mb-3 flex h-11 w-full items-center justify-center rounded-2xl bg-[#203354] font-black text-white shadow-sm transition-all hover:bg-[#182844] active:scale-95 xl:justify-start xl:px-3.5"
+          className="neu-btn-primary mb-3 flex h-11 w-full items-center justify-center rounded-2xl font-black text-white xl:justify-start xl:px-3.5"
         >
           <span className="text-sm font-black tracking-wider">BC</span>
           <span className="hidden truncate text-xs font-black tracking-wide text-white/90 xl:inline ml-1.5">
@@ -63,23 +63,23 @@ export default function Sidebar() {
           <button
             onClick={logout}
             title="Đăng xuất"
-            className="flex h-11 w-full items-center gap-3 rounded-2xl px-3 text-sm font-black text-[#9B403A] transition-all hover:bg-red-50 md:justify-center md:px-0 xl:justify-start xl:px-3.5"
+            className="neu-press flex h-11 w-full items-center gap-3 rounded-2xl px-3 text-sm font-black text-[#9B403A] transition-all hover:bg-[#FAF7F2] hover:shadow-[3px_3px_8px_rgba(170,155,140,0.2),-3px_-3px_8px_rgba(255,255,255,0.9)] hover:text-red-700 active:shadow-[inset_2px_2px_4px_rgba(150,135,120,0.25)] md:justify-center md:px-0 xl:justify-start xl:px-3.5"
           >
             <LogOut size={19} className="shrink-0" />
             <span className="md:hidden xl:inline">Đăng xuất</span>
           </button>
         </div>
       </aside>
-      <header className="fixed inset-x-2 top-2 z-50 flex h-12 items-center justify-between rounded-2xl border border-[#ECE2D5] bg-[#FAF7F2]/95 px-4 shadow-md backdrop-blur md:hidden">
+      <header className="fixed inset-x-2 top-2 z-50 flex h-12 items-center justify-between neu-surface px-4 backdrop-blur md:hidden">
         <Link href="/business" className="font-black text-[#203354]">BC · BÁN HÀNG</Link>
-        <button onClick={() => setOpen(v => !v)} aria-label="Mở menu" className="rounded-lg bg-[#E9E2DA] p-2">
+        <button onClick={() => setOpen(v => !v)} aria-label="Mở menu" className="neu-btn p-2 rounded-xl">
           {open ? <X size={18}/> : <Menu size={18}/>}
         </button>
       </header>
       {open && (
-        <div className="fixed inset-x-2 top-[62px] z-50 rounded-2xl border border-[#E2D8CC] bg-[#FAF7F2] p-3 shadow-2xl md:hidden">
+        <div className="neu-surface fixed inset-x-2 top-[62px] z-50 p-3 shadow-2xl md:hidden">
           <nav className="grid grid-cols-2 gap-2">{links}</nav>
-          <button onClick={logout} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 p-3 text-sm font-black text-[#9B403A]">
+          <button onClick={logout} className="neu-btn mt-3 flex w-full items-center justify-center gap-2 rounded-xl p-3 text-sm font-black text-[#9B403A] hover:bg-red-50">
             <LogOut size={18}/> Đăng xuất
           </button>
         </div>
