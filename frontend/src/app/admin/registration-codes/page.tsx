@@ -2,46 +2,301 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { Check, Copy, KeyRound, Loader2, Plus, RefreshCw, Trash2, UserPlus } from 'lucide-react';
+import { Check, Copy, KeyRound, Loader2, Plus, RefreshCw, RotateCcw, ShieldAlert, Store, Trash2, UserCheck, UserPlus, Users } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
 import AdminTabs from '@/components/AdminTabs';
+import ResetAccountModal from '@/components/ResetAccountModal';
 
 type Code = { id:string; code:string; is_used:boolean; used_by_username:string|null; created_at:string; created_by:string|null };
+
+type AccountUser = {
+  id: string;
+  username: string;
+  email: string | null;
+  role: string;
+  createdAt: string;
+  _count?: {
+    products: number;
+    orders: number;
+    customers: number;
+    ledgers: number;
+  };
+};
 
 export default function RegistrationCodesPage() {
   const { user, token, logout, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [codes, setCodes] = useState<Code[]>([]);
+  const [users, setUsers] = useState<AccountUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(true);
   const [creating, setCreating] = useState(false);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
+  const [resetTargetUser, setResetTargetUser] = useState<AccountUser | null>(null);
+
   const headers = { Authorization: `Bearer ${token || ''}` };
+
   const reportError = (value: unknown, fallback: string) => {
     if (axios.isAxiosError(value) && value.response?.status === 401) logout();
     setError(axios.isAxiosError(value) && typeof value.response?.data?.detail === 'string' ? value.response.data.detail : fallback);
   };
+
   useEffect(() => { if (!authLoading && (!user || user.role !== 'admin')) router.replace('/business'); }, [authLoading, user, router]);
+
+  const loadCodes = async () => {
+    try {
+      const response = await axios.get<Code[]>('/api/admin/registration-codes', { headers });
+      setCodes(response.data);
+    } catch (value) {
+      reportError(value, 'Không thể tải danh sách mã đăng ký.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const response = await axios.get<AccountUser[]>('/api/backend/api/admin/users', { headers });
+      setUsers(response.data);
+    } catch {
+      // ignore
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
   useEffect(() => {
     if (user?.role !== 'admin' || !token) return;
-    let active = true;
-    axios.get<Code[]>('/api/admin/registration-codes', { headers: { Authorization: `Bearer ${token}` } })
-      .then(response => { if (active) setCodes(response.data); })
-      .catch(value => { if (active) setError(axios.isAxiosError(value) && typeof value.response?.data?.detail === 'string' ? value.response.data.detail : 'Không thể tải danh sách mã đăng ký.'); })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+    loadCodes();
+    loadUsers();
   }, [user?.role, token]);
-  const copy = async (code: string) => { try { await navigator.clipboard.writeText(code); setNotice(`Đã sao chép mã ${code}`); } catch { setNotice(`Mã mới: ${code}`); } };
-  const create = async () => { setCreating(true); setError(''); try { const item=(await axios.post<Code>('/api/admin/registration-codes',{}, {headers})).data; setCodes(v=>[item,...v]); await copy(item.code); } catch(e){reportError(e,'Không thể tạo mã.');} finally{setCreating(false);} };
-  const regenerate = async (item: Code) => { setError(''); try { const next=(await axios.put<Code>(`/api/admin/registration-codes/${item.id}`,{}, {headers})).data; setCodes(v=>v.map(x=>x.id===item.id?next:x)); await copy(next.code); } catch(e){reportError(e,'Không thể đổi mã.');} };
-  const remove = async (item: Code) => { if (!confirm(`Xóa mã ${item.code}?`)) return; try { await axios.delete(`/api/admin/registration-codes/${item.id}`,{headers}); setCodes(v=>v.filter(x=>x.id!==item.id)); setNotice('Đã xóa mã chưa sử dụng.'); } catch(e){reportError(e,'Không thể xóa mã.');} };
-  if (authLoading || !user || user.role !== 'admin') return <div className="min-h-screen bg-[#D8C9BB]"/>;
-  const unused = codes.filter(x=>!x.is_used).length;
-  return <div className="min-h-[100dvh] bg-[#D8C9BB] p-3 pb-24 pt-20 text-[#292421] md:flex md:gap-5 md:p-6"><Sidebar/><main className="min-w-0 flex-1"><div className="mx-auto max-w-6xl space-y-4">
-    <header className="rounded-3xl border border-[#E7DED4] bg-[#FAF7F2] p-5 shadow-sm md:p-7"><div className="flex flex-col justify-between gap-4 md:flex-row md:items-start"><div><p className="text-xs font-black uppercase tracking-[.15em] text-[#766B63]">Quản trị người dùng</p><h1 className="mt-1 text-2xl font-black md:text-3xl">Cấp tài khoản bán hàng</h1><p className="mt-1 text-sm font-medium text-[#6F655E]">Tạo mã dùng một lần, gửi cho nhân viên rồi họ đăng ký tại trang đăng ký.</p></div><AdminTabs/></div></header>
-    <section className="rounded-3xl border border-[#E7DED4] bg-[#FAF7F2] p-4 shadow-sm md:p-6"><div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div className="flex gap-2"><span className="rounded-full bg-white px-3 py-2 text-xs font-black">{unused} mã có thể dùng</span><span className="rounded-full bg-white px-3 py-2 text-xs font-black">{codes.length} mã tất cả</span></div><button onClick={create} disabled={creating} className="flex h-12 items-center justify-center gap-2 rounded-xl bg-[#203354] px-5 text-sm font-black text-white disabled:opacity-50">{creating?<Loader2 className="animate-spin"/>:<Plus/>} Tạo và sao chép mã</button></div>
-    {error&&<div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700">{error}</div>}{notice&&<div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-bold text-emerald-700"><Check size={17}/>{notice}</div>}
-    {loading?<div className="flex min-h-48 items-center justify-center"><Loader2 className="animate-spin text-[#203354]"/></div>:codes.length===0?<div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-[#D5C9BC] bg-white/50 p-6 text-center"><UserPlus size={36} className="mb-3 text-[#766B63]"/><b>Chưa có mã đăng ký</b><p className="mt-1 text-sm text-[#766B63]">Tạo mã đầu tiên để cấp tài khoản cho người bán hàng.</p></div>:<div className="space-y-2">{codes.map(item=><article key={item.id} className="flex flex-col gap-3 rounded-2xl border border-[#E4D9CE] bg-white p-4 sm:flex-row sm:items-center"><div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${item.is_used?'bg-gray-100 text-gray-500':'bg-emerald-50 text-emerald-700'}`}><KeyRound size={20}/></div><div className="min-w-0 flex-1"><button onClick={()=>copy(item.code)} className="font-mono text-base font-black tracking-wider text-[#203354] hover:underline">{item.code}</button><p className="mt-1 text-xs font-semibold text-[#766B63]">{item.is_used?`Đã dùng bởi @${item.used_by_username||'không rõ'}`:'Sẵn sàng sử dụng'} · {new Date(item.created_at).toLocaleString('vi-VN')}</p></div><div className="flex gap-2"><button onClick={()=>copy(item.code)} title="Sao chép" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D9CFC4]"><Copy size={17}/></button>{!item.is_used&&<><button onClick={()=>regenerate(item)} title="Đổi mã" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D9CFC4]"><RefreshCw size={17}/></button><button onClick={()=>remove(item)} title="Xóa mã" className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 text-red-600"><Trash2 size={17}/></button></>}</div></article>)}</div>}
-    </section></div></main></div>;
+
+  const copy = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setNotice(`Đã sao chép mã ${code}`);
+    } catch {
+      setNotice(`Mã mới: ${code}`);
+    }
+  };
+
+  const create = async () => {
+    setCreating(true);
+    setError('');
+    try {
+      const item = (await axios.post<Code>('/api/admin/registration-codes', {}, { headers })).data;
+      setCodes(v => [item, ...v]);
+      await copy(item.code);
+    } catch (e) {
+      reportError(e, 'Không thể tạo mã.');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const regenerate = async (item: Code) => {
+    setError('');
+    try {
+      const next = (await axios.put<Code>(`/api/admin/registration-codes/${item.id}`, {}, { headers })).data;
+      setCodes(v => v.map(x => x.id === item.id ? next : x));
+      await copy(next.code);
+    } catch (e) {
+      reportError(e, 'Không thể đổi mã.');
+    }
+  };
+
+  const remove = async (item: Code) => {
+    if (!confirm(`Xóa mã ${item.code}?`)) return;
+    try {
+      await axios.delete(`/api/admin/registration-codes/${item.id}`, { headers });
+      setCodes(v => v.filter(x => x.id !== item.id));
+      setNotice('Đã xóa mã chưa sử dụng.');
+    } catch (e) {
+      reportError(e, 'Không thể xóa mã.');
+    }
+  };
+
+  if (authLoading || !user || user.role !== 'admin') return <div className="min-h-screen bg-[#D8C9BB]" />;
+
+  const unused = codes.filter(x => !x.is_used).length;
+
+  return (
+    <div className="min-h-[100dvh] bg-[#D8C9BB] p-3 pb-24 pt-20 text-[#292421] md:flex md:gap-5 md:p-6">
+      <Sidebar />
+      <main className="min-w-0 flex-1">
+        <div className="mx-auto max-w-6xl space-y-4">
+          <header className="rounded-3xl border border-[#E7DED4] bg-[#FAF7F2] p-5 shadow-sm md:p-7">
+            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.15em] text-[#766B63]">Quản trị hệ thống</p>
+                <h1 className="mt-1 text-2xl font-black md:text-3xl">Tài khoản & Mô hình kinh doanh</h1>
+                <p className="mt-1 text-sm font-medium text-[#6F655E]">
+                  Cấp mã tài khoản mới, xem danh sách cửa hàng và xóa sạch dữ liệu hệ thống khi chủ doanh nghiệp muốn đổi mô hình kinh doanh.
+                </p>
+              </div>
+              <AdminTabs />
+            </div>
+          </header>
+
+          {error && <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700">{error}</div>}
+          {notice && <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-bold text-emerald-700"><Check size={17} />{notice}</div>}
+
+          {/* Section: Danh sách tài khoản cửa hàng & Clear hệ thống */}
+          <section className="rounded-3xl border border-[#E7DED4] bg-[#FAF7F2] p-4 shadow-sm md:p-6">
+            <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2">
+                <Users size={20} className="text-[#203354]" />
+                <h2 className="text-lg font-black text-[#203354]">Danh sách tài khoản cửa hàng</h2>
+              </div>
+              <span className="text-xs font-bold text-[#766B63] bg-white rounded-full px-3 py-1 border border-[#E2D8CC] w-fit">
+                {users.length} tài khoản trong hệ thống
+              </span>
+            </div>
+
+            <p className="mb-4 text-xs font-semibold leading-relaxed text-[#6F655E]">
+              Mỗi tài khoản là một cửa hàng riêng biệt. Khi chủ shop muốn chuyển sang mô hình kinh doanh khác, bấm nút <b className="text-red-700">"Clear dữ liệu (Đổi mô hình)"</b> để xóa sạch dữ liệu của riêng tài khoản đó. Các tài khoản khác tuyệt đối không bị đụng đến.
+            </p>
+
+            {loadingUsers ? (
+              <div className="flex min-h-24 items-center justify-center">
+                <Loader2 className="animate-spin text-[#203354]" />
+              </div>
+            ) : users.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-[#D5C9BC] bg-white/50 p-5 text-center text-sm text-[#766B63]">
+                Chưa có tài khoản nào được đăng ký.
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {users.map(u => {
+                  const isCurrent = u.id === user.id;
+                  const prodCount = u._count?.products ?? 0;
+                  const orderCount = u._count?.orders ?? 0;
+
+                  return (
+                    <article
+                      key={u.id}
+                      className="flex flex-col gap-3 rounded-2xl border border-[#E4D9CE] bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${u.role === 'admin' ? 'bg-[#203354] text-white' : 'bg-[#EBF0F5] text-[#203354]'}`}>
+                          <Store size={20} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-base font-black text-[#203354]">@{u.username}</span>
+                            {isCurrent && (
+                              <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-800">
+                                Bạn
+                              </span>
+                            )}
+                            <span className={`rounded-md px-2 py-0.5 text-[10px] font-black ${u.role === 'admin' ? 'bg-amber-100 text-amber-900' : 'bg-gray-100 text-gray-700'}`}>
+                              {u.role === 'admin' ? 'Admin' : 'Người bán'}
+                            </span>
+                          </div>
+                          <p className="mt-0.5 text-xs font-semibold text-[#766B63]">
+                            Đã tạo: {new Date(u.createdAt).toLocaleDateString('vi-VN')} · {prodCount} sản phẩm · {orderCount} đơn hàng
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setResetTargetUser(u)}
+                          className="flex h-10 items-center gap-2 rounded-xl border border-red-200 bg-red-50/80 px-3.5 text-xs font-black text-red-700 hover:bg-red-100 transition shadow-sm"
+                          title={`Clear toàn bộ hệ thống của @${u.username} để đổi sang mô hình kinh doanh mới`}
+                        >
+                          <RotateCcw size={14} className="text-red-600" />
+                          <span>Clear dữ liệu (Đổi mô hình)</span>
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* Section: Cấp mã đăng ký tài khoản */}
+          <section className="rounded-3xl border border-[#E7DED4] bg-[#FAF7F2] p-4 shadow-sm md:p-6">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex gap-2">
+                <span className="rounded-full bg-white px-3 py-2 text-xs font-black">{unused} mã có thể dùng</span>
+                <span className="rounded-full bg-white px-3 py-2 text-xs font-black">{codes.length} mã tất cả</span>
+              </div>
+              <button
+                onClick={create}
+                disabled={creating}
+                className="flex h-12 items-center justify-center gap-2 rounded-xl bg-[#203354] px-5 text-sm font-black text-white disabled:opacity-50"
+              >
+                {creating ? <Loader2 className="animate-spin" /> : <Plus />} Tạo và sao chép mã
+              </button>
+            </div>
+
+            {loading ? (
+              <div className="flex min-h-48 items-center justify-center">
+                <Loader2 className="animate-spin text-[#203354]" />
+              </div>
+            ) : codes.length === 0 ? (
+              <div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-[#D5C9BC] bg-white/50 p-6 text-center">
+                <UserPlus size={36} className="mb-3 text-[#766B63]" />
+                <b>Chưa có mã đăng ký</b>
+                <p className="mt-1 text-sm text-[#766B63]">Tạo mã đầu tiên để cấp tài khoản cho người bán hàng.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {codes.map(item => (
+                  <article key={item.id} className="flex flex-col gap-3 rounded-2xl border border-[#E4D9CE] bg-white p-4 sm:flex-row sm:items-center">
+                    <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${item.is_used ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}`}>
+                      <KeyRound size={20} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <button onClick={() => copy(item.code)} className="font-mono text-base font-black tracking-wider text-[#203354] hover:underline">
+                        {item.code}
+                      </button>
+                      <p className="mt-1 text-xs font-semibold text-[#766B63]">
+                        {item.is_used ? `Đã dùng bởi @${item.used_by_username || 'không rõ'}` : 'Sẵn sàng sử dụng'} · {new Date(item.created_at).toLocaleString('vi-VN')}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => copy(item.code)} title="Sao chép" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D9CFC4]">
+                        <Copy size={17} />
+                      </button>
+                      {!item.is_used && (
+                        <>
+                          <button onClick={() => regenerate(item)} title="Đổi mã" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D9CFC4]">
+                            <RefreshCw size={17} />
+                          </button>
+                          <button onClick={() => remove(item)} title="Xóa mã" className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 text-red-600">
+                            <Trash2 size={17} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      </main>
+
+      {/* Modal Clear Dữ liệu */}
+      {resetTargetUser && (
+        <ResetAccountModal
+          isOpen={!!resetTargetUser}
+          onClose={() => setResetTargetUser(null)}
+          targetUsername={resetTargetUser.username}
+          targetUserId={resetTargetUser.id}
+          token={token}
+          onSuccess={msg => {
+            setNotice(msg);
+            loadUsers();
+          }}
+        />
+      )}
+    </div>
+  );
 }

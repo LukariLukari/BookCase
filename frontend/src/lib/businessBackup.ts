@@ -113,3 +113,47 @@ export async function restoreBusinessBackup(userId:string,value:unknown){
     await create('inventoryMovements',tx.businessInventoryMovement);
   },{timeout:30000});
 }
+
+export async function clearBusinessAccountData(
+  userId: string,
+  options: { deleteBackups?: boolean; createSafetyBackup?: boolean } = {}
+) {
+  const { deleteBackups = false, createSafetyBackup = true } = options;
+
+  if (createSafetyBackup) {
+    try {
+      await createBusinessBackup(userId, 'Trước khi xóa sạch đổi mô hình kinh doanh', 'pre_reset');
+    } catch (err) {
+      console.warn('[Business Reset] Không thể tạo bản sao lưu an toàn trước khi xóa:', err);
+    }
+  }
+
+  await prisma.$transaction(async tx => {
+    // Xóa triệt để toàn bộ dữ liệu kinh doanh của CHỈ tài khoản userId này
+    await tx.businessInventoryMovement.deleteMany({ where: { userId } });
+    await tx.businessOrderPayment.deleteMany({ where: { userId } });
+    await tx.businessOrderStatusHistory.deleteMany({ where: { userId } });
+    await tx.businessStockReceiptItem.deleteMany({ where: { receipt: { userId } } });
+    await tx.businessOrderItem.deleteMany({ where: { order: { userId } } });
+    await tx.businessExpense.deleteMany({ where: { userId } });
+    await tx.businessOrder.deleteMany({ where: { userId } });
+    await tx.businessStockReceipt.deleteMany({ where: { userId } });
+    await tx.businessTransaction.deleteMany({ where: { userId } });
+    await tx.businessProduct.deleteMany({ where: { userId } });
+    await tx.businessCustomer.deleteMany({ where: { userId } });
+    await tx.businessLedger.deleteMany({ where: { userId } });
+    await tx.businessInventoryBatch.deleteMany({ where: { userId } });
+
+    if (deleteBackups) {
+      await tx.businessDataBackup.deleteMany({ where: { userId } });
+    }
+
+    // Khởi tạo lô hàng mặc định ban đầu để chủ doanh nghiệp bắt đầu ngay mô hình mới
+    await tx.businessInventoryBatch.create({
+      data: {
+        userId,
+        name: 'Lô hàng 1',
+      },
+    });
+  }, { timeout: 30000 });
+}

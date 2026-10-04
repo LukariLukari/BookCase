@@ -574,3 +574,9 @@ class BusinessReportResponse(BaseModel):
 
 class BusinessBackupRestore(BaseModel):
     payload: dict
+
+
+class BusinessResetRequest(BaseModel):
+    target_user_id: Optional[str] = None
+    delete_backups: Optional[bool] = False
+    create_safety_backup: Optional[bool] = True

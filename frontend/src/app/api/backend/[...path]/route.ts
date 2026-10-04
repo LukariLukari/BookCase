@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomInt } from 'crypto';
 import { prisma } from '@/lib/db';
 import { verifyJwt } from '@/lib/auth';
-import { createAutomaticBusinessBackup, createBusinessBackup, restoreBusinessBackup } from '@/lib/businessBackup';
+import { createAutomaticBusinessBackup, createBusinessBackup, restoreBusinessBackup, clearBusinessAccountData } from '@/lib/businessBackup';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +38,44 @@ async function handle(request:NextRequest, context:RouteContext<'/api/backend/[.
  try{
   const user=await session(request); if(!user)return bad('Phiên đăng nhập đã hết hạn.',401);
   const {path}=await context.params; const parts=path[0]==='api'?path.slice(1):path; const method=request.method; const body=method==='GET'||method==='HEAD'?{}:await request.json().catch(()=>({}));
+  if(parts[0]==='admin'&&parts[1]==='users'){
+   if(user.role!=='admin')return bad('Bạn không có quyền quản trị.',403);
+   if(method==='GET'){
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        _count: {
+          select: {
+            products: true,
+            orders: true,
+            customers: true,
+            ledgers: true,
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    return json(users);
+   }
+   if(method==='POST'&&parts[3]==='reset'){
+    const targetUserId = parts[2];
+    const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } });
+    if(!targetUser) return bad('Không tìm thấy tài khoản.', 404);
+    await clearBusinessAccountData(targetUserId, {
+      deleteBackups: Boolean(body.delete_backups),
+      createSafetyBackup: body.create_safety_backup !== false,
+    });
+    return json({
+      message: `Đã xóa sạch toàn bộ dữ liệu của tài khoản @${targetUser.username}. Các tài khoản khác không bị ảnh hưởng.`,
+      target_user_id: targetUserId,
+      target_username: targetUser.username,
+    });
+   }
+  }
   if(parts[0]==='admin'&&parts[1]==='registration-codes'){
    if(user.role!=='admin')return bad('Bạn không có quyền quản trị.',403);
    if(method==='GET')return json((await prisma.registrationCode.findMany({orderBy:{createdAt:'desc'}})).map(c=>({id:c.id,code:c.code,is_used:c.isUsed,used_by_username:c.usedByUsername,created_by:c.createdBy,created_at:c.createdAt})));
@@ -48,6 +86,22 @@ async function handle(request:NextRequest, context:RouteContext<'/api/backend/[.
   }
   if(parts[0]!=='business')return bad('API này chưa được chuyển sang Vercel.',404);
   const resource=parts[1],id=parts[2];
+  if(resource==='reset'||resource==='clear-account'||resource==='clear-system'){
+   if(user.role!=='admin')return bad('Chỉ có quản trị viên (Admin) mới có quyền xóa sạch hệ thống.',403);
+   if(method!=='POST')return bad('Phương thức chưa được hỗ trợ.',405);
+   const targetUserId = String(body.target_user_id || user.id);
+   const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } });
+   if(!targetUser) return bad('Không tìm thấy tài khoản mục tiêu.', 404);
+   await clearBusinessAccountData(targetUserId, {
+     deleteBackups: Boolean(body.delete_backups),
+     createSafetyBackup: body.create_safety_backup !== false,
+   });
+   return json({
+     message: `Đã xóa sạch toàn bộ dữ liệu kinh doanh của tài khoản @${targetUser.username}. Các tài khoản khác không bị ảnh hưởng.`,
+     target_user_id: targetUserId,
+     target_username: targetUser.username,
+   });
+  }
   if(resource==='backups'){
    if(method==='GET'){const rows=await prisma.businessDataBackup.findMany({where:{userId:user.id},orderBy:{createdAt:'desc'},take:20,select:{id:true,label:true,source:true,createdAt:true}});return json(rows.map(row=>({id:row.id,label:row.label,source:row.source,created_at:row.createdAt})));}
    if(method==='POST'&&id==='restore'){await restoreBusinessBackup(user.id,body.payload);return json({message:'Đã phục hồi toàn bộ dữ liệu kinh doanh.'});}
@@ -126,7 +180,7 @@ async function report(userId:string,ledgerId:string){const ledger=await prisma.b
 
 async function mutateWithBackup(request:NextRequest,context:RouteContext<'/api/backend/[...path]'>){
  const response=await handle(request,context);
- if(response.ok&&!request.nextUrl.pathname.includes('/business/backups')){
+ if(response.ok&&!request.nextUrl.pathname.includes('/business/backups')&&!request.nextUrl.pathname.includes('/reset')&&!request.nextUrl.pathname.includes('/clear-')){
   const user=await session(request);
   if(user)await createAutomaticBusinessBackup(user.id);
  }

@@ -2802,6 +2802,53 @@ def restore_saved_business_backup(backup_id: str, db: Session = Depends(get_db),
     return {"message": "Đã phục hồi toàn bộ dữ liệu kinh doanh"}
 
 
+@app.post("/api/business/reset")
+def reset_business_data(
+    reset_in: Optional[schemas.BusinessResetRequest] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    ensure_business_tables(db)
+    target_user_id = reset_in.target_user_id if (reset_in and reset_in.target_user_id) else current_user.id
+    target_user = db.query(models.User).filter(models.User.id == target_user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Không tìm thấy tài khoản cần xóa dữ liệu")
+
+    delete_backups = reset_in.delete_backups if reset_in else False
+    create_safety_backup = reset_in.create_safety_backup if reset_in else True
+
+    if create_safety_backup:
+        try:
+            create_business_backup(db, target_user_id, "Trước khi xóa sạch đổi mô hình kinh doanh", "pre_reset")
+        except Exception as e:
+            print(f"[Business Reset] Snapshot failed: {e}")
+
+    # Xóa dữ liệu có user_id == target_user_id, tuyệt đối không đụng tài khoản khác
+    receipt_ids = db.query(models.BusinessStockReceipt.id).filter(models.BusinessStockReceipt.user_id == target_user_id)
+    order_ids = db.query(models.BusinessOrder.id).filter(models.BusinessOrder.user_id == target_user_id)
+    try:
+        db.query(models.BusinessStockReceiptItem).filter(models.BusinessStockReceiptItem.receipt_id.in_(receipt_ids)).delete(synchronize_session=False)
+        db.query(models.BusinessOrderItem).filter(models.BusinessOrderItem.order_id.in_(order_ids)).delete(synchronize_session=False)
+        for model in (models.BusinessExpense, models.BusinessOrder, models.BusinessStockReceipt, models.BusinessTransaction, models.BusinessProduct, models.BusinessLedger, models.BusinessInventoryBatch):
+            db.query(model).filter(model.user_id == target_user_id).delete(synchronize_session=False)
+        if delete_backups:
+            db.query(models.BusinessDataBackup).filter(models.BusinessDataBackup.user_id == target_user_id).delete(synchronize_session=False)
+        
+        # Khởi tạo lô hàng mặc định ban đầu để bắt đầu mô hình mới
+        default_batch = models.BusinessInventoryBatch(user_id=target_user_id, name="Lô hàng 1")
+        db.add(default_batch)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Không thể xóa dữ liệu: {str(e)}")
+
+    return {
+        "message": f"Đã xóa sạch toàn bộ dữ liệu kinh doanh của tài khoản @{target_user.username}. Các tài khoản khác không bị ảnh hưởng.",
+        "target_user_id": target_user_id,
+        "target_username": target_user.username
+    }
+
+
 @app.get("/api/business/ledgers", response_model=List[schemas.BusinessLedgerResponse])
 def get_business_ledgers(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     ensure_business_tables(db)
