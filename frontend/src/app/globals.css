@@ -21,7 +21,6 @@
 }
 
 html, body {
-  overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -176,24 +175,24 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #203354;
+  border: 1.5px solid #203354;
   background-color: #FAF7F2;
   color: #203354;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #203354;
+  box-shadow: 0 2.5px 0 0 #203354;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
 }
 
 .btn-push:hover, .btn-3d:hover, .neu-btn:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #203354;
+  transform: translateY(-1px);
+  box-shadow: 0 3.5px 0 0 #203354;
   background-color: #FFFFFF;
 }
 
 .btn-push:active, .btn-3d:active, .neu-btn:active, .btn-push.is-pressed {
-  transform: translateY(4px);
+  transform: translateY(2.5px);
   box-shadow: 0 0 0 0 #203354 !important;
 }
 
@@ -201,7 +200,7 @@ input[type="month"]::-webkit-date-and-time-value {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #203354;
+  box-shadow: 0 1.5px 0 0 #203354;
 }
 
 /* 2. Primary Navy 3D Push Button */
@@ -211,11 +210,11 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #142036;
+  border: 1.5px solid #142036;
   background-color: #203354;
   color: #FFFFFF !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #0E1626;
+  box-shadow: 0 2.5px 0 0 #0E1626;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -230,13 +229,13 @@ input[type="month"]::-webkit-date-and-time-value {
 }
 
 .btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #0E1626;
+  transform: translateY(-1px);
+  box-shadow: 0 3.5px 0 0 #0E1626;
   background-color: #283F68;
 }
 
 .btn-push-primary:active, .btn-3d-navy:active, .neu-btn-primary:active, .btn-push-primary.is-pressed {
-  transform: translateY(4px);
+  transform: translateY(2.5px);
   box-shadow: 0 0 0 0 #0E1626 !important;
   background-color: #16243A;
 }
@@ -245,7 +244,7 @@ input[type="month"]::-webkit-date-and-time-value {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #0E1626;
+  box-shadow: 0 1.5px 0 0 #0E1626;
 }
 
 /* 3. Amber / Action 3D Push Button (Thu tiền, highlight) */
@@ -255,24 +254,24 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #8C5916;
+  border: 1.5px solid #8C5916;
   background-color: #FFF3DF;
   color: #8C5916;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #8C5916;
+  box-shadow: 0 2.5px 0 0 #8C5916;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
 }
 
 .btn-push-amber:hover, .btn-3d-amber:hover, .neu-btn-amber:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #8C5916;
+  transform: translateY(-1px);
+  box-shadow: 0 3.5px 0 0 #8C5916;
   background-color: #FFF8EB;
 }
 
 .btn-push-amber:active, .btn-3d-amber:active, .neu-btn-amber:active {
-  transform: translateY(4px);
+  transform: translateY(2.5px);
   box-shadow: 0 0 0 0 #8C5916 !important;
 }
 
@@ -283,22 +282,22 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #1E663B;
+  border: 1.5px solid #1E663B;
   background-color: #EAF5EE;
   color: #1E663B;
   font-weight: 800;
-  box-shadow: 0 3px 0 0 #1E663B;
+  box-shadow: 0 2px 0 0 #1E663B;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
 .btn-push-emerald:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 0 0 #1E663B;
+  box-shadow: 0 3px 0 0 #1E663B;
   background-color: #F2FAF5;
 }
 
 .btn-push-emerald:active {
-  transform: translateY(3px);
+  transform: translateY(2px);
   box-shadow: 0 0 0 0 #1E663B !important;
 }
 
@@ -309,60 +308,60 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #9B3B30;
+  border: 1.5px solid #9B3B30;
   background-color: #FFF0EE;
   color: #9B3B30;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #9B3B30;
+  box-shadow: 0 2.5px 0 0 #9B3B30;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
 }
 
 .btn-push-danger:hover, .btn-3d-danger:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #9B3B30;
+  transform: translateY(-1px);
+  box-shadow: 0 3.5px 0 0 #9B3B30;
   background-color: #FFEAE7;
 }
 
 .btn-push-danger:active, .btn-3d-danger:active {
-  transform: translateY(4px);
+  transform: translateY(2.5px);
   box-shadow: 0 0 0 0 #9B3B30 !important;
 }
 
 /* 6. 3D Card / Container */
 .card-push, .card-3d, .neu-surface {
   background-color: #FAF7F2;
-  border: 2px solid #203354;
+  border: 1.5px solid #203354;
   border-radius: 28px;
-  box-shadow: 0 5px 0 0 #203354;
+  box-shadow: 0 3.5px 0 0 #203354;
   transition: all 0.15s ease;
 }
 
 .card-push-subtle, .card-3d-subtle, .neu-surface-subtle {
   background-color: #FFFFFF;
-  border: 2px solid #203354;
+  border: 1.5px solid #203354;
   border-radius: 20px;
-  box-shadow: 0 4px 0 0 #203354;
+  box-shadow: 0 2.5px 0 0 #203354;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .card-push-subtle:hover, .card-3d-subtle:hover, .neu-surface-subtle:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #203354;
+  transform: translateY(-1px);
+  box-shadow: 0 3.5px 0 0 #203354;
 }
 
 /* 7. 3D Input & Search Box */
 .input-push, .input-3d, .neu-inset {
   background-color: #FFFFFF;
-  border: 2px solid #203354;
+  border: 1.5px solid #203354;
   border-radius: 9999px;
-  box-shadow: 0 3px 0 0 #203354;
+  box-shadow: 0 2px 0 0 #203354;
   transition: all 0.12s ease;
 }
 
 .input-push:focus-within, .input-3d:focus-within, .neu-inset:focus-within {
-  box-shadow: 0 4px 0 0 #203354;
+  box-shadow: 0 3px 0 0 #203354;
   background-color: #FCFBF8;
 }
 
@@ -371,16 +370,16 @@ input[type="month"]::-webkit-date-and-time-value {
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  border: 2px solid #203354;
+  border: 1.5px solid #203354;
   background-color: #FAF7F2;
-  box-shadow: 0 2.5px 0 0 #203354;
+  box-shadow: 0 1.5px 0 0 #203354;
 }
 
 .badge-push-sunken, .neu-badge-sunken {
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  border: 2px solid #203354;
+  border: 1.5px solid #203354;
   background-color: #EFE8DE;
   box-shadow: 0 1px 0 0 #203354;
 }
@@ -392,27 +391,27 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #203354;
+  border: 1.5px solid #203354;
   background-color: #FAF7F2;
   color: #203354;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #203354;
+  box-shadow: 0 2.5px 0 0 #203354;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
   cursor: pointer;
 }
 .squircle-btn:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #203354;
+  transform: translateY(-1px);
+  box-shadow: 0 3.5px 0 0 #203354;
 }
 .squircle-btn:active {
-  transform: translateY(4px);
+  transform: translateY(2.5px);
   box-shadow: 0 0 0 0 #203354 !important;
 }
 .squircle-btn.active {
   background-color: #203354 !important;
   color: #FFFFFF !important;
   border-color: #142036 !important;
-  box-shadow: 0 4px 0 0 #0E1626 !important;
+  box-shadow: 0 2.5px 0 0 #0E1626 !important;
 }
 
 .no-scrollbar::-webkit-scrollbar {
