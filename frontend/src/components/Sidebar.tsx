@@ -32,7 +32,7 @@ export default function Sidebar() {
           title={label}
           className={`flex h-11 w-full items-center gap-3 rounded-full px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-4 ${
             active(href)
-              ? 'btn-push-primary'
+              ? 'border-2 border-[#203354] bg-[#F5ECDC] text-[#203354] shadow-[0_4px_0_0_#142B4E]'
               : 'text-[#5F554E] hover:bg-white hover:border-2 hover:border-[#203354] hover:shadow-[0_3px_0_0_#203354] hover:text-[#203354] active:translate-y-[3px] active:shadow-none'
           }`}
         >
@@ -53,7 +53,7 @@ export default function Sidebar() {
           title={label}
           className={`flex h-12 items-center justify-start gap-2.5 rounded-full px-3.5 text-xs font-black transition-all ${
             active(href)
-              ? 'btn-push-primary shadow-[0_3px_0_0_#142B4E]'
+              ? 'border-2 border-[#203354] bg-[#F5ECDC] text-[#203354] shadow-[0_4px_0_0_#142B4E]'
               : 'btn-push text-[#203354]'
           }`}
         >
