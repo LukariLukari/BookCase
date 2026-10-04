@@ -113,11 +113,11 @@ export default function ResetAccountModal({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-          className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-[28px] md:rounded-[24px] border border-[#E2D4C7] bg-[#FAF7F2] shadow-2xl"
+          className="card-push flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-[28px] md:rounded-[24px]"
           onMouseDown={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[#E8DDD1] px-5 py-4 bg-white/70">
+          <div className="flex items-center justify-between border-b-2 border-[#203354]/15 px-5 py-4 bg-white/70">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 text-red-600">
                 <ShieldAlert size={22} />
@@ -131,7 +131,7 @@ export default function ResetAccountModal({
               type="button"
               onClick={onClose}
               disabled={busy}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#D9CFC4] bg-white text-[#5F554E] hover:bg-[#F2ECE4] disabled:opacity-40"
+              className="btn-push flex h-9 w-9 items-center justify-center rounded-xl"
             >
               <X size={17} />
             </button>
@@ -227,12 +227,12 @@ export default function ResetAccountModal({
           </div>
 
           {/* Footer */}
-          <div className="border-t border-[#E8DDD1] bg-white/70 p-4 flex gap-3">
+          <div className="border-t-2 border-[#203354]/15 bg-white/70 p-4 flex gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={busy}
-              className="flex-1 h-12 rounded-xl border border-[#D9CFC4] bg-white text-sm font-black text-[#5F554E] hover:bg-[#F2ECE4] transition disabled:opacity-40"
+              className="btn-push flex-1 h-12 rounded-full text-sm font-black text-[#203354] disabled:opacity-40"
             >
               Hủy bỏ
             </button>
@@ -240,7 +240,7 @@ export default function ResetAccountModal({
               type="button"
               onClick={handleReset}
               disabled={!isMatch || busy}
-              className="flex-1 h-12 rounded-xl bg-red-600 px-4 text-sm font-black text-white hover:bg-red-700 transition flex items-center justify-center gap-2 shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+              className="btn-push-danger flex-1 h-12 rounded-full px-4 text-sm font-black disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {busy ? (
                 <>

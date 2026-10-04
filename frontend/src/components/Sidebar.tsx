@@ -21,7 +21,8 @@ export default function Sidebar() {
   const [open, setOpen] = useState(false);
   const navItems = user?.role === 'admin' ? [...items, { href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound }] : items;
   const active = (href: string) => href === '/business' ? pathname === href : pathname.startsWith(href);
-  const links = (
+
+  const desktopLinks = (
     <>
       {navItems.map(({ href, label, icon: Icon }) => (
         <Link
@@ -42,6 +43,27 @@ export default function Sidebar() {
     </>
   );
 
+  const mobileLinks = (
+    <>
+      {navItems.map(({ href, label, icon: Icon }) => (
+        <Link
+          key={href}
+          href={href}
+          onClick={() => setOpen(false)}
+          title={label}
+          className={`flex h-12 items-center justify-start gap-2.5 rounded-full px-3.5 text-xs font-black transition-all ${
+            active(href)
+              ? 'btn-push-primary shadow-[0_3px_0_0_#0E1626]'
+              : 'btn-push text-[#203354]'
+          }`}
+        >
+          <Icon size={18} className="shrink-0" />
+          <span className="truncate">{label}</span>
+        </Link>
+      ))}
+    </>
+  );
+
   return (
     <>
       <aside className="sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col card-push p-2.5 pt-3.5 pb-3 no-scrollbar overflow-y-auto md:flex xl:w-52">
@@ -55,7 +77,7 @@ export default function Sidebar() {
             · BÁN HÀNG
           </span>
         </Link>
-        <nav className="space-y-2">{links}</nav>
+        <nav className="space-y-2">{desktopLinks}</nav>
         <div className="mt-auto border-t-2 border-[#203354]/20 pt-3">
           <p className="hidden truncate px-3 pb-2 text-xs font-bold text-[#776C64] xl:block">
             {user?.username}
@@ -63,7 +85,7 @@ export default function Sidebar() {
           <button
             onClick={logout}
             title="Đăng xuất"
-            className="btn-push-danger flex h-11 w-full items-center gap-3 rounded-full px-3 text-sm font-black text-[#9B403A] md:justify-center md:px-0 xl:justify-start xl:px-4"
+            className="btn-push-danger flex h-11 w-full items-center gap-3 rounded-full px-3 text-sm font-black text-[#9B3B30] md:justify-center md:px-0 xl:justify-start xl:px-4"
           >
             <LogOut size={19} className="shrink-0" />
             <span className="md:hidden xl:inline">Đăng xuất</span>
@@ -72,14 +94,14 @@ export default function Sidebar() {
       </aside>
       <header className="fixed inset-x-2 top-2 z-50 flex h-12 items-center justify-between card-push px-4 rounded-2xl md:hidden">
         <Link href="/business" className="font-black text-[#203354]">BC · BÁN HÀNG</Link>
-        <button onClick={() => setOpen(v => !v)} aria-label="Mở menu" className="btn-push p-2 rounded-xl">
+        <button onClick={() => setOpen(v => !v)} aria-label="Mở menu" className="btn-push flex h-9 w-9 items-center justify-center rounded-xl">
           {open ? <X size={18}/> : <Menu size={18}/>}
         </button>
       </header>
       {open && (
-        <div className="card-push fixed inset-x-2 top-[62px] z-50 p-3 shadow-2xl md:hidden">
-          <nav className="grid grid-cols-2 gap-2">{links}</nav>
-          <button onClick={logout} className="btn-push-danger mt-3 flex w-full items-center justify-center gap-2 rounded-xl p-3 text-sm font-black text-[#9B403A]">
+        <div className="card-push fixed inset-x-2 top-[62px] z-50 p-3.5 shadow-2xl md:hidden">
+          <nav className="grid grid-cols-2 gap-2">{mobileLinks}</nav>
+          <button onClick={logout} className="btn-push-danger mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-black text-[#9B3B30]">
             <LogOut size={18}/> Đăng xuất
           </button>
         </div>

@@ -123,11 +123,11 @@ export default function RegistrationCodesPage() {
   const unused = codes.filter(x => !x.is_used).length;
 
   return (
-    <div className="min-h-[100dvh] bg-[#D8C9BB] p-3 pb-24 pt-20 text-[#292421] md:flex md:gap-5 md:p-6 md:pt-6">
+    <div className="min-h-screen bg-[#D8C9BB] p-3 pb-[calc(12rem+env(safe-area-inset-bottom))] pt-20 text-[#292421] md:flex md:gap-5 md:p-6 md:pt-6 md:pb-8">
       <Sidebar />
       <main className="min-w-0 flex-1">
         <div className="mx-auto max-w-6xl space-y-4">
-          <header className="rounded-3xl border border-[#E7DED4] bg-[#FAF7F2] p-5 shadow-sm md:p-7">
+          <header className="card-push rounded-3xl p-5 md:p-7">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
               <div>
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#766B63]">Quản trị hệ thống</p>
@@ -144,7 +144,7 @@ export default function RegistrationCodesPage() {
           {notice && <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-bold text-emerald-700"><Check size={17} />{notice}</div>}
 
           {/* Section: Danh sách tài khoản cửa hàng & Clear hệ thống */}
-          <section className="rounded-3xl border border-[#E7DED4] bg-[#FAF7F2] p-4 shadow-sm md:p-6">
+          <section className="card-push rounded-3xl p-4 md:p-6">
             <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <Users size={20} className="text-[#203354]" />
@@ -205,10 +205,10 @@ export default function RegistrationCodesPage() {
                         <button
                           type="button"
                           onClick={() => setResetTargetUser(u)}
-                          className="flex h-10 items-center gap-2 rounded-xl border border-red-200 bg-red-50/80 px-3.5 text-xs font-black text-red-700 hover:bg-red-100 transition shadow-sm"
+                          className="btn-push-danger flex h-10 items-center gap-2 rounded-full px-4 text-xs font-black text-[#9B3B30]"
                           title={`Clear toàn bộ hệ thống của @${u.username} để đổi sang mô hình kinh doanh mới`}
                         >
-                          <RotateCcw size={14} className="text-red-600" />
+                          <RotateCcw size={14} className="text-[#9B3B30]" />
                           <span>Clear dữ liệu (Đổi mô hình)</span>
                         </button>
                       </div>
@@ -220,16 +220,16 @@ export default function RegistrationCodesPage() {
           </section>
 
           {/* Section: Cấp mã đăng ký tài khoản */}
-          <section className="rounded-3xl border border-[#E7DED4] bg-[#FAF7F2] p-4 shadow-sm md:p-6">
+          <section className="card-push rounded-3xl p-4 md:p-6">
             <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex gap-2">
-                <span className="rounded-full bg-white px-3 py-2 text-xs font-black">{unused} mã có thể dùng</span>
-                <span className="rounded-full bg-white px-3 py-2 text-xs font-black">{codes.length} mã tất cả</span>
+                <span className="btn-push flex items-center rounded-full px-3 py-1.5 text-xs font-black pointer-events-none">{unused} mã có thể dùng</span>
+                <span className="btn-push flex items-center rounded-full px-3 py-1.5 text-xs font-black pointer-events-none">{codes.length} mã tất cả</span>
               </div>
               <button
                 onClick={create}
                 disabled={creating}
-                className="flex h-12 items-center justify-center gap-2 rounded-xl bg-[#203354] px-5 text-sm font-black text-white disabled:opacity-50"
+                className="btn-push-primary flex h-12 items-center justify-center gap-2 rounded-full px-5 text-sm font-black disabled:opacity-50"
               >
                 {creating ? <Loader2 className="animate-spin" /> : <Plus />} Tạo và sao chép mã
               </button>
@@ -261,15 +261,15 @@ export default function RegistrationCodesPage() {
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => copy(item.code)} title="Sao chép" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D9CFC4]">
+                      <button onClick={() => copy(item.code)} title="Sao chép" className="btn-push flex h-10 w-10 items-center justify-center rounded-xl text-[#203354]">
                         <Copy size={17} />
                       </button>
                       {!item.is_used && (
                         <>
-                          <button onClick={() => regenerate(item)} title="Đổi mã" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D9CFC4]">
+                          <button onClick={() => regenerate(item)} title="Đổi mã" className="btn-push flex h-10 w-10 items-center justify-center rounded-xl text-[#203354]">
                             <RefreshCw size={17} />
                           </button>
-                          <button onClick={() => remove(item)} title="Xóa mã" className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 text-red-600">
+                          <button onClick={() => remove(item)} title="Xóa mã" className="btn-push-danger flex h-10 w-10 items-center justify-center rounded-xl text-[#9B3B30]">
                             <Trash2 size={17} />
                           </button>
                         </>
