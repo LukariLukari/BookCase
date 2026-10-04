@@ -165,232 +165,254 @@ input[type="month"]::-webkit-date-and-time-value {
   box-shadow: 0 6px 18px rgba(27, 42, 74, 0.38);
 }
 
-/* Squircle & Clay Card Utilities */
-.clay-card {
-  background-color: #FAF7F2;
-  border-radius: 32px;
-  box-shadow: 
-    8px 8px 24px rgba(165, 150, 135, 0.22),
-    -8px -8px 24px rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-}
-
-.squircle-btn {
-  background-color: #EFE8DE;
-  color: #1C1917;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: 
-    3px 3px 8px rgba(170, 155, 140, 0.26),
-    -3px -3px 8px rgba(255, 255, 255, 0.9);
-  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
-  cursor: pointer;
-  user-select: none;
-}
-.squircle-btn:hover {
-  background-color: #F5EFE8;
-  transform: translateY(-1.5px);
-  box-shadow: 
-    5px 5px 12px rgba(165, 150, 135, 0.32),
-    -4px -4px 10px rgba(255, 255, 255, 0.98);
-}
-.squircle-btn:active {
-  transform: translateY(1px) scale(0.98);
-  background-color: #E6DDD1;
-  box-shadow: 
-    inset 2px 2px 5px rgba(150, 135, 120, 0.32),
-    inset -2px -2px 5px rgba(255, 255, 255, 0.8);
-}
-.squircle-btn.active {
-  background: linear-gradient(145deg, #24395e, #1c2d4a) !important;
-  color: #FFFFFF !important;
-  box-shadow: 
-    4px 4px 12px rgba(20, 33, 56, 0.38),
-    -3px -3px 8px rgba(255, 255, 255, 0.4),
-    inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
-}
-.squircle-btn.active * {
-  color: #FFFFFF !important;
-}
-.squircle-btn.active svg {
-  stroke: #FFFFFF !important;
-}
-
 /* ==========================================================================
-   NEUMORPHIC / SOFT 3D DESIGN SYSTEM (Clay / Soft UI)
+   3D PUSH-BUTTON DESIGN SYSTEM (Mechanical Key / Solid Hard-Extrusion / Arcade)
    ========================================================================== */
 
-/* 1. Raised Neumorphic Surface / Cards */
-.neu-surface {
-  background: #FAF7F2;
-  border-radius: 28px;
-  box-shadow: 
-    7px 7px 20px rgba(170, 155, 140, 0.24),
-    -7px -7px 20px rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.neu-surface-subtle {
-  background: #FAF7F2;
-  border-radius: 22px;
-  box-shadow: 
-    4px 4px 12px rgba(175, 160, 145, 0.2),
-    -4px -4px 12px rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.neu-surface-subtle:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 
-    6px 6px 16px rgba(170, 155, 140, 0.26),
-    -5px -5px 14px rgba(255, 255, 255, 0.98);
-}
-
-/* 2. Raised Neumorphic Buttons (Light / Cream Surface) */
-.neu-btn {
-  background: #FAF7F2;
-  color: #292421;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow: 
-    4px 4px 10px rgba(170, 155, 140, 0.26),
-    -4px -4px 10px rgba(255, 255, 255, 0.95);
-  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
-  cursor: pointer;
+/* 1. Base 3D Push Button (Cream / Light) */
+.btn-push, .btn-3d, .neu-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 2px solid #203354;
+  background-color: #FAF7F2;
+  color: #203354;
+  font-weight: 800;
+  box-shadow: 0 4px 0 0 #203354;
+  transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
+  cursor: pointer;
 }
 
-.neu-btn:hover {
+.btn-push:hover, .btn-3d:hover, .neu-btn:hover {
   transform: translateY(-1.5px);
-  background: #FCFBF8;
-  box-shadow: 
-    6px 6px 14px rgba(165, 150, 135, 0.32),
-    -5px -5px 12px rgba(255, 255, 255, 1);
+  box-shadow: 0 5.5px 0 0 #203354;
+  background-color: #FFFFFF;
 }
 
-.neu-btn:active, .neu-btn.is-active {
-  transform: translateY(1px) scale(0.98);
-  background: #EFE8DE;
-  box-shadow: 
-    inset 3px 3px 6px rgba(155, 140, 125, 0.3),
-    inset -3px -3px 6px rgba(255, 255, 255, 0.85);
-  border-color: rgba(215, 202, 189, 0.6);
+.btn-push:active, .btn-3d:active, .neu-btn:active, .btn-push.is-pressed {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 #203354 !important;
 }
 
-/* 3. Primary Navy Neumorphic Buttons */
-.neu-btn-primary {
-  background: linear-gradient(145deg, #24395e, #1c2d4a);
+.btn-push:disabled, .btn-3d:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 0 0 #203354;
+}
+
+/* 2. Primary Navy 3D Push Button */
+.btn-push-primary, .btn-3d-navy, .neu-btn-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 2px solid #142036;
+  background-color: #203354;
   color: #FFFFFF !important;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 
-    4px 5px 12px rgba(20, 33, 56, 0.38),
-    -3px -3px 8px rgba(255, 255, 255, 0.45),
-    inset 0 1px 1px rgba(255, 255, 255, 0.25);
-  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
-  cursor: pointer;
+  font-weight: 800;
+  box-shadow: 0 4px 0 0 #0E1626;
+  transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
+  cursor: pointer;
 }
 
-.neu-btn-primary * {
+.btn-push-primary *, .btn-3d-navy *, .neu-btn-primary * {
   color: #FFFFFF !important;
 }
 
-.neu-btn-primary svg {
+.btn-push-primary svg, .btn-3d-navy svg, .neu-btn-primary svg {
   stroke: #FFFFFF !important;
 }
 
-.neu-btn-primary:hover {
+.btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover {
   transform: translateY(-1.5px);
-  background: linear-gradient(145deg, #28416c, #192944);
-  box-shadow: 
-    5px 7px 16px rgba(20, 33, 56, 0.46),
-    -4px -4px 10px rgba(255, 255, 255, 0.55),
-    inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  box-shadow: 0 5.5px 0 0 #0E1626;
+  background-color: #283F68;
 }
 
-.neu-btn-primary:active, .neu-btn-primary.is-active {
-  transform: translateY(1px) scale(0.98);
-  background: #17243c;
-  box-shadow: 
-    inset 3px 3px 7px rgba(10, 18, 30, 0.75),
-    inset -2px -2px 5px rgba(255, 255, 255, 0.15);
-  border-color: rgba(15, 25, 42, 0.8);
+.btn-push-primary:active, .btn-3d-navy:active, .neu-btn-primary:active, .btn-push-primary.is-pressed {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 #0E1626 !important;
+  background-color: #16243A;
 }
 
-/* 4. Warm Amber / Action Neumorphic Buttons (e.g. Thu tiền) */
-.neu-btn-amber {
-  background: #FFF5E4;
+.btn-push-primary:disabled, .btn-3d-navy:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 0 0 #0E1626;
+}
+
+/* 3. Amber / Action 3D Push Button (Thu tiền, highlight) */
+.btn-push-amber, .btn-3d-amber, .neu-btn-amber {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 2px solid #8C5916;
+  background-color: #FFF3DF;
   color: #8C5916;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 
-    3px 3px 8px rgba(185, 145, 95, 0.24),
-    -3px -3px 8px rgba(255, 255, 255, 0.95);
-  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+  font-weight: 800;
+  box-shadow: 0 4px 0 0 #8C5916;
+  transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
+  user-select: none;
   cursor: pointer;
 }
 
-.neu-btn-amber:hover {
+.btn-push-amber:hover, .btn-3d-amber:hover, .neu-btn-amber:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 5.5px 0 0 #8C5916;
+  background-color: #FFF8EB;
+}
+
+.btn-push-amber:active, .btn-3d-amber:active, .neu-btn-amber:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 #8C5916 !important;
+}
+
+/* 4. Emerald / Success 3D Badge & Button (Đã thu, hoàn tất) */
+.btn-push-emerald, .btn-3d-emerald {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 2px solid #1E663B;
+  background-color: #EAF5EE;
+  color: #1E663B;
+  font-weight: 800;
+  box-shadow: 0 3px 0 0 #1E663B;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.btn-push-emerald:hover {
   transform: translateY(-1px);
-  background: #FFF9ED;
-  box-shadow: 
-    4px 5px 12px rgba(185, 145, 95, 0.32),
-    -4px -4px 10px rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 0 0 #1E663B;
+  background-color: #F2FAF5;
 }
 
-.neu-btn-amber:active {
-  transform: translateY(1px) scale(0.98);
-  background: #FBEAD0;
-  box-shadow: 
-    inset 2px 2px 5px rgba(175, 130, 80, 0.35),
-    inset -2px -2px 5px rgba(255, 255, 255, 0.9);
+.btn-push-emerald:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 0 #1E663B !important;
 }
 
-/* 5. Inset / Sunken / Debossed Neumorphic Elements (Search, Inset Displays, Tracks) */
-.neu-inset {
-  background: #EFE8DE;
-  border-radius: 18px;
-  border: 1px solid rgba(215, 203, 190, 0.55);
-  box-shadow: 
-    inset 3px 3px 7px rgba(150, 135, 120, 0.28),
-    inset -3px -3px 7px rgba(255, 255, 255, 0.85);
-  transition: all 0.2s ease;
-}
-
-.neu-inset:focus-within {
-  border-color: rgba(32, 51, 84, 0.4);
-  box-shadow: 
-    inset 3px 3px 8px rgba(140, 125, 110, 0.32),
-    inset -3px -3px 8px rgba(255, 255, 255, 0.9),
-    0 0 0 3px rgba(32, 51, 84, 0.08);
-}
-
-/* 6. Soft Pill Badge & Sunken Badges */
-.neu-badge {
-  background: #FAF7F2;
+/* 5. Danger / Red 3D Button (Đăng xuất, xóa) */
+.btn-push-danger, .btn-3d-danger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: 
-    2px 2px 6px rgba(170, 155, 140, 0.22),
-    -2px -2px 6px rgba(255, 255, 255, 0.9);
+  border: 2px solid #9B3B30;
+  background-color: #FFF0EE;
+  color: #9B3B30;
+  font-weight: 800;
+  box-shadow: 0 4px 0 0 #9B3B30;
+  transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
+  user-select: none;
+  cursor: pointer;
 }
 
-.neu-badge-sunken {
+.btn-push-danger:hover, .btn-3d-danger:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 5.5px 0 0 #9B3B30;
+  background-color: #FFEAE7;
+}
+
+.btn-push-danger:active, .btn-3d-danger:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 #9B3B30 !important;
+}
+
+/* 6. 3D Card / Container */
+.card-push, .card-3d, .neu-surface {
+  background-color: #FAF7F2;
+  border: 2px solid #203354;
+  border-radius: 28px;
+  box-shadow: 0 5px 0 0 #203354;
+  transition: all 0.15s ease;
+}
+
+.card-push-subtle, .card-3d-subtle, .neu-surface-subtle {
+  background-color: #FFFFFF;
+  border: 2px solid #203354;
+  border-radius: 20px;
+  box-shadow: 0 4px 0 0 #203354;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.card-push-subtle:hover, .card-3d-subtle:hover, .neu-surface-subtle:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 5.5px 0 0 #203354;
+}
+
+/* 7. 3D Input & Search Box */
+.input-push, .input-3d, .neu-inset {
+  background-color: #FFFFFF;
+  border: 2px solid #203354;
   border-radius: 9999px;
-  box-shadow: 
-    inset 2px 2px 4px rgba(150, 135, 120, 0.22),
-    inset -2px -2px 4px rgba(255, 255, 255, 0.75);
+  box-shadow: 0 3px 0 0 #203354;
+  transition: all 0.12s ease;
 }
 
-/* 7. General Tactile Press Effect */
-.neu-press {
-  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+.input-push:focus-within, .input-3d:focus-within, .neu-inset:focus-within {
+  box-shadow: 0 4px 0 0 #203354;
+  background-color: #FCFBF8;
 }
-.neu-press:active {
-  transform: translateY(1px) scale(0.98);
+
+/* 8. 3D Badge */
+.badge-push, .neu-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 2px solid #203354;
+  background-color: #FAF7F2;
+  box-shadow: 0 2.5px 0 0 #203354;
+}
+
+.badge-push-sunken, .neu-badge-sunken {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 2px solid #203354;
+  background-color: #EFE8DE;
+  box-shadow: 0 1px 0 0 #203354;
+}
+
+/* 9. Squircle button compatibility */
+.squircle-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 2px solid #203354;
+  background-color: #FAF7F2;
+  color: #203354;
+  font-weight: 800;
+  box-shadow: 0 4px 0 0 #203354;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  cursor: pointer;
+}
+.squircle-btn:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 5.5px 0 0 #203354;
+}
+.squircle-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 #203354 !important;
+}
+.squircle-btn.active {
+  background-color: #203354 !important;
+  color: #FFFFFF !important;
+  border-color: #142036 !important;
+  box-shadow: 0 4px 0 0 #0E1626 !important;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -400,3 +422,4 @@ input[type="month"]::-webkit-date-and-time-value {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+

@@ -29,10 +29,10 @@ export default function Sidebar() {
           href={href}
           onClick={() => setOpen(false)}
           title={label}
-          className={`neu-press flex h-11 items-center gap-3 rounded-2xl px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-3.5 ${
+          className={`flex h-11 items-center gap-3 rounded-full px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-4 ${
             active(href)
-              ? 'neu-btn-primary'
-              : 'text-[#5F554E] hover:bg-[#FAF7F2] hover:shadow-[3px_3px_8px_rgba(170,155,140,0.2),-3px_-3px_8px_rgba(255,255,255,0.9)] hover:text-[#203354] active:shadow-[inset_2px_2px_4px_rgba(150,135,120,0.25)]'
+              ? 'btn-push-primary'
+              : 'text-[#5F554E] hover:bg-white hover:border-2 hover:border-[#203354] hover:shadow-[0_3px_0_0_#203354] hover:text-[#203354] active:translate-y-[3px] active:shadow-none'
           }`}
         >
           <Icon size={19} className="shrink-0" />
@@ -44,11 +44,11 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col neu-surface p-2.5 pt-3.5 pb-3 no-scrollbar overflow-y-auto md:flex xl:w-52">
+      <aside className="sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col card-push p-2.5 pt-3.5 pb-3 no-scrollbar overflow-y-auto md:flex xl:w-52">
         <Link
           href="/business"
           title="BookCase · Bán Hàng"
-          className="neu-btn-primary mb-3 flex h-11 w-full items-center justify-center rounded-2xl font-black text-white xl:justify-start xl:px-3.5"
+          className="btn-push-primary mb-3 flex h-11 w-full items-center justify-center rounded-full font-black text-white xl:justify-start xl:px-4"
         >
           <span className="text-sm font-black tracking-wider">BC</span>
           <span className="hidden truncate text-xs font-black tracking-wide text-white/90 xl:inline ml-1.5">
@@ -56,30 +56,30 @@ export default function Sidebar() {
           </span>
         </Link>
         <nav className="space-y-2">{links}</nav>
-        <div className="mt-auto border-t border-[#E4D9CE] pt-3">
+        <div className="mt-auto border-t-2 border-[#203354]/20 pt-3">
           <p className="hidden truncate px-3 pb-2 text-xs font-bold text-[#776C64] xl:block">
             {user?.username}
           </p>
           <button
             onClick={logout}
             title="Đăng xuất"
-            className="neu-press flex h-11 w-full items-center gap-3 rounded-2xl px-3 text-sm font-black text-[#9B403A] transition-all hover:bg-[#FAF7F2] hover:shadow-[3px_3px_8px_rgba(170,155,140,0.2),-3px_-3px_8px_rgba(255,255,255,0.9)] hover:text-red-700 active:shadow-[inset_2px_2px_4px_rgba(150,135,120,0.25)] md:justify-center md:px-0 xl:justify-start xl:px-3.5"
+            className="btn-push-danger flex h-11 w-full items-center gap-3 rounded-full px-3 text-sm font-black text-[#9B403A] md:justify-center md:px-0 xl:justify-start xl:px-4"
           >
             <LogOut size={19} className="shrink-0" />
             <span className="md:hidden xl:inline">Đăng xuất</span>
           </button>
         </div>
       </aside>
-      <header className="fixed inset-x-2 top-2 z-50 flex h-12 items-center justify-between neu-surface px-4 backdrop-blur md:hidden">
+      <header className="fixed inset-x-2 top-2 z-50 flex h-12 items-center justify-between card-push px-4 rounded-2xl md:hidden">
         <Link href="/business" className="font-black text-[#203354]">BC · BÁN HÀNG</Link>
-        <button onClick={() => setOpen(v => !v)} aria-label="Mở menu" className="neu-btn p-2 rounded-xl">
+        <button onClick={() => setOpen(v => !v)} aria-label="Mở menu" className="btn-push p-2 rounded-xl">
           {open ? <X size={18}/> : <Menu size={18}/>}
         </button>
       </header>
       {open && (
-        <div className="neu-surface fixed inset-x-2 top-[62px] z-50 p-3 shadow-2xl md:hidden">
+        <div className="card-push fixed inset-x-2 top-[62px] z-50 p-3 shadow-2xl md:hidden">
           <nav className="grid grid-cols-2 gap-2">{links}</nav>
-          <button onClick={logout} className="neu-btn mt-3 flex w-full items-center justify-center gap-2 rounded-xl p-3 text-sm font-black text-[#9B403A] hover:bg-red-50">
+          <button onClick={logout} className="btn-push-danger mt-3 flex w-full items-center justify-center gap-2 rounded-xl p-3 text-sm font-black text-[#9B403A]">
             <LogOut size={18}/> Đăng xuất
           </button>
         </div>
