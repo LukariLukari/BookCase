@@ -49,6 +49,7 @@ model BusinessProduct {
   sellingPrice  Int      @default(0)
   unitCost      Int      @default(0)
   stockQuantity Int      @default(0)
+  trackStock    Boolean  @default(true)
   batchId       String?
   socialLink    String?
   supplierInfo  String?
