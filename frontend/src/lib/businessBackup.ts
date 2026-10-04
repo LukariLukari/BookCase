@@ -1,7 +1,8 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
 import { prisma } from '@/lib/db';
 
-export const BUSINESS_BACKUP_FORMAT = 'bookcase-business-backup';
+export const BUSINESS_BACKUP_FORMAT = 'billy-business-backup';
+export const LEGACY_BUSINESS_BACKUP_FORMAT = 'bookcase-business-backup';
 export const BUSINESS_BACKUP_VERSION = 2;
 
 const tableNames = [
@@ -61,7 +62,8 @@ const dateFields:Record<string,string[]>={
 function validatePayload(value:unknown):asserts value is BusinessBackupPayload{
   if(!value||typeof value!=='object')throw new Error('File sao lưu không hợp lệ.');
   const payload=value as Partial<BusinessBackupPayload>;
-  if(payload.format!==BUSINESS_BACKUP_FORMAT||payload.version!==BUSINESS_BACKUP_VERSION||!payload.data)throw new Error('File sao lưu không đúng phiên bản toàn bộ dữ liệu.');
+  const isValidFormat = payload.format === BUSINESS_BACKUP_FORMAT || payload.format === (LEGACY_BUSINESS_BACKUP_FORMAT as unknown);
+  if(!isValidFormat||payload.version!==BUSINESS_BACKUP_VERSION||!payload.data)throw new Error('File sao lưu không đúng phiên bản toàn bộ dữ liệu.');
   for(const table of tableNames)if(!Array.isArray(payload.data[table]))throw new Error(`File sao lưu thiếu bảng ${table}.`);
   const ids=Object.fromEntries(tableNames.map(table=>[table,new Set(payload.data![table].map(row=>row.id))])) as Record<string,Set<unknown>>;
   for(const table of tableNames)if(ids[table].size!==payload.data[table].length||ids[table].has(undefined))throw new Error(`Bảng ${table} có ID không hợp lệ.`);

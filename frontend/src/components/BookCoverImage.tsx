@@ -68,7 +68,7 @@ export default function BookCoverImage({
         <div className="absolute -right-8 -bottom-8 w-28 h-28 bg-[#F97316]/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="pl-3 pr-1 pt-2 z-10">
-          <span className="text-[10px] font-black tracking-widest text-[#F97316] block mb-1 uppercase">BookCase</span>
+          <span className="text-[10px] font-black tracking-widest text-[#F97316] block mb-1 uppercase">Billy</span>
           <h4 className="font-extrabold text-[#F5ECDC] text-xs sm:text-sm md:text-base leading-snug line-clamp-4 drop-shadow-none">{title}</h4>
         </div>
 

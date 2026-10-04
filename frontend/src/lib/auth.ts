@@ -5,7 +5,7 @@ export type AuthPayload = { id: string; sub: string; role: string };
 function jwtSecret() {
   const secret = process.env.JWT_SECRET;
   if (secret) return secret;
-  if (process.env.NODE_ENV !== 'production') return 'bookcase-local-development-only';
+  if (process.env.NODE_ENV !== 'production') return 'billy-local-development-only';
   throw new Error('JWT_SECRET is required in production');
 }
 

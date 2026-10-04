@@ -96,7 +96,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="bg-[#F5ECDC] text-[#000000] text-xs font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                  <Crown size={13} style={{ color: '#000000' }} /> BookCase VIP Member
+                  <Crown size={13} style={{ color: '#000000' }} /> Billy VIP Member
                 </span>
               </div>
               <h2 className="text-2xl md:text-3xl font-black text-[#F5ECDC] tracking-tight">

@@ -8,8 +8,8 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "BOOKCASE.",
-  description: "Thư viện sách điện tử cá nhân của bạn.",
+  title: "Billy.",
+  description: "Hệ thống quản lý bán hàng thông minh - Billy.",
 };
 
 export const viewport: Viewport = {

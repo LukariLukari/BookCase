@@ -56,7 +56,7 @@ export default function RegisterPage() {
         <div className="flex items-center gap-2 mb-8 cursor-pointer hover:opacity-80">
           <Store size={32} className="text-orange-500" />
           <h1 className="text-4xl font-extrabold text-[#F5ECDC]">
-            BC Sales<span className="text-orange-500">.</span>
+            Billy<span className="text-orange-500">.</span>
           </h1>
         </div>
       </Link>

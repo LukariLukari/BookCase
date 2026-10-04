@@ -63,17 +63,17 @@ export default function ResetAccountModal({
 
       // Xóa sạch bộ nhớ đệm cache trên trình duyệt của tài khoản này
       if (typeof window !== 'undefined' && targetUserId) {
-        const prefix = `bookcase:business:${targetUserId}`;
+        const prefixes = [`billy:business:${targetUserId}`, `bookcase:business:${targetUserId}`];
         try {
           for (let i = localStorage.length - 1; i >= 0; i--) {
             const key = localStorage.key(i);
-            if (key && (key.startsWith(prefix) || key === 'business_ledger_id')) {
+            if (key && (prefixes.some(p => key.startsWith(p)) || key === 'business_ledger_id')) {
               localStorage.removeItem(key);
             }
           }
           for (let i = sessionStorage.length - 1; i >= 0; i--) {
             const key = sessionStorage.key(i);
-            if (key && (key.startsWith(prefix) || key === 'business_ledger_id')) {
+            if (key && (prefixes.some(p => key.startsWith(p)) || key === 'business_ledger_id')) {
               sessionStorage.removeItem(key);
             }
           }

@@ -16,9 +16,9 @@ function run(command, args) {
 
 run('npx', ['prisma', 'generate']);
 if (databaseUrl) {
-  console.log('[BookCase] Synchronizing Prisma schema with PostgreSQL...');
+  console.log('[Billy] Synchronizing Prisma schema with PostgreSQL...');
   run('npx', ['prisma', 'db', 'push', '--skip-generate']);
 } else {
-  console.warn('[BookCase] No PostgreSQL URL found during build. Runtime login requires DATABASE_URL, POSTGRES_PRISMA_URL, or POSTGRES_URL.');
+  console.warn('[Billy] No PostgreSQL URL found during build. Runtime login requires DATABASE_URL, POSTGRES_PRISMA_URL, or POSTGRES_URL.');
 }
 run('npx', ['next', 'build']);

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
-import { BookOpen, Eye, EyeOff, Loader2, LogIn } from 'lucide-react';
+import { Eye, EyeOff, Loader2, LogIn, Store } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
@@ -47,9 +47,9 @@ export default function LoginPage() {
       <div className="relative w-full max-w-[460px]">
         <Link href="/" className="mx-auto mb-7 flex w-fit items-center gap-3 rounded-2xl px-3 py-2 transition hover:bg-[#FBF8F4]/50 active:scale-[0.98]">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1B2A4A] text-white shadow-[0_8px_18px_rgba(27,42,74,.24)]">
-            <BookOpen size={23} strokeWidth={2.4} />
+            <Store size={23} strokeWidth={2.4} />
           </span>
-          <span className="text-2xl font-black tracking-[-0.04em] text-[#1B2A4A]">BOOKCASE.</span>
+          <span className="text-2xl font-black tracking-[-0.04em] text-[#1B2A4A]">BILLY.</span>
         </Link>
 
         <section className="rounded-[34px] border border-[#EFE8DE] bg-[#FBF8F4] p-6 shadow-[0_22px_55px_rgba(93,72,56,.16)] sm:p-9">

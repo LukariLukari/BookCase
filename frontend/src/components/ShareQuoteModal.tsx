@@ -297,7 +297,7 @@ export default function ShareQuoteModal({
       if (!dataUrl) return;
 
       const link = document.createElement('a');
-      link.download = `BookCase_Quote_${Date.now()}.png`;
+      link.download = `Billy_Quote_${Date.now()}.png`;
       link.href = dataUrl;
       link.click();
 

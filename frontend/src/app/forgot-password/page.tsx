@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import axios from 'axios';
-import { BookOpen, ArrowLeft, Mail, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Store, ArrowLeft, Mail, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
@@ -61,9 +61,9 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-[#f8f7f4] flex flex-col justify-center items-center p-4">
       <Link href="/">
         <div className="flex items-center gap-2 mb-8 cursor-pointer hover:opacity-80">
-          <BookOpen size={32} className="text-orange-500" />
+          <Store size={32} className="text-orange-500" />
           <h1 className="text-4xl font-extrabold text-black">
-            BookCase<span className="text-orange-500">.</span>
+            Billy<span className="text-orange-500">.</span>
           </h1>
         </div>
       </Link>

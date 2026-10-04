@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, Boxes, Columns3, KeyRound, LogOut, Menu, ReceiptText, Store, Users, X } from 'lucide-react';
+import { BarChart3, Boxes, KeyRound, LogOut, Menu, ReceiptText, Store, Users, Workflow, X } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 const items = [
   { href: '/business', label: 'Tổng quan', icon: Store },
   { href: '/business/orders', label: 'Đơn hàng', icon: ReceiptText },
-  { href: '/business/workflow', label: 'Vận hành', icon: Columns3 },
+  { href: '/business/workflow', label: 'Vận hành', icon: Workflow },
   { href: '/business/customers', label: 'Khách hàng', icon: Users },
   { href: '/business/inventory', label: 'Kho hàng', icon: Boxes },
   { href: '/business/reports', label: 'Báo cáo', icon: BarChart3 },
@@ -30,7 +30,7 @@ export default function Sidebar() {
           href={href}
           onClick={() => setOpen(false)}
           title={label}
-          className={`flex h-11 items-center gap-3 rounded-full px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-4 ${
+          className={`flex h-11 w-full items-center gap-3 rounded-full px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-4 ${
             active(href)
               ? 'btn-push-primary'
               : 'text-[#5F554E] hover:bg-white hover:border-2 hover:border-[#203354] hover:shadow-[0_3px_0_0_#203354] hover:text-[#203354] active:translate-y-[3px] active:shadow-none'
@@ -69,10 +69,10 @@ export default function Sidebar() {
       <aside className="sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col card-push p-2.5 pt-3.5 pb-3 no-scrollbar overflow-y-auto md:flex xl:w-52">
         <Link
           href="/business"
-          title="BookCase · Bán Hàng"
+          title="Billy · Bán Hàng"
           className="btn-push-primary mb-3 flex h-11 w-full items-center justify-center rounded-full font-black text-white xl:justify-start xl:px-4"
         >
-          <span className="text-sm font-black tracking-wider">BC</span>
+          <span className="text-sm font-black tracking-wider">Billy</span>
           <span className="hidden truncate text-xs font-black tracking-wide text-white/90 xl:inline ml-1.5">
             · BÁN HÀNG
           </span>
@@ -93,7 +93,7 @@ export default function Sidebar() {
         </div>
       </aside>
       <header className="fixed inset-x-2 top-2 z-50 flex h-12 items-center justify-between card-push px-4 rounded-2xl md:hidden">
-        <Link href="/business" className="font-black text-[#203354]">BC · BÁN HÀNG</Link>
+        <Link href="/business" className="font-black text-[#203354]">BILLY · BÁN HÀNG</Link>
         <button onClick={() => setOpen(v => !v)} aria-label="Mở menu" className="btn-push flex h-9 w-9 items-center justify-center rounded-xl">
           {open ? <X size={18}/> : <Menu size={18}/>}
         </button>
