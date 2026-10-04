@@ -219,11 +219,11 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #142036;
+  border: 2px solid #172F56;
   background-color: #203354;
   color: #FFFFFF !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #0E1626;
+  box-shadow: 0 4px 0 0 #142B4E;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -239,21 +239,21 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #0E1626;
+  box-shadow: 0 5.5px 0 0 #142B4E;
   background-color: #283F68;
 }
 
 .btn-push-primary:active, .btn-3d-navy:active, .neu-btn-primary:active, .btn-push-primary.is-pressed {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #0E1626 !important;
-  background-color: #16243A;
+  box-shadow: 0 0 0 0 #142B4E !important;
+  background-color: #162E52;
 }
 
 .btn-push-primary:disabled, .btn-3d-navy:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #0E1626;
+  box-shadow: 0 2px 0 0 #142B4E;
 }
 
 /* 3. Amber / Action 3D Push Button (Thu tiền, highlight) */
@@ -419,8 +419,8 @@ input[type="month"]::-webkit-date-and-time-value {
 .squircle-btn.active {
   background-color: #203354 !important;
   color: #FFFFFF !important;
-  border-color: #142036 !important;
-  box-shadow: 0 4px 0 0 #0E1626 !important;
+  border-color: #172F56 !important;
+  box-shadow: 0 4px 0 0 #142B4E !important;
 }
 
 .no-scrollbar::-webkit-scrollbar {

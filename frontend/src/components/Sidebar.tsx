@@ -53,7 +53,7 @@ export default function Sidebar() {
           title={label}
           className={`flex h-12 items-center justify-start gap-2.5 rounded-full px-3.5 text-xs font-black transition-all ${
             active(href)
-              ? 'btn-push-primary shadow-[0_3px_0_0_#0E1626]'
+              ? 'btn-push-primary shadow-[0_3px_0_0_#142B4E]'
               : 'btn-push text-[#203354]'
           }`}
         >
