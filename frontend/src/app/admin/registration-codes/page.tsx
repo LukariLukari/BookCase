@@ -123,7 +123,7 @@ export default function RegistrationCodesPage() {
   const unused = codes.filter(x => !x.is_used).length;
 
   return (
-    <div className="min-h-[100dvh] bg-[#D8C9BB] p-3 pb-24 pt-20 text-[#292421] md:flex md:gap-5 md:p-6">
+    <div className="min-h-[100dvh] bg-[#D8C9BB] p-3 pb-24 pt-20 text-[#292421] md:flex md:gap-5 md:p-6 md:pt-6">
       <Sidebar />
       <main className="min-w-0 flex-1">
         <div className="mx-auto max-w-6xl space-y-4">

@@ -193,3 +193,11 @@ input[type="month"]::-webkit-date-and-time-value {
 .squircle-btn.active svg {
   stroke: #FFFFFF !important;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

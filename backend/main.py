@@ -167,24 +167,20 @@ def repair_cover_for_book(book: models.Book, db: Session) -> str | None:
     return None
 
 def keep_alive_task():
-    """Chạy ngầm để ping server mỗi 14 phút, giúp server không bị ngủ trên Render."""
-    url = os.getenv("RENDER_EXTERNAL_URL")
+    url = os.getenv("KEEP_ALIVE_URL")
     if not url:
         return
     ping_url = f"{url}/api/ping"
-    print(f"[KeepAlive] Bắt đầu tự động ping tới: {ping_url}")
-    
     import time
     import urllib.request
     while True:
         try:
-            time.sleep(14 * 60) # Chờ 14 phút (Render tắt sau 15p)
+            time.sleep(14 * 60)
             req = urllib.request.Request(ping_url, headers={'User-Agent': 'KeepAlive'})
             with urllib.request.urlopen(req, timeout=10) as response:
                 pass
-            print(f"[KeepAlive] Đã ping {ping_url} để giữ server thức.")
-        except Exception as e:
-            print(f"[KeepAlive] Lỗi ping: {e}")
+        except Exception:
+            pass
 
 @app.get("/api/ping")
 def ping():
