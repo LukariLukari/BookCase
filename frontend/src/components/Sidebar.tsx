@@ -32,8 +32,8 @@ export default function Sidebar() {
           title={label}
           className={`flex h-11 w-full items-center gap-3 rounded-full px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-4 ${
             active(href)
-              ? 'bg-[#b9cddf] text-[#585556] shadow-[0_4px_0_0_#6a6768]'
-              : 'text-[#585556] hover:bg-[#b9cddf] hover:shadow-[0_3px_0_0_#6a6768] hover:text-black active:translate-y-[3px] active:shadow-none'
+              ? 'bg-[#b9cddf] text-[#585556] shadow-[0_4px_0_0_#cecece]'
+              : 'text-[#585556] hover:bg-[#b9cddf] hover:shadow-[0_3px_0_0_#cecece] hover:text-black active:translate-y-[3px] active:shadow-none'
           }`}
         >
           <Icon size={19} className="shrink-0" />
@@ -53,7 +53,7 @@ export default function Sidebar() {
           title={label}
           className={`flex h-12 items-center justify-start gap-2.5 rounded-full px-3.5 text-xs font-black transition-all ${
             active(href)
-              ? 'bg-[#b9cddf] text-[#585556] shadow-[0_4px_0_0_#6a6768]'
+              ? 'bg-[#b9cddf] text-[#585556] shadow-[0_4px_0_0_#cecece]'
               : 'btn-push text-[#585556]'
           }`}
         >

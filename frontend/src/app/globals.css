@@ -175,7 +175,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #b9cddf !important;
   border-color: transparent !important;
   color: #585556 !important;
-  box-shadow: 0 4px 0 0 #6a6768 !important;
+  box-shadow: 0 4px 0 0 #cecece !important;
 }
 
 .btn-gradient *, .btn-navy * {
@@ -191,7 +191,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #b9cddf !important;
   color: #585556 !important;
   transform: translateY(-1px);
-  box-shadow: 0 5.5px 0 0 #6a6768 !important;
+  box-shadow: 0 5.5px 0 0 #cecece !important;
 }
 
 /* ==========================================================================
@@ -209,7 +209,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #b9cddf;
   color: #585556;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #6a6768;
+  box-shadow: 0 4px 0 0 #cecece;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -225,20 +225,20 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push:hover, .btn-3d:hover, .neu-btn:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #6a6768;
+  box-shadow: 0 5.5px 0 0 #cecece;
   background-color: #b9cddf;
 }
 
 .btn-push:active, .btn-3d:active, .neu-btn:active, .btn-push.is-pressed {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #6a6768 !important;
+  box-shadow: 0 0 0 0 #cecece !important;
 }
 
 .btn-push:disabled, .btn-3d:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #6a6768;
+  box-shadow: 0 2px 0 0 #cecece;
 }
 
 /* 2. Primary Charcoal Noir 3D Push Button */
@@ -252,7 +252,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #b9cddf;
   color: #585556 !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #6a6768;
+  box-shadow: 0 4px 0 0 #cecece;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -268,13 +268,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #6a6768;
+  box-shadow: 0 5.5px 0 0 #cecece;
   background-color: #b9cddf;
 }
 
 .btn-push-primary:active, .btn-3d-navy:active, .neu-btn-primary:active, .btn-push-primary.is-pressed {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #6a6768 !important;
+  box-shadow: 0 0 0 0 #cecece !important;
   background-color: #b9cddf;
 }
 
@@ -282,7 +282,7 @@ input[type="month"]::-webkit-date-and-time-value {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #6a6768;
+  box-shadow: 0 2px 0 0 #cecece;
 }
 
 /* 2b. Warm Ironclad Grey 3D Push Button */
@@ -296,7 +296,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #b9cddf;
   color: #585556 !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #6a6768;
+  box-shadow: 0 4px 0 0 #cecece;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -304,13 +304,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-walnut:hover, .btn-push-ironclad:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #6a6768;
+  box-shadow: 0 5.5px 0 0 #cecece;
   background-color: #b9cddf;
 }
 
 .btn-push-walnut:active, .btn-push-ironclad:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #6a6768 !important;
+  box-shadow: 0 0 0 0 #cecece !important;
 }
 
 /* 3. Action 3D Push Button (Thu tiền, highlight) */
@@ -324,7 +324,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #b9cddf;
   color: #585556;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #6a6768;
+  box-shadow: 0 4px 0 0 #cecece;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -332,13 +332,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-amber:hover, .btn-3d-amber:hover, .neu-btn-amber:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #6a6768;
+  box-shadow: 0 5.5px 0 0 #cecece;
   background-color: #b9cddf;
 }
 
 .btn-push-amber:active, .btn-3d-amber:active, .neu-btn-amber:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #6a6768 !important;
+  box-shadow: 0 0 0 0 #cecece !important;
 }
 
 /* 4. Emerald / Success 3D Badge & Button (Đã thu, hoàn tất) */
@@ -352,19 +352,19 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #b9cddf;
   color: #585556;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #6a6768;
+  box-shadow: 0 4px 0 0 #cecece;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
 .btn-push-emerald:hover {
   transform: translateY(-1px);
-  box-shadow: 0 5px 0 0 #6a6768;
+  box-shadow: 0 5px 0 0 #cecece;
   background-color: #b9cddf;
 }
 
 .btn-push-emerald:active {
   transform: translateY(3px);
-  box-shadow: 0 0 0 0 #6a6768 !important;
+  box-shadow: 0 0 0 0 #cecece !important;
 }
 
 /* 5. Danger / Red 3D Button (Đăng xuất, xóa) */
@@ -378,7 +378,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #b9cddf;
   color: #585556;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #6a6768;
+  box-shadow: 0 4px 0 0 #cecece;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -386,13 +386,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-danger:hover, .btn-3d-danger:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #6a6768;
+  box-shadow: 0 5.5px 0 0 #cecece;
   background-color: #b9cddf;
 }
 
 .btn-push-danger:active, .btn-3d-danger:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #6a6768 !important;
+  box-shadow: 0 0 0 0 #cecece !important;
 }
 
 /* 6. 3D Card / Container */
@@ -566,7 +566,7 @@ a.bg-\[\#585556\] {
   background-color: #b9cddf !important;
   border-color: transparent !important;
   color: #585556 !important;
-  box-shadow: 0 4px 0 0 #6a6768 !important;
+  box-shadow: 0 4px 0 0 #cecece !important;
 }
 
 button.bg-\[\#585556\] *,
@@ -580,7 +580,7 @@ a.bg-\[\#585556\] svg {
 button.bg-\[\#b9cddf\],
 a.bg-\[\#b9cddf\] {
   border-color: transparent !important;
-  box-shadow: 0 4px 0 0 #6a6768 !important;
+  box-shadow: 0 4px 0 0 #cecece !important;
 }
 
 [class~="bg-red-50"],
