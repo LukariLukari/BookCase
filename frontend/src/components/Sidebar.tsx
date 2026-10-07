@@ -30,10 +30,10 @@ export default function Sidebar() {
           href={href}
           onClick={() => setOpen(false)}
           title={label}
-          className={`flex h-11 w-full items-center gap-3 rounded-full px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-4 ${
+          className={`flex h-11 w-full items-center gap-3 rounded-[18px_24px_16px_22px] border-2 px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-4 ${
             active(href)
-              ? 'bg-[#112250] text-white shadow-[0_4px_0_0_#BEB7A7]'
-              : 'text-[#112250] hover:bg-[#F5F4F0] hover:text-[#112250]'
+              ? 'border-[#112250] bg-[#a9ceda] text-[#112250] shadow-[5px_5px_0_0_#cfc6b7]'
+              : 'border-transparent text-[#112250] hover:border-[#112250] hover:bg-[#f3e7c3] hover:shadow-[4px_4px_0_0_#cfc6b7]'
           }`}
         >
           <Icon size={19} className="shrink-0" />
@@ -51,9 +51,9 @@ export default function Sidebar() {
           href={href}
           onClick={() => setOpen(false)}
           title={label}
-          className={`flex h-12 items-center justify-start gap-2.5 rounded-full px-3.5 text-xs font-black transition-all ${
+          className={`flex h-12 items-center justify-start gap-2.5 rounded-[18px_24px_16px_22px] px-3.5 text-xs font-black transition-all ${
             active(href)
-              ? 'bg-[#112250] text-white shadow-[0_4px_0_0_#BEB7A7]'
+              ? 'border-2 border-[#112250] bg-[#a9ceda] text-[#112250] shadow-[5px_5px_0_0_#cfc6b7]'
               : 'btn-push'
           }`}
         >
@@ -66,11 +66,11 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col rounded-3xl border-2 border-[#112250] bg-[#F5F4F0] p-2.5 pt-3.5 pb-3 shadow-[0_5px_0_0_#112250] no-scrollbar overflow-y-auto md:flex xl:w-52">
+      <aside className="sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col rounded-[30px_36px_28px_34px] border-2 border-[#112250] bg-[#fffdf7] p-2.5 pt-3.5 pb-3 shadow-[12px_12px_0_0_#123f4d] no-scrollbar overflow-y-auto md:flex xl:w-52">
         <Link
           href="/business"
           title="Billy · Bán Hàng"
-          className="btn-push-primary mb-3 flex h-11 w-full items-center justify-center rounded-full font-black text-white xl:justify-start xl:px-4"
+          className="btn-push-primary mb-3 flex h-11 w-full items-center justify-center font-black text-white xl:justify-start xl:px-4"
         >
           <span className="text-sm font-black tracking-wider">Billy</span>
           <span className="hidden truncate text-xs font-black tracking-wide text-white/90 xl:inline ml-1.5">
@@ -92,18 +92,18 @@ export default function Sidebar() {
           </button>
         </div>
       </aside>
-      <header className="fixed inset-x-3.5 top-[max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))] z-50 flex h-14 items-center justify-between gap-3 rounded-2xl border-2 border-[#112250] bg-[#F5F4F0] px-5 py-2 shadow-[0_4px_0_0_#112250] md:hidden">
+      <header className="fixed inset-x-3.5 top-[max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))] z-50 flex h-14 items-center justify-between gap-3 rounded-[22px_28px_20px_26px] border-2 border-[#112250] bg-[#fffdf7] px-5 py-2 shadow-[7px_7px_0_0_#123f4d] md:hidden">
         <Link href="/business" className="font-black text-[#112250] tracking-wide text-sm">BILLY · BÁN HÀNG</Link>
         <button
           onClick={() => setOpen(v => !v)}
           aria-label={open ? 'Đóng menu' : 'Mở menu'}
-          className="btn-push flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[#112250]"
+          className="btn-push flex h-9 w-9 shrink-0 items-center justify-center text-[#112250]"
         >
           {open ? <X size={19}/> : <Menu size={19}/>}
         </button>
       </header>
       {open && (
-        <div className="fixed inset-x-3.5 top-[calc(max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))+4.25rem)] z-50 rounded-2xl border-2 border-[#112250] bg-[#F5F4F0] p-4 shadow-2xl md:hidden">
+        <div className="fixed inset-x-3.5 top-[calc(max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))+4.25rem)] z-50 rounded-[24px_30px_22px_28px] border-2 border-[#112250] bg-[#fffdf7] p-4 shadow-[9px_9px_0_0_#123f4d] md:hidden">
           <nav className="grid grid-cols-2 gap-2.5">{mobileLinks}</nav>
           <button onClick={logout} className="btn-push-danger mt-3.5 flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-black text-[#112250]">
             <LogOut size={18}/> Đăng xuất
