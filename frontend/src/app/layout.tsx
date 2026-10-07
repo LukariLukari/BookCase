@@ -1,17 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro, Lora } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const beVietnam = Be_Vietnam_Pro({
-  subsets: ["latin", "vietnamese"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-be-vietnam",
-});
-
-const lora = Lora({
-  subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-lora",
+const suaFont = localFont({
+  src: "../fonts/Fontcuasua.otf",
+  variable: "--font-sua",
+  display: "swap",
+  fallback: ["cursive", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -32,7 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${beVietnam.variable} ${lora.variable} font-sans min-h-full antialiased`}
+      className={`${suaFont.variable} font-sans min-h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

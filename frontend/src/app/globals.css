@@ -1,6 +1,26 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'FontCuaSua';
+  src: url('/fonts/Fontcuasua.otf') format('opentype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Suaserif';
+  src: url('/fonts/Suaserif-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
+  --font-sua: 'FontCuaSua', cursive, sans-serif;
+  --font-be-vietnam: var(--font-sua);
+  --font-lora: var(--font-sua);
+  --font-montserrat: var(--font-sua);
   --ivory: #eee9df;
   --champagne: #e7dfd1;
   --moss: #d9d0c1;
@@ -54,7 +74,8 @@
   --color-ash: #6f7f99;
   --color-greige: #e7dfd1;
   --color-stucco: #eee9df;
-  --font-sans: var(--font-montserrat);
+  --font-sans: var(--font-sua), 'FontCuaSua', cursive, sans-serif;
+  --font-serif: var(--font-sua), 'FontCuaSua', cursive, sans-serif;
 }
 
 html, body {
@@ -68,7 +89,7 @@ body {
     radial-gradient(circle at 80% 14%, rgb(255 255 255 / 0.42) 0 8%, transparent 30%),
     linear-gradient(145deg, #f3eee4 0%, #e8e1d4 52%, #d9d0c1 100%);
   color: var(--midnight);
-  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sua), 'FontCuaSua', cursive, sans-serif;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
@@ -778,8 +799,8 @@ select {
 }
 
 @theme inline {
-  --font-sans: var(--font-be-vietnam);
-  --font-serif: var(--font-lora);
+  --font-sans: var(--font-sua), 'FontCuaSua', cursive, sans-serif;
+  --font-serif: var(--font-sua), 'FontCuaSua', cursive, sans-serif;
 }
 
 body {
@@ -788,7 +809,7 @@ body {
     radial-gradient(circle at 80% 12%, rgb(215 182 74 / 0.10), transparent 28%),
     linear-gradient(135deg, #f0e7da 0%, #e6dccd 58%, #d8cbb9 100%) !important;
   color: var(--midnight) !important;
-  font-family: var(--font-be-vietnam), Arial, Helvetica, sans-serif !important;
+  font-family: var(--font-sua), 'FontCuaSua', cursive, sans-serif !important;
 }
 
 body::before {
@@ -797,13 +818,24 @@ body::before {
 
 h1,
 h2,
+h3,
+h4,
+h5,
+h6,
 .font-black.text-2xl,
 .font-black.text-3xl,
 .font-black.text-4xl,
 .font-black.text-5xl {
-  font-family: var(--font-lora), Georgia, "Times New Roman", serif !important;
-  font-weight: 600 !important;
+  font-family: var(--font-sua), 'FontCuaSua', cursive, sans-serif !important;
   letter-spacing: 0 !important;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
 }
 
 button,
