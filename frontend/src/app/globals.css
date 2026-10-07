@@ -1009,3 +1009,269 @@ textarea::placeholder {
 svg {
   filter: none !important;
 }
+
+/* ==========================================================================
+   Black Bank theme
+   Clean monochrome surfaces, strong offset shadows and burgundy CTAs.
+   This final layer normalizes legacy colour utilities across every route.
+   ========================================================================== */
+:root {
+  --ink: #181818;
+  --ink-soft: #4f4f4f;
+  --paper: #ffffff;
+  --paper-muted: #f4f4f1;
+  --burgundy: #7a1022;
+  --burgundy-dark: #570916;
+  --background: var(--paper-muted);
+  --foreground: var(--ink);
+  --surface: var(--paper);
+  --surface-muted: var(--paper-muted);
+  --surface-card: var(--paper);
+  --border-soft: rgb(24 24 24 / 0.22);
+  --text-main: var(--ink);
+  --text-muted: rgb(24 24 24 / 0.6);
+  --ivory: var(--paper);
+  --champagne: var(--paper-muted);
+  --moss: #deded9;
+  --smoke: #707070;
+  --garden: #f0f0ed;
+  --midnight: var(--ink);
+  --deep-teal: var(--ink);
+  --butter: var(--burgundy);
+  --paper-line: var(--ink);
+  --color-charcoal: var(--ink);
+  --color-navy: var(--ink);
+  --color-navy-hover: #000000;
+  --color-charcoal-noir: var(--ink);
+  --color-ironclad: var(--ink);
+  --color-urban-fog: #707070;
+  --color-moonlit-silver: var(--paper);
+  --color-cloud-veil: var(--paper-muted);
+  --color-onyx: var(--ink);
+  --color-walnut: var(--ink);
+  --color-ash: #707070;
+  --color-greige: #e6e6e2;
+  --color-stucco: var(--paper);
+  --button-shadow: 3px 4px 0 var(--ink);
+  --button-shadow-hover: 4px 5px 0 var(--ink);
+  --button-shadow-disabled: 2px 2px 0 rgb(24 24 24 / 0.45);
+  --button-shadow-inset: inset 0 0 0 2px var(--ink);
+  --page-shadow: 7px 8px 0 var(--ink);
+  --sticker-shadow: 4px 5px 0 var(--ink);
+}
+
+html { background: var(--paper-muted); }
+
+body {
+  background-color: var(--paper-muted) !important;
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0 20px, rgb(24 24 24 / 0.035) 20px 25px),
+    linear-gradient(var(--paper-muted), var(--paper-muted)) !important;
+  color: var(--ink) !important;
+  font-family: var(--font-montserrat), Montserrat, Arial, Helvetica, sans-serif !important;
+}
+
+body::before {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 28px, var(--ink) 28px 35px) top right / 250px 120px no-repeat,
+    repeating-linear-gradient(45deg, transparent 0 28px, var(--ink) 28px 35px) bottom left / 180px 90px no-repeat !important;
+  opacity: 0.08 !important;
+}
+
+::selection { background: var(--burgundy); color: white; }
+::-webkit-scrollbar-track { background: var(--paper-muted); }
+::-webkit-scrollbar-thumb { background: var(--ink); }
+::-webkit-scrollbar-thumb:hover { background: var(--burgundy); }
+
+h1, h2, h3, h4, h5, h6,
+button, input, textarea, select, option {
+  font-family: var(--font-montserrat), Montserrat, Arial, Helvetica, sans-serif !important;
+}
+
+/* Restore deliberate outlines removed by the previous soft-theme layer. */
+[class~="border"] { border-width: 1px !important; border-style: solid !important; }
+[class~="border-2"] { border-width: 2px !important; border-style: solid !important; }
+[class~="border-b"] { border-bottom-width: 1px !important; border-bottom-style: solid !important; }
+[class~="border-t"] { border-top-width: 1px !important; border-top-style: solid !important; }
+[class~="border-l"] { border-left-width: 1px !important; border-left-style: solid !important; }
+[class~="border-r"] { border-right-width: 1px !important; border-right-style: solid !important; }
+[class~="border-dashed"] { border-style: dashed !important; }
+
+[class*="border-[#585556]"],
+[class*="border-[#1f365f]"],
+[class*="border-[#173963]"] { border-color: var(--ink) !important; }
+
+/* Normalize legacy navy/brown utilities to the monochrome palette. */
+[class*="text-[#585556]"],
+[class*="text-[#1f365f]"],
+[class*="text-[#173963]"] { color: var(--ink) !important; }
+
+[class*="bg-[#fef9f4]"],
+[class*="bg-[#eee9df]"],
+[class*="bg-[#efe6d8]"],
+[class*="bg-[#f3eadc]"],
+[class*="bg-[#e4dccd]"] { background-color: var(--paper) !important; }
+
+[class*="bg-[#1f365f]"],
+[class*="bg-[#173963]"],
+[class*="bg-[#3B507D]"] { background-color: var(--ink) !important; }
+
+[class~="bg-white"] { background-color: var(--paper) !important; }
+[class~="text-white"] { color: #ffffff !important; }
+[class~="bg-gray-50"], [class~="bg-gray-100"], [class~="bg-stone-50"],
+[class~="bg-neutral-50"], [class~="bg-zinc-50"] { background-color: var(--paper-muted) !important; }
+[class~="text-gray-400"], [class~="text-gray-500"], [class~="text-gray-600"],
+[class~="text-slate-500"], [class~="text-stone-500"] { color: var(--ink-soft) !important; }
+
+/* Rounded, outlined cards with the reference's strong offset shadow. */
+.card-push, .card-3d, .neu-surface,
+.card-push-subtle, .card-3d-subtle, .neu-surface-subtle {
+  background: var(--paper) !important;
+  border: 2px solid var(--ink) !important;
+  border-radius: 24px !important;
+  color: var(--ink) !important;
+  box-shadow: var(--page-shadow) !important;
+}
+
+.card-push-subtle, .card-3d-subtle, .neu-surface-subtle {
+  box-shadow: var(--sticker-shadow) !important;
+}
+
+/* Form controls are crisp and high-contrast. */
+.input-push, .input-3d, .neu-inset,
+input, textarea, select {
+  background: var(--paper) !important;
+  border: 2px solid var(--ink) !important;
+  color: var(--ink) !important;
+  box-shadow: none !important;
+}
+
+textarea.card-push-subtle {
+  border: 2px solid var(--ink) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+
+input::placeholder, textarea::placeholder { color: rgb(24 24 24 / 0.42) !important; }
+
+.input-push:focus-within, .input-3d:focus-within, .neu-inset:focus-within,
+input:focus, textarea:focus, select:focus {
+  border-color: var(--burgundy) !important;
+  box-shadow: 0 0 0 3px rgb(122 16 34 / 0.14) !important;
+}
+
+/* Neutral controls remain black and white. */
+.btn-push, .btn-3d, .neu-btn,
+.btn-push-walnut, .btn-push-ironclad, .squircle-btn {
+  background: var(--paper) !important;
+  border: 2px solid var(--ink) !important;
+  color: var(--ink) !important;
+  box-shadow: var(--button-shadow) !important;
+}
+
+.btn-push *, .btn-3d *, .neu-btn *,
+.btn-push-walnut *, .btn-push-ironclad *, .squircle-btn *,
+.btn-push svg, .btn-3d svg, .neu-btn svg,
+.btn-push-walnut svg, .btn-push-ironclad svg, .squircle-btn svg {
+  color: var(--ink) !important;
+  stroke: var(--ink) !important;
+}
+
+/* Primary/action controls are burgundy with guaranteed white content. */
+.btn-gradient, .btn-navy,
+.btn-push-primary, .btn-3d-navy, .neu-btn-primary,
+.btn-push-danger, .btn-3d-danger,
+.btn-push-amber, .btn-3d-amber, .neu-btn-amber,
+button[data-variant="primary"] {
+  background: var(--burgundy) !important;
+  background-image: none !important;
+  border: 2px solid var(--burgundy-dark) !important;
+  color: #ffffff !important;
+  box-shadow: 3px 4px 0 var(--burgundy-dark) !important;
+}
+
+.btn-gradient *, .btn-navy *,
+.btn-push-primary *, .btn-3d-navy *, .neu-btn-primary *,
+.btn-push-danger *, .btn-3d-danger *,
+.btn-push-amber *, .btn-3d-amber *, .neu-btn-amber *,
+.btn-gradient svg, .btn-navy svg,
+.btn-push-primary svg, .btn-3d-navy svg, .neu-btn-primary svg,
+.btn-push-danger svg, .btn-3d-danger svg,
+.btn-push-amber svg, .btn-3d-amber svg, .neu-btn-amber svg,
+button[data-variant="primary"] svg {
+  color: #ffffff !important;
+  fill: none;
+  stroke: #ffffff !important;
+}
+
+.btn-gradient:hover, .btn-navy:hover,
+.btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover,
+.btn-push-danger:hover, .btn-3d-danger:hover,
+.btn-push-amber:hover, .btn-3d-amber:hover, .neu-btn-amber:hover {
+  background: var(--burgundy-dark) !important;
+  transform: translateY(-1px);
+  box-shadow: 4px 5px 0 #35040d !important;
+}
+
+.btn-push:hover, .btn-3d:hover, .neu-btn:hover,
+.btn-push-walnut:hover, .btn-push-ironclad:hover, .squircle-btn:hover {
+  background: var(--paper-muted) !important;
+  box-shadow: var(--button-shadow-hover) !important;
+}
+
+.btn-push:active, .btn-3d:active, .neu-btn:active,
+.btn-push-primary:active, .btn-3d-navy:active, .neu-btn-primary:active,
+.btn-push-danger:active, .btn-3d-danger:active,
+.btn-push-amber:active, .btn-3d-amber:active, .neu-btn-amber:active,
+.squircle-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink) !important;
+}
+
+.btn-push-emerald, .btn-3d-emerald {
+  background: var(--paper) !important;
+  border: 2px solid var(--ink) !important;
+  color: var(--ink) !important;
+  box-shadow: var(--button-shadow) !important;
+}
+
+.btn-push-emerald *, .btn-3d-emerald *,
+.btn-push-emerald svg, .btn-3d-emerald svg {
+  color: var(--ink) !important;
+  stroke: var(--ink) !important;
+}
+
+.badge-push, .neu-badge, .badge-push-sunken, .neu-badge-sunken {
+  background: var(--paper) !important;
+  border: 1.5px solid var(--ink) !important;
+  color: var(--ink) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+.squircle-btn.active {
+  background: var(--ink) !important;
+  border-color: var(--ink) !important;
+  color: white !important;
+}
+
+.squircle-btn.active *, .squircle-btn.active svg {
+  color: white !important;
+  stroke: white !important;
+}
+
+/* Restrained feedback tints; destructive actions themselves stay burgundy. */
+[class~="bg-red-50"], [class~="bg-red-100"], [class~="bg-amber-50"],
+[class~="bg-amber-100"] { background-color: #f7e9ec !important; }
+[class~="text-red-500"], [class~="text-red-600"], [class~="text-red-700"],
+[class~="text-red-800"], [class~="text-red-900"] { color: var(--burgundy) !important; }
+[class~="border-red-200"], [class~="border-red-300"], [class~="border-red-400"] {
+  border-color: var(--burgundy) !important;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --page-shadow: 4px 5px 0 var(--ink);
+    --sticker-shadow: 3px 4px 0 var(--ink);
+  }
+  body::before { opacity: 0.045 !important; }
+}
