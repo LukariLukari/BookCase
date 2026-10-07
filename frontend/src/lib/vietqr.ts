@@ -97,7 +97,7 @@ export async function generateBankQrDataUrl({
   accountName,
   amount,
   memo,
-  color = '#1C1C1B',
+  color = '#2B2B2B',
 }: {
   bankCodeOrName?: string;
   accountNumber: string;
@@ -146,7 +146,7 @@ export async function renderBankQrToCanvas(
     accountName,
     amount,
     memo,
-    color = '#1C1C1B',
+    color = '#2B2B2B',
     width = 300,
   }: {
     bankCodeOrName?: string;

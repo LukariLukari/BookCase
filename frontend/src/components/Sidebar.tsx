@@ -32,8 +32,8 @@ export default function Sidebar() {
           title={label}
           className={`flex h-11 w-full items-center gap-3 rounded-full px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-4 ${
             active(href)
-              ? 'border-2 border-[#1C1C1B] bg-[#E2E2DE] text-[#1C1C1B] shadow-[0_4px_0_0_#6A5D52]'
-              : 'text-[#6A5D52] hover:bg-white hover:border-2 hover:border-[#1C1C1B] hover:shadow-[0_3px_0_0_#1C1C1B] hover:text-[#1C1C1B] active:translate-y-[3px] active:shadow-none'
+              ? 'border-2 border-[#2B2B2B] bg-[#E0E0E0] text-[#2B2B2B] shadow-[0_4px_0_0_#565656]'
+              : 'text-[#565656] hover:bg-[#E0E0E0] hover:border-2 hover:border-[#2B2B2B] hover:shadow-[0_3px_0_0_#2B2B2B] hover:text-[#2B2B2B] active:translate-y-[3px] active:shadow-none'
           }`}
         >
           <Icon size={19} className="shrink-0" />
@@ -53,8 +53,8 @@ export default function Sidebar() {
           title={label}
           className={`flex h-12 items-center justify-start gap-2.5 rounded-full px-3.5 text-xs font-black transition-all ${
             active(href)
-              ? 'border-2 border-[#1C1C1B] bg-[#E2E2DE] text-[#1C1C1B] shadow-[0_4px_0_0_#6A5D52]'
-              : 'btn-push text-[#1C1C1B]'
+              ? 'border-2 border-[#2B2B2B] bg-[#E0E0E0] text-[#2B2B2B] shadow-[0_4px_0_0_#565656]'
+              : 'btn-push text-[#2B2B2B]'
           }`}
         >
           <Icon size={18} className="shrink-0" />
@@ -78,8 +78,8 @@ export default function Sidebar() {
           </span>
         </Link>
         <nav className="space-y-2">{desktopLinks}</nav>
-        <div className="mt-auto border-t-2 border-[#1C1C1B]/20 pt-3">
-          <p className="hidden truncate px-3 pb-2 text-xs font-bold text-[#979086] xl:block">
+        <div className="mt-auto border-t-2 border-[#2B2B2B]/20 pt-3">
+          <p className="hidden truncate px-3 pb-2 text-xs font-bold text-[#848484] xl:block">
             {user?.username}
           </p>
           <button
@@ -93,11 +93,11 @@ export default function Sidebar() {
         </div>
       </aside>
       <header className="fixed inset-x-3.5 top-[max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))] z-50 flex h-14 items-center justify-between gap-3 card-push rounded-2xl px-5 py-2 md:hidden">
-        <Link href="/business" className="font-black text-[#1C1C1B] tracking-wide text-sm">BILLY · BÁN HÀNG</Link>
+        <Link href="/business" className="font-black text-[#2B2B2B] tracking-wide text-sm">BILLY · BÁN HÀNG</Link>
         <button
           onClick={() => setOpen(v => !v)}
           aria-label={open ? 'Đóng menu' : 'Mở menu'}
-          className="btn-push flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[#1C1C1B]"
+          className="btn-push flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[#2B2B2B]"
         >
           {open ? <X size={19}/> : <Menu size={19}/>}
         </button>

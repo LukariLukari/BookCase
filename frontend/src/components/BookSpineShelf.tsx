@@ -25,66 +25,66 @@ interface BookSpineShelfProps {
 // Authentic hardcover bookbinding material themes in Onyx, Walnut, Ash, Greige, and Stucco
 const PHYSICAL_SPINE_THEMES = [
   { 
-    bg: '#1C1C1B', // Onyx
+    bg: '#2B2B2B', // Onyx
     textColor: '#FFFFFF', 
-    foilColor: '#E2E2DE', // Stucco Foil
-    authorColor: '#B7AC9B',
-    paperEdge: '#E2E2DE',
+    foilColor: '#E0E0E0', // Stucco Foil
+    authorColor: '#B3B3B3',
+    paperEdge: '#E0E0E0',
     type: 'leather' 
   },
   { 
-    bg: '#6A5D52', // Walnut
+    bg: '#565656', // Walnut
     textColor: '#FFFFFF', 
-    foilColor: '#B7AC9B', // Greige Foil
-    authorColor: '#E2E2DE',
-    paperEdge: '#E2E2DE',
+    foilColor: '#B3B3B3', // Greige Foil
+    authorColor: '#E0E0E0',
+    paperEdge: '#E0E0E0',
     type: 'cloth' 
   },
   { 
-    bg: '#979086', // Ash Linen
+    bg: '#848484', // Ash Linen
     textColor: '#FFFFFF', 
-    foilColor: '#E2E2DE', // Stucco Foil
-    authorColor: '#1C1C1B',
-    paperEdge: '#E2E2DE',
+    foilColor: '#E0E0E0', // Stucco Foil
+    authorColor: '#2B2B2B',
+    paperEdge: '#E0E0E0',
     type: 'linen' 
   },
   { 
-    bg: '#B7AC9B', // Greige Cloth
-    textColor: '#1C1C1B', 
-    foilColor: '#1C1C1B', // Onyx Foil
-    authorColor: '#6A5D52',
-    paperEdge: '#E2E2DE',
+    bg: '#B3B3B3', // Greige Cloth
+    textColor: '#2B2B2B', 
+    foilColor: '#2B2B2B', // Onyx Foil
+    authorColor: '#565656',
+    paperEdge: '#E0E0E0',
     type: 'leather' 
   },
   { 
-    bg: '#E2E2DE', // Stucco Hardbound
-    textColor: '#1C1C1B', 
-    foilColor: '#6A5D52', // Walnut Inlay Foil
-    authorColor: '#6A5D52',
+    bg: '#E0E0E0', // Stucco Hardbound
+    textColor: '#2B2B2B', 
+    foilColor: '#565656', // Walnut Inlay Foil
+    authorColor: '#565656',
     paperEdge: '#FFFFFF',
     type: 'linen' 
   },
   { 
-    bg: '#1C1C1B', // Onyx Leather
+    bg: '#2B2B2B', // Onyx Leather
     textColor: '#FFFFFF', 
-    foilColor: '#B7AC9B', // Greige Foil
-    authorColor: '#979086',
-    paperEdge: '#E2E2DE',
+    foilColor: '#B3B3B3', // Greige Foil
+    authorColor: '#848484',
+    paperEdge: '#E0E0E0',
     type: 'leather' 
   },
   { 
-    bg: '#6A5D52', // Walnut Velvet
+    bg: '#565656', // Walnut Velvet
     textColor: '#FFFFFF', 
-    foilColor: '#E2E2DE', // Stucco Foil
-    authorColor: '#B7AC9B',
-    paperEdge: '#E2E2DE',
+    foilColor: '#E0E0E0', // Stucco Foil
+    authorColor: '#B3B3B3',
+    paperEdge: '#E0E0E0',
     type: 'velvet' 
   },
   { 
-    bg: '#979086', // Ash Bound
-    textColor: '#1C1C1B', 
-    foilColor: '#1C1C1B', // Onyx Foil
-    authorColor: '#1C1C1B',
+    bg: '#848484', // Ash Bound
+    textColor: '#2B2B2B', 
+    foilColor: '#2B2B2B', // Onyx Foil
+    authorColor: '#2B2B2B',
     paperEdge: '#FFFFFF',
     type: 'cloth' 
   },
@@ -118,12 +118,12 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
       <div className="flex justify-between items-end mb-4 px-1">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl md:text-2xl font-bold text-[#1C1C1B] tracking-tight">{title}</h2>
-            <span className="bg-[#E2E2DE] text-[#1C1C1B] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#979086]">
+            <h2 className="text-xl md:text-2xl font-bold text-[#2B2B2B] tracking-tight">{title}</h2>
+            <span className="bg-[#E0E0E0] text-[#2B2B2B] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#848484]">
               {books.length} cuốn
             </span>
           </div>
-          <p className="text-xs md:text-sm text-[#6A5D52] mt-0.5 font-medium">
+          <p className="text-xs md:text-sm text-[#565656] mt-0.5 font-medium">
             Bấm trực tiếp vào gáy sách 3D để xem chi tiết
           </p>
         </div>
@@ -132,7 +132,7 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleScroll('left')}
-            className="w-9 h-9 rounded-full bg-[#1C1C1B] text-white hover:bg-[#2E2E2D] transition-colors flex items-center justify-center shadow-md active:scale-95 cursor-pointer"
+            className="w-9 h-9 rounded-full bg-[#2B2B2B] text-white hover:bg-[#2E2E2D] transition-colors flex items-center justify-center shadow-md active:scale-95 cursor-pointer"
             title="Cuộn sang trái"
             aria-label="Cuộn sang trái"
           >
@@ -140,7 +140,7 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
           </button>
           <button
             onClick={() => handleScroll('right')}
-            className="w-9 h-9 rounded-full bg-[#1C1C1B] text-white hover:bg-[#2E2E2D] transition-colors flex items-center justify-center shadow-md active:scale-95 cursor-pointer"
+            className="w-9 h-9 rounded-full bg-[#2B2B2B] text-white hover:bg-[#2E2E2D] transition-colors flex items-center justify-center shadow-md active:scale-95 cursor-pointer"
             title="Cuộn sang phải"
             aria-label="Cuộn sang phải"
           >

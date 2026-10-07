@@ -78,11 +78,11 @@ export default function QuoteGallery({
   return (
     <div className="w-full">
       {isLoading ? (
-        <div className="flex justify-center p-12"><Loader2 className="animate-spin text-[#B7AC9B]" size={32} /></div>
+        <div className="flex justify-center p-12"><Loader2 className="animate-spin text-[#B3B3B3]" size={32} /></div>
       ) : quotes.length === 0 ? (
-        <div className="bg-[#1C1C1B] rounded-2xl border border-[#6A5D52]/50 p-10 text-center flex flex-col items-center">
-          <QuoteIcon size={44} className="text-[#6A5D52] mb-4" />
-          <p className="text-[#E2E2DE] font-bold text-base mb-1">Chưa có trích dẫn nào cho cuốn sách này.</p>
+        <div className="bg-[#2B2B2B] rounded-2xl border border-[#565656]/50 p-10 text-center flex flex-col items-center">
+          <QuoteIcon size={44} className="text-[#565656] mb-4" />
+          <p className="text-[#E0E0E0] font-bold text-base mb-1">Chưa có trích dẫn nào cho cuốn sách này.</p>
           <p className="text-sm text-[#8A817C] max-w-md">Bấm vào nút "Thêm Trích Dẫn" để quét chữ hoặc lưu lại trang sách kỷ niệm nhé!</p>
         </div>
       ) : (
@@ -94,14 +94,14 @@ export default function QuoteGallery({
             return (
               <div 
                 key={quote.id} 
-                className="relative bg-[#1C1C1B] border border-[#6A5D52]/60 hover:border-[#E2E2DE]/40 rounded-2xl p-5 shadow-lg flex flex-col justify-between group transition-all"
+                className="relative bg-[#2B2B2B] border border-[#565656]/60 hover:border-[#E0E0E0]/40 rounded-2xl p-5 shadow-lg flex flex-col justify-between group transition-all"
               >
                 {/* Action Buttons Top Right */}
                 <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
                   {hasText && (
                     <button
                       onClick={() => setSharingQuote(quote)}
-                      className="p-1.5 text-[#B7AC9B] hover:text-[#E2E2DE] hover:bg-[#2E2E2D] bg-[#1C1C1B] border border-[#6A5D52]/60 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-bold shadow-sm"
+                      className="p-1.5 text-[#B3B3B3] hover:text-[#E0E0E0] hover:bg-[#2E2E2D] bg-[#2B2B2B] border border-[#565656]/60 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-bold shadow-sm"
                       title="Xuất ảnh trích dẫn"
                     >
                       <Share2 size={12} />
@@ -111,7 +111,7 @@ export default function QuoteGallery({
                   
                   <button
                     onClick={() => handleDeleteQuote(quote.id)}
-                    className="p-1.5 text-[#979086] hover:text-red-400 hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer opacity-80 group-hover:opacity-100"
+                    className="p-1.5 text-[#848484] hover:text-red-400 hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer opacity-80 group-hover:opacity-100"
                     title="Xóa trích dẫn này"
                   >
                     <Trash2 size={16} />
@@ -122,11 +122,11 @@ export default function QuoteGallery({
                 <div>
                   {hasText ? (
                     <div className="relative pt-2 pb-3 px-2">
-                      <span className="text-4xl font-serif text-[#E2E2DE]/25 leading-none block -mb-3 select-none">“</span>
-                      <p className="text-[#E2E2DE] text-base md:text-sm font-medium leading-relaxed italic whitespace-pre-wrap pl-2 pr-4 font-serif">
+                      <span className="text-4xl font-serif text-[#E0E0E0]/25 leading-none block -mb-3 select-none">“</span>
+                      <p className="text-[#E0E0E0] text-base md:text-sm font-medium leading-relaxed italic whitespace-pre-wrap pl-2 pr-4 font-serif">
                         {quote.text_content}
                       </p>
-                      <span className="text-4xl font-serif text-[#E2E2DE]/25 leading-none text-right block -mt-2 select-none">”</span>
+                      <span className="text-4xl font-serif text-[#E0E0E0]/25 leading-none text-right block -mt-2 select-none">”</span>
                     </div>
                   ) : (
                     <div className="py-2 text-xs text-[#8A817C] font-semibold italic">Trích dẫn bằng ảnh chụp</div>
@@ -136,7 +136,7 @@ export default function QuoteGallery({
                   {hasImage && (
                     <div 
                       onClick={() => setSelectedImage(quote.image_url!)}
-                      className="mt-3 relative w-full rounded-xl overflow-hidden bg-black/60 border border-[#6A5D52]/50 cursor-pointer group/img flex items-center justify-center p-1.5"
+                      className="mt-3 relative w-full rounded-xl overflow-hidden bg-black/60 border border-[#565656]/50 cursor-pointer group/img flex items-center justify-center p-1.5"
                     >
                       <img 
                         src={quote.image_url} 
@@ -152,14 +152,14 @@ export default function QuoteGallery({
                 </div>
 
                 {/* Footer Metadata */}
-                <div className="mt-4 pt-3 border-t border-[#6A5D52]/30 flex justify-between items-center text-[11px] text-[#979086]">
+                <div className="mt-4 pt-3 border-t border-[#565656]/30 flex justify-between items-center text-[11px] text-[#848484]">
                   <div className="flex items-center gap-2">
                     <span>{new Date(quote.created_at).toLocaleDateString('vi-VN')}</span>
-                    {hasImage && <span className="flex items-center gap-1 text-[#B7AC9B] font-semibold"><ImageIcon size={12} /> Ảnh</span>}
+                    {hasImage && <span className="flex items-center gap-1 text-[#B3B3B3] font-semibold"><ImageIcon size={12} /> Ảnh</span>}
                   </div>
                   
                   {quote.page_number && (
-                    <span className="flex items-center gap-1 text-xs font-bold bg-[#1C1C1B] text-[#B7AC9B] border border-[#6A5D52]/60 px-2 py-0.5 rounded-md">
+                    <span className="flex items-center gap-1 text-xs font-bold bg-[#2B2B2B] text-[#B3B3B3] border border-[#565656]/60 px-2 py-0.5 rounded-md">
                       <Hash size={11} /> Trang {quote.page_number}
                     </span>
                   )}

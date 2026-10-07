@@ -40,25 +40,25 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#B7AC9B] px-4 py-10 text-[#1C1C1B]">
-      <div className="pointer-events-none absolute -left-28 top-[-120px] h-80 w-80 rounded-full bg-[#E2E2DE]/60 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-36 right-[-80px] h-96 w-96 rounded-full bg-[#1C1C1B]/10 blur-3xl" />
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#E0E0E0] px-4 py-10 text-[#2B2B2B]">
+      <div className="pointer-events-none absolute -left-28 top-[-120px] h-80 w-80 rounded-full bg-[#E0E0E0]/60 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-36 right-[-80px] h-96 w-96 rounded-full bg-[#2B2B2B]/10 blur-3xl" />
 
       <div className="relative w-full max-w-[460px]">
-        <Link href="/" className="mx-auto mb-7 flex w-fit items-center gap-3 rounded-2xl px-3 py-2 transition hover:bg-[#E2E2DE]/50 active:scale-[0.98]">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1C1C1B] text-white shadow-[0_8px_18px_rgba(28,28,27,.24)]">
+        <Link href="/" className="mx-auto mb-7 flex w-fit items-center gap-3 rounded-2xl px-3 py-2 transition hover:bg-[#E0E0E0]/50 active:scale-[0.98]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#2B2B2B] text-white shadow-[0_8px_18px_rgba(28,28,27,.24)]">
             <Store size={23} strokeWidth={2.4} />
           </span>
-          <span className="text-2xl font-black tracking-[-0.04em] text-[#1C1C1B]">BILLY.</span>
+          <span className="text-2xl font-black tracking-[-0.04em] text-[#2B2B2B]">BILLY.</span>
         </Link>
 
-        <section className="rounded-[34px] border-2 border-[#1C1C1B] bg-[#E2E2DE] p-6 shadow-[0_8px_0_0_#1C1C1B] sm:p-9">
+        <section className="rounded-[34px] border-2 border-[#2B2B2B] bg-white p-6 shadow-[0_8px_0_0_#2B2B2B] sm:p-9">
           <div className="mb-7 text-center">
-            <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#B7AC9B]/30 text-[#1C1C1B]">
+            <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E0E0E0] text-[#2B2B2B]">
               <LogIn size={22} strokeWidth={2.3} />
             </span>
-            <h1 className="text-2xl font-black tracking-[-0.03em] sm:text-3xl text-[#1C1C1B]">Đăng nhập</h1>
-            <p className="mt-2 text-sm font-medium text-[#6A5D52]">Truy cập đơn hàng, tồn kho và dữ liệu bán hàng của bạn.</p>
+            <h1 className="text-2xl font-black tracking-[-0.03em] sm:text-3xl text-[#2B2B2B]">Đăng nhập</h1>
+            <p className="mt-2 text-sm font-medium text-[#565656]">Truy cập đơn hàng, tồn kho và dữ liệu bán hàng của bạn.</p>
           </div>
 
           {error && (
@@ -69,7 +69,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-5">
             <label className="block">
-              <span className="mb-2 block text-sm font-extrabold text-[#1C1C1B]">Tên đăng nhập</span>
+              <span className="mb-2 block text-sm font-extrabold text-[#2B2B2B]">Tên đăng nhập</span>
               <input
                 autoComplete="username"
                 autoFocus
@@ -77,13 +77,13 @@ export default function LoginPage() {
                 onChange={(event) => setUsername(event.target.value)}
                 disabled={isSubmitting}
                 required
-                className="h-13 w-full rounded-2xl border-2 border-[#1C1C1B] bg-white px-4 text-base font-semibold outline-none transition placeholder:text-[#979086] focus:shadow-[0_3px_0_0_#1C1C1B] disabled:opacity-60"
+                className="h-13 w-full rounded-2xl border-2 border-[#2B2B2B] bg-white px-4 text-base font-semibold outline-none transition placeholder:text-[#848484] focus:shadow-[0_3px_0_0_#2B2B2B] disabled:opacity-60"
                 placeholder="Nhập tên đăng nhập"
               />
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-extrabold text-[#1C1C1B]">Mật khẩu</span>
+              <span className="mb-2 block text-sm font-extrabold text-[#2B2B2B]">Mật khẩu</span>
               <span className="relative block">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -92,13 +92,13 @@ export default function LoginPage() {
                   onChange={(event) => setPassword(event.target.value)}
                   disabled={isSubmitting}
                   required
-                  className="h-13 w-full rounded-2xl border-2 border-[#1C1C1B] bg-white px-4 pr-13 text-base font-semibold outline-none transition placeholder:text-[#979086] focus:shadow-[0_3px_0_0_#1C1C1B] disabled:opacity-60"
+                  className="h-13 w-full rounded-2xl border-2 border-[#2B2B2B] bg-white px-4 pr-13 text-base font-semibold outline-none transition placeholder:text-[#848484] focus:shadow-[0_3px_0_0_#2B2B2B] disabled:opacity-60"
                   placeholder="Nhập mật khẩu"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((visible) => !visible)}
-                  className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-[#6A5D52] transition hover:bg-[#B7AC9B]/20 hover:text-[#1C1C1B] active:scale-90"
+                  className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-[#565656] transition hover:bg-[#E0E0E0]/20 hover:text-[#2B2B2B] active:scale-90"
                   aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                 >
                   {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
@@ -115,9 +115,9 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 space-y-3 border-t border-[#979086]/30 pt-6 text-center text-sm font-semibold text-[#6A5D52]">
-            <p>Chưa có tài khoản? <Link href="/register" className="font-black text-[#1C1C1B] hover:underline">Đăng ký bằng mã admin</Link></p>
-            <Link href="/forgot-password" className="inline-block hover:text-[#1C1C1B] hover:underline">Quên mật khẩu?</Link>
+          <div className="mt-6 space-y-3 border-t border-[#848484]/30 pt-6 text-center text-sm font-semibold text-[#565656]">
+            <p>Chưa có tài khoản? <Link href="/register" className="font-black text-[#2B2B2B] hover:underline">Đăng ký bằng mã admin</Link></p>
+            <Link href="/forgot-password" className="inline-block hover:text-[#2B2B2B] hover:underline">Quên mật khẩu?</Link>
           </div>
         </section>
       </div>

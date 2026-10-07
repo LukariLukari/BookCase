@@ -180,24 +180,24 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
           initial={{ opacity: 0, y: 50, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 50, scale: 0.95 }}
-          className="relative bg-[#FBF8F4] text-[#2A2320] rounded-[36px] max-w-2xl w-full border border-[#E2E2DE] shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
+          className="relative bg-[#FBF8F4] text-[#2A2320] rounded-[36px] max-w-2xl w-full border border-[#E0E0E0] shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
         >
           {/* Header */}
-          <div className="p-6 border-b border-[#E2E2DE] flex justify-between items-center bg-[#E2E2DE]">
+          <div className="p-6 border-b border-[#E0E0E0] flex justify-between items-center bg-[#E0E0E0]">
             <div>
               <h2 className="text-xl font-bold text-[#1C1917] flex items-center gap-2">
-                <BookOpen className="text-[#1C1C1B]" size={20} />
+                <BookOpen className="text-[#2B2B2B]" size={20} />
                 Tìm & Tải Sách Online
               </h2>
               {targetBookId && (
-                <p className="text-xs text-[#6A5D52] font-semibold mt-1">
+                <p className="text-xs text-[#565656] font-semibold mt-1">
                   Đang tìm kiếm file để gắn bù vào cuốn sách bị mất liên kết
                 </p>
               )}
             </div>
             <button 
               onClick={handleModalClose}
-              className="p-2.5 rounded-full transition-colors cursor-pointer border border-[#E2E2DE] bg-[#E2E2DE] hover:bg-[#979086] text-[#6A5D52] hover:text-[#1C1917]"
+              className="p-2.5 rounded-full transition-colors cursor-pointer border border-[#E0E0E0] bg-[#E0E0E0] hover:bg-[#848484] text-[#565656] hover:text-[#1C1917]"
             >
               <X size={18} />
             </button>
@@ -211,7 +211,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Nhập tên sách, tác giả..."
-                className="flex-1 bg-[#E2E2DE] border border-[#979086] rounded-full px-5 py-3 text-[#1C1917] placeholder-[#6A5D52] focus:outline-none focus:border-[#1C1C1B] text-xs font-semibold"
+                className="flex-1 bg-[#E0E0E0] border border-[#848484] rounded-full px-5 py-3 text-[#1C1917] placeholder-[#565656] focus:outline-none focus:border-[#2B2B2B] text-xs font-semibold"
                 autoFocus
               />
               <button 
@@ -235,8 +235,8 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 onClick={() => handleSourceChange('all')}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border shadow-sm ${
                   selectedSource === 'all'
-                    ? 'bg-[#1C1C1B] !text-white border-[#1C1C1B]'
-                    : 'bg-[#E2E2DE] text-[#6A5D52] border-[#979086] hover:bg-[#E2E2DE] hover:text-[#1C1917]'
+                    ? 'bg-[#2B2B2B] !text-white border-[#2B2B2B]'
+                    : 'bg-[#E0E0E0] text-[#565656] border-[#848484] hover:bg-[#E0E0E0] hover:text-[#1C1917]'
                 }`}
               >
                 <Layers size={13} className={selectedSource === 'all' ? '!text-white stroke-white' : ''} />
@@ -248,8 +248,8 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 onClick={() => handleSourceChange('zlib')}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border shadow-sm ${
                   selectedSource === 'zlib'
-                    ? 'bg-[#1C1C1B] !text-white border-[#1C1C1B]'
-                    : 'bg-[#E2E2DE] text-[#6A5D52] border-[#979086] hover:bg-[#E2E2DE] hover:text-[#1C1917]'
+                    ? 'bg-[#2B2B2B] !text-white border-[#2B2B2B]'
+                    : 'bg-[#E0E0E0] text-[#565656] border-[#848484] hover:bg-[#E0E0E0] hover:text-[#1C1917]'
                 }`}
               >
                 <Pencil size={13} className={selectedSource === 'zlib' ? '!text-white stroke-white' : ''} />
@@ -261,8 +261,8 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 onClick={() => handleSourceChange('cloudily')}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border shadow-sm ${
                   selectedSource === 'cloudily'
-                    ? 'bg-[#1C1C1B] !text-white border-[#1C1C1B]'
-                    : 'bg-[#E2E2DE] text-[#6A5D52] border-[#979086] hover:bg-[#E2E2DE] hover:text-[#1C1917]'
+                    ? 'bg-[#2B2B2B] !text-white border-[#2B2B2B]'
+                    : 'bg-[#E0E0E0] text-[#565656] border-[#848484] hover:bg-[#E0E0E0] hover:text-[#1C1917]'
                 }`}
               >
                 <PenTool size={13} className={selectedSource === 'cloudily' ? '!text-white stroke-white' : ''} />
@@ -280,7 +280,7 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
             )}
 
             {!isSearching && results.length === 0 && !error && query && (
-              <div className="text-center text-[#979086] py-10 font-medium text-xs">
+              <div className="text-center text-[#848484] py-10 font-medium text-xs">
                 Nhập từ khóa và bấm tìm kiếm
               </div>
             )}
@@ -292,20 +292,20 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 const displayTitle = item.title.replace(/^\[.*?\]\s*/, '');
 
                 return (
-                  <div key={`${item.id}-${idx}`} className="bg-white border border-[#E2E2DE] rounded-2xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between hover:border-[#1C1C1B] transition-colors shadow-sm">
+                  <div key={`${item.id}-${idx}`} className="bg-white border border-[#E0E0E0] rounded-2xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between hover:border-[#2B2B2B] transition-colors shadow-sm">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="border border-[#E2E2DE] bg-[#E2E2DE] text-[#6A5D52] text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                          <BadgeIcon size={11} className="text-[#1C1C1B]" />
+                        <span className="border border-[#E0E0E0] bg-[#E0E0E0] text-[#565656] text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                          <BadgeIcon size={11} className="text-[#2B2B2B]" />
                           <span>{badge.label}</span>
                         </span>
                       </div>
                       <h3 className="text-[#1C1917] font-bold line-clamp-2 text-sm">{displayTitle}</h3>
-                      <p className="text-[#6A5D52] text-xs mt-0.5 font-medium">{item.author || 'Không rõ tác giả'}</p>
-                      <div className="flex gap-2 mt-2 text-[11px] text-[#6A5D52] font-semibold">
-                        {item.extension && <span className="bg-[#E2E2DE] border border-[#E2E2DE] px-2 py-0.5 rounded-md uppercase text-[#1C1917]">{item.extension}</span>}
-                        {item.size && <span className="bg-[#E2E2DE] border border-[#E2E2DE] px-2 py-0.5 rounded-md text-[#6A5D52]">{item.size}</span>}
-                        {item.language && <span className="bg-[#E2E2DE] border border-[#E2E2DE] px-2 py-0.5 rounded-md text-[#6A5D52]">{item.language}</span>}
+                      <p className="text-[#565656] text-xs mt-0.5 font-medium">{item.author || 'Không rõ tác giả'}</p>
+                      <div className="flex gap-2 mt-2 text-[11px] text-[#565656] font-semibold">
+                        {item.extension && <span className="bg-[#E0E0E0] border border-[#E0E0E0] px-2 py-0.5 rounded-md uppercase text-[#1C1917]">{item.extension}</span>}
+                        {item.size && <span className="bg-[#E0E0E0] border border-[#E0E0E0] px-2 py-0.5 rounded-md text-[#565656]">{item.size}</span>}
+                        {item.language && <span className="bg-[#E0E0E0] border border-[#E0E0E0] px-2 py-0.5 rounded-md text-[#565656]">{item.language}</span>}
                       </div>
                     </div>
                     
@@ -313,12 +313,12 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                       <div className="w-full sm:w-60 flex flex-col gap-1.5 py-1">
                         <div className="flex justify-between items-center text-xs font-bold px-0.5">
                           <span className="flex items-center gap-1.5 text-[#1C1917]">
-                            <Loader2 size={13} className="animate-spin text-[#1C1C1B]" />
+                            <Loader2 size={13} className="animate-spin text-[#2B2B2B]" />
                             Đang xử lý & tải file...
                           </span>
                           <span className="text-[#1C1917] font-extrabold">{Math.round(importProgress)}%</span>
                         </div>
-                        <div className="w-full bg-[#E2E2DE] rounded-full h-3 border border-[#979086] overflow-hidden relative">
+                        <div className="w-full bg-[#E0E0E0] rounded-full h-3 border border-[#848484] overflow-hidden relative">
                           <motion.div 
                             className="btn-gradient h-full rounded-full transition-all duration-300 relative overflow-hidden"
                             style={{ width: `${importProgress}%` }}

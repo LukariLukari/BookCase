@@ -59,21 +59,21 @@ export default function BookCoverImage({
 
   if (imgState === 'error' || (!src && !bookId)) {
     return (
-      <div className={`w-full h-full ${aspectRatio} bg-[#1C1C1B] p-4 flex flex-col justify-between relative overflow-hidden select-none border border-[#6A5D52]/60 shadow-md rounded-2xl`}>
+      <div className={`w-full h-full ${aspectRatio} bg-[#2B2B2B] p-4 flex flex-col justify-between relative overflow-hidden select-none border border-[#565656]/60 shadow-md rounded-2xl`}>
         {/* Book spine line overlay */}
-        <div className="absolute top-0 bottom-0 left-2.5 w-[3px] bg-[#6A5D52]/40 blur-[0.5px]" />
-        <div className="absolute top-0 bottom-0 left-3.5 w-[1px] bg-[#979086]/30" />
+        <div className="absolute top-0 bottom-0 left-2.5 w-[3px] bg-[#565656]/40 blur-[0.5px]" />
+        <div className="absolute top-0 bottom-0 left-3.5 w-[1px] bg-[#848484]/30" />
         
         {/* Subtle background glow */}
         <div className="absolute -right-8 -bottom-8 w-28 h-28 bg-[#F97316]/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="pl-3 pr-1 pt-2 z-10">
           <span className="text-[10px] font-black tracking-widest text-[#F97316] block mb-1 uppercase">Billy</span>
-          <h4 className="font-extrabold text-[#E2E2DE] text-xs sm:text-sm md:text-base leading-snug line-clamp-4 drop-shadow-none">{title}</h4>
+          <h4 className="font-extrabold text-[#E0E0E0] text-xs sm:text-sm md:text-base leading-snug line-clamp-4 drop-shadow-none">{title}</h4>
         </div>
 
-        <div className="pl-3 pr-1 pb-1 z-10 mt-auto pt-2 border-t border-[#6A5D52]/40">
-          <p className="text-[11px] font-bold text-[#B7AC9B] truncate">{author || "Tác giả chưa rõ"}</p>
+        <div className="pl-3 pr-1 pb-1 z-10 mt-auto pt-2 border-t border-[#565656]/40">
+          <p className="text-[11px] font-bold text-[#B3B3B3] truncate">{author || "Tác giả chưa rõ"}</p>
         </div>
       </div>
     );

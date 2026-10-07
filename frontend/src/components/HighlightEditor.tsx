@@ -236,9 +236,9 @@ export default function HighlightEditor({
 
   return (
     <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col">
-      <div className="flex items-center justify-between p-4 bg-[#1C1C1B] border-b border-[#6A5D52]/50">
-        <h2 className="text-[#E2E2DE] font-bold">Tạo Trích Dẫn (Highlight)</h2>
-        <button onClick={() => { stopCamera(); onClose(); }} className="p-2 text-[#B7AC9B] hover:text-white bg-[#1C1C1B] rounded-full">
+      <div className="flex items-center justify-between p-4 bg-[#2B2B2B] border-b border-[#565656]/50">
+        <h2 className="text-[#E0E0E0] font-bold">Tạo Trích Dẫn (Highlight)</h2>
+        <button onClick={() => { stopCamera(); onClose(); }} className="p-2 text-[#B3B3B3] hover:text-white bg-[#2B2B2B] rounded-full">
           <X size={20} />
         </button>
       </div>
@@ -246,7 +246,7 @@ export default function HighlightEditor({
       <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center p-4 relative w-full h-full">
         {isCameraActive ? (
           <div className="flex flex-col items-center justify-center w-full h-full gap-4">
-            <div className="relative w-full max-w-2xl bg-black rounded-xl overflow-hidden border border-[#6A5D52]">
+            <div className="relative w-full max-w-2xl bg-black rounded-xl overflow-hidden border border-[#565656]">
               <video 
                 ref={videoRef} 
                 className="w-full h-auto object-contain max-h-[70vh]" 
@@ -258,7 +258,7 @@ export default function HighlightEditor({
             <div className="flex gap-4">
               <button 
                 onClick={stopCamera} 
-                className="px-6 py-3 bg-[#1C1C1B] text-[#E2E2DE] rounded-full font-bold border border-[#6A5D52]"
+                className="px-6 py-3 bg-[#2B2B2B] text-[#E0E0E0] rounded-full font-bold border border-[#565656]"
               >
                 Hủy
               </button>
@@ -275,27 +275,27 @@ export default function HighlightEditor({
             <div className="flex gap-3 w-full">
               <button 
                 onClick={startCamera}
-                className="flex-1 flex flex-col items-center justify-center h-48 border-2 border-[#E2E2DE]/30 rounded-2xl cursor-pointer hover:bg-[#1C1C1B] transition-colors bg-[#1C1C1B]"
+                className="flex-1 flex flex-col items-center justify-center h-48 border-2 border-[#E0E0E0]/30 rounded-2xl cursor-pointer hover:bg-[#2B2B2B] transition-colors bg-[#2B2B2B]"
               >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-[#E2E2DE]">
-                  <Camera size={40} className="mb-3 text-[#E2E2DE]" />
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-[#E0E0E0]">
+                  <Camera size={40} className="mb-3 text-[#E0E0E0]" />
                   <p className="mb-2 text-sm font-bold text-center">Camera Trực Tiếp</p>
                 </div>
               </button>
               
-              <label className="flex-1 flex flex-col items-center justify-center h-48 border-2 border-dashed border-[#E2E2DE]/30 rounded-2xl cursor-pointer hover:bg-[#1C1C1B] transition-colors bg-[#1C1C1B]">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-[#E2E2DE]">
-                  <Camera size={40} className="mb-3 text-[#B7AC9B]" />
+              <label className="flex-1 flex flex-col items-center justify-center h-48 border-2 border-dashed border-[#E0E0E0]/30 rounded-2xl cursor-pointer hover:bg-[#2B2B2B] transition-colors bg-[#2B2B2B]">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-[#E0E0E0]">
+                  <Camera size={40} className="mb-3 text-[#B3B3B3]" />
                   <p className="mb-2 text-sm font-bold text-center">App Camera</p>
                 </div>
                 <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageUpload} />
               </label>
             </div>
 
-            <div className="w-full text-center text-[#B7AC9B] text-sm font-bold">HOẶC</div>
+            <div className="w-full text-center text-[#B3B3B3] text-sm font-bold">HOẶC</div>
 
-            <label className="flex flex-col items-center justify-center w-full h-24 border border-[#6A5D52] rounded-xl cursor-pointer hover:bg-[#2E2E2D] transition-colors bg-[#1C1C1B]">
-              <div className="flex items-center justify-center gap-3 text-[#E2E2DE]">
+            <label className="flex flex-col items-center justify-center w-full h-24 border border-[#565656] rounded-xl cursor-pointer hover:bg-[#2E2E2D] transition-colors bg-[#2B2B2B]">
+              <div className="flex items-center justify-center gap-3 text-[#E0E0E0]">
                 <Upload size={24} />
                 <span className="font-bold">Tải ảnh từ thư viện</span>
               </div>
@@ -306,9 +306,9 @@ export default function HighlightEditor({
           <div className="w-full max-w-2xl flex flex-col items-center gap-4 h-full">
             
             {/* Toolbar */}
-            <div className="w-full flex items-center justify-between bg-[#1C1C1B] p-3 rounded-xl border border-[#6A5D52]">
+            <div className="w-full flex items-center justify-between bg-[#2B2B2B] p-3 rounded-xl border border-[#565656]">
               <div className="flex items-center gap-4">
-                <button onClick={undo} disabled={paths.length === 0} className="p-2 text-[#B7AC9B] hover:text-white disabled:opacity-50">
+                <button onClick={undo} disabled={paths.length === 0} className="p-2 text-[#B3B3B3] hover:text-white disabled:opacity-50">
                   <Undo size={20} />
                 </button>
                 <button onClick={clear} disabled={paths.length === 0} className="p-2 text-red-400 hover:text-red-300 disabled:opacity-50">
@@ -317,20 +317,20 @@ export default function HighlightEditor({
               </div>
               
               <div className="flex items-center gap-2">
-                <span className="text-[#B7AC9B] text-xs font-bold">Cọ vẽ:</span>
+                <span className="text-[#B3B3B3] text-xs font-bold">Cọ vẽ:</span>
                 <input 
                   type="range" 
                   min="10" max="60" 
                   value={brushSize} 
                   onChange={e => setBrushSize(parseInt(e.target.value))}
-                  className="w-24 accent-[#E2E2DE]"
+                  className="w-24 accent-[#E0E0E0]"
                 />
               </div>
 
               <button 
                 onClick={saveQuote} 
                 disabled={isSaving || paths.length === 0}
-                className="bg-[#E2E2DE] text-black font-bold py-1.5 px-4 rounded-lg flex items-center gap-2 disabled:opacity-50"
+                className="bg-[#E0E0E0] text-black font-bold py-1.5 px-4 rounded-lg flex items-center gap-2 disabled:opacity-50"
               >
                 {isSaving ? <span className="animate-spin text-xl">⏳</span> : <CheckCircle2 size={18} />}
                 {isSaving ? 'Đang lưu...' : 'Lưu Quote'}
@@ -339,7 +339,7 @@ export default function HighlightEditor({
 
             {/* Canvas Area */}
             <div 
-              className="w-full relative flex-1 bg-[#1C1C1B] rounded-xl overflow-hidden border border-[#6A5D52] shadow-2xl flex items-center justify-center"
+              className="w-full relative flex-1 bg-[#2B2B2B] rounded-xl overflow-hidden border border-[#565656] shadow-2xl flex items-center justify-center"
               ref={containerRef}
             >
               <canvas

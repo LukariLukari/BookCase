@@ -35,13 +35,13 @@ const THEMES: Record<ThemeId, ThemeConfig> = {
     id: 'obsidian',
     name: 'Obsidian Gold',
     bgGradient: 'from-[#19171A] via-[#242124] to-[#121113]',
-    cardBg: 'bg-[#1C1C1B]/80 border-[#E2E2DE]/20',
-    textColor: 'text-[#E2E2DE]',
-    accentColor: '#B7AC9B',
+    cardBg: 'bg-[#2B2B2B]/80 border-[#E0E0E0]/20',
+    textColor: 'text-[#E0E0E0]',
+    accentColor: '#B3B3B3',
     subtextColor: 'text-[#B8AFA6]',
     canvasBg: ['#181619', '#262227', '#121113'],
-    canvasText: '#E2E2DE',
-    canvasAccent: '#B7AC9B',
+    canvasText: '#E0E0E0',
+    canvasAccent: '#B3B3B3',
     canvasSubtext: '#A69E96',
     canvasCardBg: 'rgba(42, 39, 42, 0.9)'
   },
@@ -115,7 +115,7 @@ export default function ShareQuoteModal({
         particleCount: 80,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#E2E2DE', '#B7AC9B', '#E0A96D', '#FFFFFF']
+        colors: ['#E0E0E0', '#B3B3B3', '#E0A96D', '#FFFFFF']
       });
     } catch {
       // fallback
@@ -349,22 +349,22 @@ export default function ShareQuoteModal({
 
   return (
     <div className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-md flex items-center justify-center p-3 md:p-6 overflow-y-auto">
-      <div className="relative bg-[#1A181C] border border-[#6A5D52]/60 rounded-3xl p-5 md:p-8 max-w-4xl w-full shadow-2xl flex flex-col my-auto max-h-[96vh]">
+      <div className="relative bg-[#1A181C] border border-[#565656]/60 rounded-3xl p-5 md:p-8 max-w-4xl w-full shadow-2xl flex flex-col my-auto max-h-[96vh]">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#6A5D52]/40 pb-4 mb-6">
+        <div className="flex items-center justify-between border-b border-[#565656]/40 pb-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#1C1C1B] rounded-xl text-[#E2E2DE] border border-[#6A5D52]/50">
-              <Sparkles size={22} className="text-[#B7AC9B]" />
+            <div className="p-2.5 bg-[#2B2B2B] rounded-xl text-[#E0E0E0] border border-[#565656]/50">
+              <Sparkles size={22} className="text-[#B3B3B3]" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-[#E2E2DE]">Xuất Ảnh Trích Dẫn Nghệ Thuật</h2>
-              <p className="text-xs text-[#B7AC9B]">Tạo Quote Card sang trọng để chia sẻ Story hoặc Feed</p>
+              <h2 className="text-xl font-black text-[#E0E0E0]">Xuất Ảnh Trích Dẫn Nghệ Thuật</h2>
+              <p className="text-xs text-[#B3B3B3]">Tạo Quote Card sang trọng để chia sẻ Story hoặc Feed</p>
             </div>
           </div>
           <button 
             onClick={onClose} 
-            className="p-2 text-[#B7AC9B] hover:text-[#E2E2DE] bg-[#1C1C1B] hover:bg-[#2E2E2D] rounded-full transition-colors cursor-pointer"
+            className="p-2 text-[#B3B3B3] hover:text-[#E0E0E0] bg-[#2B2B2B] hover:bg-[#2E2E2D] rounded-full transition-colors cursor-pointer"
           >
             <X size={20} />
           </button>
@@ -373,7 +373,7 @@ export default function ShareQuoteModal({
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-y-auto pr-1">
           
           {/* Left: Interactive Preview */}
-          <div className="lg:col-span-7 flex flex-col items-center justify-center bg-[#121113] border border-[#6A5D52]/40 rounded-2xl p-4 md:p-6 relative overflow-hidden min-h-[380px]">
+          <div className="lg:col-span-7 flex flex-col items-center justify-center bg-[#121113] border border-[#565656]/40 rounded-2xl p-4 md:p-6 relative overflow-hidden min-h-[380px]">
             
             <div 
               ref={previewCardRef}
@@ -429,7 +429,7 @@ export default function ShareQuoteModal({
             <div className="space-y-5">
               {/* Ratio Selector */}
               <div>
-                <label className="block text-xs font-bold text-[#B7AC9B] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <label className="block text-xs font-bold text-[#B3B3B3] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <Smartphone size={14} /> 1. Chọn định dạng khung hình
                 </label>
                 <div className="grid grid-cols-2 gap-2.5">
@@ -437,10 +437,10 @@ export default function ShareQuoteModal({
                     onClick={() => setRatio('story')}
                     className={`py-3 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer ${
                       ratio === 'story'
-                        ? 'bg-[#E2E2DE] border-[#E2E2DE] shadow-md'
-                        : 'bg-[#1C1C1B] text-[#B7AC9B] border-[#6A5D52]/60 hover:bg-[#2E2E2D]'
+                        ? 'bg-[#E0E0E0] border-[#E0E0E0] shadow-md'
+                        : 'bg-[#2B2B2B] text-[#B3B3B3] border-[#565656]/60 hover:bg-[#2E2E2D]'
                     }`}
-                    style={ratio === 'story' ? { color: '#1C1C1B' } : undefined}
+                    style={ratio === 'story' ? { color: '#2B2B2B' } : undefined}
                   >
                     <Smartphone size={15} />
                     <span>Story 9:16</span>
@@ -450,10 +450,10 @@ export default function ShareQuoteModal({
                     onClick={() => setRatio('square')}
                     className={`py-3 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer ${
                       ratio === 'square'
-                        ? 'bg-[#E2E2DE] border-[#E2E2DE] shadow-md'
-                        : 'bg-[#1C1C1B] text-[#B7AC9B] border-[#6A5D52]/60 hover:bg-[#2E2E2D]'
+                        ? 'bg-[#E0E0E0] border-[#E0E0E0] shadow-md'
+                        : 'bg-[#2B2B2B] text-[#B3B3B3] border-[#565656]/60 hover:bg-[#2E2E2D]'
                     }`}
-                    style={ratio === 'square' ? { color: '#1C1C1B' } : undefined}
+                    style={ratio === 'square' ? { color: '#2B2B2B' } : undefined}
                   >
                     <SquareIcon size={15} />
                     <span>Square 1:1</span>
@@ -463,7 +463,7 @@ export default function ShareQuoteModal({
 
               {/* Theme Palette Selector */}
               <div>
-                <label className="block text-xs font-bold text-[#B7AC9B] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <label className="block text-xs font-bold text-[#B3B3B3] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <Palette size={14} /> 2. Bộ phối màu (Color Theme)
                 </label>
                 <div className="grid grid-cols-2 gap-2.5">
@@ -476,15 +476,15 @@ export default function ShareQuoteModal({
                         onClick={() => setCurrentTheme(key)}
                         className={`p-3 rounded-xl border flex items-center gap-2.5 transition-all text-left cursor-pointer ${
                           isSelected 
-                            ? 'border-[#E2E2DE] bg-[#1C1C1B] ring-2 ring-[#E2E2DE]/30' 
-                            : 'border-[#6A5D52]/40 bg-[#1C1C1B] hover:bg-[#1C1C1B]'
+                            ? 'border-[#E0E0E0] bg-[#2B2B2B] ring-2 ring-[#E0E0E0]/30' 
+                            : 'border-[#565656]/40 bg-[#2B2B2B] hover:bg-[#2B2B2B]'
                         }`}
                       >
                         <div 
                           className="w-4 h-4 rounded-full border border-white/20 flex-shrink-0" 
                           style={{ background: theme.canvasBg[1] }} 
                         />
-                        <span className="text-xs font-bold text-[#E2E2DE] truncate">{theme.name}</span>
+                        <span className="text-xs font-bold text-[#E0E0E0] truncate">{theme.name}</span>
                       </button>
                     );
                   })}
@@ -493,12 +493,12 @@ export default function ShareQuoteModal({
             </div>
 
             {/* Actions: Download & Copy Buttons */}
-            <div className="space-y-3 pt-4 border-t border-[#6A5D52]/40">
+            <div className="space-y-3 pt-4 border-t border-[#565656]/40">
               <button
                 onClick={handleDownload}
                 disabled={isExporting}
-                className="w-full bg-[#E2E2DE] hover:bg-white py-3.5 px-4 rounded-xl font-bold text-sm shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                style={{ color: '#1C1C1B' }}
+                className="w-full bg-[#E0E0E0] hover:bg-white py-3.5 px-4 rounded-xl font-bold text-sm shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                style={{ color: '#2B2B2B' }}
               >
                 <Download size={17} />
                 <span>{isExporting ? 'Đang xuất ảnh Ultra HD...' : 'Tải Ảnh Xuống (.PNG)'}</span>
@@ -507,7 +507,7 @@ export default function ShareQuoteModal({
               <button
                 onClick={handleCopyImage}
                 disabled={isExporting}
-                className="w-full bg-[#1C1C1B] hover:bg-[#2E2E2D] text-[#E2E2DE] border border-[#6A5D52] py-3 px-4 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full bg-[#2B2B2B] hover:bg-[#2E2E2D] text-[#E0E0E0] border border-[#565656] py-3 px-4 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 {copied ? (
                   <>
