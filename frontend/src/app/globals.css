@@ -171,25 +171,27 @@ input[type="month"]::-webkit-date-and-time-value {
 }
 
 /* Charcoal Noir Accent Button & Pills */
-.btn-gradient, .btn-navy, .bg-\[\#585556\], .bg-\[\#585556\], .bg-\[\#585556\] {
-  background-color: #585556 !important;
-  color: #fef9f4 !important;
+.btn-gradient, .btn-navy {
+  background-color: #b9cddf !important;
+  border-color: transparent !important;
+  color: #585556 !important;
+  box-shadow: 0 4px 0 0 #6a6768 !important;
 }
 
-.btn-gradient *, .btn-navy *, .bg-\[\#585556\] *, .bg-\[\#585556\] *, .bg-\[\#585556\] * {
-  color: #fef9f4 !important;
+.btn-gradient *, .btn-navy * {
+  color: #585556 !important;
 }
 
-.btn-gradient svg, .btn-navy svg, .bg-\[\#585556\] svg, .bg-\[\#585556\] svg, .bg-\[\#585556\] svg {
-  stroke: #fef9f4 !important;
-  color: #fef9f4 !important;
+.btn-gradient svg, .btn-navy svg {
+  stroke: #585556 !important;
+  color: #585556 !important;
 }
 
 .btn-gradient:hover, .btn-navy:hover {
-  background-color: #6a6768 !important;
-  color: #fef9f4 !important;
+  background-color: #b9cddf !important;
+  color: #585556 !important;
   transform: translateY(-1px);
-  box-shadow: 0 6px 0 0 #cecece, 0 10px 20px rgba(206, 206, 206, 0.28);
+  box-shadow: 0 5.5px 0 0 #6a6768 !important;
 }
 
 /* ==========================================================================
@@ -203,11 +205,11 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #585556;
-  background-color: #fef9f4;
+  border: 2px solid transparent;
+  background-color: #b9cddf;
   color: #585556;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #585556;
+  box-shadow: 0 4px 0 0 #6a6768;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -223,20 +225,20 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push:hover, .btn-3d:hover, .neu-btn:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #585556;
-  background-color: #fef9f4;
+  box-shadow: 0 5.5px 0 0 #6a6768;
+  background-color: #b9cddf;
 }
 
 .btn-push:active, .btn-3d:active, .neu-btn:active, .btn-push.is-pressed {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #585556 !important;
+  box-shadow: 0 0 0 0 #6a6768 !important;
 }
 
 .btn-push:disabled, .btn-3d:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #585556;
+  box-shadow: 0 2px 0 0 #6a6768;
 }
 
 /* 2. Primary Charcoal Noir 3D Push Button */
@@ -246,41 +248,41 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #585556;
-  background-color: #585556;
-  color: #fef9f4 !important;
+  border: 2px solid transparent;
+  background-color: #b9cddf;
+  color: #585556 !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #cecece;
+  box-shadow: 0 4px 0 0 #6a6768;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
 }
 
 .btn-push-primary *, .btn-3d-navy *, .neu-btn-primary * {
-  color: #fef9f4 !important;
+  color: #585556 !important;
 }
 
 .btn-push-primary svg, .btn-3d-navy svg, .neu-btn-primary svg {
-  stroke: #fef9f4 !important;
+  stroke: #585556 !important;
 }
 
 .btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #cecece;
-  background-color: #6a6768;
+  box-shadow: 0 5.5px 0 0 #6a6768;
+  background-color: #b9cddf;
 }
 
 .btn-push-primary:active, .btn-3d-navy:active, .neu-btn-primary:active, .btn-push-primary.is-pressed {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #cecece !important;
-  background-color: #585556;
+  box-shadow: 0 0 0 0 #6a6768 !important;
+  background-color: #b9cddf;
 }
 
 .btn-push-primary:disabled, .btn-3d-navy:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #cecece;
+  box-shadow: 0 2px 0 0 #6a6768;
 }
 
 /* 2b. Warm Ironclad Grey 3D Push Button */
@@ -290,11 +292,11 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #585556;
-  background-color: #585556;
-  color: #fef9f4 !important;
+  border: 2px solid transparent;
+  background-color: #b9cddf;
+  color: #585556 !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #cecece;
+  box-shadow: 0 4px 0 0 #6a6768;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -302,13 +304,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-walnut:hover, .btn-push-ironclad:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #cecece;
-  background-color: #6a6768;
+  box-shadow: 0 5.5px 0 0 #6a6768;
+  background-color: #b9cddf;
 }
 
 .btn-push-walnut:active, .btn-push-ironclad:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #cecece !important;
+  box-shadow: 0 0 0 0 #6a6768 !important;
 }
 
 /* 3. Action 3D Push Button (Thu tiền, highlight) */
@@ -318,11 +320,11 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #585556;
-  background-color: #fef9f4;
+  border: 2px solid transparent;
+  background-color: #b9cddf;
   color: #585556;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #585556;
+  box-shadow: 0 4px 0 0 #6a6768;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -330,13 +332,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-amber:hover, .btn-3d-amber:hover, .neu-btn-amber:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #585556;
-  background-color: #fef9f4;
+  box-shadow: 0 5.5px 0 0 #6a6768;
+  background-color: #b9cddf;
 }
 
 .btn-push-amber:active, .btn-3d-amber:active, .neu-btn-amber:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #585556 !important;
+  box-shadow: 0 0 0 0 #6a6768 !important;
 }
 
 /* 4. Emerald / Success 3D Badge & Button (Đã thu, hoàn tất) */
@@ -346,23 +348,23 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #cecece;
+  border: 2px solid transparent;
   background-color: #b9cddf;
-  color: #cecece;
+  color: #585556;
   font-weight: 800;
-  box-shadow: 0 3px 0 0 #cecece;
+  box-shadow: 0 4px 0 0 #6a6768;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
 .btn-push-emerald:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 0 0 #cecece;
-  background-color: #fef9f4;
+  box-shadow: 0 5px 0 0 #6a6768;
+  background-color: #b9cddf;
 }
 
 .btn-push-emerald:active {
   transform: translateY(3px);
-  box-shadow: 0 0 0 0 #cecece !important;
+  box-shadow: 0 0 0 0 #6a6768 !important;
 }
 
 /* 5. Danger / Red 3D Button (Đăng xuất, xóa) */
@@ -372,11 +374,11 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #585556;
+  border: 2px solid transparent;
   background-color: #b9cddf;
   color: #585556;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #585556;
+  box-shadow: 0 4px 0 0 #6a6768;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -384,13 +386,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-danger:hover, .btn-3d-danger:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #585556;
+  box-shadow: 0 5.5px 0 0 #6a6768;
   background-color: #b9cddf;
 }
 
 .btn-push-danger:active, .btn-3d-danger:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #585556 !important;
+  box-shadow: 0 0 0 0 #6a6768 !important;
 }
 
 /* 6. 3D Card / Container */
@@ -557,6 +559,28 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .bg-\[\#585556\].shadow-inner {
   box-shadow: inset 0 2px 5px rgb(185 205 223 / 0.3) !important;
+}
+
+button.bg-\[\#585556\],
+a.bg-\[\#585556\] {
+  background-color: #b9cddf !important;
+  border-color: transparent !important;
+  color: #585556 !important;
+  box-shadow: 0 4px 0 0 #6a6768 !important;
+}
+
+button.bg-\[\#585556\] *,
+a.bg-\[\#585556\] *,
+button.bg-\[\#585556\] svg,
+a.bg-\[\#585556\] svg {
+  color: #585556 !important;
+  stroke: #585556 !important;
+}
+
+button.bg-\[\#b9cddf\],
+a.bg-\[\#b9cddf\] {
+  border-color: transparent !important;
+  box-shadow: 0 4px 0 0 #6a6768 !important;
 }
 
 [class~="bg-red-50"],
