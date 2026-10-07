@@ -48,7 +48,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         />
       </head>
-      <body className="min-h-full bg-[#FCF7DF] text-[#3E3630] flex flex-col font-sans" suppressHydrationWarning>
+      <body className="min-h-full bg-[#fef9f4] text-[#585556] flex flex-col font-sans" suppressHydrationWarning>
         <AuthProvider>
           {children}
         </AuthProvider>

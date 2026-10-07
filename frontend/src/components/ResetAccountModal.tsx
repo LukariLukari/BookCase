@@ -117,7 +117,7 @@ export default function ResetAccountModal({
           onMouseDown={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b-2 border-[#3E3630]/15 px-5 py-4 bg-white/70">
+          <div className="flex items-center justify-between border-b-2 border-[#585556]/15 px-5 py-4 bg-white/70">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 text-red-600">
                 <ShieldAlert size={22} />
@@ -166,9 +166,9 @@ export default function ResetAccountModal({
             </div>
 
             {/* What will be cleared */}
-            <div className="rounded-xl border border-[#C7D3DB] bg-white p-4">
-              <p className="text-xs font-black uppercase tracking-wider text-[#A79A8A]">Dữ liệu sẽ được làm sạch:</p>
-              <ul className="mt-2 space-y-1.5 text-xs font-semibold text-[#3E3630]">
+            <div className="rounded-xl border border-[#b9cddf] bg-white p-4">
+              <p className="text-xs font-black uppercase tracking-wider text-[#cecece]">Dữ liệu sẽ được làm sạch:</p>
+              <ul className="mt-2 space-y-1.5 text-xs font-semibold text-[#585556]">
                 <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-red-500" /> Toàn bộ sản phẩm, danh mục và hình ảnh hàng hóa</li>
                 <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-red-500" /> Toàn bộ kho hàng, lô hàng và các phiếu nhập kho</li>
                 <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-red-500" /> Toàn bộ đơn hàng, trạng thái và lịch sử thanh toán</li>
@@ -181,18 +181,18 @@ export default function ResetAccountModal({
             </div>
 
             {/* Options */}
-            <div className="space-y-2 rounded-xl border border-[#C7D3DB] bg-white p-3.5 text-xs font-bold text-[#3E3630]">
+            <div className="space-y-2 rounded-xl border border-[#b9cddf] bg-white p-3.5 text-xs font-bold text-[#585556]">
               <label className="flex items-center gap-2.5 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={createSafetyBackup}
                   onChange={e => setCreateSafetyBackup(e.target.checked)}
-                  className="h-4 w-4 rounded text-[#3E3630] focus:ring-0"
+                  className="h-4 w-4 rounded text-[#585556] focus:ring-0"
                 />
                 <span>Tự động tạo bản sao lưu an toàn trước khi xóa (khuyến nghị, có thể phục hồi nếu cần)</span>
               </label>
 
-              <label className="flex items-center gap-2.5 cursor-pointer text-[#3E3630]">
+              <label className="flex items-center gap-2.5 cursor-pointer text-[#585556]">
                 <input
                   type="checkbox"
                   checked={deleteBackups}
@@ -221,18 +221,18 @@ export default function ResetAccountModal({
                 onChange={e => setConfirmText(e.target.value)}
                 placeholder="Nhập vào đây để mở khóa nút xóa"
                 disabled={busy}
-                className="w-full rounded-xl border border-[#C7D3DB] bg-[#FCF7DF] px-3.5 py-2.5 text-sm font-black text-red-950 placeholder:text-gray-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100"
+                className="w-full rounded-xl border border-[#b9cddf] bg-[#fef9f4] px-3.5 py-2.5 text-sm font-black text-red-950 placeholder:text-gray-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100"
               />
             </div>
           </div>
 
           {/* Footer */}
-          <div className="border-t-2 border-[#3E3630]/15 bg-white/70 p-4 flex gap-3">
+          <div className="border-t-2 border-[#585556]/15 bg-white/70 p-4 flex gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={busy}
-              className="btn-push flex-1 h-12 rounded-full text-sm font-black text-[#3E3630] disabled:opacity-40"
+              className="btn-push flex-1 h-12 rounded-full text-sm font-black text-[#585556] disabled:opacity-40"
             >
               Hủy bỏ
             </button>

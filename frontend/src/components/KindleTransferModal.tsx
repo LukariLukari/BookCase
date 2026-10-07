@@ -102,24 +102,24 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative bg-[#3E3630] border border-[#3E3630]/30/50 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl text-[#FCF7DF] z-10"
+          className="relative bg-[#585556] border border-[#585556]/30/50 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl text-[#fef9f4] z-10"
         >
           {/* Header */}
-          <div className="flex justify-between items-center pb-4 border-b border-[#3E3630]/30/40 mb-6">
+          <div className="flex justify-between items-center pb-4 border-b border-[#585556]/30/40 mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-[#FCF7DF] rounded-xl text-black">
+              <div className="p-2.5 bg-[#fef9f4] rounded-xl text-black">
                 <Smartphone size={20} className="text-black" />
               </div>
               <div>
-                <h3 className="font-extrabold text-lg text-[#FCF7DF]">Gửi Sang Máy Đọc Sách</h3>
-                <p className="text-xs text-[#3E3630]/60 font-semibold flex items-center gap-1 mt-0.5">
+                <h3 className="font-extrabold text-lg text-[#fef9f4]">Gửi Sang Máy Đọc Sách</h3>
+                <p className="text-xs text-[#585556]/60 font-semibold flex items-center gap-1 mt-0.5">
                   <Wifi size={12} /> Cùng mạng Wi-Fi LAN
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-[#3E3630]/60 hover:text-[#FCF7DF] bg-[#3E3630] rounded-full transition-colors cursor-pointer"
+              className="p-2 text-[#585556]/60 hover:text-[#fef9f4] bg-[#585556] rounded-full transition-colors cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -127,15 +127,15 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
 
           {/* Book Title */}
           {bookTitle && (
-            <div className="bg-[#3E3630] p-3.5 rounded-xl border border-[#3E3630]/30/40 mb-6 text-center">
-              <span className="text-xs text-[#3E3630]/60 font-bold block mb-0.5">Sách đang gửi:</span>
-              <p className="font-extrabold text-sm text-[#FCF7DF] line-clamp-1">{bookTitle}</p>
+            <div className="bg-[#585556] p-3.5 rounded-xl border border-[#585556]/30/40 mb-6 text-center">
+              <span className="text-xs text-[#585556]/60 font-bold block mb-0.5">Sách đang gửi:</span>
+              <p className="font-extrabold text-sm text-[#fef9f4] line-clamp-1">{bookTitle}</p>
             </div>
           )}
 
           {loading ? (
-            <div className="py-12 text-center text-[#3E3630]/60 space-y-3">
-              <div className="w-8 h-8 border-3 border-[#FCF7DF] border-t-transparent rounded-full animate-spin mx-auto" />
+            <div className="py-12 text-center text-[#585556]/60 space-y-3">
+              <div className="w-8 h-8 border-3 border-[#fef9f4] border-t-transparent rounded-full animate-spin mx-auto" />
               <p className="font-bold text-sm">Đang tạo mã PIN kết nối...</p>
             </div>
           ) : error ? (
@@ -145,40 +145,40 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
           ) : (
             <div className="space-y-6">
               {/* PIN Code Box */}
-              <div className="bg-[#3E3630] border-2 border-[#FCF7DF]/30 rounded-2xl p-6 text-center shadow-inner">
-                <span className="text-xs font-black uppercase text-[#3E3630]/60 tracking-wider block mb-2">
+              <div className="bg-[#585556] border-2 border-[#fef9f4]/30 rounded-2xl p-6 text-center shadow-inner">
+                <span className="text-xs font-black uppercase text-[#585556]/60 tracking-wider block mb-2">
                   MÃ PIN 4 SỐ CỦA BẠN
                 </span>
                 
-                <div className="text-5xl font-black tracking-[12px] text-[#FCF7DF] my-2 font-mono drop-shadow-md">
+                <div className="text-5xl font-black tracking-[12px] text-[#fef9f4] my-2 font-mono drop-shadow-md">
                   {pin ? pin.split('').join(' ') : '----'}
                 </div>
 
-                <div className="flex items-center justify-center gap-1.5 text-xs text-[#3E3630]/60 mt-3 font-semibold">
+                <div className="flex items-center justify-center gap-1.5 text-xs text-[#585556]/60 mt-3 font-semibold">
                   <Clock size={14} />
-                  <span>Hết hạn sau: <strong className="text-[#FCF7DF] font-mono">{formatTime(timeLeft)}</strong></span>
+                  <span>Hết hạn sau: <strong className="text-[#fef9f4] font-mono">{formatTime(timeLeft)}</strong></span>
                 </div>
               </div>
 
               {/* Instructions */}
-              <div className="space-y-3 text-xs leading-relaxed text-[#3E3630]/60 bg-[#3E3630]/60 p-4 rounded-2xl border border-[#3E3630]/30/30">
-                <p className="font-bold text-[#FCF7DF] flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded-full bg-[#FCF7DF] text-black flex items-center justify-center font-black text-xs shrink-0">1</span>
+              <div className="space-y-3 text-xs leading-relaxed text-[#585556]/60 bg-[#585556]/60 p-4 rounded-2xl border border-[#585556]/30/30">
+                <p className="font-bold text-[#fef9f4] flex items-center gap-1.5">
+                  <span className="w-5 h-5 rounded-full bg-[#fef9f4] text-black flex items-center justify-center font-black text-xs shrink-0">1</span>
                   Mở trình duyệt Kindle & nhập địa chỉ (hoặc quét mã QR):
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center gap-3">
-                  <div className="flex-1 w-full flex items-center gap-2 bg-[#3E3630] p-2.5 rounded-xl border border-[#3E3630]/30/50">
-                    <code className="text-[#FCF7DF] font-mono text-xs font-bold flex-1 select-all break-all px-1">
+                  <div className="flex-1 w-full flex items-center gap-2 bg-[#585556] p-2.5 rounded-xl border border-[#585556]/30/50">
+                    <code className="text-[#fef9f4] font-mono text-xs font-bold flex-1 select-all break-all px-1">
                       {kindleUrl || `https://book-case-one.vercel.app/k`}
                     </code>
                     <button
                       onClick={copyUrl}
-                      className="p-1.5 bg-[#3E3630] hover:bg-[#A79A8A] text-[#FCF7DF] rounded-lg transition-colors cursor-pointer shrink-0"
+                      className="p-1.5 bg-[#585556] hover:bg-[#cecece] text-[#fef9f4] rounded-lg transition-colors cursor-pointer shrink-0"
                       title="Sao chép link"
-                      style={{ backgroundColor: '#3E3630', color: '#FCF7DF' }}
+                      style={{ backgroundColor: '#585556', color: '#fef9f4' }}
                     >
-                      {isCopied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} style={{ color: '#FCF7DF' }} />}
+                      {isCopied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} style={{ color: '#fef9f4' }} />}
                     </button>
                   </div>
 
@@ -193,15 +193,15 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
                   )}
                 </div>
 
-                <p className="font-bold text-[#FCF7DF] flex items-center gap-1.5 pt-1">
-                  <span className="w-5 h-5 rounded-full bg-[#FCF7DF] text-black flex items-center justify-center font-black text-xs shrink-0">2</span>
-                  Nhập mã <span className="font-mono text-[#FCF7DF] font-black text-sm">{pin}</span> vào ô và bấm Tải sách ngay.
+                <p className="font-bold text-[#fef9f4] flex items-center gap-1.5 pt-1">
+                  <span className="w-5 h-5 rounded-full bg-[#fef9f4] text-black flex items-center justify-center font-black text-xs shrink-0">2</span>
+                  Nhập mã <span className="font-mono text-[#fef9f4] font-black text-sm">{pin}</span> vào ô và bấm Tải sách ngay.
                 </p>
 
                 {localDirectUrl && (
-                  <div className="pt-2 border-t border-[#3E3630]/30/30 text-[11px] text-[#3E3630]/60">
+                  <div className="pt-2 border-t border-[#585556]/30/30 text-[11px] text-[#585556]/60">
                     <span>💡 Hoặc nhập trực tiếp link LAN (Cùng Wi-Fi): </span>
-                    <code className="text-[#FCF7DF] font-mono select-all font-bold underline">{localDirectUrl}</code>
+                    <code className="text-[#fef9f4] font-mono select-all font-bold underline">{localDirectUrl}</code>
                   </div>
                 )}
               </div>
@@ -210,7 +210,7 @@ export default function KindleTransferModal({ isOpen, onClose, bookId, bookTitle
               <button
                 onClick={onClose}
                 className="w-full py-3.5 px-6 rounded-xl font-black text-sm transition-all shadow-md cursor-pointer hover:bg-white"
-                style={{ backgroundColor: '#FCF7DF', color: '#3E3630' }}
+                style={{ backgroundColor: '#fef9f4', color: '#585556' }}
               >
                 ĐÃ HIỂU - ĐÓN NHẬN SÁCH TÊN KINDLE
               </button>

@@ -78,12 +78,12 @@ export default function QuoteGallery({
   return (
     <div className="w-full">
       {isLoading ? (
-        <div className="flex justify-center p-12"><Loader2 className="animate-spin text-[#3E3630]/60" size={32} /></div>
+        <div className="flex justify-center p-12"><Loader2 className="animate-spin text-[#585556]/60" size={32} /></div>
       ) : quotes.length === 0 ? (
-        <div className="bg-[#3E3630] rounded-2xl border border-[#3E3630]/30/50 p-10 text-center flex flex-col items-center">
-          <QuoteIcon size={44} className="text-[#3E3630]/75 mb-4" />
-          <p className="text-[#FCF7DF] font-bold text-base mb-1">Chưa có trích dẫn nào cho cuốn sách này.</p>
-          <p className="text-sm text-[#3E3630]/60 max-w-md">Bấm vào nút "Thêm Trích Dẫn" để quét chữ hoặc lưu lại trang sách kỷ niệm nhé!</p>
+        <div className="bg-[#585556] rounded-2xl border border-[#585556]/30/50 p-10 text-center flex flex-col items-center">
+          <QuoteIcon size={44} className="text-[#585556]/75 mb-4" />
+          <p className="text-[#fef9f4] font-bold text-base mb-1">Chưa có trích dẫn nào cho cuốn sách này.</p>
+          <p className="text-sm text-[#585556]/60 max-w-md">Bấm vào nút "Thêm Trích Dẫn" để quét chữ hoặc lưu lại trang sách kỷ niệm nhé!</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -94,14 +94,14 @@ export default function QuoteGallery({
             return (
               <div 
                 key={quote.id} 
-                className="relative bg-[#3E3630] border border-[#3E3630]/30/60 hover:border-[#FCF7DF]/40 rounded-2xl p-5 shadow-lg flex flex-col justify-between group transition-all"
+                className="relative bg-[#585556] border border-[#585556]/30/60 hover:border-[#fef9f4]/40 rounded-2xl p-5 shadow-lg flex flex-col justify-between group transition-all"
               >
                 {/* Action Buttons Top Right */}
                 <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
                   {hasText && (
                     <button
                       onClick={() => setSharingQuote(quote)}
-                      className="p-1.5 text-[#3E3630]/60 hover:text-[#FCF7DF] hover:bg-[#3E3630] bg-[#3E3630] border border-[#3E3630]/30/60 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-bold shadow-sm"
+                      className="p-1.5 text-[#585556]/60 hover:text-[#fef9f4] hover:bg-[#585556] bg-[#585556] border border-[#585556]/30/60 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-bold shadow-sm"
                       title="Xuất ảnh trích dẫn"
                     >
                       <Share2 size={12} />
@@ -111,7 +111,7 @@ export default function QuoteGallery({
                   
                   <button
                     onClick={() => handleDeleteQuote(quote.id)}
-                    className="p-1.5 text-[#3E3630]/60 hover:text-red-400 hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer opacity-80 group-hover:opacity-100"
+                    className="p-1.5 text-[#585556]/60 hover:text-red-400 hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer opacity-80 group-hover:opacity-100"
                     title="Xóa trích dẫn này"
                   >
                     <Trash2 size={16} />
@@ -122,21 +122,21 @@ export default function QuoteGallery({
                 <div>
                   {hasText ? (
                     <div className="relative pt-2 pb-3 px-2">
-                      <span className="text-4xl font-serif text-[#FCF7DF]/25 leading-none block -mb-3 select-none">“</span>
-                      <p className="text-[#FCF7DF] text-base md:text-sm font-medium leading-relaxed italic whitespace-pre-wrap pl-2 pr-4 font-serif">
+                      <span className="text-4xl font-serif text-[#fef9f4]/25 leading-none block -mb-3 select-none">“</span>
+                      <p className="text-[#fef9f4] text-base md:text-sm font-medium leading-relaxed italic whitespace-pre-wrap pl-2 pr-4 font-serif">
                         {quote.text_content}
                       </p>
-                      <span className="text-4xl font-serif text-[#FCF7DF]/25 leading-none text-right block -mt-2 select-none">”</span>
+                      <span className="text-4xl font-serif text-[#fef9f4]/25 leading-none text-right block -mt-2 select-none">”</span>
                     </div>
                   ) : (
-                    <div className="py-2 text-xs text-[#3E3630]/60 font-semibold italic">Trích dẫn bằng ảnh chụp</div>
+                    <div className="py-2 text-xs text-[#585556]/60 font-semibold italic">Trích dẫn bằng ảnh chụp</div>
                   )}
 
                   {/* Reference Image Thumbnail */}
                   {hasImage && (
                     <div 
                       onClick={() => setSelectedImage(quote.image_url!)}
-                      className="mt-3 relative w-full rounded-xl overflow-hidden bg-black/60 border border-[#3E3630]/30/50 cursor-pointer group/img flex items-center justify-center p-1.5"
+                      className="mt-3 relative w-full rounded-xl overflow-hidden bg-black/60 border border-[#585556]/30/50 cursor-pointer group/img flex items-center justify-center p-1.5"
                     >
                       <img 
                         src={quote.image_url} 
@@ -152,14 +152,14 @@ export default function QuoteGallery({
                 </div>
 
                 {/* Footer Metadata */}
-                <div className="mt-4 pt-3 border-t border-[#3E3630]/30/30 flex justify-between items-center text-[11px] text-[#3E3630]/60">
+                <div className="mt-4 pt-3 border-t border-[#585556]/30/30 flex justify-between items-center text-[11px] text-[#585556]/60">
                   <div className="flex items-center gap-2">
                     <span>{new Date(quote.created_at).toLocaleDateString('vi-VN')}</span>
-                    {hasImage && <span className="flex items-center gap-1 text-[#3E3630]/60 font-semibold"><ImageIcon size={12} /> Ảnh</span>}
+                    {hasImage && <span className="flex items-center gap-1 text-[#585556]/60 font-semibold"><ImageIcon size={12} /> Ảnh</span>}
                   </div>
                   
                   {quote.page_number && (
-                    <span className="flex items-center gap-1 text-xs font-bold bg-[#3E3630] text-[#3E3630]/60 border border-[#3E3630]/30/60 px-2 py-0.5 rounded-md">
+                    <span className="flex items-center gap-1 text-xs font-bold bg-[#585556] text-[#585556]/60 border border-[#585556]/30/60 px-2 py-0.5 rounded-md">
                       <Hash size={11} /> Trang {quote.page_number}
                     </span>
                   )}
