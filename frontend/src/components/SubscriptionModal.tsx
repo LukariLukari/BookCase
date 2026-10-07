@@ -89,23 +89,23 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
           initial={{ opacity: 0, y: 40, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.96 }}
-          className="relative bg-[#3C3E4A] rounded-3xl max-w-4xl w-full border border-[#3C3E4A]/30/60 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-[#F3F1EC]"
+          className="relative bg-[#3E3630] rounded-3xl max-w-4xl w-full border border-[#3E3630]/30/60 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-[#FCF7DF]"
         >
           {/* Header */}
-          <div className="p-6 md:p-8 border-b border-[#3C3E4A]/30/50 flex justify-between items-center bg-[#3C3E4A]">
+          <div className="p-6 md:p-8 border-b border-[#3E3630]/30/50 flex justify-between items-center bg-[#3E3630]">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="bg-[#F3F1EC] text-[#3C3E4A] text-xs font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                  <Crown size={13} style={{ color: '#3C3E4A' }} /> Billy VIP Member
+                <span className="bg-[#FCF7DF] text-[#3E3630] text-xs font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  <Crown size={13} style={{ color: '#3E3630' }} /> Billy VIP Member
                 </span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-black text-[#F3F1EC] tracking-tight">
+              <h2 className="text-2xl md:text-3xl font-black text-[#FCF7DF] tracking-tight">
                 Bảng Giá Đăng Ký Thành Viên
               </h2>
             </div>
             <button
               onClick={onClose}
-              className="p-2.5 bg-[#3C3E4A] hover:bg-[#F3F1EC] hover:text-black text-[#F3F1EC] rounded-full transition-colors cursor-pointer border border-[#3C3E4A]/30/50"
+              className="p-2.5 bg-[#3E3630] hover:bg-[#FCF7DF] hover:text-black text-[#FCF7DF] rounded-full transition-colors cursor-pointer border border-[#3E3630]/30/50"
             >
               <X size={20} />
             </button>
@@ -123,35 +123,35 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                       <div
                         key={plan.id}
                         onClick={() => setSelectedPlan(plan.id as any)}
-                        className={`relative bg-[#3C3E4A] rounded-2xl p-6 md:p-7 border transition-all duration-200 flex flex-col justify-between cursor-pointer ${
+                        className={`relative bg-[#3E3630] rounded-2xl p-6 md:p-7 border transition-all duration-200 flex flex-col justify-between cursor-pointer ${
                           isSelected
-                            ? 'border-[#F3F1EC] shadow-xl ring-2 ring-[#F3F1EC]/30 scale-[1.02]'
-                            : 'border-[#3C3E4A]/30/50 hover:border-[#F3F1EC]/50'
+                            ? 'border-[#FCF7DF] shadow-xl ring-2 ring-[#FCF7DF]/30 scale-[1.02]'
+                            : 'border-[#3E3630]/30/50 hover:border-[#FCF7DF]/50'
                         }`}
                       >
                         {plan.badge && (
                           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                            <span className="bg-[#F3F1EC] text-[#3C3E4A] font-black text-[10px] uppercase px-3.5 py-1 rounded-full shadow-md whitespace-nowrap">
+                            <span className="bg-[#FCF7DF] text-[#3E3630] font-black text-[10px] uppercase px-3.5 py-1 rounded-full shadow-md whitespace-nowrap">
                               {plan.badge}
                             </span>
                           </div>
                         )}
 
                         <div>
-                          <div className="text-center pb-5 border-b border-[#3C3E4A]/30/40 mb-5 pt-1">
-                            <h3 className="font-bold text-lg text-[#F3F1EC] mb-1.5">{plan.name}</h3>
-                            <p className="text-[#3C3E4A]/60 text-xs mb-4 min-h-[32px] flex items-center justify-center">{plan.description}</p>
+                          <div className="text-center pb-5 border-b border-[#3E3630]/30/40 mb-5 pt-1">
+                            <h3 className="font-bold text-lg text-[#FCF7DF] mb-1.5">{plan.name}</h3>
+                            <p className="text-[#3E3630]/60 text-xs mb-4 min-h-[32px] flex items-center justify-center">{plan.description}</p>
                             <div className="flex items-baseline justify-center gap-1">
-                              <span className="text-3xl md:text-4xl font-black text-[#F3F1EC] tracking-tight">{plan.price}</span>
-                              <span className="text-[#3C3E4A]/60 text-xs font-semibold">{plan.period}</span>
+                              <span className="text-3xl md:text-4xl font-black text-[#FCF7DF] tracking-tight">{plan.price}</span>
+                              <span className="text-[#3E3630]/60 text-xs font-semibold">{plan.period}</span>
                             </div>
                           </div>
 
-                          <ul className="space-y-3.5 text-xs text-[#3C3E4A]/60 mb-8">
+                          <ul className="space-y-3.5 text-xs text-[#3E3630]/60 mb-8">
                             {plan.features.map((feat, idx) => (
                               <li key={idx} className="flex items-start gap-2.5 leading-relaxed">
-                                <Check size={16} className="text-[#F3F1EC] shrink-0 mt-0.5" />
-                                <span className={feat.includes('KHÔNG GIỚI HẠN') ? 'font-black text-[#F3F1EC]' : ''}>
+                                <Check size={16} className="text-[#FCF7DF] shrink-0 mt-0.5" />
+                                <span className={feat.includes('KHÔNG GIỚI HẠN') ? 'font-black text-[#FCF7DF]' : ''}>
                                   {feat}
                                 </span>
                               </li>
@@ -167,14 +167,14 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                             alert('Tính năng đăng ký tự động đang được hoàn thiện. Cảm ơn bạn đã quan tâm!');
                             onClose();
                           }}
-                          className="w-full py-3.5 px-4 rounded-xl font-black text-sm transition-all shadow-md cursor-pointer border border-[#3C3E4A]/30/50 flex items-center justify-center gap-2 mt-2"
+                          className="w-full py-3.5 px-4 rounded-xl font-black text-sm transition-all shadow-md cursor-pointer border border-[#3E3630]/30/50 flex items-center justify-center gap-2 mt-2"
                           style={{
-                            backgroundColor: isSelected ? '#F3F1EC' : '#3C3E4A',
-                            color: isSelected ? '#3C3E4A' : '#F3F1EC'
+                            backgroundColor: isSelected ? '#FCF7DF' : '#3E3630',
+                            color: isSelected ? '#3E3630' : '#FCF7DF'
                           }}
                         >
-                          <Sparkles size={16} style={{ color: isSelected ? '#3C3E4A' : '#F3F1EC' }} />
-                          <span style={{ color: isSelected ? '#3C3E4A' : '#F3F1EC' }}>
+                          <Sparkles size={16} style={{ color: isSelected ? '#3E3630' : '#FCF7DF' }} />
+                          <span style={{ color: isSelected ? '#3E3630' : '#FCF7DF' }}>
                             Chọn Mua
                           </span>
                         </button>
@@ -184,15 +184,15 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                 </div>
 
                 {/* Trust Footer */}
-                <div className="flex flex-wrap items-center justify-center gap-6 pt-4 border-t border-[#3C3E4A]/30/40 text-xs text-[#3C3E4A]/60">
+                <div className="flex flex-wrap items-center justify-center gap-6 pt-4 border-t border-[#3E3630]/30/40 text-xs text-[#3E3630]/60">
                   <span className="flex items-center gap-1.5">
-                    <ShieldCheck size={16} className="text-[#F3F1EC]" /> Tải sách tốc độ cao 24/7
+                    <ShieldCheck size={16} className="text-[#FCF7DF]" /> Tải sách tốc độ cao 24/7
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Zap size={16} className="text-[#F3F1EC]" /> Đọc trực tiếp EPub / PDF online
+                    <Zap size={16} className="text-[#FCF7DF]" /> Đọc trực tiếp EPub / PDF online
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <PhoneCall size={16} className="text-[#F3F1EC]" /> Hỗ trợ tìm sách theo yêu cầu
+                    <PhoneCall size={16} className="text-[#FCF7DF]" /> Hỗ trợ tìm sách theo yêu cầu
                   </span>
                 </div>
           </div>

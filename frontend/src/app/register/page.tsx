@@ -51,34 +51,34 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] text-[#3C3E4A] flex flex-col justify-center items-center p-4">
+    <div className="min-h-screen bg-[#FCF7DF] text-[#3E3630] flex flex-col justify-center items-center p-4">
       <Link href="/">
         <div className="flex items-center gap-2 mb-8 cursor-pointer hover:opacity-80">
-          <Store size={32} className="text-[#3C3E4A]" />
-          <h1 className="text-4xl font-extrabold text-[#3C3E4A]">
-            Billy<span className="text-[#3C3E4A]/75">.</span>
+          <Store size={32} className="text-[#3E3630]" />
+          <h1 className="text-4xl font-extrabold text-[#3E3630]">
+            Billy<span className="text-[#3E3630]/75">.</span>
           </h1>
         </div>
       </Link>
       
-      <div className="bg-white p-8 md:p-10 rounded-[34px] shadow-[0_8px_0_0_#3C3E4A] border-2 border-[#3C3E4A] w-full max-w-md relative overflow-hidden">
-        <h2 className="text-2xl font-black mb-2 text-center text-[#3C3E4A] mt-2">Đăng ký tài khoản</h2>
-        <p className="text-[#3C3E4A]/75 text-sm text-center mb-6 font-medium">
+      <div className="bg-white p-8 md:p-10 rounded-[34px] shadow-[0_8px_0_0_#3E3630] border-2 border-[#3E3630] w-full max-w-md relative overflow-hidden">
+        <h2 className="text-2xl font-black mb-2 text-center text-[#3E3630] mt-2">Đăng ký tài khoản</h2>
+        <p className="text-[#3E3630]/75 text-sm text-center mb-6 font-medium">
           Tạo tài khoản để quản lý đơn hàng và bán hàng
         </p>
         
         {error && (
-          <div className="bg-[#E0DFD2] border border-red-300 text-[#3C3E4A] p-3 rounded-xl mb-4 text-sm text-center font-bold">
+          <div className="bg-[#C7D3DB] border border-red-300 text-[#3E3630] p-3 rounded-xl mb-4 text-sm text-center font-bold">
             {error}
           </div>
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label className="block text-sm font-bold mb-1 text-[#3C3E4A]">Mã đăng ký <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-bold mb-1 text-[#3E3630]">Mã đăng ký <span className="text-red-500">*</span></label>
             <input 
               type="text" 
-              className="w-full bg-white border-2 border-[#3C3E4A] rounded-xl px-4 py-3 text-sm text-[#3C3E4A] uppercase font-mono tracking-wider focus:outline-none focus:shadow-[0_3px_0_0_#3C3E4A] placeholder-[#3C3E4A]/40"
+              className="w-full bg-white border-2 border-[#3E3630] rounded-xl px-4 py-3 text-sm text-[#3E3630] uppercase font-mono tracking-wider focus:outline-none focus:shadow-[0_3px_0_0_#3E3630] placeholder-[#3E3630]/40"
               value={registrationCode}
               onChange={(e) => setRegistrationCode(e.target.value.toUpperCase())}
               required
@@ -87,10 +87,10 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-1 text-[#3C3E4A]">Username</label>
+            <label className="block text-sm font-bold mb-1 text-[#3E3630]">Username</label>
             <input 
               type="text" 
-              className="w-full bg-white border-2 border-[#3C3E4A] rounded-xl px-4 py-3 text-sm text-[#3C3E4A] focus:outline-none focus:shadow-[0_3px_0_0_#3C3E4A] placeholder-[#3C3E4A]/40"
+              className="w-full bg-white border-2 border-[#3E3630] rounded-xl px-4 py-3 text-sm text-[#3E3630] focus:outline-none focus:shadow-[0_3px_0_0_#3E3630] placeholder-[#3E3630]/40"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -100,10 +100,10 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-1 text-[#3C3E4A]">Email <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-bold mb-1 text-[#3E3630]">Email <span className="text-red-500">*</span></label>
             <input 
               type="email" 
-              className="w-full bg-white border-2 border-[#3C3E4A] rounded-xl px-4 py-3 text-sm text-[#3C3E4A] focus:outline-none focus:shadow-[0_3px_0_0_#3C3E4A] placeholder-[#3C3E4A]/40"
+              className="w-full bg-white border-2 border-[#3E3630] rounded-xl px-4 py-3 text-sm text-[#3E3630] focus:outline-none focus:shadow-[0_3px_0_0_#3E3630] placeholder-[#3E3630]/40"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -112,11 +112,11 @@ export default function RegisterPage() {
           </div>
           
           <div>
-            <label className="block text-sm font-bold mb-1 text-[#3C3E4A]">Mật khẩu</label>
+            <label className="block text-sm font-bold mb-1 text-[#3E3630]">Mật khẩu</label>
             <div className="relative">
               <input 
                 type={showPassword ? 'text' : 'password'} 
-                className="w-full bg-white border-2 border-[#3C3E4A] rounded-xl px-4 py-3 pr-10 text-sm text-[#3C3E4A] focus:outline-none focus:shadow-[0_3px_0_0_#3C3E4A] placeholder-[#3C3E4A]/40"
+                className="w-full bg-white border-2 border-[#3E3630] rounded-xl px-4 py-3 pr-10 text-sm text-[#3E3630] focus:outline-none focus:shadow-[0_3px_0_0_#3E3630] placeholder-[#3E3630]/40"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -126,7 +126,7 @@ export default function RegisterPage() {
               <button 
                 type="button" 
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3C3E4A]/75 hover:text-[#3C3E4A] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3E3630]/75 hover:text-[#3E3630] transition-colors"
                 title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -143,9 +143,9 @@ export default function RegisterPage() {
           </button>
           
           <div className="mt-6 text-center text-sm font-semibold">
-            <p className="text-[#3C3E4A]/75">
+            <p className="text-[#3E3630]/75">
               Đã có tài khoản?{' '}
-              <Link href="/login" className="text-[#3C3E4A] font-black hover:underline">
+              <Link href="/login" className="text-[#3E3630] font-black hover:underline">
                 Đăng nhập
               </Link>
             </p>

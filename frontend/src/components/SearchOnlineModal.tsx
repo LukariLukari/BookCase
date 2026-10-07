@@ -180,38 +180,38 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
           initial={{ opacity: 0, y: 50, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 50, scale: 0.95 }}
-          className="relative bg-[#F3F1EC] text-[#3C3E4A] rounded-[36px] max-w-2xl w-full border border-[#F3F1EC] shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
+          className="relative bg-[#FCF7DF] text-[#3E3630] rounded-[36px] max-w-2xl w-full border border-[#FCF7DF] shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
         >
           {/* Header */}
-          <div className="p-6 border-b border-[#F3F1EC] flex justify-between items-center bg-[#F3F1EC]">
+          <div className="p-6 border-b border-[#FCF7DF] flex justify-between items-center bg-[#FCF7DF]">
             <div>
-              <h2 className="text-xl font-bold text-[#3C3E4A] flex items-center gap-2">
-                <BookOpen className="text-[#3C3E4A]" size={20} />
+              <h2 className="text-xl font-bold text-[#3E3630] flex items-center gap-2">
+                <BookOpen className="text-[#3E3630]" size={20} />
                 Tìm & Tải Sách Online
               </h2>
               {targetBookId && (
-                <p className="text-xs text-[#3C3E4A]/75 font-semibold mt-1">
+                <p className="text-xs text-[#3E3630]/75 font-semibold mt-1">
                   Đang tìm kiếm file để gắn bù vào cuốn sách bị mất liên kết
                 </p>
               )}
             </div>
             <button 
               onClick={handleModalClose}
-              className="p-2.5 rounded-full transition-colors cursor-pointer border border-[#F3F1EC] bg-[#F3F1EC] hover:bg-[#3C3E4A]/30 text-[#3C3E4A]/75 hover:text-[#3C3E4A]"
+              className="p-2.5 rounded-full transition-colors cursor-pointer border border-[#FCF7DF] bg-[#FCF7DF] hover:bg-[#3E3630]/30 text-[#3E3630]/75 hover:text-[#3E3630]"
             >
               <X size={18} />
             </button>
           </div>
 
           {/* Search Bar & Source Tabs */}
-          <div className="p-6 bg-[#F3F1EC] pb-3 space-y-3">
+          <div className="p-6 bg-[#FCF7DF] pb-3 space-y-3">
             <form onSubmit={handleSearch} className="flex gap-3">
               <input 
                 type="text" 
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Nhập tên sách, tác giả..."
-                className="flex-1 bg-[#F3F1EC] border border-[#3C3E4A]/30 rounded-full px-5 py-3 text-[#3C3E4A] placeholder-[#3C3E4A] focus:outline-none focus:border-[#3C3E4A] text-xs font-semibold"
+                className="flex-1 bg-[#FCF7DF] border border-[#3E3630]/30 rounded-full px-5 py-3 text-[#3E3630] placeholder-[#3E3630] focus:outline-none focus:border-[#3E3630] text-xs font-semibold"
                 autoFocus
               />
               <button 
@@ -235,8 +235,8 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 onClick={() => handleSourceChange('all')}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border shadow-sm ${
                   selectedSource === 'all'
-                    ? 'bg-[#3C3E4A] !text-white border-[#3C3E4A]'
-                    : 'bg-[#F3F1EC] text-[#3C3E4A]/75 border-[#3C3E4A]/30 hover:bg-[#F3F1EC] hover:text-[#3C3E4A]'
+                    ? 'bg-[#3E3630] !text-white border-[#3E3630]'
+                    : 'bg-[#FCF7DF] text-[#3E3630]/75 border-[#3E3630]/30 hover:bg-[#FCF7DF] hover:text-[#3E3630]'
                 }`}
               >
                 <Layers size={13} className={selectedSource === 'all' ? '!text-white stroke-white' : ''} />
@@ -248,8 +248,8 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 onClick={() => handleSourceChange('zlib')}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border shadow-sm ${
                   selectedSource === 'zlib'
-                    ? 'bg-[#3C3E4A] !text-white border-[#3C3E4A]'
-                    : 'bg-[#F3F1EC] text-[#3C3E4A]/75 border-[#3C3E4A]/30 hover:bg-[#F3F1EC] hover:text-[#3C3E4A]'
+                    ? 'bg-[#3E3630] !text-white border-[#3E3630]'
+                    : 'bg-[#FCF7DF] text-[#3E3630]/75 border-[#3E3630]/30 hover:bg-[#FCF7DF] hover:text-[#3E3630]'
                 }`}
               >
                 <Pencil size={13} className={selectedSource === 'zlib' ? '!text-white stroke-white' : ''} />
@@ -261,8 +261,8 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 onClick={() => handleSourceChange('cloudily')}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border shadow-sm ${
                   selectedSource === 'cloudily'
-                    ? 'bg-[#3C3E4A] !text-white border-[#3C3E4A]'
-                    : 'bg-[#F3F1EC] text-[#3C3E4A]/75 border-[#3C3E4A]/30 hover:bg-[#F3F1EC] hover:text-[#3C3E4A]'
+                    ? 'bg-[#3E3630] !text-white border-[#3E3630]'
+                    : 'bg-[#FCF7DF] text-[#3E3630]/75 border-[#3E3630]/30 hover:bg-[#FCF7DF] hover:text-[#3E3630]'
                 }`}
               >
                 <PenTool size={13} className={selectedSource === 'cloudily' ? '!text-white stroke-white' : ''} />
@@ -274,13 +274,13 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
           {/* Results Area */}
           <div className="flex-1 overflow-y-auto p-6 pt-2">
             {error && (
-              <div className="bg-[#E0DFD2] border border-red-200 text-red-600 p-3.5 rounded-2xl mb-3 text-xs text-center leading-relaxed font-semibold">
+              <div className="bg-[#C7D3DB] border border-red-200 text-red-600 p-3.5 rounded-2xl mb-3 text-xs text-center leading-relaxed font-semibold">
                 {error}
               </div>
             )}
 
             {!isSearching && results.length === 0 && !error && query && (
-              <div className="text-center text-[#3C3E4A]/60 py-10 font-medium text-xs">
+              <div className="text-center text-[#3E3630]/60 py-10 font-medium text-xs">
                 Nhập từ khóa và bấm tìm kiếm
               </div>
             )}
@@ -292,33 +292,33 @@ export default function SearchOnlineModal({ isOpen, onClose, onImportSuccess, in
                 const displayTitle = item.title.replace(/^\[.*?\]\s*/, '');
 
                 return (
-                  <div key={`${item.id}-${idx}`} className="bg-white border border-[#F3F1EC] rounded-2xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between hover:border-[#3C3E4A] transition-colors shadow-sm">
+                  <div key={`${item.id}-${idx}`} className="bg-white border border-[#FCF7DF] rounded-2xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between hover:border-[#3E3630] transition-colors shadow-sm">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="border border-[#F3F1EC] bg-[#F3F1EC] text-[#3C3E4A]/75 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                          <BadgeIcon size={11} className="text-[#3C3E4A]" />
+                        <span className="border border-[#FCF7DF] bg-[#FCF7DF] text-[#3E3630]/75 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                          <BadgeIcon size={11} className="text-[#3E3630]" />
                           <span>{badge.label}</span>
                         </span>
                       </div>
-                      <h3 className="text-[#3C3E4A] font-bold line-clamp-2 text-sm">{displayTitle}</h3>
-                      <p className="text-[#3C3E4A]/75 text-xs mt-0.5 font-medium">{item.author || 'Không rõ tác giả'}</p>
-                      <div className="flex gap-2 mt-2 text-[11px] text-[#3C3E4A]/75 font-semibold">
-                        {item.extension && <span className="bg-[#F3F1EC] border border-[#F3F1EC] px-2 py-0.5 rounded-md uppercase text-[#3C3E4A]">{item.extension}</span>}
-                        {item.size && <span className="bg-[#F3F1EC] border border-[#F3F1EC] px-2 py-0.5 rounded-md text-[#3C3E4A]/75">{item.size}</span>}
-                        {item.language && <span className="bg-[#F3F1EC] border border-[#F3F1EC] px-2 py-0.5 rounded-md text-[#3C3E4A]/75">{item.language}</span>}
+                      <h3 className="text-[#3E3630] font-bold line-clamp-2 text-sm">{displayTitle}</h3>
+                      <p className="text-[#3E3630]/75 text-xs mt-0.5 font-medium">{item.author || 'Không rõ tác giả'}</p>
+                      <div className="flex gap-2 mt-2 text-[11px] text-[#3E3630]/75 font-semibold">
+                        {item.extension && <span className="bg-[#FCF7DF] border border-[#FCF7DF] px-2 py-0.5 rounded-md uppercase text-[#3E3630]">{item.extension}</span>}
+                        {item.size && <span className="bg-[#FCF7DF] border border-[#FCF7DF] px-2 py-0.5 rounded-md text-[#3E3630]/75">{item.size}</span>}
+                        {item.language && <span className="bg-[#FCF7DF] border border-[#FCF7DF] px-2 py-0.5 rounded-md text-[#3E3630]/75">{item.language}</span>}
                       </div>
                     </div>
                     
                     {importingId === item.id ? (
                       <div className="w-full sm:w-60 flex flex-col gap-1.5 py-1">
                         <div className="flex justify-between items-center text-xs font-bold px-0.5">
-                          <span className="flex items-center gap-1.5 text-[#3C3E4A]">
-                            <Loader2 size={13} className="animate-spin text-[#3C3E4A]" />
+                          <span className="flex items-center gap-1.5 text-[#3E3630]">
+                            <Loader2 size={13} className="animate-spin text-[#3E3630]" />
                             Đang xử lý & tải file...
                           </span>
-                          <span className="text-[#3C3E4A] font-extrabold">{Math.round(importProgress)}%</span>
+                          <span className="text-[#3E3630] font-extrabold">{Math.round(importProgress)}%</span>
                         </div>
-                        <div className="w-full bg-[#F3F1EC] rounded-full h-3 border border-[#3C3E4A]/30 overflow-hidden relative">
+                        <div className="w-full bg-[#FCF7DF] rounded-full h-3 border border-[#3E3630]/30 overflow-hidden relative">
                           <motion.div 
                             className="btn-gradient h-full rounded-full transition-all duration-300 relative overflow-hidden"
                             style={{ width: `${importProgress}%` }}

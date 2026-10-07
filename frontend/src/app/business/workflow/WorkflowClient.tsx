@@ -34,25 +34,25 @@ const states = [
     key: 'confirmed',
     label: 'Mới xác nhận',
     icon: Clock3,
-    color: 'bg-blue-100 text-blue-900 border-2 border-[#3C3E4A]',
+    color: 'bg-blue-100 text-blue-900 border-2 border-[#3E3630]',
   },
   {
     key: 'packing',
     label: 'Đang đóng gói',
     icon: PackageCheck,
-    color: 'bg-amber-100 text-amber-950 border-2 border-[#3C3E4A]',
+    color: 'bg-amber-100 text-amber-950 border-2 border-[#3E3630]',
   },
   {
     key: 'shipping',
     label: 'Đang giao',
     icon: Truck,
-    color: 'bg-purple-100 text-purple-950 border-2 border-[#3C3E4A]',
+    color: 'bg-purple-100 text-purple-950 border-2 border-[#3E3630]',
   },
   {
     key: 'completed',
     label: 'Hoàn tất',
     icon: Check,
-    color: 'bg-emerald-100 text-emerald-950 border-2 border-[#3C3E4A]',
+    color: 'bg-emerald-100 text-emerald-950 border-2 border-[#3E3630]',
   },
 ];
 
@@ -134,24 +134,24 @@ export default function WorkflowClient() {
     }
   };
 
-  if (isLoading || !user) return <div className="min-h-screen bg-[#F3F1EC]" />;
+  if (isLoading || !user) return <div className="min-h-screen bg-[#FCF7DF]" />;
 
   const pending = orders.filter((o) => o.payment_status !== 'paid' && o.status !== 'cancelled');
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] p-3 pb-[calc(12rem+env(safe-area-inset-bottom))] pt-[calc(4.75rem+env(safe-area-inset-top,0px))] text-[#3C3E4A] md:flex md:gap-5 md:p-6 md:pb-8 md:pt-6">
+    <div className="min-h-screen bg-[#FCF7DF] p-3 pb-[calc(12rem+env(safe-area-inset-bottom))] pt-[calc(4.75rem+env(safe-area-inset-top,0px))] text-[#3E3630] md:flex md:gap-5 md:p-6 md:pb-8 md:pt-6">
       <Sidebar />
       <main className="min-w-0 flex-1">
         <div className="mx-auto max-w-[1500px]">
           {/* Header 3D Card in Cloud Veil */}
-          <header className="mb-6 rounded-3xl border-2 border-[#3C3E4A] bg-[#F3F1EC] p-6 shadow-[0_5px_0_0_#3C3E4A] md:p-8">
-            <p className="text-[11px] font-black uppercase tracking-[.2em] text-[#3C3E4A]/70">
+          <header className="mb-6 rounded-3xl border-2 border-[#3E3630] bg-[#FCF7DF] p-6 shadow-[0_5px_0_0_#3E3630] md:p-8">
+            <p className="text-[11px] font-black uppercase tracking-[.2em] text-[#3E3630]/70">
               Trung tâm vận hành
             </p>
-            <h1 className="mt-1 text-2xl font-black md:text-3xl text-[#3C3E4A]">
+            <h1 className="mt-1 text-2xl font-black md:text-3xl text-[#3E3630]">
               Theo dõi và xử lý đơn
             </h1>
-            <p className="mt-1 text-sm font-semibold text-[#3C3E4A]/80">
+            <p className="mt-1 text-sm font-semibold text-[#3E3630]/80">
               Nhìn toàn bộ tiến độ, chuyển bước và thu công nợ ngay tại một màn hình.
             </p>
 
@@ -165,12 +165,12 @@ export default function WorkflowClient() {
               ].map(([l, v]) => (
                 <div
                   key={String(l)}
-                  className="rounded-2xl border-2 border-[#3C3E4A] bg-white p-4 shadow-[0_4px_0_0_#3C3E4A] flex flex-col justify-between"
+                  className="rounded-2xl border-2 border-[#3E3630] bg-white p-4 shadow-[0_4px_0_0_#3E3630] flex flex-col justify-between"
                 >
-                  <p className="text-[10px] font-black uppercase tracking-wider text-[#3C3E4A]/70">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-[#3E3630]/70">
                     {l}
                   </p>
-                  <b className="mt-1.5 block text-lg font-black text-[#3C3E4A] md:text-xl">
+                  <b className="mt-1.5 block text-lg font-black text-[#3E3630] md:text-xl">
                     {v}
                   </b>
                 </div>
@@ -180,12 +180,12 @@ export default function WorkflowClient() {
 
           {/* 3D Search Bar */}
           <div className="input-push mb-6 flex items-center px-4 py-1.5">
-            <Search className="h-5 w-5 shrink-0 text-[#3C3E4A]" />
+            <Search className="h-5 w-5 shrink-0 text-[#3E3630]" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm mã đơn, khách hàng hoặc số điện thoại..."
-              className="h-11 w-full bg-transparent pl-3 pr-2 text-sm font-bold text-[#3C3E4A] placeholder-[#3C3E4A]/40 outline-none"
+              className="h-11 w-full bg-transparent pl-3 pr-2 text-sm font-bold text-[#3E3630] placeholder-[#3E3630]/40 outline-none"
             />
             {search && (
               <button
@@ -202,7 +202,7 @@ export default function WorkflowClient() {
           {/* Kanban Board Columns */}
           {loading ? (
             <div className="card-push my-12 flex min-h-[300px] items-center justify-center p-8">
-              <Loader2 className="animate-spin text-[#3C3E4A]" size={36} />
+              <Loader2 className="animate-spin text-[#3E3630]" size={36} />
             </div>
           ) : (
             <section className="grid gap-4 xl:grid-cols-4">
@@ -212,7 +212,7 @@ export default function WorkflowClient() {
                 return (
                   <div
                     key={state.key}
-                    className="min-w-0 rounded-3xl border-2 border-[#3C3E4A] bg-[#F3F1EC] p-4 shadow-[0_5px_0_0_#3C3E4A]"
+                    className="min-w-0 rounded-3xl border-2 border-[#3E3630] bg-[#FCF7DF] p-4 shadow-[0_5px_0_0_#3E3630]"
                   >
                     {/* Column Header */}
                     <div className="mb-4 flex items-center justify-between">
@@ -220,9 +220,9 @@ export default function WorkflowClient() {
                         <span className={`flex h-6 w-6 items-center justify-center rounded-full ${state.color}`}>
                           <Icon size={14} />
                         </span>
-                        <b className="text-xs font-black text-[#3C3E4A]">{state.label}</b>
+                        <b className="text-xs font-black text-[#3E3630]">{state.label}</b>
                       </div>
-                      <span className="rounded-full border-2 border-[#3C3E4A] bg-white px-3 py-0.5 text-xs font-black text-[#3C3E4A] shadow-[0_2px_0_0_#3C3E4A]">
+                      <span className="rounded-full border-2 border-[#3E3630] bg-white px-3 py-0.5 text-xs font-black text-[#3E3630] shadow-[0_2px_0_0_#3E3630]">
                         {list.length}
                       </span>
                     </div>
@@ -236,19 +236,19 @@ export default function WorkflowClient() {
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <b className="block truncate text-sm font-extrabold text-[#3C3E4A]">
+                              <b className="block truncate text-sm font-extrabold text-[#3E3630]">
                                 {order.customer_name}
                               </b>
-                              <p className="text-[10px] font-black text-[#3C3E4A]/60">
+                              <p className="text-[10px] font-black text-[#3E3630]/60">
                                 {order.code} · {new Date(order.ordered_at).toLocaleDateString('vi-VN')}
                               </p>
                             </div>
-                            <b className="shrink-0 text-xs font-black text-[#3C3E4A]">
+                            <b className="shrink-0 text-xs font-black text-[#3E3630]">
                               {money(order.total)}
                             </b>
                           </div>
 
-                          <p className="line-clamp-2 text-xs font-semibold text-[#3C3E4A]/75">
+                          <p className="line-clamp-2 text-xs font-semibold text-[#3E3630]/75">
                             {order.items.map((i) => `${i.product_name} ×${i.quantity}`).join(', ')}
                           </p>
 
@@ -286,7 +286,7 @@ export default function WorkflowClient() {
                       ))}
 
                       {!list.length && (
-                        <div className="rounded-2xl border-2 border-dashed border-[#3C3E4A]/30 p-6 text-center text-xs font-extrabold text-[#3C3E4A]/75">
+                        <div className="rounded-2xl border-2 border-dashed border-[#3E3630]/30 p-6 text-center text-xs font-extrabold text-[#3E3630]/75">
                           Không có đơn
                         </div>
                       )}
@@ -319,8 +319,8 @@ export default function WorkflowClient() {
           >
             <div className="mb-5 flex items-start justify-between">
               <div>
-                <h2 className="text-lg font-black text-[#3C3E4A]">Ghi nhận thanh toán</h2>
-                <p className="text-xs font-semibold text-[#3C3E4A]/75">
+                <h2 className="text-lg font-black text-[#3E3630]">Ghi nhận thanh toán</h2>
+                <p className="text-xs font-semibold text-[#3E3630]/75">
                   {payment.code} · {payment.customer_name}
                 </p>
               </div>
@@ -335,24 +335,24 @@ export default function WorkflowClient() {
             </div>
 
             <label className="block">
-              <span className="mb-1.5 block text-xs font-black text-[#3C3E4A]">Số tiền</span>
+              <span className="mb-1.5 block text-xs font-black text-[#3E3630]">Số tiền</span>
               <div className="input-push px-4 py-1.5 rounded-2xl">
                 <input
                   value={Number(amount || 0).toLocaleString('vi-VN')}
                   onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
                   inputMode="numeric"
-                  className="h-10 w-full bg-transparent text-lg font-black text-[#3C3E4A] outline-none"
+                  className="h-10 w-full bg-transparent text-lg font-black text-[#3E3630] outline-none"
                 />
               </div>
             </label>
 
             <label className="mt-4 block">
-              <span className="mb-1.5 block text-xs font-black text-[#3C3E4A]">Phương thức</span>
+              <span className="mb-1.5 block text-xs font-black text-[#3E3630]">Phương thức</span>
               <div className="input-push px-4 py-1.5 rounded-2xl">
                 <select
                   value={method}
                   onChange={(e) => setMethod(e.target.value)}
-                  className="h-10 w-full bg-transparent text-sm font-bold text-[#3C3E4A] outline-none cursor-pointer"
+                  className="h-10 w-full bg-transparent text-sm font-bold text-[#3E3630] outline-none cursor-pointer"
                 >
                   <option value="transfer">Chuyển khoản</option>
                   <option value="cash">Tiền mặt</option>

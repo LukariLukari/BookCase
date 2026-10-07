@@ -20,10 +20,10 @@ interface Book {
 }
 
 const RIBBON_COLORS = [
-  '#3C3E4A', // Onyx
-  '#3C3E4A', // Walnut
-  '#3C3E4A', // Ash
-  '#F3F1EC', // Greige
+  '#3E3630', // Onyx
+  '#3E3630', // Walnut
+  '#3E3630', // Ash
+  '#FCF7DF', // Greige
 ];
 
 export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books: Book[], refresh: () => void, sortBy?: string }) {
@@ -144,8 +144,8 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
 
             {/* Rating badge */}
             {ratingInfo && ratingInfo.count > 0 && (
-              <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 bg-[#F3F1EC]/95 backdrop-blur-md text-[#3C3E4A] border border-[#3C3E4A]/30 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold flex items-center gap-1 shadow-sm z-20">
-                <Star size={10} className="fill-[#3C3E4A] text-[#3C3E4A]" />
+              <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 bg-[#FCF7DF]/95 backdrop-blur-md text-[#3E3630] border border-[#3E3630]/30 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold flex items-center gap-1 shadow-sm z-20">
+                <Star size={10} className="fill-[#3E3630] text-[#3E3630]" />
                 <span>{ratingInfo.average_rating.toFixed(1)}</span>
               </div>
             )}
@@ -155,13 +155,13 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
         {/* BOOK INFO */}
         <div className="flex flex-col flex-1 px-0.5 sm:px-1">
           <h3 
-            className="text-xs sm:text-sm md:text-[14px] font-extrabold text-[#3C3E4A] leading-tight line-clamp-1 sm:line-clamp-2 mb-0.5 group-hover:text-[#3C3E4A] transition-colors" 
+            className="text-xs sm:text-sm md:text-[14px] font-extrabold text-[#3E3630] leading-tight line-clamp-1 sm:line-clamp-2 mb-0.5 group-hover:text-[#3E3630] transition-colors" 
             title={book.title}
           >
             {book.title}
           </h3>
           <p 
-            className="text-[11px] sm:text-xs font-semibold text-[#3C3E4A]/75 truncate mb-1 sm:mb-2.5" 
+            className="text-[11px] sm:text-xs font-semibold text-[#3E3630]/75 truncate mb-1 sm:mb-2.5" 
             title={book.author || "Unknown Author"}
           >
             {book.author || "Unknown Author"}
@@ -178,13 +178,13 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
               disabled={downloadingId === book.id || book.has_file === false}
               className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all flex-shrink-0 cursor-pointer shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
                 book.has_file === false
-                  ? 'bg-[#F3F1EC] text-[#9FA3AD] border border-[#3C3E4A]/20'
-                  : 'bg-[#F3F1EC] hover:bg-[#3C3E4A]/30 text-[#3C3E4A] border border-[#3C3E4A]/20'
+                  ? 'bg-[#FCF7DF] text-[#A79A8A] border border-[#3E3630]/20'
+                  : 'bg-[#FCF7DF] hover:bg-[#3E3630]/30 text-[#3E3630] border border-[#3E3630]/20'
               }`}
               title={book.has_file === false ? "Sách đang được cập nhật file" : "Tải Sách Xuống"}
             >
               {downloadingId === book.id ? (
-                <Loader2 size={13} className="animate-spin text-[#3C3E4A]" />
+                <Loader2 size={13} className="animate-spin text-[#3E3630]" />
               ) : (
                 <Download size={13} className="stroke-[2.5]" />
               )}
@@ -195,7 +195,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                 e.stopPropagation();
                 setKindleBook({ id: book.id, title: book.title });
               }}
-              className="p-1.5 sm:p-2 text-[#3C3E4A]/75 hover:text-[#3C3E4A] bg-[#F3F1EC] hover:bg-[#3C3E4A]/30 rounded-lg sm:rounded-xl border border-[#3C3E4A]/20 transition-all flex-shrink-0 cursor-pointer shadow-sm"
+              className="p-1.5 sm:p-2 text-[#3E3630]/75 hover:text-[#3E3630] bg-[#FCF7DF] hover:bg-[#3E3630]/30 rounded-lg sm:rounded-xl border border-[#3E3630]/20 transition-all flex-shrink-0 cursor-pointer shadow-sm"
               title="Gửi sang Kindle (Wi-Fi)"
             >
               <Smartphone size={13} />
@@ -203,10 +203,10 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
 
             <button 
               onClick={(e) => copyShareLink(e, book.id)} 
-              className="p-1.5 sm:p-2 text-[#3C3E4A]/75 hover:text-[#3C3E4A] bg-[#F3F1EC] hover:bg-[#3C3E4A]/30 rounded-lg sm:rounded-xl border border-[#3C3E4A]/20 transition-all flex-shrink-0 cursor-pointer shadow-sm"
+              className="p-1.5 sm:p-2 text-[#3E3630]/75 hover:text-[#3E3630] bg-[#FCF7DF] hover:bg-[#3E3630]/30 rounded-lg sm:rounded-xl border border-[#3E3630]/20 transition-all flex-shrink-0 cursor-pointer shadow-sm"
               title="Chia sẻ sách"
             >
-              {copiedId === book.id ? <Check size={13} className="text-[#3C3E4A] stroke-[3]" /> : <Share2 size={13} />}
+              {copiedId === book.id ? <Check size={13} className="text-[#3E3630] stroke-[3]" /> : <Share2 size={13} />}
             </button>
           </div>
         </div>
@@ -238,9 +238,9 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
         <div className="space-y-6 sm:space-y-10">
           {Object.entries(groupedBooks).map(([author, authorBooks]) => (
             <div key={author} className="space-y-3 sm:space-y-4">
-              <div className="flex items-center gap-2 sm:gap-3 border-b border-[#E0DFD2] pb-1.5">
-                <h2 className="text-sm sm:text-lg font-black text-[#3C3E4A]">{author}</h2>
-                <span className="text-[10px] sm:text-xs font-bold text-[#9FA3AD] bg-[#F3F1EC] px-2 py-0.5 rounded-full">
+              <div className="flex items-center gap-2 sm:gap-3 border-b border-[#C7D3DB] pb-1.5">
+                <h2 className="text-sm sm:text-lg font-black text-[#3E3630]">{author}</h2>
+                <span className="text-[10px] sm:text-xs font-bold text-[#A79A8A] bg-[#FCF7DF] px-2 py-0.5 rounded-full">
                   {authorBooks.length} cuốn
                 </span>
               </div>
@@ -270,7 +270,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
              
              <motion.div 
                layoutId={`book-container-${selectedBook.id}`}
-               className="relative bg-[#F3F1EC] text-[#3C3E4A] rounded-[36px] max-w-2xl w-full p-6 md:p-8 shadow-2xl overflow-hidden z-10 border border-[#F3F1EC] flex flex-col md:flex-row gap-6 max-h-[90vh]"
+               className="relative bg-[#FCF7DF] text-[#3E3630] rounded-[36px] max-w-2xl w-full p-6 md:p-8 shadow-2xl overflow-hidden z-10 border border-[#FCF7DF] flex flex-col md:flex-row gap-6 max-h-[90vh]"
              >
                 {/* Left: Book Cover Preview */}
                 <div className="w-full md:w-1/3 flex flex-col items-center flex-shrink-0">
@@ -291,15 +291,15 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
 
                   {/* Rating Summary Pill */}
                   {ratingSummary && (
-                    <div className="w-full bg-[#F3F1EC] p-3 rounded-2xl text-center mb-3 border border-[#3C3E4A]/20">
+                    <div className="w-full bg-[#FCF7DF] p-3 rounded-2xl text-center mb-3 border border-[#3E3630]/20">
                       <div className="flex items-center justify-center gap-1 mb-0.5">
-                        <Star size={14} className="fill-[#B6B8AB] text-[#B6B8AB]" />
-                        <span className="font-extrabold text-base text-[#3C3E4A]">
+                        <Star size={14} className="fill-[#A79A8A] text-[#A79A8A]" />
+                        <span className="font-extrabold text-base text-[#3E3630]">
                           {ratingSummary.average_rating ? ratingSummary.average_rating.toFixed(1) : '5.0'}
                         </span>
-                        <span className="text-xs text-[#3C3E4A]/60">/ 5</span>
+                        <span className="text-xs text-[#3E3630]/60">/ 5</span>
                       </div>
-                      <p className="text-[11px] text-[#3C3E4A]/60 font-bold">
+                      <p className="text-[11px] text-[#3E3630]/60 font-bold">
                         {ratingSummary.total_reviews} lượt đánh giá
                       </p>
                     </div>
@@ -308,9 +308,9 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   {/* Rate Button */}
                   <button
                     onClick={() => setIsRatingModalOpen(true)}
-                    className="w-full py-2.5 px-3 bg-[#F3F1EC] hover:bg-[#3C3E4A]/30 text-[#3C3E4A] font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 border border-[#3C3E4A]/20"
+                    className="w-full py-2.5 px-3 bg-[#FCF7DF] hover:bg-[#3E3630]/30 text-[#3E3630] font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 border border-[#3E3630]/20"
                   >
-                    <Sparkles size={14} className="text-[#3C3E4A]" />
+                    <Sparkles size={14} className="text-[#3E3630]" />
                     <span>Đánh Giá Sách</span>
                   </button>
                 </div>
@@ -320,19 +320,19 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   <div>
                     <div className="flex justify-between items-start gap-4">
                       <div>
-                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#3C3E4A] bg-[#E0DFD2] border border-[#B6B8AB] px-2.5 py-0.5 rounded-full">
+                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#3E3630] bg-[#C7D3DB] border border-[#A79A8A] px-2.5 py-0.5 rounded-full">
                           {selectedBook.genre || "Tủ sách"}
                         </span>
-                        <h2 className="text-xl md:text-2xl font-black text-[#3C3E4A] leading-tight mt-1.5">
+                        <h2 className="text-xl md:text-2xl font-black text-[#3E3630] leading-tight mt-1.5">
                           {selectedBook.title}
                         </h2>
-                        <p className="text-sm text-[#3C3E4A]/75 font-bold mt-1">
+                        <p className="text-sm text-[#3E3630]/75 font-bold mt-1">
                           {selectedBook.author || "Unknown Author"}
                         </p>
                       </div>
                       <button 
                         onClick={() => setSelectedBook(null)}
-                        className="p-2 text-[#3C3E4A]/75 hover:text-[#3C3E4A] bg-[#F3F1EC] hover:bg-[#3C3E4A]/30 rounded-full transition-colors flex-shrink-0 cursor-pointer border border-[#3C3E4A]/20"
+                        className="p-2 text-[#3E3630]/75 hover:text-[#3E3630] bg-[#FCF7DF] hover:bg-[#3E3630]/30 rounded-full transition-colors flex-shrink-0 cursor-pointer border border-[#3E3630]/20"
                       >
                         <X size={18} />
                       </button>
@@ -342,8 +342,8 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   <div className="flex-grow mt-5 space-y-4">
                     {/* Summary */}
                     <div>
-                      <h3 className="text-xs font-black uppercase text-[#3C3E4A]/75 tracking-wider mb-1.5">Tóm tắt nội dung</h3>
-                      <p className="text-[#3C3E4A] leading-relaxed text-xs md:text-sm whitespace-pre-wrap bg-[#F3F1EC] p-3.5 rounded-2xl border border-[#F3F1EC]">
+                      <h3 className="text-xs font-black uppercase text-[#3E3630]/75 tracking-wider mb-1.5">Tóm tắt nội dung</h3>
+                      <p className="text-[#3E3630] leading-relaxed text-xs md:text-sm whitespace-pre-wrap bg-[#FCF7DF] p-3.5 rounded-2xl border border-[#FCF7DF]">
                         {selectedBook.summary || "Chưa có tóm tắt cho cuốn sách này."}
                       </p>
                     </div>
@@ -351,22 +351,22 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                     {/* Reviews */}
                     {ratingSummary && ratingSummary.reviews && ratingSummary.reviews.length > 0 && (
                       <div className="pt-1">
-                        <h3 className="text-xs font-black uppercase tracking-wider text-[#3C3E4A]/75 mb-2 flex items-center gap-1.5">
-                          <Award size={13} className="text-[#3C3E4A]" /> Cảm nhận độc giả ({ratingSummary.reviews.length})
+                        <h3 className="text-xs font-black uppercase tracking-wider text-[#3E3630]/75 mb-2 flex items-center gap-1.5">
+                          <Award size={13} className="text-[#3E3630]" /> Cảm nhận độc giả ({ratingSummary.reviews.length})
                         </h3>
                         <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
                           {ratingSummary.reviews.map((rev: any) => (
-                            <div key={rev.id} className="bg-[#F3F1EC] border border-[#F3F1EC] rounded-xl p-2.5 text-xs">
+                            <div key={rev.id} className="bg-[#FCF7DF] border border-[#FCF7DF] rounded-xl p-2.5 text-xs">
                               <div className="flex justify-between items-center mb-1">
-                                <span className="font-bold text-[#3C3E4A]">{rev.username || 'Độc giả'}</span>
+                                <span className="font-bold text-[#3E3630]">{rev.username || 'Độc giả'}</span>
                                 <div className="flex items-center gap-0.5">
                                   {[...Array(rev.rating)].map((_, i) => (
-                                    <Star key={i} size={10} className="fill-[#3C3E4A] text-[#3C3E4A]" />
+                                    <Star key={i} size={10} className="fill-[#3E3630] text-[#3E3630]" />
                                   ))}
                                 </div>
                               </div>
                               {rev.review_text && (
-                                <p className="text-[#3C3E4A]/75 line-clamp-2">{rev.review_text}</p>
+                                <p className="text-[#3E3630]/75 line-clamp-2">{rev.review_text}</p>
                               )}
                             </div>
                           ))}
@@ -376,7 +376,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   </div>
 
                   {/* Footer Actions */}
-                  <div className="mt-6 pt-4 border-t border-[#E0DFD2] flex flex-col sm:flex-row gap-3">
+                  <div className="mt-6 pt-4 border-t border-[#C7D3DB] flex flex-col sm:flex-row gap-3">
                     <button 
                       onClick={() => {
                         if (selectedBook.has_file === false) return;
@@ -384,7 +384,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                       }}
                       disabled={downloadingId === selectedBook.id || selectedBook.has_file === false}
                       className={`btn-gradient flex-1 py-3 px-4 rounded-2xl font-black text-sm flex justify-center items-center gap-2 cursor-pointer ${
-                        selectedBook.has_file === false ? '!bg-[#F3F1EC] !text-[#9FA3AD] !shadow-none opacity-60 cursor-not-allowed' : ''
+                        selectedBook.has_file === false ? '!bg-[#FCF7DF] !text-[#A79A8A] !shadow-none opacity-60 cursor-not-allowed' : ''
                       }`}
                       title={selectedBook.has_file === false ? "Sách đang được cập nhật file" : "Tải Sách Xuống"}
                     >
@@ -394,7 +394,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
 
                     <button 
                       onClick={() => setKindleBook({ id: selectedBook.id, title: selectedBook.title })}
-                      className="bg-[#F3F1EC] hover:bg-[#3C3E4A]/30 text-[#3C3E4A] border border-[#3C3E4A]/20 flex-1 py-3 px-4 rounded-2xl font-bold text-sm flex justify-center items-center gap-2 transition-all cursor-pointer"
+                      className="bg-[#FCF7DF] hover:bg-[#3E3630]/30 text-[#3E3630] border border-[#3E3630]/20 flex-1 py-3 px-4 rounded-2xl font-bold text-sm flex justify-center items-center gap-2 transition-all cursor-pointer"
                     >
                       <Smartphone size={16} />
                       <span>Gửi Sang Kindle</span>
