@@ -4,9 +4,7 @@ import "./globals.css";
 
 const montserrat = Montserrat({
   subsets: ["latin", "vietnamese"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-montserrat",
-  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +24,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="vi"
+      lang="en"
       className={`${montserrat.variable} font-sans min-h-full antialiased`}
       suppressHydrationWarning
     >
@@ -50,7 +48,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#f4f4f1] text-[#181818] font-sans" suppressHydrationWarning>
+      <body className="min-h-full bg-[#fef9f4] text-[#585556] flex flex-col font-sans" suppressHydrationWarning>
         <AuthProvider>
           {children}
         </AuthProvider>
