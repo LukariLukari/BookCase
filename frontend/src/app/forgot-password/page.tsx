@@ -58,21 +58,21 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#E0E0E0] text-[#2B2B2B] flex flex-col justify-center items-center p-4">
+    <div className="min-h-screen bg-[#F3F1EC] text-[#3C3E4A] flex flex-col justify-center items-center p-4">
       <Link href="/">
         <div className="flex items-center gap-2 mb-8 cursor-pointer hover:opacity-80">
-          <Store size={32} className="text-[#2B2B2B]" />
-          <h1 className="text-4xl font-extrabold text-[#2B2B2B]">
-            Billy<span className="text-[#2B2B2B]/75">.</span>
+          <Store size={32} className="text-[#3C3E4A]" />
+          <h1 className="text-4xl font-extrabold text-[#3C3E4A]">
+            Billy<span className="text-[#3C3E4A]/75">.</span>
           </h1>
         </div>
       </Link>
       
-      <div className="bg-white p-8 md:p-10 rounded-[34px] shadow-[0_8px_0_0_#2B2B2B] border-2 border-[#2B2B2B] w-full max-w-md relative overflow-hidden">
+      <div className="bg-white p-8 md:p-10 rounded-[34px] shadow-[0_8px_0_0_#3C3E4A] border-2 border-[#3C3E4A] w-full max-w-md relative overflow-hidden">
         {step === 2 && (
           <button 
             onClick={() => setStep(1)} 
-            className="absolute top-8 left-8 text-[#2B2B2B]/75 hover:text-[#2B2B2B] transition-colors"
+            className="absolute top-8 left-8 text-[#3C3E4A]/75 hover:text-[#3C3E4A] transition-colors"
             title="Quay lại"
           >
             <ArrowLeft size={20} />
@@ -81,23 +81,23 @@ export default function ForgotPasswordPage() {
         
         {step === 1 && (
           <>
-            <h2 className="text-2xl font-black mb-2 text-center mt-2 text-[#2B2B2B]">Quên mật khẩu</h2>
-            <p className="text-[#2B2B2B]/75 text-sm text-center mb-6 font-medium">
+            <h2 className="text-2xl font-black mb-2 text-center mt-2 text-[#3C3E4A]">Quên mật khẩu</h2>
+            <p className="text-[#3C3E4A]/75 text-sm text-center mb-6 font-medium">
               Nhập email của bạn để nhận mã khôi phục
             </p>
             
             {error && (
-              <div className="bg-[#FFF0EE] border border-red-300 text-[#9B3B30] p-3 rounded-xl mb-4 text-sm text-center font-bold">
+              <div className="bg-[#E0DFD2] border border-red-300 text-[#3C3E4A] p-3 rounded-xl mb-4 text-sm text-center font-bold">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSendOTP} className="space-y-4">
               <div>
-                <label className="block text-sm font-bold mb-1 text-[#2B2B2B]">Email <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-bold mb-1 text-[#3C3E4A]">Email <span className="text-red-500">*</span></label>
                 <input 
                   type="email" 
-                  className="w-full bg-white border-2 border-[#2B2B2B] rounded-xl px-4 py-3 text-sm focus:outline-none focus:shadow-[0_3px_0_0_#2B2B2B] text-[#2B2B2B] placeholder-[#2B2B2B]/40"
+                  className="w-full bg-white border-2 border-[#3C3E4A] rounded-xl px-4 py-3 text-sm focus:outline-none focus:shadow-[0_3px_0_0_#3C3E4A] text-[#3C3E4A] placeholder-[#3C3E4A]/40"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -114,7 +114,7 @@ export default function ForgotPasswordPage() {
               </button>
               
               <div className="mt-6 text-center text-sm font-semibold">
-                <Link href="/login" className="text-[#2B2B2B]/75 hover:text-[#2B2B2B] hover:underline">
+                <Link href="/login" className="text-[#3C3E4A]/75 hover:text-[#3C3E4A] hover:underline">
                   Quay lại Đăng nhập
                 </Link>
               </div>
@@ -124,13 +124,13 @@ export default function ForgotPasswordPage() {
 
         {step === 2 && (
           <form onSubmit={handleResetPassword} className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-            <h2 className="text-2xl font-black mb-2 text-center mt-2 text-[#2B2B2B]">Tạo mật khẩu mới</h2>
-            <p className="text-[#2B2B2B]/75 text-sm text-center mb-6 font-medium">
+            <h2 className="text-2xl font-black mb-2 text-center mt-2 text-[#3C3E4A]">Tạo mật khẩu mới</h2>
+            <p className="text-[#3C3E4A]/75 text-sm text-center mb-6 font-medium">
               Vui lòng kiểm tra email và thiết lập mật khẩu
             </p>
 
             {error && (
-              <div className="bg-[#FFF0EE] border border-red-300 text-[#9B3B30] p-3 rounded-xl mb-4 text-sm text-center font-bold">
+              <div className="bg-[#E0DFD2] border border-red-300 text-[#3C3E4A] p-3 rounded-xl mb-4 text-sm text-center font-bold">
                 {error}
               </div>
             )}
@@ -142,10 +142,10 @@ export default function ForgotPasswordPage() {
             )}
 
             <div>
-              <label className="block text-sm font-bold mb-1 text-center text-[#2B2B2B]">Mã OTP (6 số)</label>
+              <label className="block text-sm font-bold mb-1 text-center text-[#3C3E4A]">Mã OTP (6 số)</label>
               <input 
                 type="text" 
-                className="w-full bg-white border-2 border-[#2B2B2B] rounded-xl px-4 py-4 text-center text-2xl font-black tracking-[0.5em] focus:outline-none focus:shadow-[0_3px_0_0_#2B2B2B] text-[#2B2B2B]"
+                className="w-full bg-white border-2 border-[#3C3E4A] rounded-xl px-4 py-4 text-center text-2xl font-black tracking-[0.5em] focus:outline-none focus:shadow-[0_3px_0_0_#3C3E4A] text-[#3C3E4A]"
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 required
@@ -155,11 +155,11 @@ export default function ForgotPasswordPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-1 mt-2 text-[#2B2B2B]">Mật khẩu mới</label>
+              <label className="block text-sm font-bold mb-1 mt-2 text-[#3C3E4A]">Mật khẩu mới</label>
               <div className="relative">
                 <input 
                   type={showPassword ? 'text' : 'password'} 
-                  className="w-full bg-white border-2 border-[#2B2B2B] rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:shadow-[0_3px_0_0_#2B2B2B] text-[#2B2B2B] placeholder-[#2B2B2B]/40"
+                  className="w-full bg-white border-2 border-[#3C3E4A] rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:shadow-[0_3px_0_0_#3C3E4A] text-[#3C3E4A] placeholder-[#3C3E4A]/40"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
@@ -169,7 +169,7 @@ export default function ForgotPasswordPage() {
                 <button 
                   type="button" 
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2B2B2B]/75 hover:text-[#2B2B2B] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3C3E4A]/75 hover:text-[#3C3E4A] transition-colors"
                   title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -192,8 +192,8 @@ export default function ForgotPasswordPage() {
             <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 size={40} className="text-emerald-700" />
             </div>
-            <h2 className="text-2xl font-black mb-4 text-[#2B2B2B]">Cập nhật thành công!</h2>
-            <p className="text-[#2B2B2B]/75 text-sm mb-8 font-medium">
+            <h2 className="text-2xl font-black mb-4 text-[#3C3E4A]">Cập nhật thành công!</h2>
+            <p className="text-[#3C3E4A]/75 text-sm mb-8 font-medium">
               Mật khẩu của bạn đã được thay đổi an toàn. Bạn có thể đăng nhập ngay bây giờ.
             </p>
             <Link href="/login" className="btn-push-primary inline-flex h-12 w-full items-center justify-center rounded-2xl font-black text-white">

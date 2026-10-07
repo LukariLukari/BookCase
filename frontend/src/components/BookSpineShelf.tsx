@@ -25,67 +25,67 @@ interface BookSpineShelfProps {
 // Authentic hardcover bookbinding material themes in Onyx, Walnut, Ash, Greige, and Stucco
 const PHYSICAL_SPINE_THEMES = [
   { 
-    bg: '#2B2B2B', // Onyx
-    textColor: '#FFFFFF', 
-    foilColor: '#E0E0E0', // Stucco Foil
-    authorColor: '#E0E0E0',
-    paperEdge: '#E0E0E0',
+    bg: '#3C3E4A', // Onyx
+    textColor: '#F3F1EC', 
+    foilColor: '#F3F1EC', // Stucco Foil
+    authorColor: '#F3F1EC',
+    paperEdge: '#F3F1EC',
     type: 'leather' 
   },
   { 
-    bg: '#2B2B2B', // Walnut
-    textColor: '#FFFFFF', 
-    foilColor: '#E0E0E0', // Greige Foil
-    authorColor: '#E0E0E0',
-    paperEdge: '#E0E0E0',
+    bg: '#3C3E4A', // Walnut
+    textColor: '#F3F1EC', 
+    foilColor: '#F3F1EC', // Greige Foil
+    authorColor: '#F3F1EC',
+    paperEdge: '#F3F1EC',
     type: 'cloth' 
   },
   { 
-    bg: '#2B2B2B', // Ash Linen
-    textColor: '#FFFFFF', 
-    foilColor: '#E0E0E0', // Stucco Foil
-    authorColor: '#2B2B2B',
-    paperEdge: '#E0E0E0',
+    bg: '#3C3E4A', // Ash Linen
+    textColor: '#F3F1EC', 
+    foilColor: '#F3F1EC', // Stucco Foil
+    authorColor: '#3C3E4A',
+    paperEdge: '#F3F1EC',
     type: 'linen' 
   },
   { 
-    bg: '#E0E0E0', // Greige Cloth
-    textColor: '#2B2B2B', 
-    foilColor: '#2B2B2B', // Onyx Foil
-    authorColor: '#2B2B2B',
-    paperEdge: '#E0E0E0',
+    bg: '#F3F1EC', // Greige Cloth
+    textColor: '#3C3E4A', 
+    foilColor: '#3C3E4A', // Onyx Foil
+    authorColor: '#3C3E4A',
+    paperEdge: '#F3F1EC',
     type: 'leather' 
   },
   { 
-    bg: '#E0E0E0', // Stucco Hardbound
-    textColor: '#2B2B2B', 
-    foilColor: '#2B2B2B', // Walnut Inlay Foil
-    authorColor: '#2B2B2B',
-    paperEdge: '#FFFFFF',
+    bg: '#F3F1EC', // Stucco Hardbound
+    textColor: '#3C3E4A', 
+    foilColor: '#3C3E4A', // Walnut Inlay Foil
+    authorColor: '#3C3E4A',
+    paperEdge: '#F3F1EC',
     type: 'linen' 
   },
   { 
-    bg: '#2B2B2B', // Onyx Leather
-    textColor: '#FFFFFF', 
-    foilColor: '#E0E0E0', // Greige Foil
-    authorColor: '#2B2B2B',
-    paperEdge: '#E0E0E0',
+    bg: '#3C3E4A', // Onyx Leather
+    textColor: '#F3F1EC', 
+    foilColor: '#F3F1EC', // Greige Foil
+    authorColor: '#3C3E4A',
+    paperEdge: '#F3F1EC',
     type: 'leather' 
   },
   { 
-    bg: '#2B2B2B', // Walnut Velvet
-    textColor: '#FFFFFF', 
-    foilColor: '#E0E0E0', // Stucco Foil
-    authorColor: '#E0E0E0',
-    paperEdge: '#E0E0E0',
+    bg: '#3C3E4A', // Walnut Velvet
+    textColor: '#F3F1EC', 
+    foilColor: '#F3F1EC', // Stucco Foil
+    authorColor: '#F3F1EC',
+    paperEdge: '#F3F1EC',
     type: 'velvet' 
   },
   { 
-    bg: '#2B2B2B', // Ash Bound
-    textColor: '#2B2B2B', 
-    foilColor: '#2B2B2B', // Onyx Foil
-    authorColor: '#2B2B2B',
-    paperEdge: '#FFFFFF',
+    bg: '#3C3E4A', // Ash Bound
+    textColor: '#3C3E4A', 
+    foilColor: '#3C3E4A', // Onyx Foil
+    authorColor: '#3C3E4A',
+    paperEdge: '#F3F1EC',
     type: 'cloth' 
   },
 ];
@@ -118,12 +118,12 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
       <div className="flex justify-between items-end mb-4 px-1">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl md:text-2xl font-bold text-[#2B2B2B] tracking-tight">{title}</h2>
-            <span className="bg-[#E0E0E0] text-[#2B2B2B] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#2B2B2B]/30">
+            <h2 className="text-xl md:text-2xl font-bold text-[#3C3E4A] tracking-tight">{title}</h2>
+            <span className="bg-[#F3F1EC] text-[#3C3E4A] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#3C3E4A]/30">
               {books.length} cuốn
             </span>
           </div>
-          <p className="text-xs md:text-sm text-[#2B2B2B]/75 mt-0.5 font-medium">
+          <p className="text-xs md:text-sm text-[#3C3E4A]/75 mt-0.5 font-medium">
             Bấm trực tiếp vào gáy sách 3D để xem chi tiết
           </p>
         </div>
@@ -132,7 +132,7 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleScroll('left')}
-            className="w-9 h-9 rounded-full bg-[#2B2B2B] text-white hover:bg-[#2E2E2D] transition-colors flex items-center justify-center shadow-md active:scale-95 cursor-pointer"
+            className="w-9 h-9 rounded-full bg-[#3C3E4A] text-white hover:bg-[#3C3E4A] transition-colors flex items-center justify-center shadow-md active:scale-95 cursor-pointer"
             title="Cuộn sang trái"
             aria-label="Cuộn sang trái"
           >
@@ -140,7 +140,7 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
           </button>
           <button
             onClick={() => handleScroll('right')}
-            className="w-9 h-9 rounded-full bg-[#2B2B2B] text-white hover:bg-[#2E2E2D] transition-colors flex items-center justify-center shadow-md active:scale-95 cursor-pointer"
+            className="w-9 h-9 rounded-full bg-[#3C3E4A] text-white hover:bg-[#3C3E4A] transition-colors flex items-center justify-center shadow-md active:scale-95 cursor-pointer"
             title="Cuộn sang phải"
             aria-label="Cuộn sang phải"
           >
@@ -208,8 +208,8 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
                     width: `${width}px`,
                     backgroundColor: theme.bg,
                     boxShadow: isHovered 
-                      ? '0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.3)' 
-                      : '0 4px 10px rgba(0,0,0,0.25), inset -2px 0 4px rgba(0,0,0,0.4), inset 2px 0 4px rgba(255,255,255,0.1)'
+                      ? '0 20px 25px -5px rgba(60,62,74,0.5), 0 10px 10px -5px rgba(60,62,74,0.3)' 
+                      : '0 4px 10px rgba(60,62,74,0.25), inset -2px 0 4px rgba(60,62,74,0.4), inset 2px 0 4px rgba(243,241,236,0.1)'
                   }}
                   className="rounded-t-[3px] rounded-b-[2px] relative flex flex-col justify-between p-1.5 overflow-hidden select-none border-t border-white/20 transition-shadow duration-300"
                 >
@@ -250,7 +250,7 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
                   {/* Vertical Title & Author Text */}
                   <div className="relative z-10 flex-1 flex flex-col items-center justify-center py-2 overflow-hidden">
                     <span
-                      className="font-extrabold text-xs md:text-[13px] tracking-wide text-center leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] truncate max-h-[85%]"
+                      className="font-extrabold text-xs md:text-[13px] tracking-wide text-center leading-snug drop-shadow-[0_1px_2px_rgba(60,62,74,0.8)] truncate max-h-[85%]"
                       style={{
                         writingMode: 'vertical-rl',
                         textOrientation: 'mixed',
@@ -274,7 +274,7 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
                       style={{ 
                         borderColor: theme.foilColor, 
                         color: theme.textColor,
-                        backgroundColor: 'rgba(0,0,0,0.2)'
+                        backgroundColor: 'rgba(60,62,74,0.2)'
                       }}
                     >
                       {(idx + 1).toString().padStart(2, '0')}
@@ -298,13 +298,13 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
           <div className="w-full h-2 bg-gradient-to-b from-black/40 to-transparent" />
           
           {/* Main Wooden Plank */}
-          <div className="w-full h-4 bg-gradient-to-b from-[#4a2e18] via-[#3d2411] to-[#2b1809] border-t border-[#6b4527]/60 shadow-lg relative flex items-center justify-between px-4">
-             <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:8px_8px] pointer-events-none" />
+          <div className="w-full h-4 bg-gradient-to-b from-[#3C3E4A] via-[#3C3E4A] to-[#3C3E4A] border-t border-[#9FA3AD]/60 shadow-lg relative flex items-center justify-between px-4">
+             <div className="absolute inset-0 bg-[radial-gradient(#F3F1EC1A_1px,transparent_1px)] [background-size:8px_8px] pointer-events-none" />
              <div className="w-full h-[1px] bg-white/10" />
           </div>
 
           {/* Wooden Bevel Front Ledge */}
-          <div className="w-full h-2.5 bg-gradient-to-b from-[#241306] to-[#150a03] border-t border-black/50 shadow-md" />
+          <div className="w-full h-2.5 bg-gradient-to-b from-[#3C3E4A] to-[#3C3E4A] border-t border-black/50 shadow-md" />
         </div>
       </div>
     </div>

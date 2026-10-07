@@ -59,21 +59,21 @@ export default function BookCoverImage({
 
   if (imgState === 'error' || (!src && !bookId)) {
     return (
-      <div className={`w-full h-full ${aspectRatio} bg-[#2B2B2B] p-4 flex flex-col justify-between relative overflow-hidden select-none border border-[#2B2B2B]/30/60 shadow-md rounded-2xl`}>
+      <div className={`w-full h-full ${aspectRatio} bg-[#3C3E4A] p-4 flex flex-col justify-between relative overflow-hidden select-none border border-[#3C3E4A]/30/60 shadow-md rounded-2xl`}>
         {/* Book spine line overlay */}
-        <div className="absolute top-0 bottom-0 left-2.5 w-[3px] bg-[#2B2B2B]/40 blur-[0.5px]" />
-        <div className="absolute top-0 bottom-0 left-3.5 w-[1px] bg-[#2B2B2B]/30/30" />
+        <div className="absolute top-0 bottom-0 left-2.5 w-[3px] bg-[#3C3E4A]/40 blur-[0.5px]" />
+        <div className="absolute top-0 bottom-0 left-3.5 w-[1px] bg-[#3C3E4A]/30/30" />
         
         {/* Subtle background glow */}
-        <div className="absolute -right-8 -bottom-8 w-28 h-28 bg-[#F97316]/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -right-8 -bottom-8 w-28 h-28 bg-[#B6B8AB]/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="pl-3 pr-1 pt-2 z-10">
-          <span className="text-[10px] font-black tracking-widest text-[#F97316] block mb-1 uppercase">Billy</span>
-          <h4 className="font-extrabold text-[#E0E0E0] text-xs sm:text-sm md:text-base leading-snug line-clamp-4 drop-shadow-none">{title}</h4>
+          <span className="text-[10px] font-black tracking-widest text-[#B6B8AB] block mb-1 uppercase">Billy</span>
+          <h4 className="font-extrabold text-[#F3F1EC] text-xs sm:text-sm md:text-base leading-snug line-clamp-4 drop-shadow-none">{title}</h4>
         </div>
 
-        <div className="pl-3 pr-1 pb-1 z-10 mt-auto pt-2 border-t border-[#2B2B2B]/30/40">
-          <p className="text-[11px] font-bold text-[#2B2B2B]/60 truncate">{author || "Tác giả chưa rõ"}</p>
+        <div className="pl-3 pr-1 pb-1 z-10 mt-auto pt-2 border-t border-[#3C3E4A]/30/40">
+          <p className="text-[11px] font-bold text-[#3C3E4A]/60 truncate">{author || "Tác giả chưa rõ"}</p>
         </div>
       </div>
     );

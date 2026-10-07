@@ -1,44 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --background: #E0E0E0;
-  --foreground: #2B2B2B;
-  --surface: #FFFFFF;
-  --surface-muted: #EAEAEA;
-  --surface-card: #FFFFFF;
-  --border-soft: #2B2B2B;
-  --text-main: #2B2B2B;
-  --text-muted: #2B2B2B;
-  --color-charcoal: #2B2B2B;
-  --color-navy: #2B2B2B;
-  --color-navy-hover: #3E3E3E;
-  --color-charcoal-noir: #2B2B2B;
-  --color-ironclad: #2B2B2B;
-  --color-urban-fog: #2B2B2B;
-  --color-moonlit-silver: #E0E0E0;
-  --color-cloud-veil: #E0E0E0;
+  --ivory: #F3F1EC;
+  --moss: #B6B8AB;
+  --smoke: #9FA3AD;
+  --garden: #E0DFD2;
+  --midnight: #3C3E4A;
+  --background: #F3F1EC;
+  --foreground: #3C3E4A;
+  --surface: #F3F1EC;
+  --surface-muted: #E0DFD2;
+  --surface-card: #F3F1EC;
+  --border-soft: #3C3E4A;
+  --text-main: #3C3E4A;
+  --text-muted: #3C3E4A;
+  --color-charcoal: #3C3E4A;
+  --color-navy: #3C3E4A;
+  --color-navy-hover: #4B4D5B;
+  --color-charcoal-noir: #3C3E4A;
+  --color-ironclad: #3C3E4A;
+  --color-urban-fog: #3C3E4A;
+  --color-moonlit-silver: #F3F1EC;
+  --color-cloud-veil: #F3F1EC;
   /* Legacy alias mappings for maximum compatibility */
-  --color-onyx: #2B2B2B;
-  --color-walnut: #2B2B2B;
-  --color-ash: #2B2B2B;
-  --color-greige: #E0E0E0;
-  --color-stucco: #E0E0E0;
+  --color-onyx: #3C3E4A;
+  --color-walnut: #3C3E4A;
+  --color-ash: #3C3E4A;
+  --color-greige: #F3F1EC;
+  --color-stucco: #F3F1EC;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
-  --color-charcoal-noir: #2B2B2B;
-  --color-ironclad: #2B2B2B;
-  --color-urban-fog: #2B2B2B;
-  --color-moonlit-silver: #E0E0E0;
-  --color-cloud-veil: #E0E0E0;
-  --color-onyx: #2B2B2B;
-  --color-walnut: #2B2B2B;
-  --color-ash: #2B2B2B;
-  --color-greige: #E0E0E0;
-  --color-stucco: #E0E0E0;
+  --color-charcoal-noir: #3C3E4A;
+  --color-ironclad: #3C3E4A;
+  --color-urban-fog: #3C3E4A;
+  --color-moonlit-silver: #F3F1EC;
+  --color-cloud-veil: #F3F1EC;
+  --color-onyx: #3C3E4A;
+  --color-walnut: #3C3E4A;
+  --color-ash: #3C3E4A;
+  --color-greige: #F3F1EC;
+  --color-stucco: #F3F1EC;
   --font-sans: var(--font-montserrat);
 }
 
@@ -48,8 +53,8 @@ html, body {
 }
 
 body {
-  background-color: #E0E0E0;
-  color: #2B2B2B;
+  background-color: #F3F1EC;
+  color: #3C3E4A;
   font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
@@ -78,14 +83,14 @@ input[type="month"]::-webkit-date-and-time-value {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #E0E0E0;
+  background: #F3F1EC;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2B2B2B;
+  background: #3C3E4A;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2B2B2B;
+  background: #3C3E4A;
 }
 
 /* Hardcover Book & Ribbon Visual System */
@@ -97,23 +102,23 @@ input[type="month"]::-webkit-date-and-time-value {
   height: 100%;
   border-radius: 4px 12px 12px 4px;
   overflow: hidden;
-  background-color: #FFFFFF;
+  background-color: #F3F1EC;
   box-shadow: 
-    -2px 3px 6px rgba(43, 43, 43, 0.12),
-    0 10px 20px -3px rgba(43, 43, 43, 0.18),
-    0 4px 6px -2px rgba(43, 43, 43, 0.08),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    -2px 3px 6px rgba(60, 62, 74, 0.12),
+    0 10px 20px -3px rgba(60, 62, 74, 0.18),
+    0 4px 6px -2px rgba(60, 62, 74, 0.08),
+    inset 0 0 0 1px rgba(60, 62, 74, 0.08),
+    inset 0 1px 0 rgba(243, 241, 236, 0.25);
   transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .group:hover .book-card-3d,
 .group:hover .book-hardcover {
   box-shadow: 
-    -4px 6px 12px rgba(43, 43, 43, 0.16),
-    0 20px 32px -6px rgba(43, 43, 43, 0.26),
-    0 8px 12px -3px rgba(43, 43, 43, 0.14),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    -4px 6px 12px rgba(60, 62, 74, 0.16),
+    0 20px 32px -6px rgba(60, 62, 74, 0.26),
+    0 8px 12px -3px rgba(60, 62, 74, 0.14),
+    inset 0 0 0 1px rgba(243, 241, 236, 0.18);
 }
 
 /* Subtle Book Spine Crease & Hinge Groove */
@@ -127,13 +132,13 @@ input[type="month"]::-webkit-date-and-time-value {
   z-index: 10;
   background: linear-gradient(
     90deg, 
-    rgba(0, 0, 0, 0.28) 0%, 
-    rgba(0, 0, 0, 0.10) 30%, 
-    rgba(0, 0, 0, 0.16) 65%, 
-    rgba(255, 255, 255, 0.22) 78%, 
+    rgba(60, 62, 74, 0.28) 0%, 
+    rgba(60, 62, 74, 0.10) 30%, 
+    rgba(60, 62, 74, 0.16) 65%, 
+    rgba(243, 241, 236, 0.22) 78%, 
     transparent 100%
   );
-  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.15);
+  box-shadow: inset 1px 0 0 rgba(243, 241, 236, 0.15);
 }
 
 /* Subtle Paper Page Block Bevel */
@@ -145,7 +150,7 @@ input[type="month"]::-webkit-date-and-time-value {
   width: 3px;
   pointer-events: none;
   z-index: 10;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.25));
+  background: linear-gradient(90deg, rgba(60, 62, 74, 0.08), rgba(243, 241, 236, 0.25));
   border-radius: 0 10px 10px 0;
 }
 
@@ -157,34 +162,34 @@ input[type="month"]::-webkit-date-and-time-value {
   z-index: 5;
   background: linear-gradient(
     115deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0.05) 25%,
+    rgba(243, 241, 236, 0.15) 0%,
+    rgba(243, 241, 236, 0.05) 25%,
     transparent 45%,
-    rgba(0, 0, 0, 0.02) 75%,
-    rgba(0, 0, 0, 0.08) 100%
+    rgba(60, 62, 74, 0.02) 75%,
+    rgba(60, 62, 74, 0.08) 100%
   );
 }
 
 /* Charcoal Noir Accent Button & Pills */
-.btn-gradient, .btn-navy, .bg-\[\#1B2A4A\], .bg-\[\#203354\], .bg-\[\#1C1C1B\] {
-  background-color: #2B2B2B !important;
-  color: #FFFFFF !important;
+.btn-gradient, .btn-navy, .bg-\[\#3C3E4A\], .bg-\[\#3C3E4A\], .bg-\[\#3C3E4A\] {
+  background-color: #3C3E4A !important;
+  color: #F3F1EC !important;
 }
 
-.btn-gradient *, .btn-navy *, .bg-\[\#1B2A4A\] *, .bg-\[\#203354\] *, .bg-\[\#1C1C1B\] * {
-  color: #FFFFFF !important;
+.btn-gradient *, .btn-navy *, .bg-\[\#3C3E4A\] *, .bg-\[\#3C3E4A\] *, .bg-\[\#3C3E4A\] * {
+  color: #F3F1EC !important;
 }
 
-.btn-gradient svg, .btn-navy svg, .bg-\[\#1B2A4A\] svg, .bg-\[\#203354\] svg, .bg-\[\#1C1C1B\] svg {
-  stroke: #FFFFFF !important;
-  color: #FFFFFF !important;
+.btn-gradient svg, .btn-navy svg, .bg-\[\#3C3E4A\] svg, .bg-\[\#3C3E4A\] svg, .bg-\[\#3C3E4A\] svg {
+  stroke: #F3F1EC !important;
+  color: #F3F1EC !important;
 }
 
 .btn-gradient:hover, .btn-navy:hover {
-  background-color: #3E3E3E !important;
-  color: #FFFFFF !important;
+  background-color: #4B4D5B !important;
+  color: #F3F1EC !important;
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(43, 43, 43, 0.38);
+  box-shadow: 0 6px 18px rgba(60, 62, 74, 0.38);
 }
 
 /* ==========================================================================
@@ -198,11 +203,11 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #2B2B2B;
-  background-color: #FFFFFF;
-  color: #2B2B2B;
+  border: 2px solid #3C3E4A;
+  background-color: #F3F1EC;
+  color: #3C3E4A;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #2B2B2B;
+  box-shadow: 0 4px 0 0 #3C3E4A;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -218,20 +223,20 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push:hover, .btn-3d:hover, .neu-btn:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #2B2B2B;
-  background-color: #E0E0E0;
+  box-shadow: 0 5.5px 0 0 #3C3E4A;
+  background-color: #F3F1EC;
 }
 
 .btn-push:active, .btn-3d:active, .neu-btn:active, .btn-push.is-pressed {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #2B2B2B !important;
+  box-shadow: 0 0 0 0 #3C3E4A !important;
 }
 
 .btn-push:disabled, .btn-3d:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #2B2B2B;
+  box-shadow: 0 2px 0 0 #3C3E4A;
 }
 
 /* 2. Primary Charcoal Noir 3D Push Button */
@@ -241,41 +246,41 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #2B2B2B;
-  background-color: #2B2B2B;
-  color: #FFFFFF !important;
+  border: 2px solid #3C3E4A;
+  background-color: #3C3E4A;
+  color: #F3F1EC !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #2B2B2B;
+  box-shadow: 0 4px 0 0 #3C3E4A;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
 }
 
 .btn-push-primary *, .btn-3d-navy *, .neu-btn-primary * {
-  color: #FFFFFF !important;
+  color: #F3F1EC !important;
 }
 
 .btn-push-primary svg, .btn-3d-navy svg, .neu-btn-primary svg {
-  stroke: #FFFFFF !important;
+  stroke: #F3F1EC !important;
 }
 
 .btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #2B2B2B;
-  background-color: #3E3E3E;
+  box-shadow: 0 5.5px 0 0 #3C3E4A;
+  background-color: #4B4D5B;
 }
 
 .btn-push-primary:active, .btn-3d-navy:active, .neu-btn-primary:active, .btn-push-primary.is-pressed {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #2B2B2B !important;
-  background-color: #2B2B2B;
+  box-shadow: 0 0 0 0 #3C3E4A !important;
+  background-color: #3C3E4A;
 }
 
 .btn-push-primary:disabled, .btn-3d-navy:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #2B2B2B;
+  box-shadow: 0 2px 0 0 #3C3E4A;
 }
 
 /* 2b. Warm Ironclad Grey 3D Push Button */
@@ -285,11 +290,11 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #2B2B2B;
-  background-color: #2B2B2B;
-  color: #FFFFFF !important;
+  border: 2px solid #3C3E4A;
+  background-color: #3C3E4A;
+  color: #F3F1EC !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #2B2B2B;
+  box-shadow: 0 4px 0 0 #3C3E4A;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -297,13 +302,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-walnut:hover, .btn-push-ironclad:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #2B2B2B;
-  background-color: #444444;
+  box-shadow: 0 5.5px 0 0 #3C3E4A;
+  background-color: #4B4D5B;
 }
 
 .btn-push-walnut:active, .btn-push-ironclad:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #2B2B2B !important;
+  box-shadow: 0 0 0 0 #3C3E4A !important;
 }
 
 /* 3. Action 3D Push Button (Thu tiền, highlight) */
@@ -313,11 +318,11 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #2B2B2B;
-  background-color: #FFFFFF;
-  color: #2B2B2B;
+  border: 2px solid #3C3E4A;
+  background-color: #F3F1EC;
+  color: #3C3E4A;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #2B2B2B;
+  box-shadow: 0 4px 0 0 #3C3E4A;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -325,13 +330,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-amber:hover, .btn-3d-amber:hover, .neu-btn-amber:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #2B2B2B;
-  background-color: #E0E0E0;
+  box-shadow: 0 5.5px 0 0 #3C3E4A;
+  background-color: #F3F1EC;
 }
 
 .btn-push-amber:active, .btn-3d-amber:active, .neu-btn-amber:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #2B2B2B !important;
+  box-shadow: 0 0 0 0 #3C3E4A !important;
 }
 
 /* 4. Emerald / Success 3D Badge & Button (Đã thu, hoàn tất) */
@@ -341,23 +346,23 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #1E663B;
-  background-color: #EAF5EE;
-  color: #1E663B;
+  border: 2px solid #B6B8AB;
+  background-color: #E0DFD2;
+  color: #B6B8AB;
   font-weight: 800;
-  box-shadow: 0 3px 0 0 #1E663B;
+  box-shadow: 0 3px 0 0 #B6B8AB;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
 .btn-push-emerald:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 0 0 #1E663B;
-  background-color: #F2FAF5;
+  box-shadow: 0 4px 0 0 #B6B8AB;
+  background-color: #F3F1EC;
 }
 
 .btn-push-emerald:active {
   transform: translateY(3px);
-  box-shadow: 0 0 0 0 #1E663B !important;
+  box-shadow: 0 0 0 0 #B6B8AB !important;
 }
 
 /* 5. Danger / Red 3D Button (Đăng xuất, xóa) */
@@ -367,11 +372,11 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #9B3B30;
-  background-color: #FFF0EE;
-  color: #9B3B30;
+  border: 2px solid #3C3E4A;
+  background-color: #E0DFD2;
+  color: #3C3E4A;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #9B3B30;
+  box-shadow: 0 4px 0 0 #3C3E4A;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -379,49 +384,49 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-danger:hover, .btn-3d-danger:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #9B3B30;
-  background-color: #FFEAE7;
+  box-shadow: 0 5.5px 0 0 #3C3E4A;
+  background-color: #E0DFD2;
 }
 
 .btn-push-danger:active, .btn-3d-danger:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #9B3B30 !important;
+  box-shadow: 0 0 0 0 #3C3E4A !important;
 }
 
 /* 6. 3D Card / Container */
 .card-push, .card-3d, .neu-surface {
-  background-color: #FFFFFF;
-  border: 2px solid #2B2B2B;
+  background-color: #F3F1EC;
+  border: 2px solid #3C3E4A;
   border-radius: 28px;
-  box-shadow: 0 5px 0 0 #2B2B2B;
+  box-shadow: 0 5px 0 0 #3C3E4A;
   transition: all 0.15s ease;
 }
 
 .card-push-subtle, .card-3d-subtle, .neu-surface-subtle {
-  background-color: #FFFFFF;
-  border: 2px solid #2B2B2B;
+  background-color: #F3F1EC;
+  border: 2px solid #3C3E4A;
   border-radius: 20px;
-  box-shadow: 0 4px 0 0 #2B2B2B;
+  box-shadow: 0 4px 0 0 #3C3E4A;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .card-push-subtle:hover, .card-3d-subtle:hover, .neu-surface-subtle:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #2B2B2B;
+  box-shadow: 0 5.5px 0 0 #3C3E4A;
 }
 
 /* 7. 3D Input & Search Box */
 .input-push, .input-3d, .neu-inset {
-  background-color: #FFFFFF;
-  border: 2px solid #2B2B2B;
+  background-color: #F3F1EC;
+  border: 2px solid #3C3E4A;
   border-radius: 9999px;
-  box-shadow: 0 3px 0 0 #2B2B2B;
+  box-shadow: 0 3px 0 0 #3C3E4A;
   transition: all 0.12s ease;
 }
 
 .input-push:focus-within, .input-3d:focus-within, .neu-inset:focus-within {
-  box-shadow: 0 4px 0 0 #2B2B2B;
-  background-color: #FFFFFF;
+  box-shadow: 0 4px 0 0 #3C3E4A;
+  background-color: #F3F1EC;
 }
 
 /* 8. 3D Badge */
@@ -429,18 +434,18 @@ input[type="month"]::-webkit-date-and-time-value {
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  border: 2px solid #2B2B2B;
-  background-color: #FFFFFF;
-  box-shadow: 0 2.5px 0 0 #2B2B2B;
+  border: 2px solid #3C3E4A;
+  background-color: #F3F1EC;
+  box-shadow: 0 2.5px 0 0 #3C3E4A;
 }
 
 .badge-push-sunken, .neu-badge-sunken {
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  border: 2px solid #2B2B2B;
-  background-color: #E0E0E0;
-  box-shadow: 0 1px 0 0 #2B2B2B;
+  border: 2px solid #3C3E4A;
+  background-color: #F3F1EC;
+  box-shadow: 0 1px 0 0 #3C3E4A;
 }
 
 /* 9. Squircle button compatibility */
@@ -450,28 +455,28 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #2B2B2B;
-  background-color: #FFFFFF;
-  color: #2B2B2B;
+  border: 2px solid #3C3E4A;
+  background-color: #F3F1EC;
+  color: #3C3E4A;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #2B2B2B;
+  box-shadow: 0 4px 0 0 #3C3E4A;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
   cursor: pointer;
 }
 .squircle-btn:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #2B2B2B;
-  background-color: #E0E0E0;
+  box-shadow: 0 5.5px 0 0 #3C3E4A;
+  background-color: #F3F1EC;
 }
 .squircle-btn:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #2B2B2B !important;
+  box-shadow: 0 0 0 0 #3C3E4A !important;
 }
 .squircle-btn.active {
-  background-color: #2B2B2B !important;
-  color: #FFFFFF !important;
-  border-color: #2B2B2B !important;
-  box-shadow: 0 4px 0 0 #2B2B2B !important;
+  background-color: #3C3E4A !important;
+  color: #F3F1EC !important;
+  border-color: #3C3E4A !important;
+  box-shadow: 0 4px 0 0 #3C3E4A !important;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -482,4 +487,159 @@ input[type="month"]::-webkit-date-and-time-value {
   scrollbar-width: none;
 }
 
+/* Palette utility compatibility
+   Keeps existing Tailwind utility usage on the new Ivory / Moss / Smoke / Garden / Midnight theme. */
+[class~="bg-white"] { background-color: var(--ivory) !important; }
+[class~="bg-black"] { background-color: var(--midnight) !important; }
+[class~="bg-gray-50"],
+[class~="bg-gray-100"],
+[class~="bg-stone-50"],
+[class~="bg-neutral-50"],
+[class~="bg-zinc-50"] { background-color: var(--garden) !important; }
+[class~="bg-gray-200"],
+[class~="bg-gray-300"],
+[class~="bg-slate-100"],
+[class~="bg-slate-200"] { background-color: var(--moss) !important; }
+[class~="hover:bg-white"]:hover { background-color: var(--ivory) !important; }
+[class~="hover:bg-black"]:hover,
+[class~="hover:bg-gray-800"]:hover { background-color: var(--midnight) !important; }
+[class~="hover:bg-gray-50"]:hover,
+[class~="hover:bg-gray-100"]:hover { background-color: var(--garden) !important; }
 
+[class~="text-white"] { color: var(--ivory) !important; }
+[class~="text-black"],
+[class~="text-gray-800"],
+[class~="text-slate-900"],
+[class~="text-stone-900"] { color: var(--midnight) !important; }
+[class~="text-gray-400"],
+[class~="text-gray-500"],
+[class~="text-gray-600"],
+[class~="text-slate-500"],
+[class~="text-stone-500"] { color: var(--smoke) !important; }
+[class~="hover:text-white"]:hover { color: var(--ivory) !important; }
+[class~="hover:text-black"]:hover { color: var(--midnight) !important; }
+
+[class~="border-white"] { border-color: var(--ivory) !important; }
+[class~="border-black"] { border-color: var(--midnight) !important; }
+[class~="border-gray-100"],
+[class~="border-gray-200"] { border-color: var(--garden) !important; }
+[class~="border-gray-300"] { border-color: var(--moss) !important; }
+[class~="hover:border-white"]:hover { border-color: var(--ivory) !important; }
+[class~="hover:border-black"]:hover { border-color: var(--midnight) !important; }
+
+[class~="bg-black/30"] { background-color: rgb(60 62 74 / 0.3) !important; }
+[class~="bg-black/40"] { background-color: rgb(60 62 74 / 0.4) !important; }
+[class~="bg-black/50"] { background-color: rgb(60 62 74 / 0.5) !important; }
+[class~="bg-black/60"] { background-color: rgb(60 62 74 / 0.6) !important; }
+[class~="bg-black/85"] { background-color: rgb(60 62 74 / 0.85) !important; }
+[class~="bg-black/90"] { background-color: rgb(60 62 74 / 0.9) !important; }
+[class~="bg-white/10"] { background-color: rgb(243 241 236 / 0.1) !important; }
+[class~="bg-white/20"] { background-color: rgb(243 241 236 / 0.2) !important; }
+[class~="bg-white/30"] { background-color: rgb(243 241 236 / 0.3) !important; }
+[class~="bg-white/95"] { background-color: rgb(243 241 236 / 0.95) !important; }
+[class~="hover:bg-white/20"]:hover { background-color: rgb(243 241 236 / 0.2) !important; }
+
+[class~="from-black"] { --tw-gradient-from: var(--midnight) var(--tw-gradient-from-position) !important; --tw-gradient-to: rgb(60 62 74 / 0) var(--tw-gradient-to-position) !important; }
+[class~="via-white"] { --tw-gradient-via: var(--ivory) var(--tw-gradient-via-position) !important; }
+[class~="to-black"] { --tw-gradient-to: var(--midnight) var(--tw-gradient-to-position) !important; }
+
+[class~="bg-red-50"],
+[class~="bg-red-100"],
+[class~="bg-red-500/10"],
+[class~="bg-red-950/30"],
+[class~="bg-red-950/40"],
+[class~="bg-amber-50"],
+[class~="bg-amber-100"],
+[class~="bg-emerald-50"],
+[class~="bg-emerald-50/80"],
+[class~="bg-emerald-100"],
+[class~="bg-blue-100"],
+[class~="bg-purple-100"],
+[class~="bg-orange-100"],
+[class~="bg-sky-100"],
+[class~="bg-indigo-100"],
+[class~="bg-teal-100"],
+[class~="bg-cyan-200"],
+[class~="bg-rose-100"],
+[class~="bg-pink-100"],
+[class~="bg-fuchsia-100"],
+[class~="bg-lime-100"] { background-color: var(--garden) !important; }
+[class~="bg-red-100/80"],
+[class~="bg-red-100/90"],
+[class~="bg-red-500"],
+[class~="bg-red-500/80"],
+[class~="bg-red-600"],
+[class~="bg-green-500"],
+[class~="bg-emerald-300"],
+[class~="bg-emerald-700"],
+[class~="hover:bg-red-600"]:hover,
+[class~="hover:bg-red-950/40"]:hover { background-color: var(--moss) !important; }
+
+[class~="text-red-300"],
+[class~="text-red-400"],
+[class~="text-red-500"],
+[class~="text-red-600"],
+[class~="text-red-700"],
+[class~="text-red-800"],
+[class~="text-red-900"],
+[class~="text-red-950"],
+[class~="text-amber-600"],
+[class~="text-amber-800"],
+[class~="text-amber-900"],
+[class~="text-amber-950"],
+[class~="text-orange-500"],
+[class~="text-green-400"],
+[class~="text-green-500"],
+[class~="text-green-600"],
+[class~="text-emerald-400"],
+[class~="text-emerald-700"],
+[class~="text-emerald-800"],
+[class~="text-emerald-900"],
+[class~="text-emerald-950"],
+[class~="text-blue-900"],
+[class~="text-purple-950"],
+[class~="text-teal-950"],
+[class~="text-cyan-950"],
+[class~="text-rose-950"],
+[class~="text-pink-950"],
+[class~="text-lime-950"],
+[class~="text-indigo-950"],
+[class~="text-violet-950"] { color: var(--midnight) !important; }
+[class~="hover:text-red-300"]:hover,
+[class~="hover:text-red-400"]:hover,
+[class~="hover:text-red-500"]:hover { color: var(--midnight) !important; }
+
+[class~="border-red-200"],
+[class~="border-red-300"],
+[class~="border-red-400"],
+[class~="border-red-500/20"],
+[class~="border-red-500/30"],
+[class~="border-red-500/40"],
+[class~="border-amber-200"],
+[class~="border-emerald-200"],
+[class~="border-emerald-300"],
+[class~="hover:border-red-400"]:hover { border-color: var(--moss) !important; }
+[class~="focus:border-red-500"]:focus { border-color: var(--midnight) !important; }
+[class~="focus:ring-red-100"]:focus { --tw-ring-color: rgb(182 184 171 / 0.45) !important; }
+
+[class~="from-amber-100"],
+[class~="from-sky-100"],
+[class~="from-emerald-100"],
+[class~="from-rose-100"],
+[class~="from-purple-100"],
+[class~="from-lime-100"],
+[class~="from-indigo-100"] { --tw-gradient-from: var(--ivory) var(--tw-gradient-from-position) !important; --tw-gradient-to: rgb(243 241 236 / 0) var(--tw-gradient-to-position) !important; }
+[class~="via-orange-100"],
+[class~="via-indigo-100"],
+[class~="via-teal-100"],
+[class~="via-pink-100"],
+[class~="via-fuchsia-100"],
+[class~="via-emerald-100"],
+[class~="via-violet-100"] { --tw-gradient-via: var(--garden) var(--tw-gradient-via-position) !important; }
+[class~="to-amber-200"],
+[class~="to-blue-200"],
+[class~="to-cyan-200"],
+[class~="to-red-200"],
+[class~="to-pink-200"],
+[class~="to-teal-200"],
+[class~="to-purple-200"] { --tw-gradient-to: var(--moss) var(--tw-gradient-to-position) !important; }
