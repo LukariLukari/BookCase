@@ -333,17 +333,17 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
 
   return (
     <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-3 md:p-4 backdrop-blur-md">
-      <div className="relative bg-[#2B2B2B] border border-[#565656]/50 rounded-3xl p-5 md:p-8 max-w-2xl w-full shadow-2xl overflow-hidden max-h-[95vh] flex flex-col">
+      <div className="relative bg-[#2B2B2B] border border-[#2B2B2B]/30/50 rounded-3xl p-5 md:p-8 max-w-2xl w-full shadow-2xl overflow-hidden max-h-[95vh] flex flex-col">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#565656]/40 pb-4 mb-5">
+        <div className="flex items-center justify-between border-b border-[#2B2B2B]/30/40 pb-4 mb-5">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#2B2B2B] rounded-xl text-[#E0E0E0] border border-[#565656]/50 shadow-inner">
+            <div className="p-2.5 bg-[#2B2B2B] rounded-xl text-[#E0E0E0] border border-[#2B2B2B]/30/50 shadow-inner">
               <QuoteIcon size={20} />
             </div>
             <div>
               <h2 className="text-xl font-black text-[#E0E0E0]">Tạo Trích Dẫn</h2>
-              <p className="text-xs text-[#B3B3B3]">Canh khung đoạn sách & lưu lại số trang</p>
+              <p className="text-xs text-[#2B2B2B]/60">Canh khung đoạn sách & lưu lại số trang</p>
             </div>
           </div>
           <button 
@@ -351,7 +351,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
               handleStopLiveCamera();
               onClose();
             }} 
-            className="p-2 text-[#B3B3B3] hover:text-[#E0E0E0] bg-[#2B2B2B] hover:bg-[#2E2E2D] rounded-full transition-colors cursor-pointer"
+            className="p-2 text-[#2B2B2B]/60 hover:text-[#E0E0E0] bg-[#2B2B2B] hover:bg-[#2E2E2D] rounded-full transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -361,11 +361,11 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
         <div className="flex-1 overflow-y-auto pr-1 space-y-6">
           
           {/* Section 1: Book Snippet Camera / Frame Capture */}
-          <div className="bg-[#2B2B2B]/70 border border-[#565656]/50 rounded-2xl p-4">
+          <div className="bg-[#2B2B2B]/70 border border-[#2B2B2B]/30/50 rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
               <label className="block text-sm font-bold text-[#E0E0E0] flex items-center gap-1.5">
-                <FileText size={15} className="text-[#B3B3B3]" />
-                <span>1. Canh khung ảnh đoạn sách <span className="text-xs text-[#8A817C] font-normal">(Tùy chọn)</span></span>
+                <FileText size={15} className="text-[#2B2B2B]/60" />
+                <span>1. Canh khung ảnh đoạn sách <span className="text-xs text-[#2B2B2B]/60 font-normal">(Tùy chọn)</span></span>
               </label>
               
               {imageSrc && !isCameraActive && (
@@ -373,7 +373,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                   {rawUploadedSrc && (
                     <button
                       onClick={() => setIsCroppingStatic(true)}
-                      className="flex items-center gap-1 text-xs text-[#E0E0E0] bg-[#2B2B2B] px-2.5 py-1 rounded-lg border border-[#565656]/60 hover:bg-[#2E2E2D] transition-colors"
+                      className="flex items-center gap-1 text-xs text-[#E0E0E0] bg-[#2B2B2B] px-2.5 py-1 rounded-lg border border-[#2B2B2B]/30/60 hover:bg-[#2E2E2D] transition-colors"
                     >
                       <Crop size={13} />
                       <span>Chỉnh khung</span>
@@ -381,7 +381,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                   )}
                   <button
                     onClick={() => setIsImageExpanded(!isImageExpanded)}
-                    className="flex items-center gap-1 text-xs text-[#B3B3B3] hover:text-[#E0E0E0] bg-[#2B2B2B] px-2.5 py-1 rounded-lg border border-[#565656]/60 transition-colors"
+                    className="flex items-center gap-1 text-xs text-[#2B2B2B]/60 hover:text-[#E0E0E0] bg-[#2B2B2B] px-2.5 py-1 rounded-lg border border-[#2B2B2B]/30/60 transition-colors"
                   >
                     {isImageExpanded ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
                     <span>{isImageExpanded ? "Thu nhỏ" : "Phóng to"}</span>
@@ -430,28 +430,28 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                 </div>
 
                 {/* Viewfinder Controls & Height Ratio Buttons */}
-                <div className="w-full bg-[#181618] p-3 border-t border-[#565656]/50 flex flex-col gap-3">
+                <div className="w-full bg-[#181618] p-3 border-t border-[#2B2B2B]/30/50 flex flex-col gap-3">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-[#B3B3B3] font-semibold">Khổ khung chụp:</span>
+                    <span className="text-[#2B2B2B]/60 font-semibold">Khổ khung chụp:</span>
                     <div className="flex gap-1.5">
                       <button
                         type="button"
                         onClick={() => setFrameHeightRatio(0.22)}
-                        className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${frameHeightRatio === 0.22 ? 'bg-[#E0E0E0] text-[#2B2B2B]' : 'bg-[#2B2B2B] text-[#B3B3B3]'}`}
+                        className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${frameHeightRatio === 0.22 ? 'bg-[#E0E0E0] text-[#2B2B2B]' : 'bg-[#2B2B2B] text-[#2B2B2B]/60'}`}
                       >
                         1 - 2 Dòng
                       </button>
                       <button
                         type="button"
                         onClick={() => setFrameHeightRatio(0.38)}
-                        className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${frameHeightRatio === 0.38 ? 'bg-[#E0E0E0] text-[#2B2B2B]' : 'bg-[#2B2B2B] text-[#B3B3B3]'}`}
+                        className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${frameHeightRatio === 0.38 ? 'bg-[#E0E0E0] text-[#2B2B2B]' : 'bg-[#2B2B2B] text-[#2B2B2B]/60'}`}
                       >
                         Khổ vừa
                       </button>
                       <button
                         type="button"
                         onClick={() => setFrameHeightRatio(0.60)}
-                        className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${frameHeightRatio === 0.60 ? 'bg-[#E0E0E0] text-[#2B2B2B]' : 'bg-[#2B2B2B] text-[#B3B3B3]'}`}
+                        className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${frameHeightRatio === 0.60 ? 'bg-[#E0E0E0] text-[#2B2B2B]' : 'bg-[#2B2B2B] text-[#2B2B2B]/60'}`}
                       >
                         Cả đoạn dài
                       </button>
@@ -462,7 +462,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                     <button
                       type="button"
                       onClick={handleStopLiveCamera}
-                      className="px-4 py-2 bg-[#2B2B2B] text-[#B3B3B3] hover:text-[#E0E0E0] rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                      className="px-4 py-2 bg-[#2B2B2B] text-[#2B2B2B]/60 hover:text-[#E0E0E0] rounded-xl text-xs font-bold transition-colors cursor-pointer"
                     >
                       Đóng Camera
                     </button>
@@ -482,24 +482,24 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
               </div>
             ) : isCroppingStatic && rawUploadedSrc ? (
               /* STATIC CROPPER FOR UPLOADED PHOTOS */
-              <div className="space-y-3 bg-[#2B2B2B] border border-[#565656] rounded-xl p-3.5">
+              <div className="space-y-3 bg-[#2B2B2B] border border-[#2B2B2B]/30 rounded-xl p-3.5">
                 <div className="flex items-center justify-between text-xs font-bold text-[#E0E0E0]">
                   <span className="flex items-center gap-1.5">
-                    <Crop size={14} className="text-[#B3B3B3]" /> Kéo thanh trượt để chọn đúng đoạn sách:
+                    <Crop size={14} className="text-[#2B2B2B]/60" /> Kéo thanh trượt để chọn đúng đoạn sách:
                   </span>
                   <button
                     onClick={() => {
                       setImageSrc(rawUploadedSrc);
                       setIsCroppingStatic(false);
                     }}
-                    className="text-[#8A817C] hover:text-white"
+                    className="text-[#2B2B2B]/60 hover:text-white"
                   >
                     Hủy cắt
                   </button>
                 </div>
 
                 {/* Interactive Crop Preview Box */}
-                <div className="relative rounded-xl overflow-hidden bg-black/80 max-h-[300px] flex items-center justify-center border border-[#565656]/60">
+                <div className="relative rounded-xl overflow-hidden bg-black/80 max-h-[300px] flex items-center justify-center border border-[#2B2B2B]/30/60">
                   <img src={rawUploadedSrc} alt="Crop preview" className="w-full h-auto object-contain" />
                   
                   {/* Highlight Crop Box */}
@@ -518,7 +518,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
 
                 {/* Sliders for Top & Height */}
                 <div className="space-y-2 pt-2">
-                  <div className="flex items-center justify-between text-xs text-[#B3B3B3]">
+                  <div className="flex items-center justify-between text-xs text-[#2B2B2B]/60">
                     <span>Vị trí đoạn (Lên / Xuống):</span>
                     <input 
                       type="range" 
@@ -529,7 +529,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                       className="w-48 accent-[#E0E0E0] cursor-pointer"
                     />
                   </div>
-                  <div className="flex items-center justify-between text-xs text-[#B3B3B3]">
+                  <div className="flex items-center justify-between text-xs text-[#2B2B2B]/60">
                     <span>Độ dài đoạn (Ngắn / Dài):</span>
                     <input 
                       type="range" 
@@ -553,14 +553,14 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                 </button>
               </div>
             ) : isCompressingImage ? (
-              <div className="flex items-center justify-center py-10 gap-2 text-xs font-bold text-[#B3B3B3]">
+              <div className="flex items-center justify-center py-10 gap-2 text-xs font-bold text-[#2B2B2B]/60">
                 <Loader2 size={18} className="animate-spin text-[#E0E0E0]" />
                 <span>Đang xử lý ảnh...</span>
               </div>
             ) : imageSrc ? (
               /* CROPPED SNIPPET RESULT DISPLAY */
               <div className="space-y-3">
-                <div className={`relative w-full rounded-xl overflow-hidden bg-black/70 border border-[#565656]/60 flex items-center justify-center p-2 transition-all ${
+                <div className={`relative w-full rounded-xl overflow-hidden bg-black/70 border border-[#2B2B2B]/30/60 flex items-center justify-center p-2 transition-all ${
                   isImageExpanded ? 'max-h-[75vh]' : 'max-h-[46vh] min-h-[140px]'
                 }`}>
                   <img 
@@ -593,13 +593,13 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                 >
                   <Camera size={26} className="text-[#E0E0E0] mb-1.5 group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-bold text-[#E0E0E0]">Chụp</span>
-                  <span className="text-[10px] text-[#8A817C] mt-0.5">Chụp đúng đoạn sách</span>
+                  <span className="text-[10px] text-[#2B2B2B]/60 mt-0.5">Chụp đúng đoạn sách</span>
                 </button>
 
-                <label className="flex flex-col items-center justify-center py-6 border border-dashed border-[#565656] rounded-xl cursor-pointer hover:bg-[#2E2E2D] transition-all bg-[#2B2B2B] group">
-                  <Upload size={26} className="text-[#B3B3B3] mb-1.5 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-bold text-[#B3B3B3]">Tải lên</span>
-                  <span className="text-[10px] text-[#8A817C] mt-0.5">Có công cụ cắt đoạn</span>
+                <label className="flex flex-col items-center justify-center py-6 border border-dashed border-[#2B2B2B]/30 rounded-xl cursor-pointer hover:bg-[#2E2E2D] transition-all bg-[#2B2B2B] group">
+                  <Upload size={26} className="text-[#2B2B2B]/60 mb-1.5 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-bold text-[#2B2B2B]/60">Tải lên</span>
+                  <span className="text-[10px] text-[#2B2B2B]/60 mt-0.5">Có công cụ cắt đoạn</span>
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                 </label>
               </div>
@@ -632,7 +632,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
             {quotes.map((item, idx) => (
               <div 
                 key={idx} 
-                className="relative bg-[#2B2B2B] border border-[#565656] rounded-2xl p-4 shadow-md focus-within:border-[#E0E0E0]/60 transition-colors space-y-3"
+                className="relative bg-[#2B2B2B] border border-[#2B2B2B]/30 rounded-2xl p-4 shadow-md focus-within:border-[#E0E0E0]/60 transition-colors space-y-3"
               >
                 <div className="relative">
                   <span className="absolute top-3 left-3 text-3xl font-serif text-[#E0E0E0]/20 select-none pointer-events-none leading-none">“</span>
@@ -643,18 +643,18 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                     onChange={(e) => handleTextChange(idx, e.target.value)}
                     placeholder="Nhập hoặc dán nội dung trích dẫn vào đây..."
                     rows={3}
-                    className="w-full bg-transparent text-[#E0E0E0] placeholder-[#848484] text-sm font-medium focus:outline-none resize-none pt-6 pb-6 px-8"
+                    className="w-full bg-transparent text-[#E0E0E0] placeholder-[#2B2B2B]/40 text-sm font-medium focus:outline-none resize-none pt-6 pb-6 px-8"
                   />
 
                   <span className="absolute bottom-3 right-3 text-3xl font-serif text-[#E0E0E0]/20 select-none pointer-events-none leading-none">”</span>
                 </div>
 
                 {/* Bottom Row: Page Number + Paste + Remove */}
-                <div className="flex items-center justify-between pt-2 border-t border-[#565656]/40 gap-3">
+                <div className="flex items-center justify-between pt-2 border-t border-[#2B2B2B]/30/40 gap-3">
                   
                   {/* Page Number Field */}
-                  <div className="flex items-center gap-2 bg-[#2B2B2B] border border-[#565656]/60 rounded-lg px-2.5 py-1">
-                    <span className="text-xs text-[#B3B3B3] font-semibold">Trang:</span>
+                  <div className="flex items-center gap-2 bg-[#2B2B2B] border border-[#2B2B2B]/30/60 rounded-lg px-2.5 py-1">
+                    <span className="text-xs text-[#2B2B2B]/60 font-semibold">Trang:</span>
                     <input
                       type="number"
                       value={item.pageNumber}
@@ -668,7 +668,7 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
                     <button
                       type="button"
                       onClick={() => handlePasteClipboard(idx)}
-                      className="flex items-center gap-1.5 text-xs font-bold text-[#E0E0E0] bg-[#2B2B2B] hover:bg-[#2E2E2D] border border-[#565656]/60 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                      className="flex items-center gap-1.5 text-xs font-bold text-[#E0E0E0] bg-[#2B2B2B] hover:bg-[#2E2E2D] border border-[#2B2B2B]/30/60 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
                     >
                       {pastedIndex === idx ? (
                         <>
@@ -702,13 +702,13 @@ export default function QuoteCollectorModal({ bookId, onClose, onSaveSuccess }: 
         </div>
 
         {/* Footer Actions */}
-        <div className="mt-6 pt-4 border-t border-[#565656]/40 flex gap-3">
+        <div className="mt-6 pt-4 border-t border-[#2B2B2B]/30/40 flex gap-3">
           <button
             onClick={() => {
               handleStopLiveCamera();
               onClose();
             }}
-            className="flex-1 bg-[#2B2B2B] hover:bg-[#2E2E2D] text-[#E0E0E0] border border-[#565656] py-3 rounded-xl font-bold text-sm transition-colors cursor-pointer"
+            className="flex-1 bg-[#2B2B2B] hover:bg-[#2E2E2D] text-[#E0E0E0] border border-[#2B2B2B]/30 py-3 rounded-xl font-bold text-sm transition-colors cursor-pointer"
           >
             Hủy
           </button>

@@ -21,9 +21,9 @@ interface Book {
 
 const RIBBON_COLORS = [
   '#2B2B2B', // Onyx
-  '#565656', // Walnut
-  '#848484', // Ash
-  '#B3B3B3', // Greige
+  '#2B2B2B', // Walnut
+  '#2B2B2B', // Ash
+  '#E0E0E0', // Greige
 ];
 
 export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books: Book[], refresh: () => void, sortBy?: string }) {
@@ -144,7 +144,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
 
             {/* Rating badge */}
             {ratingInfo && ratingInfo.count > 0 && (
-              <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 bg-[#E0E0E0]/95 backdrop-blur-md text-[#1C1917] border border-[#848484] px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold flex items-center gap-1 shadow-sm z-20">
+              <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 bg-[#E0E0E0]/95 backdrop-blur-md text-[#1C1917] border border-[#2B2B2B]/30 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold flex items-center gap-1 shadow-sm z-20">
                 <Star size={10} className="fill-[#2B2B2B] text-[#2B2B2B]" />
                 <span>{ratingInfo.average_rating.toFixed(1)}</span>
               </div>
@@ -161,7 +161,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
             {book.title}
           </h3>
           <p 
-            className="text-[11px] sm:text-xs font-semibold text-[#565656] truncate mb-1 sm:mb-2.5" 
+            className="text-[11px] sm:text-xs font-semibold text-[#2B2B2B]/75 truncate mb-1 sm:mb-2.5" 
             title={book.author || "Unknown Author"}
           >
             {book.author || "Unknown Author"}
@@ -178,8 +178,8 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
               disabled={downloadingId === book.id || book.has_file === false}
               className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all flex-shrink-0 cursor-pointer shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
                 book.has_file === false
-                  ? 'bg-[#E0E0E0] text-[#8C827A] border border-[#E0D5C7]'
-                  : 'bg-[#E0E0E0] hover:bg-[#848484] text-[#1C1917] border border-[#E0D5C7]'
+                  ? 'bg-[#E0E0E0] text-[#8C827A] border border-[#2B2B2B]/20'
+                  : 'bg-[#E0E0E0] hover:bg-[#2B2B2B]/30 text-[#1C1917] border border-[#2B2B2B]/20'
               }`}
               title={book.has_file === false ? "Sách đang được cập nhật file" : "Tải Sách Xuống"}
             >
@@ -195,7 +195,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                 e.stopPropagation();
                 setKindleBook({ id: book.id, title: book.title });
               }}
-              className="p-1.5 sm:p-2 text-[#565656] hover:text-[#1C1917] bg-[#E0E0E0] hover:bg-[#848484] rounded-lg sm:rounded-xl border border-[#E0D5C7] transition-all flex-shrink-0 cursor-pointer shadow-sm"
+              className="p-1.5 sm:p-2 text-[#2B2B2B]/75 hover:text-[#1C1917] bg-[#E0E0E0] hover:bg-[#2B2B2B]/30 rounded-lg sm:rounded-xl border border-[#2B2B2B]/20 transition-all flex-shrink-0 cursor-pointer shadow-sm"
               title="Gửi sang Kindle (Wi-Fi)"
             >
               <Smartphone size={13} />
@@ -203,7 +203,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
 
             <button 
               onClick={(e) => copyShareLink(e, book.id)} 
-              className="p-1.5 sm:p-2 text-[#565656] hover:text-[#1C1917] bg-[#E0E0E0] hover:bg-[#848484] rounded-lg sm:rounded-xl border border-[#E0D5C7] transition-all flex-shrink-0 cursor-pointer shadow-sm"
+              className="p-1.5 sm:p-2 text-[#2B2B2B]/75 hover:text-[#1C1917] bg-[#E0E0E0] hover:bg-[#2B2B2B]/30 rounded-lg sm:rounded-xl border border-[#2B2B2B]/20 transition-all flex-shrink-0 cursor-pointer shadow-sm"
               title="Chia sẻ sách"
             >
               {copiedId === book.id ? <Check size={13} className="text-[#2B2B2B] stroke-[3]" /> : <Share2 size={13} />}
@@ -291,15 +291,15 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
 
                   {/* Rating Summary Pill */}
                   {ratingSummary && (
-                    <div className="w-full bg-[#E0E0E0] p-3 rounded-2xl text-center mb-3 border border-[#E0D5C7]">
+                    <div className="w-full bg-[#E0E0E0] p-3 rounded-2xl text-center mb-3 border border-[#2B2B2B]/20">
                       <div className="flex items-center justify-center gap-1 mb-0.5">
                         <Star size={14} className="fill-[#F2C94C] text-[#F2C94C]" />
                         <span className="font-extrabold text-base text-[#2A2320]">
                           {ratingSummary.average_rating ? ratingSummary.average_rating.toFixed(1) : '5.0'}
                         </span>
-                        <span className="text-xs text-[#848484]">/ 5</span>
+                        <span className="text-xs text-[#2B2B2B]/60">/ 5</span>
                       </div>
-                      <p className="text-[11px] text-[#848484] font-bold">
+                      <p className="text-[11px] text-[#2B2B2B]/60 font-bold">
                         {ratingSummary.total_reviews} lượt đánh giá
                       </p>
                     </div>
@@ -308,7 +308,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   {/* Rate Button */}
                   <button
                     onClick={() => setIsRatingModalOpen(true)}
-                    className="w-full py-2.5 px-3 bg-[#E0E0E0] hover:bg-[#848484] text-[#1C1917] font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 border border-[#E0D5C7]"
+                    className="w-full py-2.5 px-3 bg-[#E0E0E0] hover:bg-[#2B2B2B]/30 text-[#1C1917] font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 border border-[#2B2B2B]/20"
                   >
                     <Sparkles size={14} className="text-[#2B2B2B]" />
                     <span>Đánh Giá Sách</span>
@@ -326,13 +326,13 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                         <h2 className="text-xl md:text-2xl font-black text-[#1C1917] leading-tight mt-1.5">
                           {selectedBook.title}
                         </h2>
-                        <p className="text-sm text-[#565656] font-bold mt-1">
+                        <p className="text-sm text-[#2B2B2B]/75 font-bold mt-1">
                           {selectedBook.author || "Unknown Author"}
                         </p>
                       </div>
                       <button 
                         onClick={() => setSelectedBook(null)}
-                        className="p-2 text-[#565656] hover:text-[#1C1917] bg-[#E0E0E0] hover:bg-[#848484] rounded-full transition-colors flex-shrink-0 cursor-pointer border border-[#E0D5C7]"
+                        className="p-2 text-[#2B2B2B]/75 hover:text-[#1C1917] bg-[#E0E0E0] hover:bg-[#2B2B2B]/30 rounded-full transition-colors flex-shrink-0 cursor-pointer border border-[#2B2B2B]/20"
                       >
                         <X size={18} />
                       </button>
@@ -342,7 +342,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                   <div className="flex-grow mt-5 space-y-4">
                     {/* Summary */}
                     <div>
-                      <h3 className="text-xs font-black uppercase text-[#565656] tracking-wider mb-1.5">Tóm tắt nội dung</h3>
+                      <h3 className="text-xs font-black uppercase text-[#2B2B2B]/75 tracking-wider mb-1.5">Tóm tắt nội dung</h3>
                       <p className="text-[#1C1917] leading-relaxed text-xs md:text-sm whitespace-pre-wrap bg-[#E0E0E0] p-3.5 rounded-2xl border border-[#E0E0E0]">
                         {selectedBook.summary || "Chưa có tóm tắt cho cuốn sách này."}
                       </p>
@@ -351,7 +351,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                     {/* Reviews */}
                     {ratingSummary && ratingSummary.reviews && ratingSummary.reviews.length > 0 && (
                       <div className="pt-1">
-                        <h3 className="text-xs font-black uppercase tracking-wider text-[#565656] mb-2 flex items-center gap-1.5">
+                        <h3 className="text-xs font-black uppercase tracking-wider text-[#2B2B2B]/75 mb-2 flex items-center gap-1.5">
                           <Award size={13} className="text-[#2B2B2B]" /> Cảm nhận độc giả ({ratingSummary.reviews.length})
                         </h3>
                         <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
@@ -366,7 +366,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
                                 </div>
                               </div>
                               {rev.review_text && (
-                                <p className="text-[#565656] line-clamp-2">{rev.review_text}</p>
+                                <p className="text-[#2B2B2B]/75 line-clamp-2">{rev.review_text}</p>
                               )}
                             </div>
                           ))}
@@ -394,7 +394,7 @@ export default function Bookshelf({ books, refresh, sortBy = 'newest' }: { books
 
                     <button 
                       onClick={() => setKindleBook({ id: selectedBook.id, title: selectedBook.title })}
-                      className="bg-[#E0E0E0] hover:bg-[#848484] text-[#1C1917] border border-[#E0D5C7] flex-1 py-3 px-4 rounded-2xl font-bold text-sm flex justify-center items-center gap-2 transition-all cursor-pointer"
+                      className="bg-[#E0E0E0] hover:bg-[#2B2B2B]/30 text-[#1C1917] border border-[#2B2B2B]/20 flex-1 py-3 px-4 rounded-2xl font-bold text-sm flex justify-center items-center gap-2 transition-all cursor-pointer"
                     >
                       <Smartphone size={16} />
                       <span>Gửi Sang Kindle</span>

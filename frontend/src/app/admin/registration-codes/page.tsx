@@ -130,9 +130,9 @@ export default function RegistrationCodesPage() {
           <header className="card-push rounded-3xl p-5 md:p-7">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
               <div>
-                <p className="text-xs font-black uppercase tracking-[.15em] text-[#565656]">Quản trị hệ thống</p>
+                <p className="text-xs font-black uppercase tracking-[.15em] text-[#2B2B2B]/75">Quản trị hệ thống</p>
                 <h1 className="mt-1 text-2xl font-black md:text-3xl text-[#2B2B2B]">Tài khoản & Mô hình kinh doanh</h1>
-                <p className="mt-1 text-sm font-medium text-[#565656]">
+                <p className="mt-1 text-sm font-medium text-[#2B2B2B]/75">
                   Cấp mã tài khoản mới, xem danh sách cửa hàng và xóa sạch dữ liệu hệ thống khi chủ doanh nghiệp muốn đổi mô hình kinh doanh.
                 </p>
               </div>
@@ -150,12 +150,12 @@ export default function RegistrationCodesPage() {
                 <Users size={20} className="text-[#2B2B2B]" />
                 <h2 className="text-lg font-black text-[#2B2B2B]">Danh sách tài khoản cửa hàng</h2>
               </div>
-              <span className="text-xs font-bold text-[#565656] bg-white rounded-full px-3 py-1 border border-[#848484] w-fit">
+              <span className="text-xs font-bold text-[#2B2B2B]/75 bg-white rounded-full px-3 py-1 border border-[#2B2B2B]/30 w-fit">
                 {users.length} tài khoản trong hệ thống
               </span>
             </div>
 
-            <p className="mb-4 text-xs font-semibold leading-relaxed text-[#565656]">
+            <p className="mb-4 text-xs font-semibold leading-relaxed text-[#2B2B2B]/75">
               Mỗi tài khoản là một cửa hàng riêng biệt. Khi chủ shop muốn chuyển sang mô hình kinh doanh khác, bấm nút <b className="text-red-700">"Clear dữ liệu (Đổi mô hình)"</b> để xóa sạch dữ liệu của riêng tài khoản đó. Các tài khoản khác tuyệt đối không bị đụng đến.
             </p>
 
@@ -164,7 +164,7 @@ export default function RegistrationCodesPage() {
                 <Loader2 className="animate-spin text-[#2B2B2B]" />
               </div>
             ) : users.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-[#848484] bg-white/50 p-5 text-center text-sm text-[#848484]">
+              <div className="rounded-2xl border border-dashed border-[#2B2B2B]/30 bg-white/50 p-5 text-center text-sm text-[#2B2B2B]/60">
                 Chưa có tài khoản nào được đăng ký.
               </div>
             ) : (
@@ -177,7 +177,7 @@ export default function RegistrationCodesPage() {
                   return (
                     <article
                       key={u.id}
-                      className="flex flex-col gap-3 rounded-2xl border border-[#848484]/30 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-3 rounded-2xl border border-[#2B2B2B]/20 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${u.role === 'admin' ? 'bg-[#2B2B2B] text-white' : 'bg-[#E0E0E0] text-[#2B2B2B]'}`}>
@@ -195,7 +195,7 @@ export default function RegistrationCodesPage() {
                               {u.role === 'admin' ? 'Admin' : 'Người bán'}
                             </span>
                           </div>
-                          <p className="mt-0.5 text-xs font-semibold text-[#848484]">
+                          <p className="mt-0.5 text-xs font-semibold text-[#2B2B2B]/60">
                             Đã tạo: {new Date(u.createdAt).toLocaleDateString('vi-VN')} · {prodCount} sản phẩm · {orderCount} đơn hàng
                           </p>
                         </div>
@@ -240,15 +240,15 @@ export default function RegistrationCodesPage() {
                 <Loader2 className="animate-spin text-[#2B2B2B]" />
               </div>
             ) : codes.length === 0 ? (
-              <div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-[#848484] bg-white/50 p-6 text-center">
-                <UserPlus size={36} className="mb-3 text-[#848484]" />
+              <div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-[#2B2B2B]/30 bg-white/50 p-6 text-center">
+                <UserPlus size={36} className="mb-3 text-[#2B2B2B]/60" />
                 <b>Chưa có mã đăng ký</b>
-                <p className="mt-1 text-sm text-[#848484]">Tạo mã đầu tiên để cấp tài khoản cho người bán hàng.</p>
+                <p className="mt-1 text-sm text-[#2B2B2B]/60">Tạo mã đầu tiên để cấp tài khoản cho người bán hàng.</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {codes.map(item => (
-                  <article key={item.id} className="flex flex-col gap-3 rounded-2xl border border-[#848484]/30 bg-white p-4 sm:flex-row sm:items-center">
+                  <article key={item.id} className="flex flex-col gap-3 rounded-2xl border border-[#2B2B2B]/20 bg-white p-4 sm:flex-row sm:items-center">
                     <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${item.is_used ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}`}>
                       <KeyRound size={20} />
                     </div>
@@ -256,7 +256,7 @@ export default function RegistrationCodesPage() {
                       <button onClick={() => copy(item.code)} className="font-mono text-base font-black tracking-wider text-[#2B2B2B] hover:underline">
                         {item.code}
                       </button>
-                      <p className="mt-1 text-xs font-semibold text-[#848484]">
+                      <p className="mt-1 text-xs font-semibold text-[#2B2B2B]/60">
                         {item.is_used ? `Đã dùng bởi @${item.used_by_username || 'không rõ'}` : 'Sẵn sàng sử dụng'} · {new Date(item.created_at).toLocaleString('vi-VN')}
                       </p>
                     </div>

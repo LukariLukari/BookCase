@@ -89,10 +89,10 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
           initial={{ opacity: 0, y: 40, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.96 }}
-          className="relative bg-[#2B2B2B] rounded-3xl max-w-4xl w-full border border-[#565656]/60 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-[#E0E0E0]"
+          className="relative bg-[#2B2B2B] rounded-3xl max-w-4xl w-full border border-[#2B2B2B]/30/60 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-[#E0E0E0]"
         >
           {/* Header */}
-          <div className="p-6 md:p-8 border-b border-[#565656]/50 flex justify-between items-center bg-[#2B2B2B]">
+          <div className="p-6 md:p-8 border-b border-[#2B2B2B]/30/50 flex justify-between items-center bg-[#2B2B2B]">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="bg-[#E0E0E0] text-[#000000] text-xs font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
@@ -105,7 +105,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
             </div>
             <button
               onClick={onClose}
-              className="p-2.5 bg-[#2B2B2B] hover:bg-[#E0E0E0] hover:text-black text-[#E0E0E0] rounded-full transition-colors cursor-pointer border border-[#565656]/50"
+              className="p-2.5 bg-[#2B2B2B] hover:bg-[#E0E0E0] hover:text-black text-[#E0E0E0] rounded-full transition-colors cursor-pointer border border-[#2B2B2B]/30/50"
             >
               <X size={20} />
             </button>
@@ -126,7 +126,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                         className={`relative bg-[#2B2B2B] rounded-2xl p-6 md:p-7 border transition-all duration-200 flex flex-col justify-between cursor-pointer ${
                           isSelected
                             ? 'border-[#E0E0E0] shadow-xl ring-2 ring-[#E0E0E0]/30 scale-[1.02]'
-                            : 'border-[#565656]/50 hover:border-[#E0E0E0]/50'
+                            : 'border-[#2B2B2B]/30/50 hover:border-[#E0E0E0]/50'
                         }`}
                       >
                         {plan.badge && (
@@ -138,16 +138,16 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                         )}
 
                         <div>
-                          <div className="text-center pb-5 border-b border-[#565656]/40 mb-5 pt-1">
+                          <div className="text-center pb-5 border-b border-[#2B2B2B]/30/40 mb-5 pt-1">
                             <h3 className="font-bold text-lg text-[#E0E0E0] mb-1.5">{plan.name}</h3>
-                            <p className="text-[#8A817C] text-xs mb-4 min-h-[32px] flex items-center justify-center">{plan.description}</p>
+                            <p className="text-[#2B2B2B]/60 text-xs mb-4 min-h-[32px] flex items-center justify-center">{plan.description}</p>
                             <div className="flex items-baseline justify-center gap-1">
                               <span className="text-3xl md:text-4xl font-black text-[#E0E0E0] tracking-tight">{plan.price}</span>
-                              <span className="text-[#8A817C] text-xs font-semibold">{plan.period}</span>
+                              <span className="text-[#2B2B2B]/60 text-xs font-semibold">{plan.period}</span>
                             </div>
                           </div>
 
-                          <ul className="space-y-3.5 text-xs text-[#B3B3B3] mb-8">
+                          <ul className="space-y-3.5 text-xs text-[#2B2B2B]/60 mb-8">
                             {plan.features.map((feat, idx) => (
                               <li key={idx} className="flex items-start gap-2.5 leading-relaxed">
                                 <Check size={16} className="text-[#E0E0E0] shrink-0 mt-0.5" />
@@ -167,7 +167,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                             alert('Tính năng đăng ký tự động đang được hoàn thiện. Cảm ơn bạn đã quan tâm!');
                             onClose();
                           }}
-                          className="w-full py-3.5 px-4 rounded-xl font-black text-sm transition-all shadow-md cursor-pointer border border-[#565656]/50 flex items-center justify-center gap-2 mt-2"
+                          className="w-full py-3.5 px-4 rounded-xl font-black text-sm transition-all shadow-md cursor-pointer border border-[#2B2B2B]/30/50 flex items-center justify-center gap-2 mt-2"
                           style={{
                             backgroundColor: isSelected ? '#E0E0E0' : '#2B2B2B',
                             color: isSelected ? '#000000' : '#E0E0E0'
@@ -184,7 +184,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                 </div>
 
                 {/* Trust Footer */}
-                <div className="flex flex-wrap items-center justify-center gap-6 pt-4 border-t border-[#565656]/40 text-xs text-[#8A817C]">
+                <div className="flex flex-wrap items-center justify-center gap-6 pt-4 border-t border-[#2B2B2B]/30/40 text-xs text-[#2B2B2B]/60">
                   <span className="flex items-center gap-1.5">
                     <ShieldCheck size={16} className="text-[#E0E0E0]" /> Tải sách tốc độ cao 24/7
                   </span>

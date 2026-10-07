@@ -58,7 +58,7 @@ export default function LoginPage() {
               <LogIn size={22} strokeWidth={2.3} />
             </span>
             <h1 className="text-2xl font-black tracking-[-0.03em] sm:text-3xl text-[#2B2B2B]">Đăng nhập</h1>
-            <p className="mt-2 text-sm font-medium text-[#565656]">Truy cập đơn hàng, tồn kho và dữ liệu bán hàng của bạn.</p>
+            <p className="mt-2 text-sm font-medium text-[#2B2B2B]/75">Truy cập đơn hàng, tồn kho và dữ liệu bán hàng của bạn.</p>
           </div>
 
           {error && (
@@ -77,7 +77,7 @@ export default function LoginPage() {
                 onChange={(event) => setUsername(event.target.value)}
                 disabled={isSubmitting}
                 required
-                className="h-13 w-full rounded-2xl border-2 border-[#2B2B2B] bg-white px-4 text-base font-semibold outline-none transition placeholder:text-[#848484] focus:shadow-[0_3px_0_0_#2B2B2B] disabled:opacity-60"
+                className="h-13 w-full rounded-2xl border-2 border-[#2B2B2B] bg-white px-4 text-base font-semibold outline-none transition placeholder:text-[#2B2B2B]/60 focus:shadow-[0_3px_0_0_#2B2B2B] disabled:opacity-60"
                 placeholder="Nhập tên đăng nhập"
               />
             </label>
@@ -92,13 +92,13 @@ export default function LoginPage() {
                   onChange={(event) => setPassword(event.target.value)}
                   disabled={isSubmitting}
                   required
-                  className="h-13 w-full rounded-2xl border-2 border-[#2B2B2B] bg-white px-4 pr-13 text-base font-semibold outline-none transition placeholder:text-[#848484] focus:shadow-[0_3px_0_0_#2B2B2B] disabled:opacity-60"
+                  className="h-13 w-full rounded-2xl border-2 border-[#2B2B2B] bg-white px-4 pr-13 text-base font-semibold outline-none transition placeholder:text-[#2B2B2B]/60 focus:shadow-[0_3px_0_0_#2B2B2B] disabled:opacity-60"
                   placeholder="Nhập mật khẩu"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((visible) => !visible)}
-                  className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-[#565656] transition hover:bg-[#E0E0E0]/20 hover:text-[#2B2B2B] active:scale-90"
+                  className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-[#2B2B2B]/75 transition hover:bg-[#E0E0E0]/20 hover:text-[#2B2B2B] active:scale-90"
                   aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                 >
                   {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
@@ -115,7 +115,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 space-y-3 border-t border-[#848484]/30 pt-6 text-center text-sm font-semibold text-[#565656]">
+          <div className="mt-6 space-y-3 border-t border-[#2B2B2B]/20 pt-6 text-center text-sm font-semibold text-[#2B2B2B]/75">
             <p>Chưa có tài khoản? <Link href="/register" className="font-black text-[#2B2B2B] hover:underline">Đăng ký bằng mã admin</Link></p>
             <Link href="/forgot-password" className="inline-block hover:text-[#2B2B2B] hover:underline">Quên mật khẩu?</Link>
           </div>

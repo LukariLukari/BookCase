@@ -6,22 +6,22 @@
   --surface: #FFFFFF;
   --surface-muted: #EAEAEA;
   --surface-card: #FFFFFF;
-  --border-soft: #848484;
+  --border-soft: #2B2B2B;
   --text-main: #2B2B2B;
-  --text-muted: #565656;
+  --text-muted: #2B2B2B;
   --color-charcoal: #2B2B2B;
   --color-navy: #2B2B2B;
   --color-navy-hover: #3E3E3E;
   --color-charcoal-noir: #2B2B2B;
-  --color-ironclad: #565656;
-  --color-urban-fog: #848484;
-  --color-moonlit-silver: #B3B3B3;
+  --color-ironclad: #2B2B2B;
+  --color-urban-fog: #2B2B2B;
+  --color-moonlit-silver: #E0E0E0;
   --color-cloud-veil: #E0E0E0;
   /* Legacy alias mappings for maximum compatibility */
   --color-onyx: #2B2B2B;
-  --color-walnut: #565656;
-  --color-ash: #848484;
-  --color-greige: #B3B3B3;
+  --color-walnut: #2B2B2B;
+  --color-ash: #2B2B2B;
+  --color-greige: #E0E0E0;
   --color-stucco: #E0E0E0;
 }
 
@@ -30,14 +30,14 @@
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-charcoal-noir: #2B2B2B;
-  --color-ironclad: #565656;
-  --color-urban-fog: #848484;
-  --color-moonlit-silver: #B3B3B3;
+  --color-ironclad: #2B2B2B;
+  --color-urban-fog: #2B2B2B;
+  --color-moonlit-silver: #E0E0E0;
   --color-cloud-veil: #E0E0E0;
   --color-onyx: #2B2B2B;
-  --color-walnut: #565656;
-  --color-ash: #848484;
-  --color-greige: #B3B3B3;
+  --color-walnut: #2B2B2B;
+  --color-ash: #2B2B2B;
+  --color-greige: #E0E0E0;
   --color-stucco: #E0E0E0;
   --font-sans: var(--font-montserrat);
 }
@@ -81,11 +81,11 @@ input[type="month"]::-webkit-date-and-time-value {
   background: #E0E0E0;
 }
 ::-webkit-scrollbar-thumb {
-  background: #848484;
+  background: #2B2B2B;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #565656;
+  background: #2B2B2B;
 }
 
 /* Hardcover Book & Ribbon Visual System */
@@ -245,7 +245,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #2B2B2B;
   color: #FFFFFF !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #565656;
+  box-shadow: 0 4px 0 0 #2B2B2B;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -261,13 +261,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #565656;
+  box-shadow: 0 5.5px 0 0 #2B2B2B;
   background-color: #3E3E3E;
 }
 
 .btn-push-primary:active, .btn-3d-navy:active, .neu-btn-primary:active, .btn-push-primary.is-pressed {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #565656 !important;
+  box-shadow: 0 0 0 0 #2B2B2B !important;
   background-color: #2B2B2B;
 }
 
@@ -275,7 +275,7 @@ input[type="month"]::-webkit-date-and-time-value {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #565656;
+  box-shadow: 0 2px 0 0 #2B2B2B;
 }
 
 /* 2b. Warm Ironclad Grey 3D Push Button */
@@ -286,7 +286,7 @@ input[type="month"]::-webkit-date-and-time-value {
   justify-content: center;
   border-radius: 9999px;
   border: 2px solid #2B2B2B;
-  background-color: #565656;
+  background-color: #2B2B2B;
   color: #FFFFFF !important;
   font-weight: 800;
   box-shadow: 0 4px 0 0 #2B2B2B;
@@ -317,7 +317,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #FFFFFF;
   color: #2B2B2B;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #565656;
+  box-shadow: 0 4px 0 0 #2B2B2B;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -325,13 +325,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-amber:hover, .btn-3d-amber:hover, .neu-btn-amber:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #565656;
+  box-shadow: 0 5.5px 0 0 #2B2B2B;
   background-color: #E0E0E0;
 }
 
 .btn-push-amber:active, .btn-3d-amber:active, .neu-btn-amber:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #565656 !important;
+  box-shadow: 0 0 0 0 #2B2B2B !important;
 }
 
 /* 4. Emerald / Success 3D Badge & Button (Đã thu, hoàn tất) */
@@ -439,7 +439,7 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   border-radius: 9999px;
   border: 2px solid #2B2B2B;
-  background-color: #B3B3B3;
+  background-color: #E0E0E0;
   box-shadow: 0 1px 0 0 #2B2B2B;
 }
 
@@ -471,7 +471,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #2B2B2B !important;
   color: #FFFFFF !important;
   border-color: #2B2B2B !important;
-  box-shadow: 0 4px 0 0 #565656 !important;
+  box-shadow: 0 4px 0 0 #2B2B2B !important;
 }
 
 .no-scrollbar::-webkit-scrollbar {

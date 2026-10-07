@@ -143,15 +143,15 @@ export default function WorkflowClient() {
       <Sidebar />
       <main className="min-w-0 flex-1">
         <div className="mx-auto max-w-[1500px]">
-          {/* Header 3D Card */}
-          <header className="card-push mb-6 p-6 md:p-8">
-            <p className="text-[11px] font-black uppercase tracking-[.2em] text-[#565656]">
+          {/* Header 3D Card in Cloud Veil */}
+          <header className="mb-6 rounded-3xl border-2 border-[#2B2B2B] bg-[#E0E0E0] p-6 shadow-[0_5px_0_0_#2B2B2B] md:p-8">
+            <p className="text-[11px] font-black uppercase tracking-[.2em] text-[#2B2B2B]/70">
               Trung tâm vận hành
             </p>
             <h1 className="mt-1 text-2xl font-black md:text-3xl text-[#2B2B2B]">
               Theo dõi và xử lý đơn
             </h1>
-            <p className="mt-1 text-sm font-semibold text-[#565656]">
+            <p className="mt-1 text-sm font-semibold text-[#2B2B2B]/80">
               Nhìn toàn bộ tiến độ, chuyển bước và thu công nợ ngay tại một màn hình.
             </p>
 
@@ -165,9 +165,9 @@ export default function WorkflowClient() {
               ].map(([l, v]) => (
                 <div
                   key={String(l)}
-                  className="card-push-subtle p-4 flex flex-col justify-between"
+                  className="rounded-2xl border-2 border-[#2B2B2B] bg-white p-4 shadow-[0_4px_0_0_#2B2B2B] flex flex-col justify-between"
                 >
-                  <p className="text-[10px] font-black uppercase tracking-wider text-[#848484]">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-[#2B2B2B]/70">
                     {l}
                   </p>
                   <b className="mt-1.5 block text-lg font-black text-[#2B2B2B] md:text-xl">
@@ -185,7 +185,7 @@ export default function WorkflowClient() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm mã đơn, khách hàng hoặc số điện thoại..."
-              className="h-11 w-full bg-transparent pl-3 pr-2 text-sm font-bold text-[#2B2B2B] placeholder-[#848484] outline-none"
+              className="h-11 w-full bg-transparent pl-3 pr-2 text-sm font-bold text-[#2B2B2B] placeholder-[#2B2B2B]/40 outline-none"
             />
             {search && (
               <button
@@ -212,7 +212,7 @@ export default function WorkflowClient() {
                 return (
                   <div
                     key={state.key}
-                    className="min-w-0 rounded-3xl border-2 border-[#2B2B2B] bg-[#EAEAEA]/90 p-4 shadow-[0_5px_0_0_#2B2B2B]"
+                    className="min-w-0 rounded-3xl border-2 border-[#2B2B2B] bg-[#E0E0E0] p-4 shadow-[0_5px_0_0_#2B2B2B]"
                   >
                     {/* Column Header */}
                     <div className="mb-4 flex items-center justify-between">
@@ -239,7 +239,7 @@ export default function WorkflowClient() {
                               <b className="block truncate text-sm font-extrabold text-[#2B2B2B]">
                                 {order.customer_name}
                               </b>
-                              <p className="text-[10px] font-black text-[#848484]">
+                              <p className="text-[10px] font-black text-[#2B2B2B]/60">
                                 {order.code} · {new Date(order.ordered_at).toLocaleDateString('vi-VN')}
                               </p>
                             </div>
@@ -248,7 +248,7 @@ export default function WorkflowClient() {
                             </b>
                           </div>
 
-                          <p className="line-clamp-2 text-xs font-semibold text-[#565656]">
+                          <p className="line-clamp-2 text-xs font-semibold text-[#2B2B2B]/75">
                             {order.items.map((i) => `${i.product_name} ×${i.quantity}`).join(', ')}
                           </p>
 
@@ -286,7 +286,7 @@ export default function WorkflowClient() {
                       ))}
 
                       {!list.length && (
-                        <div className="rounded-2xl border-2 border-dashed border-[#848484] p-6 text-center text-xs font-extrabold text-[#565656]">
+                        <div className="rounded-2xl border-2 border-dashed border-[#2B2B2B]/30 p-6 text-center text-xs font-extrabold text-[#2B2B2B]/75">
                           Không có đơn
                         </div>
                       )}
@@ -320,7 +320,7 @@ export default function WorkflowClient() {
             <div className="mb-5 flex items-start justify-between">
               <div>
                 <h2 className="text-lg font-black text-[#2B2B2B]">Ghi nhận thanh toán</h2>
-                <p className="text-xs font-semibold text-[#565656]">
+                <p className="text-xs font-semibold text-[#2B2B2B]/75">
                   {payment.code} · {payment.customer_name}
                 </p>
               </div>

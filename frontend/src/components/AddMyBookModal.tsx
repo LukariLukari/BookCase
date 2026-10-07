@@ -204,40 +204,40 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal Card */}
-      <div className="relative bg-[#2B2B2B] border border-[#565656]/50 rounded-3xl p-6 md:p-8 w-full max-w-xl shadow-2xl z-10 max-h-[92vh] flex flex-col">
+      <div className="relative bg-[#2B2B2B] border border-[#2B2B2B]/30/50 rounded-3xl p-6 md:p-8 w-full max-w-xl shadow-2xl z-10 max-h-[92vh] flex flex-col">
         
         {/* Header */}
-        <div className="flex justify-between items-center pb-4 border-b border-[#565656]/40 mb-5">
+        <div className="flex justify-between items-center pb-4 border-b border-[#2B2B2B]/30/40 mb-5">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#2B2B2B] rounded-xl text-[#E0E0E0] border border-[#565656]/50">
+            <div className="p-2.5 bg-[#2B2B2B] rounded-xl text-[#E0E0E0] border border-[#2B2B2B]/30/50">
               <Library size={20} />
             </div>
             <div>
               <h2 className="text-xl font-black text-[#E0E0E0]">Thêm Sách Cá Nhân</h2>
-              <p className="text-xs text-[#B3B3B3]">Tạo bộ sưu tập sách và lưu trữ trích dẫn của bạn</p>
+              <p className="text-xs text-[#2B2B2B]/60">Tạo bộ sưu tập sách và lưu trữ trích dẫn của bạn</p>
             </div>
           </div>
           <button 
             onClick={onClose} 
-            className="text-[#B3B3B3] hover:text-[#E0E0E0] p-2 bg-[#2B2B2B] hover:bg-[#2E2E2D] rounded-full transition-colors cursor-pointer"
+            className="text-[#2B2B2B]/60 hover:text-[#E0E0E0] p-2 bg-[#2B2B2B] hover:bg-[#2E2E2D] rounded-full transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Tab Navigation - High Contrast Button Styling (RULE[user_global]) */}
-        <div className="grid grid-cols-3 gap-2 p-1.5 bg-[#2B2B2B] rounded-2xl border border-[#565656]/40 mb-6">
+        <div className="grid grid-cols-3 gap-2 p-1.5 bg-[#2B2B2B] rounded-2xl border border-[#2B2B2B]/30/40 mb-6">
           <button
             type="button"
             onClick={() => setActiveTab('library')}
             className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'library'
                 ? 'bg-[#E0E0E0] text-[#2B2B2B] shadow-md font-black'
-                : 'text-[#B3B3B3] hover:text-[#E0E0E0] hover:bg-[#2E2E2D]'
+                : 'text-[#2B2B2B]/60 hover:text-[#E0E0E0] hover:bg-[#2E2E2D]'
             }`}
             style={activeTab === 'library' ? { color: '#2B2B2B' } : {}}
           >
-            <Library size={15} className={activeTab === 'library' ? 'text-[#2B2B2B]' : 'text-[#B3B3B3]'} />
+            <Library size={15} className={activeTab === 'library' ? 'text-[#2B2B2B]' : 'text-[#2B2B2B]/60'} />
             <span>Thư Viện</span>
           </button>
 
@@ -247,11 +247,11 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
             className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'upload'
                 ? 'bg-[#E0E0E0] text-[#2B2B2B] shadow-md font-black'
-                : 'text-[#B3B3B3] hover:text-[#E0E0E0] hover:bg-[#2E2E2D]'
+                : 'text-[#2B2B2B]/60 hover:text-[#E0E0E0] hover:bg-[#2E2E2D]'
             }`}
             style={activeTab === 'upload' ? { color: '#2B2B2B' } : {}}
           >
-            <Upload size={15} className={activeTab === 'upload' ? 'text-[#2B2B2B]' : 'text-[#B3B3B3]'} />
+            <Upload size={15} className={activeTab === 'upload' ? 'text-[#2B2B2B]' : 'text-[#2B2B2B]/60'} />
             <span>Tải File Máy</span>
           </button>
 
@@ -261,11 +261,11 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
             className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'manual'
                 ? 'bg-[#E0E0E0] text-[#2B2B2B] shadow-md font-black'
-                : 'text-[#B3B3B3] hover:text-[#E0E0E0] hover:bg-[#2E2E2D]'
+                : 'text-[#2B2B2B]/60 hover:text-[#E0E0E0] hover:bg-[#2E2E2D]'
             }`}
             style={activeTab === 'manual' ? { color: '#2B2B2B' } : {}}
           >
-            <Edit3 size={15} className={activeTab === 'manual' ? 'text-[#2B2B2B]' : 'text-[#B3B3B3]'} />
+            <Edit3 size={15} className={activeTab === 'manual' ? 'text-[#2B2B2B]' : 'text-[#2B2B2B]/60'} />
             <span>Nhập Tay</span>
           </button>
         </div>
@@ -278,24 +278,24 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
             <div className="space-y-4">
               {/* Search Bar */}
               <div className="relative">
-                <Search size={16} className="absolute left-3.5 top-3.5 text-[#8A817C]" />
+                <Search size={16} className="absolute left-3.5 top-3.5 text-[#2B2B2B]/60" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Tìm kiếm sách trong thư viện..."
-                  className="w-full bg-[#2B2B2B] border border-[#565656] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#848484] focus:outline-none focus:border-[#E0E0E0]"
+                  className="w-full bg-[#2B2B2B] border border-[#2B2B2B]/30 rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#E0E0E0] placeholder-[#2B2B2B]/40 focus:outline-none focus:border-[#E0E0E0]"
                 />
               </div>
 
               {/* Book List */}
               {isFetchingLibrary ? (
                 <div className="flex justify-center py-12">
-                  <Loader2 className="animate-spin text-[#B3B3B3]" size={28} />
+                  <Loader2 className="animate-spin text-[#2B2B2B]/60" size={28} />
                 </div>
               ) : filteredLibraryBooks.length === 0 ? (
-                <div className="text-center py-10 bg-[#2B2B2B]/50 rounded-2xl border border-[#565656]/30">
-                  <p className="text-sm text-[#B3B3B3]">Không tìm thấy sách phù hợp.</p>
+                <div className="text-center py-10 bg-[#2B2B2B]/50 rounded-2xl border border-[#2B2B2B]/30/30">
+                  <p className="text-sm text-[#2B2B2B]/60">Không tìm thấy sách phù hợp.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-1">
@@ -308,7 +308,7 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
                         className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${
                           isSelected
                             ? 'bg-[#2E2E2D] border-[#E0E0E0] shadow-md ring-1 ring-[#E0E0E0]'
-                            : 'bg-[#2B2B2B]/80 border-[#565656]/50 hover:bg-[#2E2E2D]/60'
+                            : 'bg-[#2B2B2B]/80 border-[#2B2B2B]/30/50 hover:bg-[#2E2E2D]/60'
                         }`}
                       >
                         <div className="w-12 h-16 flex-shrink-0 relative overflow-hidden rounded-lg">
@@ -322,7 +322,7 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="text-xs font-bold text-[#E0E0E0] truncate leading-snug">{book.title}</h4>
-                          <p className="text-[11px] text-[#B3B3B3] truncate">{book.author || "Unknown Author"}</p>
+                          <p className="text-[11px] text-[#2B2B2B]/60 truncate">{book.author || "Unknown Author"}</p>
                         </div>
                         {isSelected && (
                           <div className="p-1 bg-[#E0E0E0] text-black rounded-full flex-shrink-0">
@@ -342,14 +342,14 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
             <div className="space-y-4">
               
               {/* File Input Box */}
-              <div className="bg-[#2B2B2B]/60 border border-dashed border-[#565656] hover:border-[#E0E0E0]/50 rounded-2xl p-5 text-center transition-colors">
+              <div className="bg-[#2B2B2B]/60 border border-dashed border-[#2B2B2B]/30 hover:border-[#E0E0E0]/50 rounded-2xl p-5 text-center transition-colors">
                 <label className="cursor-pointer flex flex-col items-center justify-center gap-2">
-                  <div className="p-3 bg-[#2B2B2B] rounded-full text-[#E0E0E0] border border-[#565656]/60">
+                  <div className="p-3 bg-[#2B2B2B] rounded-full text-[#E0E0E0] border border-[#2B2B2B]/30/60">
                     <FileText size={24} />
                   </div>
                   <div>
                     <span className="text-xs font-bold text-[#E0E0E0] block">Chọn File sách hoặc Ảnh bìa từ máy</span>
-                    <span className="text-[11px] text-[#8A817C] block mt-0.5">Hỗ trợ .pdf, .epub, .mobi, .txt hoặc file ảnh (.png, .jpg)</span>
+                    <span className="text-[11px] text-[#2B2B2B]/60 block mt-0.5">Hỗ trợ .pdf, .epub, .mobi, .txt hoặc file ảnh (.png, .jpg)</span>
                   </div>
                   <input
                     type="file"
@@ -361,12 +361,12 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
               </div>
 
               {/* Info notice about file saving strategy */}
-              <div className="p-3 bg-[#2B2B2B] border border-[#565656]/60 rounded-xl text-xs text-[#B3B3B3] leading-relaxed">
+              <div className="p-3 bg-[#2B2B2B] border border-[#2B2B2B]/30/60 rounded-xl text-xs text-[#2B2B2B]/60 leading-relaxed">
                 💡 <strong>Tiết kiệm dung lượng:</strong> Hệ thống chỉ trích xuất thông tin tên sách & nén ảnh bìa xuống mức thấp nhất (15-30KB) để hiển thị, <strong>không lưu trữ toàn bộ file nặng</strong> lên máy chủ.
               </div>
 
               {uploadedFileName && (
-                <div className="text-xs text-[#B3B3B3] bg-[#2B2B2B] px-3 py-2 rounded-lg border border-[#565656]/40 flex items-center gap-2 truncate">
+                <div className="text-xs text-[#2B2B2B]/60 bg-[#2B2B2B] px-3 py-2 rounded-lg border border-[#2B2B2B]/30/40 flex items-center gap-2 truncate">
                   <FileText size={14} className="text-[#E0E0E0] flex-shrink-0" />
                   <span className="truncate">File đã chọn: <strong>{uploadedFileName}</strong></span>
                 </div>
@@ -374,31 +374,31 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
 
               {/* Title & Author inputs */}
               <div>
-                <label className="block text-xs font-bold text-[#B3B3B3] mb-1">Tên Sách <span className="text-red-400">*</span></label>
+                <label className="block text-xs font-bold text-[#2B2B2B]/60 mb-1">Tên Sách <span className="text-red-400">*</span></label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Nhập tên sách..."
-                  className="w-full bg-[#2B2B2B] border border-[#565656] rounded-xl px-4 py-2.5 text-sm text-[#E0E0E0] focus:outline-none focus:border-[#E0E0E0]"
+                  className="w-full bg-[#2B2B2B] border border-[#2B2B2B]/30 rounded-xl px-4 py-2.5 text-sm text-[#E0E0E0] focus:outline-none focus:border-[#E0E0E0]"
                   required={activeTab === 'upload'}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#B3B3B3] mb-1">Tác giả</label>
+                <label className="block text-xs font-bold text-[#2B2B2B]/60 mb-1">Tác giả</label>
                 <input
                   type="text"
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
                   placeholder="Nhập tên tác giả..."
-                  className="w-full bg-[#2B2B2B] border border-[#565656] rounded-xl px-4 py-2.5 text-sm text-[#E0E0E0] focus:outline-none focus:border-[#E0E0E0]"
+                  className="w-full bg-[#2B2B2B] border border-[#2B2B2B]/30 rounded-xl px-4 py-2.5 text-sm text-[#E0E0E0] focus:outline-none focus:border-[#E0E0E0]"
                 />
               </div>
 
               {/* Compressed Cover Preview */}
               {compressedCoverUrl && (
-                <div className="flex items-center gap-4 p-3 bg-[#2B2B2B] rounded-xl border border-[#565656]/50">
+                <div className="flex items-center gap-4 p-3 bg-[#2B2B2B] rounded-xl border border-[#2B2B2B]/30/50">
                   <img src={compressedCoverUrl} alt="Cover preview" className="w-12 h-16 object-cover rounded-md shadow-md" />
                   <div>
                     <span className="text-xs font-bold text-[#E0E0E0] block">Ảnh bìa đã nén siêu nhỏ</span>
@@ -416,33 +416,33 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
           {activeTab === 'manual' && (
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#B3B3B3] mb-1">Tên Sách <span className="text-red-400">*</span></label>
+                <label className="block text-xs font-bold text-[#2B2B2B]/60 mb-1">Tên Sách <span className="text-red-400">*</span></label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Nhập tên sách..."
-                  className="w-full bg-[#2B2B2B] border border-[#565656] rounded-xl px-4 py-2.5 text-sm text-[#E0E0E0] focus:outline-none focus:border-[#E0E0E0]"
+                  className="w-full bg-[#2B2B2B] border border-[#2B2B2B]/30 rounded-xl px-4 py-2.5 text-sm text-[#E0E0E0] focus:outline-none focus:border-[#E0E0E0]"
                   required={activeTab === 'manual'}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#B3B3B3] mb-1">Tác giả</label>
+                <label className="block text-xs font-bold text-[#2B2B2B]/60 mb-1">Tác giả</label>
                 <input
                   type="text"
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
                   placeholder="Nhập tên tác giả..."
-                  className="w-full bg-[#2B2B2B] border border-[#565656] rounded-xl px-4 py-2.5 text-sm text-[#E0E0E0] focus:outline-none focus:border-[#E0E0E0]"
+                  className="w-full bg-[#2B2B2B] border border-[#2B2B2B]/30 rounded-xl px-4 py-2.5 text-sm text-[#E0E0E0] focus:outline-none focus:border-[#E0E0E0]"
                 />
               </div>
 
               {/* Custom Cover Picker */}
               <div>
-                <label className="block text-xs font-bold text-[#B3B3B3] mb-1.5">Ảnh Bìa (Tùy chọn)</label>
+                <label className="block text-xs font-bold text-[#2B2B2B]/60 mb-1.5">Ảnh Bìa (Tùy chọn)</label>
                 {compressedCoverUrl ? (
-                  <div className="flex items-center gap-3 p-3 bg-[#2B2B2B] rounded-xl border border-[#565656]/50">
+                  <div className="flex items-center gap-3 p-3 bg-[#2B2B2B] rounded-xl border border-[#2B2B2B]/30/50">
                     <img src={compressedCoverUrl} alt="Cover preview" className="w-12 h-16 object-cover rounded-md shadow" />
                     <div className="flex-1">
                       <span className="text-xs font-bold text-[#E0E0E0] block">Ảnh bìa đã nén</span>
@@ -457,7 +457,7 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
                     </button>
                   </div>
                 ) : (
-                  <label className="flex items-center justify-center gap-2 p-3 bg-[#2B2B2B] border border-dashed border-[#565656] hover:border-[#E0E0E0]/50 rounded-xl cursor-pointer transition-colors text-xs font-bold text-[#B3B3B3]">
+                  <label className="flex items-center justify-center gap-2 p-3 bg-[#2B2B2B] border border-dashed border-[#2B2B2B]/30 hover:border-[#E0E0E0]/50 rounded-xl cursor-pointer transition-colors text-xs font-bold text-[#2B2B2B]/60">
                     <ImageIcon size={16} className="text-[#E0E0E0]" />
                     <span>Tải ảnh bìa (Sẽ tự nén dung lượng thấp)</span>
                     <input type="file" accept="image/*" onChange={handleCoverUpload} className="hidden" />
@@ -468,7 +468,7 @@ export default function AddMyBookModal({ isOpen, onClose, onSuccess }: AddMyBook
           )}
 
           {/* Submit Button - Enforcing Contrast (RULE[user_global]) */}
-          <div className="pt-6 mt-4 border-t border-[#565656]/40">
+          <div className="pt-6 mt-4 border-t border-[#2B2B2B]/30/40">
             <button
               type="submit"
               disabled={isLoading || (activeTab === 'library' && !selectedLibraryBookId) || (activeTab !== 'library' && !title.trim())}

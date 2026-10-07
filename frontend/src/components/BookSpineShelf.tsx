@@ -28,20 +28,20 @@ const PHYSICAL_SPINE_THEMES = [
     bg: '#2B2B2B', // Onyx
     textColor: '#FFFFFF', 
     foilColor: '#E0E0E0', // Stucco Foil
-    authorColor: '#B3B3B3',
+    authorColor: '#E0E0E0',
     paperEdge: '#E0E0E0',
     type: 'leather' 
   },
   { 
-    bg: '#565656', // Walnut
+    bg: '#2B2B2B', // Walnut
     textColor: '#FFFFFF', 
-    foilColor: '#B3B3B3', // Greige Foil
+    foilColor: '#E0E0E0', // Greige Foil
     authorColor: '#E0E0E0',
     paperEdge: '#E0E0E0',
     type: 'cloth' 
   },
   { 
-    bg: '#848484', // Ash Linen
+    bg: '#2B2B2B', // Ash Linen
     textColor: '#FFFFFF', 
     foilColor: '#E0E0E0', // Stucco Foil
     authorColor: '#2B2B2B',
@@ -49,39 +49,39 @@ const PHYSICAL_SPINE_THEMES = [
     type: 'linen' 
   },
   { 
-    bg: '#B3B3B3', // Greige Cloth
+    bg: '#E0E0E0', // Greige Cloth
     textColor: '#2B2B2B', 
     foilColor: '#2B2B2B', // Onyx Foil
-    authorColor: '#565656',
+    authorColor: '#2B2B2B',
     paperEdge: '#E0E0E0',
     type: 'leather' 
   },
   { 
     bg: '#E0E0E0', // Stucco Hardbound
     textColor: '#2B2B2B', 
-    foilColor: '#565656', // Walnut Inlay Foil
-    authorColor: '#565656',
+    foilColor: '#2B2B2B', // Walnut Inlay Foil
+    authorColor: '#2B2B2B',
     paperEdge: '#FFFFFF',
     type: 'linen' 
   },
   { 
     bg: '#2B2B2B', // Onyx Leather
     textColor: '#FFFFFF', 
-    foilColor: '#B3B3B3', // Greige Foil
-    authorColor: '#848484',
+    foilColor: '#E0E0E0', // Greige Foil
+    authorColor: '#2B2B2B',
     paperEdge: '#E0E0E0',
     type: 'leather' 
   },
   { 
-    bg: '#565656', // Walnut Velvet
+    bg: '#2B2B2B', // Walnut Velvet
     textColor: '#FFFFFF', 
     foilColor: '#E0E0E0', // Stucco Foil
-    authorColor: '#B3B3B3',
+    authorColor: '#E0E0E0',
     paperEdge: '#E0E0E0',
     type: 'velvet' 
   },
   { 
-    bg: '#848484', // Ash Bound
+    bg: '#2B2B2B', // Ash Bound
     textColor: '#2B2B2B', 
     foilColor: '#2B2B2B', // Onyx Foil
     authorColor: '#2B2B2B',
@@ -119,11 +119,11 @@ export default function BookSpineShelf({ books, onSelectBook, title = "Tủ Sác
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl md:text-2xl font-bold text-[#2B2B2B] tracking-tight">{title}</h2>
-            <span className="bg-[#E0E0E0] text-[#2B2B2B] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#848484]">
+            <span className="bg-[#E0E0E0] text-[#2B2B2B] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#2B2B2B]/30">
               {books.length} cuốn
             </span>
           </div>
-          <p className="text-xs md:text-sm text-[#565656] mt-0.5 font-medium">
+          <p className="text-xs md:text-sm text-[#2B2B2B]/75 mt-0.5 font-medium">
             Bấm trực tiếp vào gáy sách 3D để xem chi tiết
           </p>
         </div>
