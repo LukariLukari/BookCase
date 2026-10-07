@@ -189,7 +189,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #4B4D5B !important;
   color: #F3F1EC !important;
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(60, 62, 74, 0.38);
+  box-shadow: 0 6px 0 0 #B6B8AB, 0 10px 20px rgba(182, 184, 171, 0.28);
 }
 
 /* ==========================================================================
@@ -250,7 +250,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #3C3E4A;
   color: #F3F1EC !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #3C3E4A;
+  box-shadow: 0 4px 0 0 #B6B8AB;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -266,13 +266,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #3C3E4A;
+  box-shadow: 0 5.5px 0 0 #B6B8AB;
   background-color: #4B4D5B;
 }
 
 .btn-push-primary:active, .btn-3d-navy:active, .neu-btn-primary:active, .btn-push-primary.is-pressed {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #3C3E4A !important;
+  box-shadow: 0 0 0 0 #B6B8AB !important;
   background-color: #3C3E4A;
 }
 
@@ -280,7 +280,7 @@ input[type="month"]::-webkit-date-and-time-value {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #3C3E4A;
+  box-shadow: 0 2px 0 0 #B6B8AB;
 }
 
 /* 2b. Warm Ironclad Grey 3D Push Button */
@@ -294,7 +294,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #3C3E4A;
   color: #F3F1EC !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #3C3E4A;
+  box-shadow: 0 4px 0 0 #B6B8AB;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -302,13 +302,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-walnut:hover, .btn-push-ironclad:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #3C3E4A;
+  box-shadow: 0 5.5px 0 0 #B6B8AB;
   background-color: #4B4D5B;
 }
 
 .btn-push-walnut:active, .btn-push-ironclad:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #3C3E4A !important;
+  box-shadow: 0 0 0 0 #B6B8AB !important;
 }
 
 /* 3. Action 3D Push Button (Thu tiền, highlight) */
@@ -542,6 +542,18 @@ input[type="month"]::-webkit-date-and-time-value {
 [class~="from-black"] { --tw-gradient-from: var(--midnight) var(--tw-gradient-from-position) !important; --tw-gradient-to: rgb(60 62 74 / 0) var(--tw-gradient-to-position) !important; }
 [class~="via-white"] { --tw-gradient-via: var(--ivory) var(--tw-gradient-via-position) !important; }
 [class~="to-black"] { --tw-gradient-to: var(--midnight) var(--tw-gradient-to-position) !important; }
+
+.bg-\[\#3C3E4A\].shadow-sm,
+.bg-\[\#3C3E4A\].shadow,
+.bg-\[\#3C3E4A\].shadow-md,
+.bg-\[\#3C3E4A\].shadow-lg,
+.bg-\[\#3C3E4A\].shadow-xl {
+  box-shadow: 0 4px 0 0 var(--moss), 0 8px 18px rgb(182 184 171 / 0.24) !important;
+}
+
+.bg-\[\#3C3E4A\].shadow-inner {
+  box-shadow: inset 0 2px 5px rgb(224 223 210 / 0.3) !important;
+}
 
 [class~="bg-red-50"],
 [class~="bg-red-100"],
