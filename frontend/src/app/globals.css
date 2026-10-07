@@ -76,14 +76,26 @@
   --color-stucco: #eee9df;
   --font-sans: var(--font-sua), 'FontCuaSua', cursive, sans-serif;
   --font-serif: var(--font-sua), 'FontCuaSua', cursive, sans-serif;
+  --text-xs: 0.85rem;
+  --text-sm: 0.95rem;
+  --text-base: 1.05rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.45rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.15rem;
 }
 
-html, body {
+html {
+  font-size: 118%;
   overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 body {
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
+  font-size: 1.05rem;
+  line-height: 1.5;
   background:
     radial-gradient(circle at 22% 18%, rgb(255 255 255 / 0.62) 0 10%, transparent 33%),
     radial-gradient(circle at 80% 14%, rgb(255 255 255 / 0.42) 0 8%, transparent 30%),
@@ -801,6 +813,30 @@ select {
 @theme inline {
   --font-sans: var(--font-sua), 'FontCuaSua', cursive, sans-serif;
   --font-serif: var(--font-sua), 'FontCuaSua', cursive, sans-serif;
+  --text-xs: 0.85rem;
+  --text-sm: 0.95rem;
+  --text-base: 1.05rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.45rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.15rem;
+}
+
+.text-xs {
+  font-size: 0.85rem !important;
+}
+
+.text-sm {
+  font-size: 0.95rem !important;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 1rem;
 }
 
 body {
