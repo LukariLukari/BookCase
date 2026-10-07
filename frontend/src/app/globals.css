@@ -747,3 +747,259 @@ select {
 [class~="to-pink-200"],
 [class~="to-teal-200"],
 [class~="to-purple-200"] { --tw-gradient-to: var(--moss) var(--tw-gradient-to-position) !important; }
+
+/* ==========================================================================
+   Warm minimal planner theme
+   Inspired by the supplied mobile reference: airy ivory canvas, paper cards,
+   muted sage accents, deep forest actions and very soft elevation.
+   ========================================================================== */
+:root {
+  --planner-ink: #18201c;
+  --planner-muted: #777a73;
+  --planner-canvas: #f2f0e8;
+  --planner-paper: #fbfaf5;
+  --planner-card: #fffefa;
+  --planner-sage: #dfe4d7;
+  --planner-sage-deep: #73806f;
+  --planner-line: rgb(24 32 28 / 0.08);
+  --ivory: var(--planner-paper);
+  --champagne: #ece9df;
+  --moss: var(--planner-sage);
+  --smoke: var(--planner-muted);
+  --garden: #e8ebe2;
+  --midnight: var(--planner-ink);
+  --deep-teal: var(--planner-ink);
+  --butter: #d9d1b7;
+  --paper-line: var(--planner-line);
+  --background: var(--planner-canvas);
+  --foreground: var(--planner-ink);
+  --surface: var(--planner-paper);
+  --surface-muted: #eeece4;
+  --surface-card: var(--planner-card);
+  --border-soft: var(--planner-line);
+  --text-main: var(--planner-ink);
+  --text-muted: var(--planner-muted);
+  --button-shadow: 0 7px 18px rgb(39 45 37 / 0.08);
+  --button-shadow-hover: 0 10px 24px rgb(39 45 37 / 0.12);
+  --button-shadow-disabled: 0 4px 10px rgb(39 45 37 / 0.05);
+  --button-shadow-inset: inset 0 1px 2px rgb(39 45 37 / 0.08);
+  --page-shadow: 0 16px 42px rgb(39 45 37 / 0.075);
+  --sticker-shadow: 0 8px 24px rgb(39 45 37 / 0.065);
+  --color-charcoal: var(--planner-ink);
+  --color-navy: var(--planner-ink);
+  --color-navy-hover: #0f1612;
+  --color-charcoal-noir: var(--planner-ink);
+  --color-ironclad: var(--planner-ink);
+  --color-urban-fog: var(--planner-muted);
+  --color-moonlit-silver: var(--planner-paper);
+  --color-cloud-veil: var(--planner-canvas);
+  --color-onyx: var(--planner-ink);
+  --color-walnut: var(--planner-ink);
+  --color-ash: var(--planner-muted);
+  --color-greige: #ece9df;
+  --color-stucco: var(--planner-paper);
+}
+
+html { background: var(--planner-canvas); }
+
+body {
+  background:
+    radial-gradient(circle at 8% 2%, rgb(255 255 255 / 0.72), transparent 30rem),
+    radial-gradient(circle at 92% 100%, rgb(196 203 185 / 0.18), transparent 34rem),
+    var(--planner-canvas) !important;
+  color: var(--planner-ink) !important;
+  font-family: var(--font-montserrat), Montserrat, Arial, Helvetica, sans-serif !important;
+}
+
+body::before { display: none !important; }
+
+h1, h2, h3, h4, h5, h6,
+button, input, textarea, select, option {
+  font-family: var(--font-montserrat), Montserrat, Arial, Helvetica, sans-serif !important;
+}
+
+h1, h2, h3 { color: var(--planner-ink); letter-spacing: -0.035em; }
+
+::selection { background: var(--planner-sage); color: var(--planner-ink); }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c2c6bc; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--planner-sage-deep); }
+
+/* Retire the previous navy/brown utility palette throughout legacy screens. */
+[class*="text-[#1f365f]"],
+[class*="text-[#173963]"],
+[class*="text-[#585556]"] { color: var(--planner-ink) !important; }
+
+[class*="bg-[#eee9df]"],
+[class*="bg-[#efe6d8]"],
+[class*="bg-[#fef9f4]"],
+[class*="bg-[#f3eadc]"],
+[class*="bg-[#e4dccd]"] { background-color: var(--planner-paper) !important; }
+
+[class*="bg-[#1f365f]"],
+[class*="bg-[#173963]"],
+[class*="bg-[#3B507D]"],
+[class*="bg-[#585556]"] { background-color: var(--planner-ink) !important; }
+
+[class*="bg-[#b9cddf]"] { background-color: var(--planner-sage) !important; }
+
+[class~="bg-white"] { background-color: var(--planner-card) !important; }
+[class~="text-white"] { color: #ffffff !important; }
+[class~="bg-gray-50"], [class~="bg-gray-100"], [class~="bg-stone-50"],
+[class~="bg-neutral-50"], [class~="bg-zinc-50"] { background-color: #eeece4 !important; }
+[class~="text-gray-400"], [class~="text-gray-500"], [class~="text-gray-600"],
+[class~="text-slate-500"], [class~="text-stone-500"] { color: var(--planner-muted) !important; }
+
+/* Remove the old heavy outlines and mechanical offset shadows. Form fields
+   receive their own subtle border again below. */
+[class~="border-2"],
+[class*="border-[#585556]"],
+[class*="border-[#1f365f]"],
+[class*="border-[#173963]"] { border-color: transparent !important; }
+
+[class*="shadow-[0_"],
+[class*="shadow-[6px_"],
+[class*="shadow-[8px_"],
+[class*="shadow-[10px_"],
+[class*="shadow-[12px_"],
+[class*="shadow-[14px_"],
+[class*="shadow-[18px_"] { box-shadow: var(--sticker-shadow) !important; }
+
+/* Paper-like cards from the reference: no visible outline, restrained shadow. */
+.card-push, .card-3d, .neu-surface,
+.card-push-subtle, .card-3d-subtle, .neu-surface-subtle {
+  background: rgb(255 254 250 / 0.94) !important;
+  border: 1px solid rgb(255 255 255 / 0.72) !important;
+  border-radius: 24px !important;
+  box-shadow: var(--page-shadow) !important;
+  color: var(--planner-ink) !important;
+}
+
+.card-push-subtle, .card-3d-subtle, .neu-surface-subtle {
+  border-radius: 19px !important;
+  box-shadow: var(--sticker-shadow) !important;
+}
+
+.card-push-subtle:hover, .card-3d-subtle:hover, .neu-surface-subtle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgb(39 45 37 / 0.09) !important;
+}
+
+/* Soft white fields with a quiet focus ring. */
+.input-push, .input-3d, .neu-inset,
+input, textarea, select {
+  background: rgb(255 254 250 / 0.94) !important;
+  border: 1px solid var(--planner-line) !important;
+  color: var(--planner-ink) !important;
+  box-shadow: 0 4px 16px rgb(39 45 37 / 0.035) !important;
+}
+
+input::placeholder, textarea::placeholder { color: rgb(24 32 28 / 0.38) !important; }
+
+.input-push:focus-within, .input-3d:focus-within, .neu-inset:focus-within,
+input:focus, textarea:focus, select:focus {
+  border-color: rgb(115 128 111 / 0.52) !important;
+  box-shadow: 0 0 0 3px rgb(115 128 111 / 0.12), 0 7px 20px rgb(39 45 37 / 0.05) !important;
+  outline: none !important;
+}
+
+/* Light secondary controls. */
+.btn-push, .btn-3d, .neu-btn,
+.btn-push-walnut, .btn-push-ironclad,
+.btn-push-emerald, .btn-3d-emerald,
+.squircle-btn {
+  background: rgb(255 254 250 / 0.96) !important;
+  background-image: none !important;
+  border: 1px solid rgb(24 32 28 / 0.06) !important;
+  color: var(--planner-ink) !important;
+  box-shadow: var(--button-shadow) !important;
+}
+
+.btn-push *, .btn-3d *, .neu-btn *,
+.btn-push-walnut *, .btn-push-ironclad *,
+.btn-push-emerald *, .btn-3d-emerald *, .squircle-btn *,
+.btn-push svg, .btn-3d svg, .neu-btn svg,
+.btn-push-walnut svg, .btn-push-ironclad svg,
+.btn-push-emerald svg, .btn-3d-emerald svg, .squircle-btn svg {
+  color: var(--planner-ink) !important;
+  stroke: var(--planner-ink) !important;
+}
+
+/* Dark forest CTAs and floating actions, matching the reference's plus button. */
+.btn-gradient, .btn-navy,
+.btn-push-primary, .btn-3d-navy, .neu-btn-primary,
+.btn-push-danger, .btn-3d-danger,
+.btn-push-amber, .btn-3d-amber, .neu-btn-amber {
+  background: var(--planner-ink) !important;
+  background-image: none !important;
+  border: 1px solid var(--planner-ink) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 24px rgb(24 32 28 / 0.18) !important;
+}
+
+.btn-gradient *, .btn-navy *,
+.btn-push-primary *, .btn-3d-navy *, .neu-btn-primary *,
+.btn-push-danger *, .btn-3d-danger *,
+.btn-push-amber *, .btn-3d-amber *, .neu-btn-amber *,
+.btn-gradient svg, .btn-navy svg,
+.btn-push-primary svg, .btn-3d-navy svg, .neu-btn-primary svg,
+.btn-push-danger svg, .btn-3d-danger svg,
+.btn-push-amber svg, .btn-3d-amber svg, .neu-btn-amber svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.btn-gradient:hover, .btn-navy:hover,
+.btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover,
+.btn-push-danger:hover, .btn-3d-danger:hover,
+.btn-push-amber:hover, .btn-3d-amber:hover, .neu-btn-amber:hover {
+  background: #0f1612 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 13px 28px rgb(24 32 28 / 0.22) !important;
+}
+
+.btn-push:hover, .btn-3d:hover, .neu-btn:hover, .squircle-btn:hover {
+  background: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: var(--button-shadow-hover) !important;
+}
+
+.btn-push:active, .btn-3d:active, .neu-btn:active,
+.btn-push-primary:active, .btn-3d-navy:active, .neu-btn-primary:active,
+.btn-push-danger:active, .btn-3d-danger:active,
+.btn-push-amber:active, .btn-3d-amber:active, .neu-btn-amber:active,
+.squircle-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 3px 10px rgb(39 45 37 / 0.1) !important;
+}
+
+.badge-push, .neu-badge, .badge-push-sunken, .neu-badge-sunken {
+  background: var(--planner-sage) !important;
+  border: 0 !important;
+  color: var(--planner-ink) !important;
+  box-shadow: none !important;
+}
+
+.squircle-btn.active {
+  background: var(--planner-ink) !important;
+  border-color: var(--planner-ink) !important;
+  color: #ffffff !important;
+}
+
+.squircle-btn.active *, .squircle-btn.active svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.shadow-2xl, .shadow-xl, .shadow-lg, .shadow-md, .shadow {
+  box-shadow: var(--page-shadow) !important;
+}
+
+.rounded-xl, .rounded-2xl, .rounded-3xl { border-radius: 20px; }
+
+@media (max-width: 767px) {
+  :root {
+    --page-shadow: 0 10px 28px rgb(39 45 37 / 0.065);
+    --sticker-shadow: 0 6px 18px rgb(39 45 37 / 0.055);
+  }
+}
