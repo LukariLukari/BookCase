@@ -15,6 +15,9 @@
   --border-soft: #112250;
   --text-main: #112250;
   --text-muted: #112250;
+  --button-shadow: 0 4px 0 0 #BEB7A7, 0 10px 18px rgb(190 183 167 / 0.22);
+  --button-shadow-hover: 0 5.5px 0 0 #BEB7A7, 0 13px 22px rgb(190 183 167 / 0.26);
+  --button-shadow-disabled: 0 2px 0 0 #BEB7A7, 0 6px 12px rgb(190 183 167 / 0.18);
   --color-charcoal: #112250;
   --color-navy: #112250;
   --color-navy-hover: #3B507D;
@@ -176,7 +179,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #112250 !important;
   border-color: transparent !important;
   color: #F5F4F0 !important;
-  box-shadow: 0 4px 0 0 #BEB7A7 !important;
+  box-shadow: var(--button-shadow) !important;
 }
 
 .btn-gradient *, .btn-navy * {
@@ -192,14 +195,14 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #112250 !important;
   color: #F5F4F0 !important;
   transform: translateY(-1px);
-  box-shadow: 0 5.5px 0 0 #BEB7A7 !important;
+  box-shadow: var(--button-shadow-hover) !important;
 }
 
 /* ==========================================================================
    3D PUSH-BUTTON DESIGN SYSTEM (Mechanical Key / Solid Hard-Extrusion / Arcade)
    ========================================================================== */
 
-/* 1. Base Button (Flat until selected/primary) */
+/* 1. Base 3D Navy Push Button */
 .btn-push, .btn-3d, .neu-btn {
   position: relative;
   display: inline-flex;
@@ -207,13 +210,21 @@ input[type="month"]::-webkit-date-and-time-value {
   justify-content: center;
   border-radius: 9999px;
   border: 2px solid transparent;
-  background-color: #F5F4F0;
-  color: #112250;
+  background-color: #112250;
+  color: #F5F4F0 !important;
   font-weight: 800;
-  box-shadow: none;
+  box-shadow: var(--button-shadow);
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
+}
+
+.btn-push *, .btn-3d *, .neu-btn * {
+  color: #F5F4F0 !important;
+}
+
+.btn-push svg, .btn-3d svg, .neu-btn svg {
+  stroke: #F5F4F0 !important;
 }
 
 .btn-push.absolute, .btn-3d.absolute, .neu-btn.absolute {
@@ -225,21 +236,21 @@ input[type="month"]::-webkit-date-and-time-value {
 }
 
 .btn-push:hover, .btn-3d:hover, .neu-btn:hover {
-  transform: none;
-  box-shadow: none;
-  background-color: #F5F4F0;
+  transform: translateY(-1.5px);
+  box-shadow: var(--button-shadow-hover);
+  background-color: #112250;
 }
 
 .btn-push:active, .btn-3d:active, .neu-btn:active, .btn-push.is-pressed {
-  transform: none;
-  box-shadow: none !important;
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 #BEB7A7 !important;
 }
 
 .btn-push:disabled, .btn-3d:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
+  box-shadow: var(--button-shadow-disabled);
 }
 
 /* 2. Primary Charcoal Noir 3D Push Button */
@@ -253,7 +264,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #112250;
   color: #F5F4F0 !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #BEB7A7;
+  box-shadow: var(--button-shadow);
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -269,7 +280,7 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #BEB7A7;
+  box-shadow: var(--button-shadow-hover);
   background-color: #112250;
 }
 
@@ -283,7 +294,7 @@ input[type="month"]::-webkit-date-and-time-value {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #BEB7A7;
+  box-shadow: var(--button-shadow-disabled);
 }
 
 /* 2b. Warm Ironclad Grey 3D Push Button */
@@ -297,7 +308,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #112250;
   color: #F5F4F0 !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #BEB7A7;
+  box-shadow: var(--button-shadow);
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -305,7 +316,7 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-walnut:hover, .btn-push-ironclad:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #BEB7A7;
+  box-shadow: var(--button-shadow-hover);
   background-color: #112250;
 }
 
@@ -325,7 +336,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #112250;
   color: #F5F4F0;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #BEB7A7;
+  box-shadow: var(--button-shadow);
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -333,7 +344,7 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-amber:hover, .btn-3d-amber:hover, .neu-btn-amber:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #BEB7A7;
+  box-shadow: var(--button-shadow-hover);
   background-color: #112250;
 }
 
@@ -353,13 +364,13 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #112250;
   color: #F5F4F0;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #BEB7A7;
+  box-shadow: var(--button-shadow);
   transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
 .btn-push-emerald:hover {
   transform: translateY(-1px);
-  box-shadow: 0 5px 0 0 #BEB7A7;
+  box-shadow: var(--button-shadow-hover);
   background-color: #112250;
 }
 
@@ -379,7 +390,7 @@ input[type="month"]::-webkit-date-and-time-value {
   background-color: #112250;
   color: #F5F4F0;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #BEB7A7;
+  box-shadow: var(--button-shadow);
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -387,7 +398,7 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-danger:hover, .btn-3d-danger:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #BEB7A7;
+  box-shadow: var(--button-shadow-hover);
   background-color: #112250;
 }
 
@@ -567,7 +578,7 @@ a.bg-\[\#112250\] {
   background-color: #112250 !important;
   border-color: transparent !important;
   color: #F5F4F0 !important;
-  box-shadow: 0 4px 0 0 #BEB7A7 !important;
+  box-shadow: var(--button-shadow) !important;
 }
 
 button.bg-\[\#112250\] *,
