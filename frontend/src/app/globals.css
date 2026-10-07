@@ -551,6 +551,10 @@ input[type="month"]::-webkit-date-and-time-value {
   box-shadow: 0 4px 0 0 var(--moss), 0 8px 18px rgb(206 206 206 / 0.24) !important;
 }
 
+[class*="bg-[#585556]"][class*="shadow-["] {
+  box-shadow: 0 4px 0 0 var(--moss), 0 8px 18px rgb(206 206 206 / 0.24) !important;
+}
+
 .bg-\[\#585556\].shadow-inner {
   box-shadow: inset 0 2px 5px rgb(185 205 223 / 0.3) !important;
 }
