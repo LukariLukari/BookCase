@@ -172,24 +172,24 @@ input[type="month"]::-webkit-date-and-time-value {
 
 /* Charcoal Noir Accent Button & Pills */
 .btn-gradient, .btn-navy {
-  background-color: #b9cddf !important;
+  background-color: #585556 !important;
   border-color: transparent !important;
-  color: #585556 !important;
+  color: #fff !important;
   box-shadow: 0 4px 0 0 #cecece !important;
 }
 
 .btn-gradient *, .btn-navy * {
-  color: #585556 !important;
+  color: #fff !important;
 }
 
 .btn-gradient svg, .btn-navy svg {
-  stroke: #585556 !important;
-  color: #585556 !important;
+  stroke: #fff !important;
+  color: #fff !important;
 }
 
 .btn-gradient:hover, .btn-navy:hover {
-  background-color: #b9cddf !important;
-  color: #585556 !important;
+  background-color: #585556 !important;
+  color: #fff !important;
   transform: translateY(-1px);
   box-shadow: 0 5.5px 0 0 #cecece !important;
 }
@@ -206,8 +206,8 @@ input[type="month"]::-webkit-date-and-time-value {
   justify-content: center;
   border-radius: 9999px;
   border: 2px solid transparent;
-  background-color: #b9cddf;
-  color: #585556;
+  background-color: #585556;
+  color: #fff;
   font-weight: 800;
   box-shadow: 0 4px 0 0 #cecece;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
@@ -226,7 +226,7 @@ input[type="month"]::-webkit-date-and-time-value {
 .btn-push:hover, .btn-3d:hover, .neu-btn:hover {
   transform: translateY(-1.5px);
   box-shadow: 0 5.5px 0 0 #cecece;
-  background-color: #b9cddf;
+  background-color: #585556;
 }
 
 .btn-push:active, .btn-3d:active, .neu-btn:active, .btn-push.is-pressed {
@@ -249,8 +249,8 @@ input[type="month"]::-webkit-date-and-time-value {
   justify-content: center;
   border-radius: 9999px;
   border: 2px solid transparent;
-  background-color: #b9cddf;
-  color: #585556 !important;
+  background-color: #585556;
+  color: #fff !important;
   font-weight: 800;
   box-shadow: 0 4px 0 0 #cecece;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
@@ -259,23 +259,23 @@ input[type="month"]::-webkit-date-and-time-value {
 }
 
 .btn-push-primary *, .btn-3d-navy *, .neu-btn-primary * {
-  color: #585556 !important;
+  color: #fff !important;
 }
 
 .btn-push-primary svg, .btn-3d-navy svg, .neu-btn-primary svg {
-  stroke: #585556 !important;
+  stroke: #fff !important;
 }
 
 .btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover {
   transform: translateY(-1.5px);
   box-shadow: 0 5.5px 0 0 #cecece;
-  background-color: #b9cddf;
+  background-color: #585556;
 }
 
 .btn-push-primary:active, .btn-3d-navy:active, .neu-btn-primary:active, .btn-push-primary.is-pressed {
   transform: translateY(4px);
   box-shadow: 0 0 0 0 #cecece !important;
-  background-color: #b9cddf;
+  background-color: #585556;
 }
 
 .btn-push-primary:disabled, .btn-3d-navy:disabled {
@@ -293,8 +293,8 @@ input[type="month"]::-webkit-date-and-time-value {
   justify-content: center;
   border-radius: 9999px;
   border: 2px solid transparent;
-  background-color: #b9cddf;
-  color: #585556 !important;
+  background-color: #585556;
+  color: #fff !important;
   font-weight: 800;
   box-shadow: 0 4px 0 0 #cecece;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
@@ -305,7 +305,7 @@ input[type="month"]::-webkit-date-and-time-value {
 .btn-push-walnut:hover, .btn-push-ironclad:hover {
   transform: translateY(-1.5px);
   box-shadow: 0 5.5px 0 0 #cecece;
-  background-color: #b9cddf;
+  background-color: #585556;
 }
 
 .btn-push-walnut:active, .btn-push-ironclad:active {
@@ -321,8 +321,8 @@ input[type="month"]::-webkit-date-and-time-value {
   justify-content: center;
   border-radius: 9999px;
   border: 2px solid transparent;
-  background-color: #b9cddf;
-  color: #585556;
+  background-color: #585556;
+  color: #fff;
   font-weight: 800;
   box-shadow: 0 4px 0 0 #cecece;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
@@ -333,7 +333,7 @@ input[type="month"]::-webkit-date-and-time-value {
 .btn-push-amber:hover, .btn-3d-amber:hover, .neu-btn-amber:hover {
   transform: translateY(-1.5px);
   box-shadow: 0 5.5px 0 0 #cecece;
-  background-color: #b9cddf;
+  background-color: #585556;
 }
 
 .btn-push-amber:active, .btn-3d-amber:active, .neu-btn-amber:active {
@@ -349,8 +349,8 @@ input[type="month"]::-webkit-date-and-time-value {
   justify-content: center;
   border-radius: 9999px;
   border: 2px solid transparent;
-  background-color: #b9cddf;
-  color: #585556;
+  background-color: #585556;
+  color: #fff;
   font-weight: 800;
   box-shadow: 0 4px 0 0 #cecece;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
@@ -359,7 +359,7 @@ input[type="month"]::-webkit-date-and-time-value {
 .btn-push-emerald:hover {
   transform: translateY(-1px);
   box-shadow: 0 5px 0 0 #cecece;
-  background-color: #b9cddf;
+  background-color: #585556;
 }
 
 .btn-push-emerald:active {
@@ -375,8 +375,8 @@ input[type="month"]::-webkit-date-and-time-value {
   justify-content: center;
   border-radius: 9999px;
   border: 2px solid transparent;
-  background-color: #b9cddf;
-  color: #585556;
+  background-color: #585556;
+  color: #fff;
   font-weight: 800;
   box-shadow: 0 4px 0 0 #cecece;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
@@ -387,7 +387,7 @@ input[type="month"]::-webkit-date-and-time-value {
 .btn-push-danger:hover, .btn-3d-danger:hover {
   transform: translateY(-1.5px);
   box-shadow: 0 5.5px 0 0 #cecece;
-  background-color: #b9cddf;
+  background-color: #585556;
 }
 
 .btn-push-danger:active, .btn-3d-danger:active {
@@ -563,9 +563,9 @@ input[type="month"]::-webkit-date-and-time-value {
 
 button.bg-\[\#585556\],
 a.bg-\[\#585556\] {
-  background-color: #b9cddf !important;
+  background-color: #585556 !important;
   border-color: transparent !important;
-  color: #585556 !important;
+  color: #fff !important;
   box-shadow: 0 4px 0 0 #cecece !important;
 }
 
@@ -573,14 +573,8 @@ button.bg-\[\#585556\] *,
 a.bg-\[\#585556\] *,
 button.bg-\[\#585556\] svg,
 a.bg-\[\#585556\] svg {
-  color: #585556 !important;
-  stroke: #585556 !important;
-}
-
-button.bg-\[\#b9cddf\],
-a.bg-\[\#b9cddf\] {
-  border-color: transparent !important;
-  box-shadow: 0 4px 0 0 #cecece !important;
+  color: #fff !important;
+  stroke: #fff !important;
 }
 
 [class~="bg-red-50"],
