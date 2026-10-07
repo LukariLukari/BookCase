@@ -198,7 +198,7 @@ input[type="month"]::-webkit-date-and-time-value {
    3D PUSH-BUTTON DESIGN SYSTEM (Mechanical Key / Solid Hard-Extrusion / Arcade)
    ========================================================================== */
 
-/* 1. Base 3D Push Button (Crisp White / Silver / Light) */
+/* 1. Base Button (Flat until selected/primary) */
 .btn-push, .btn-3d, .neu-btn {
   position: relative;
   display: inline-flex;
@@ -206,10 +206,10 @@ input[type="month"]::-webkit-date-and-time-value {
   justify-content: center;
   border-radius: 9999px;
   border: 2px solid transparent;
-  background-color: #585556;
-  color: #fff;
+  background-color: #fef9f4;
+  color: #585556;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #cecece;
+  box-shadow: none;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -224,21 +224,21 @@ input[type="month"]::-webkit-date-and-time-value {
 }
 
 .btn-push:hover, .btn-3d:hover, .neu-btn:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #cecece;
-  background-color: #585556;
+  transform: none;
+  box-shadow: none;
+  background-color: #fef9f4;
 }
 
 .btn-push:active, .btn-3d:active, .neu-btn:active, .btn-push.is-pressed {
-  transform: translateY(4px);
-  box-shadow: 0 0 0 0 #cecece !important;
+  transform: none;
+  box-shadow: none !important;
 }
 
 .btn-push:disabled, .btn-3d:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #cecece;
+  box-shadow: none;
 }
 
 /* 2. Primary Charcoal Noir 3D Push Button */

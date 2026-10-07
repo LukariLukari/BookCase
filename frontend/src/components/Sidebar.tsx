@@ -33,7 +33,7 @@ export default function Sidebar() {
           className={`flex h-11 w-full items-center gap-3 rounded-full px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-4 ${
             active(href)
               ? 'bg-[#585556] text-white shadow-[0_4px_0_0_#cecece]'
-              : 'text-[#585556] hover:bg-[#585556] hover:text-white hover:shadow-[0_3px_0_0_#cecece] active:translate-y-[3px] active:shadow-none'
+              : 'text-[#585556] hover:bg-[#fef9f4] hover:text-[#585556]'
           }`}
         >
           <Icon size={19} className="shrink-0" />
