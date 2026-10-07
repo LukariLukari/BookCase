@@ -117,7 +117,7 @@ export default function ResetAccountModal({
           onMouseDown={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b-2 border-[#203354]/15 px-5 py-4 bg-white/70">
+          <div className="flex items-center justify-between border-b-2 border-[#1C1C1B]/15 px-5 py-4 bg-white/70">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 text-red-600">
                 <ShieldAlert size={22} />
@@ -187,7 +187,7 @@ export default function ResetAccountModal({
                   type="checkbox"
                   checked={createSafetyBackup}
                   onChange={e => setCreateSafetyBackup(e.target.checked)}
-                  className="h-4 w-4 rounded text-[#203354] focus:ring-0"
+                  className="h-4 w-4 rounded text-[#1C1C1B] focus:ring-0"
                 />
                 <span>Tự động tạo bản sao lưu an toàn trước khi xóa (khuyến nghị, có thể phục hồi nếu cần)</span>
               </label>
@@ -221,18 +221,18 @@ export default function ResetAccountModal({
                 onChange={e => setConfirmText(e.target.value)}
                 placeholder="Nhập vào đây để mở khóa nút xóa"
                 disabled={busy}
-                className="w-full rounded-xl border border-[#D5C7B8] bg-[#FAF7F2] px-3.5 py-2.5 text-sm font-black text-red-950 placeholder:text-gray-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100"
+                className="w-full rounded-xl border border-[#D5C7B8] bg-[#E2E2DE] px-3.5 py-2.5 text-sm font-black text-red-950 placeholder:text-gray-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100"
               />
             </div>
           </div>
 
           {/* Footer */}
-          <div className="border-t-2 border-[#203354]/15 bg-white/70 p-4 flex gap-3">
+          <div className="border-t-2 border-[#1C1C1B]/15 bg-white/70 p-4 flex gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={busy}
-              className="btn-push flex-1 h-12 rounded-full text-sm font-black text-[#203354] disabled:opacity-40"
+              className="btn-push flex-1 h-12 rounded-full text-sm font-black text-[#1C1C1B] disabled:opacity-40"
             >
               Hủy bỏ
             </button>

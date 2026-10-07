@@ -118,21 +118,21 @@ export default function RegistrationCodesPage() {
     }
   };
 
-  if (authLoading || !user || user.role !== 'admin') return <div className="min-h-screen bg-[#D8C9BB]" />;
+  if (authLoading || !user || user.role !== 'admin') return <div className="min-h-screen bg-[#B7AC9B]" />;
 
   const unused = codes.filter(x => !x.is_used).length;
 
   return (
-    <div className="min-h-screen bg-[#D8C9BB] p-3 pb-[calc(12rem+env(safe-area-inset-bottom))] pt-[calc(4.75rem+env(safe-area-inset-top,0px))] text-[#292421] md:flex md:gap-5 md:p-6 md:pt-6 md:pb-8">
+    <div className="min-h-screen bg-[#B7AC9B] p-3 pb-[calc(12rem+env(safe-area-inset-bottom))] pt-[calc(4.75rem+env(safe-area-inset-top,0px))] text-[#1C1C1B] md:flex md:gap-5 md:p-6 md:pt-6 md:pb-8">
       <Sidebar />
       <main className="min-w-0 flex-1">
         <div className="mx-auto max-w-6xl space-y-4">
           <header className="card-push rounded-3xl p-5 md:p-7">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
               <div>
-                <p className="text-xs font-black uppercase tracking-[.15em] text-[#766B63]">Quản trị hệ thống</p>
-                <h1 className="mt-1 text-2xl font-black md:text-3xl">Tài khoản & Mô hình kinh doanh</h1>
-                <p className="mt-1 text-sm font-medium text-[#6F655E]">
+                <p className="text-xs font-black uppercase tracking-[.15em] text-[#6A5D52]">Quản trị hệ thống</p>
+                <h1 className="mt-1 text-2xl font-black md:text-3xl text-[#1C1C1B]">Tài khoản & Mô hình kinh doanh</h1>
+                <p className="mt-1 text-sm font-medium text-[#6A5D52]">
                   Cấp mã tài khoản mới, xem danh sách cửa hàng và xóa sạch dữ liệu hệ thống khi chủ doanh nghiệp muốn đổi mô hình kinh doanh.
                 </p>
               </div>
@@ -147,24 +147,24 @@ export default function RegistrationCodesPage() {
           <section className="card-push rounded-3xl p-4 md:p-6">
             <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
-                <Users size={20} className="text-[#203354]" />
-                <h2 className="text-lg font-black text-[#203354]">Danh sách tài khoản cửa hàng</h2>
+                <Users size={20} className="text-[#1C1C1B]" />
+                <h2 className="text-lg font-black text-[#1C1C1B]">Danh sách tài khoản cửa hàng</h2>
               </div>
-              <span className="text-xs font-bold text-[#766B63] bg-white rounded-full px-3 py-1 border border-[#E2D8CC] w-fit">
+              <span className="text-xs font-bold text-[#6A5D52] bg-white rounded-full px-3 py-1 border border-[#979086] w-fit">
                 {users.length} tài khoản trong hệ thống
               </span>
             </div>
 
-            <p className="mb-4 text-xs font-semibold leading-relaxed text-[#6F655E]">
+            <p className="mb-4 text-xs font-semibold leading-relaxed text-[#6A5D52]">
               Mỗi tài khoản là một cửa hàng riêng biệt. Khi chủ shop muốn chuyển sang mô hình kinh doanh khác, bấm nút <b className="text-red-700">"Clear dữ liệu (Đổi mô hình)"</b> để xóa sạch dữ liệu của riêng tài khoản đó. Các tài khoản khác tuyệt đối không bị đụng đến.
             </p>
 
             {loadingUsers ? (
               <div className="flex min-h-24 items-center justify-center">
-                <Loader2 className="animate-spin text-[#203354]" />
+                <Loader2 className="animate-spin text-[#1C1C1B]" />
               </div>
             ) : users.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-[#D5C9BC] bg-white/50 p-5 text-center text-sm text-[#766B63]">
+              <div className="rounded-2xl border border-dashed border-[#979086] bg-white/50 p-5 text-center text-sm text-[#979086]">
                 Chưa có tài khoản nào được đăng ký.
               </div>
             ) : (
@@ -177,25 +177,25 @@ export default function RegistrationCodesPage() {
                   return (
                     <article
                       key={u.id}
-                      className="flex flex-col gap-3 rounded-2xl border border-[#E4D9CE] bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-3 rounded-2xl border border-[#979086]/30 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${u.role === 'admin' ? 'bg-[#203354] text-white' : 'bg-[#EBF0F5] text-[#203354]'}`}>
+                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${u.role === 'admin' ? 'bg-[#1C1C1B] text-white' : 'bg-[#E2E2DE] text-[#1C1C1B]'}`}>
                           <Store size={20} />
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-base font-black text-[#203354]">@{u.username}</span>
+                            <span className="font-mono text-base font-black text-[#1C1C1B]">@{u.username}</span>
                             {isCurrent && (
                               <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-800">
                                 Bạn
                               </span>
                             )}
-                            <span className={`rounded-md px-2 py-0.5 text-[10px] font-black ${u.role === 'admin' ? 'bg-amber-100 text-amber-900' : 'bg-gray-100 text-gray-700'}`}>
+                            <span className={`rounded-md px-2 py-0.5 text-[10px] font-black ${u.role === 'admin' ? 'bg-amber-100 text-amber-900' : 'bg-[#E2E2DE] text-[#1C1C1B]'}`}>
                               {u.role === 'admin' ? 'Admin' : 'Người bán'}
                             </span>
                           </div>
-                          <p className="mt-0.5 text-xs font-semibold text-[#766B63]">
+                          <p className="mt-0.5 text-xs font-semibold text-[#979086]">
                             Đã tạo: {new Date(u.createdAt).toLocaleDateString('vi-VN')} · {prodCount} sản phẩm · {orderCount} đơn hàng
                           </p>
                         </div>
@@ -237,36 +237,36 @@ export default function RegistrationCodesPage() {
 
             {loading ? (
               <div className="flex min-h-48 items-center justify-center">
-                <Loader2 className="animate-spin text-[#203354]" />
+                <Loader2 className="animate-spin text-[#1C1C1B]" />
               </div>
             ) : codes.length === 0 ? (
-              <div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-[#D5C9BC] bg-white/50 p-6 text-center">
-                <UserPlus size={36} className="mb-3 text-[#766B63]" />
+              <div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-[#979086] bg-white/50 p-6 text-center">
+                <UserPlus size={36} className="mb-3 text-[#979086]" />
                 <b>Chưa có mã đăng ký</b>
-                <p className="mt-1 text-sm text-[#766B63]">Tạo mã đầu tiên để cấp tài khoản cho người bán hàng.</p>
+                <p className="mt-1 text-sm text-[#979086]">Tạo mã đầu tiên để cấp tài khoản cho người bán hàng.</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {codes.map(item => (
-                  <article key={item.id} className="flex flex-col gap-3 rounded-2xl border border-[#E4D9CE] bg-white p-4 sm:flex-row sm:items-center">
+                  <article key={item.id} className="flex flex-col gap-3 rounded-2xl border border-[#979086]/30 bg-white p-4 sm:flex-row sm:items-center">
                     <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${item.is_used ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}`}>
                       <KeyRound size={20} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <button onClick={() => copy(item.code)} className="font-mono text-base font-black tracking-wider text-[#203354] hover:underline">
+                      <button onClick={() => copy(item.code)} className="font-mono text-base font-black tracking-wider text-[#1C1C1B] hover:underline">
                         {item.code}
                       </button>
-                      <p className="mt-1 text-xs font-semibold text-[#766B63]">
+                      <p className="mt-1 text-xs font-semibold text-[#979086]">
                         {item.is_used ? `Đã dùng bởi @${item.used_by_username || 'không rõ'}` : 'Sẵn sàng sử dụng'} · {new Date(item.created_at).toLocaleString('vi-VN')}
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => copy(item.code)} title="Sao chép" className="btn-push flex h-10 w-10 items-center justify-center rounded-xl text-[#203354]">
+                      <button onClick={() => copy(item.code)} title="Sao chép" className="btn-push flex h-10 w-10 items-center justify-center rounded-xl text-[#1C1C1B]">
                         <Copy size={17} />
                       </button>
                       {!item.is_used && (
                         <>
-                          <button onClick={() => regenerate(item)} title="Đổi mã" className="btn-push flex h-10 w-10 items-center justify-center rounded-xl text-[#203354]">
+                          <button onClick={() => regenerate(item)} title="Đổi mã" className="btn-push flex h-10 w-10 items-center justify-center rounded-xl text-[#1C1C1B]">
                             <RefreshCw size={17} />
                           </button>
                           <button onClick={() => remove(item)} title="Xóa mã" className="btn-push-danger flex h-10 w-10 items-center justify-center rounded-xl text-[#9B3B30]">

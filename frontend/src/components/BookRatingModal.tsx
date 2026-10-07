@@ -155,12 +155,12 @@ export default function BookRatingModal({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative bg-[#1F1D20] border border-[#4D4845]/50 rounded-3xl p-5 sm:p-8 max-w-2xl w-full shadow-2xl z-10 max-h-[92vh] overflow-y-auto text-[#F5ECDC]"
+          className="relative bg-[#1C1C1B] border border-[#6A5D52]/50 rounded-3xl p-5 sm:p-8 max-w-2xl w-full shadow-2xl z-10 max-h-[92vh] overflow-y-auto text-[#E2E2DE]"
         >
           {/* Header */}
-          <div className="flex items-start justify-between pb-4 border-b border-[#4D4845]/40 mb-6">
+          <div className="flex items-start justify-between pb-4 border-b border-[#6A5D52]/40 mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-20 relative rounded-xl overflow-hidden shadow-md flex-shrink-0 border border-[#4D4845]/40">
+              <div className="w-14 h-20 relative rounded-xl overflow-hidden shadow-md flex-shrink-0 border border-[#6A5D52]/40">
                 <BookCoverImage
                   coverUrl={coverUrl}
                   bookId={bookId}
@@ -170,16 +170,16 @@ export default function BookRatingModal({
                 />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-[#D7C9B2] mb-1 flex items-center gap-1">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#B7AC9B] mb-1 flex items-center gap-1">
                   <Sparkles size={13} /> Đánh Giá & Ghi Insight
                 </p>
-                <h2 className="text-lg sm:text-xl font-black text-[#F5ECDC] line-clamp-1">{bookTitle}</h2>
-                <p className="text-xs text-[#D7C9B2]">{bookAuthor || 'Tác giả chưa rõ'}</p>
+                <h2 className="text-lg sm:text-xl font-black text-[#E2E2DE] line-clamp-1">{bookTitle}</h2>
+                <p className="text-xs text-[#B7AC9B]">{bookAuthor || 'Tác giả chưa rõ'}</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-[#D7C9B2] hover:text-[#F5ECDC] bg-[#2A272A] hover:bg-[#3A373A] rounded-full transition-colors flex-shrink-0 cursor-pointer"
+              className="p-2 text-[#B7AC9B] hover:text-[#E2E2DE] bg-[#1C1C1B] hover:bg-[#2E2E2D] rounded-full transition-colors flex-shrink-0 cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -187,15 +187,15 @@ export default function BookRatingModal({
 
           {isFetchingMyReview ? (
             <div className="py-12 flex flex-col items-center justify-center gap-2">
-              <Loader2 className="animate-spin text-[#F5ECDC]" size={28} />
-              <p className="text-xs text-[#D7C9B2]">Đang tải dữ liệu...</p>
+              <Loader2 className="animate-spin text-[#E2E2DE]" size={28} />
+              <p className="text-xs text-[#B7AC9B]">Đang tải dữ liệu...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               
               {/* Star Rating Section */}
-              <div className="bg-[#2A272A] border border-[#4D4845]/40 rounded-2xl p-4 text-center">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#D7C9B2] mb-2">Đánh Giá Tổng Quan</p>
+              <div className="bg-[#1C1C1B] border border-[#6A5D52]/40 rounded-2xl p-4 text-center">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#B7AC9B] mb-2">Đánh Giá Tổng Quan</p>
                 <div className="flex justify-center items-center gap-2 mb-1">
                   {[1, 2, 3, 4, 5].map((star) => {
                     const isFilled = (hoverRating !== null ? hoverRating : rating) >= star;
@@ -210,13 +210,13 @@ export default function BookRatingModal({
                       >
                         <Star
                           size={30}
-                          className={isFilled ? 'text-[#F5ECDC] fill-[#F5ECDC]' : 'text-[#4D4845] hover:text-[#D7C9B2]'}
+                          className={isFilled ? 'text-[#E2E2DE] fill-[#E2E2DE]' : 'text-[#6A5D52] hover:text-[#B7AC9B]'}
                         />
                       </button>
                     );
                   })}
                 </div>
-                <p className="text-xs font-semibold text-[#D7C9B2]">
+                <p className="text-xs font-semibold text-[#B7AC9B]">
                   {rating === 5 && 'Tuyệt tác - Đổi thay góc nhìn'}
                   {rating === 4 && 'Rất hay - Nhiều bài học thực tiễn'}
                   {rating === 3 && 'Khá ổn - Đáng đọc khi có thời gian'}
@@ -228,10 +228,10 @@ export default function BookRatingModal({
               {/* Reading Status & Progress Slider */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#D7C9B2] mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#B7AC9B] mb-2">
                     Trạng Thái Đọc
                   </label>
-                  <div className="flex gap-1.5 bg-[#2A272A] p-1.5 rounded-xl border border-[#4D4845]/40">
+                  <div className="flex gap-1.5 bg-[#1C1C1B] p-1.5 rounded-xl border border-[#6A5D52]/40">
                     {[
                       { key: 'reading', label: 'Đang đọc' },
                       { key: 'completed', label: 'Đã xong' },
@@ -248,8 +248,8 @@ export default function BookRatingModal({
                         }}
                         className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                           readingStatus === item.key
-                            ? 'bg-[#F5ECDC] text-black shadow-sm'
-                            : 'text-[#D7C9B2] hover:text-white'
+                            ? 'bg-[#E2E2DE] text-black shadow-sm'
+                            : 'text-[#B7AC9B] hover:text-white'
                         }`}
                       >
                         {item.label}
@@ -260,10 +260,10 @@ export default function BookRatingModal({
 
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-[#D7C9B2]">
+                    <label className="text-xs font-bold uppercase tracking-wider text-[#B7AC9B]">
                       Tiến Độ Hoàn Thành
                     </label>
-                    <span className="text-xs font-bold text-[#F5ECDC] bg-[#1F1D20] border border-[#4D4845]/50 px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-bold text-[#E2E2DE] bg-[#1C1C1B] border border-[#6A5D52]/50 px-2 py-0.5 rounded-full">
                       {progressPercent}%
                     </span>
                   </div>
@@ -279,17 +279,17 @@ export default function BookRatingModal({
                       if (val === 100) setReadingStatus('completed');
                       else if (val > 0) setReadingStatus('reading');
                     }}
-                    className="w-full accent-[#F5ECDC] h-2 bg-[#2A272A] rounded-lg appearance-none cursor-pointer mt-3"
+                    className="w-full accent-[#E2E2DE] h-2 bg-[#1C1C1B] rounded-lg appearance-none cursor-pointer mt-3"
                   />
                 </div>
               </div>
 
               {/* Signature Insight: Key Takeaway */}
-              <div className="bg-[#1F1D20] border border-[#4D4845]/50 rounded-2xl p-4 shadow-sm">
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#F5ECDC] mb-1">
+              <div className="bg-[#1C1C1B] border border-[#6A5D52]/50 rounded-2xl p-4 shadow-sm">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#E2E2DE] mb-1">
                   Bài Học Cốt Lõi (Key Takeaway)
                 </label>
-                <p className="text-xs text-[#7B7369] mb-3">
+                <p className="text-xs text-[#979086] mb-3">
                   Điều gì đọng lại sâu sắc nhất sau khi gấp cuốn sách này lại?
                 </p>
                 <textarea
@@ -297,13 +297,13 @@ export default function BookRatingModal({
                   onChange={(e) => setKeyTakeaway(e.target.value)}
                   placeholder="Ví dụ: Quy luật 80/20 giúp tôi nhận ra 20% nỗ lực cốt lõi tạo ra 80% kết quả..."
                   rows={3}
-                  className="w-full bg-[#2A272A] border border-[#4D4845]/50 rounded-xl p-3 text-sm text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none focus:border-[#D7C9B2] resize-none font-medium leading-relaxed"
+                  className="w-full bg-[#1C1C1B] border border-[#6A5D52]/50 rounded-xl p-3 text-sm text-[#E2E2DE] placeholder-[#979086] focus:outline-none focus:border-[#B7AC9B] resize-none font-medium leading-relaxed"
                 />
               </div>
 
               {/* Review & Thoughts */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#D7C9B2] mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#B7AC9B] mb-2">
                   Cảm Nhận Chi Tiết (Tùy chọn)
                 </label>
                 <input
@@ -311,35 +311,35 @@ export default function BookRatingModal({
                   value={reviewTitle}
                   onChange={(e) => setReviewTitle(e.target.value)}
                   placeholder="Tiêu đề cảm nhận ngắn gọn"
-                  className="w-full bg-[#2A272A] border border-[#4D4845]/50 rounded-xl px-4 py-2.5 text-sm text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none focus:border-[#D7C9B2] mb-2"
+                  className="w-full bg-[#1C1C1B] border border-[#6A5D52]/50 rounded-xl px-4 py-2.5 text-sm text-[#E2E2DE] placeholder-[#979086] focus:outline-none focus:border-[#B7AC9B] mb-2"
                 />
                 <textarea
                   value={reviewText}
                   onChange={(e) => setReviewText(e.target.value)}
                   placeholder="Chia sẻ góc nhìn, điều bạn thích, điều bạn chưa ưng ý..."
                   rows={3}
-                  className="w-full bg-[#2A272A] border border-[#4D4845]/50 rounded-xl p-3 text-sm text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none focus:border-[#D7C9B2] resize-none"
+                  className="w-full bg-[#1C1C1B] border border-[#6A5D52]/50 rounded-xl p-3 text-sm text-[#E2E2DE] placeholder-[#979086] focus:outline-none focus:border-[#B7AC9B] resize-none"
                 />
               </div>
 
               {/* Favorite Quote */}
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#D7C9B2] mb-2">
-                  <Quote size={14} className="text-[#7B7369]" /> Trích Dẫn Tâm Đắc Nhất (Tùy chọn)
+                <label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#B7AC9B] mb-2">
+                  <Quote size={14} className="text-[#979086]" /> Trích Dẫn Tâm Đắc Nhất (Tùy chọn)
                 </label>
                 <input
                   type="text"
                   value={favoriteQuote}
                   onChange={(e) => setFavoriteQuote(e.target.value)}
                   placeholder='"Cuộc sống là 10% những gì xảy ra với bạn và 90% cách bạn phản ứng với nó."'
-                  className="w-full bg-[#2A272A] border border-[#4D4845]/50 rounded-xl px-4 py-2.5 text-sm text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none focus:border-[#D7C9B2] italic"
+                  className="w-full bg-[#1C1C1B] border border-[#6A5D52]/50 rounded-xl px-4 py-2.5 text-sm text-[#E2E2DE] placeholder-[#979086] focus:outline-none focus:border-[#B7AC9B] italic"
                 />
               </div>
 
               {/* Tag Cloud */}
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#D7C9B2] mb-2">
-                  <Tag size={14} className="text-[#7B7369]" /> Thẻ Chủ Đề
+                <label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#B7AC9B] mb-2">
+                  <Tag size={14} className="text-[#979086]" /> Thẻ Chủ Đề
                 </label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {PRESET_TAGS.map((t) => {
@@ -351,8 +351,8 @@ export default function BookRatingModal({
                         onClick={() => handleToggleTag(t)}
                         className={`text-xs px-3 py-1.5 rounded-full border transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-[#F5ECDC] text-black font-bold border-[#F5ECDC]'
-                            : 'bg-[#2A272A] border-[#4D4845]/40 text-[#D7C9B2] hover:border-[#D7C9B2]'
+                            ? 'bg-[#E2E2DE] text-black font-bold border-[#E2E2DE]'
+                            : 'bg-[#1C1C1B] border-[#6A5D52]/40 text-[#B7AC9B] hover:border-[#B7AC9B]'
                         }`}
                       >
                         {isSelected && '✓ '}{t}
@@ -366,7 +366,7 @@ export default function BookRatingModal({
                   onChange={(e) => setCustomTagInput(e.target.value)}
                   onKeyDown={handleAddCustomTag}
                   placeholder="Thêm tag tự tạo và bấm Enter..."
-                  className="w-full bg-[#2A272A] border border-[#4D4845]/40 rounded-xl px-3 py-2 text-xs text-[#F5ECDC] placeholder-[#7B7369] focus:outline-none"
+                  className="w-full bg-[#1C1C1B] border border-[#6A5D52]/40 rounded-xl px-3 py-2 text-xs text-[#E2E2DE] placeholder-[#979086] focus:outline-none"
                 />
               </div>
 

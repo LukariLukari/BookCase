@@ -204,7 +204,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
 
             <div 
               className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-colors ${
-                isUploading ? 'pointer-events-none opacity-50 bg-gray-50 border-gray-200' : 'border-gray-300 hover:border-[#D7C9B2] hover:bg-gray-50'
+                isUploading ? 'pointer-events-none opacity-50 bg-gray-50 border-gray-200' : 'border-gray-300 hover:border-[#B7AC9B] hover:bg-gray-50'
               }`}
               onClick={() => fileInputRef.current?.click()}
             >
@@ -233,7 +233,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
                       {/* Background Progress Bar */}
                       {fs.status === 'uploading' && (
                         <div 
-                          className="absolute top-0 left-0 bottom-0 bg-[#F5ECDC]/30 transition-all duration-300 z-0" 
+                          className="absolute top-0 left-0 bottom-0 bg-[#E2E2DE]/30 transition-all duration-300 z-0" 
                           style={{ width: `${fs.progress}%` }} 
                         />
                       )}

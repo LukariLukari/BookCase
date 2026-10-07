@@ -1,22 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --background: #D8C9BB;
-  --foreground: #1C1917;
-  --surface: #FBF8F4;
-  --surface-muted: #EFE8DE;
+  --background: #B7AC9B;
+  --foreground: #1C1C1B;
+  --surface: #E2E2DE;
+  --surface-muted: #D8D1C7;
   --surface-card: #FFFFFF;
-  --border-soft: #E5DACD;
-  --text-main: #1C1917;
-  --text-muted: #57534E;
-  --color-charcoal: #1F1E20;
-  --color-navy: #1B2A4A;
-  --color-navy-hover: #131E33;
+  --border-soft: #979086;
+  --text-main: #1C1C1B;
+  --text-muted: #6A5D52;
+  --color-charcoal: #1C1C1B;
+  --color-navy: #1C1C1B;
+  --color-navy-hover: #2E2E2D;
+  --color-onyx: #1C1C1B;
+  --color-walnut: #6A5D52;
+  --color-ash: #979086;
+  --color-greige: #B7AC9B;
+  --color-stucco: #E2E2DE;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-onyx: #1C1C1B;
+  --color-walnut: #6A5D52;
+  --color-ash: #979086;
+  --color-greige: #B7AC9B;
+  --color-stucco: #E2E2DE;
   --font-sans: var(--font-montserrat);
 }
 
@@ -26,8 +37,8 @@ html, body {
 }
 
 body {
-  background-color: #D8C9BB;
-  color: #1C1917;
+  background-color: #B7AC9B;
+  color: #1C1C1B;
   font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
@@ -56,14 +67,14 @@ input[type="month"]::-webkit-date-and-time-value {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #EFE8DE;
+  background: #E2E2DE;
 }
 ::-webkit-scrollbar-thumb {
-  background: #C8BAA9;
+  background: #979086;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #AFA190;
+  background: #6A5D52;
 }
 
 /* Hardcover Book & Ribbon Visual System */
@@ -75,11 +86,11 @@ input[type="month"]::-webkit-date-and-time-value {
   height: 100%;
   border-radius: 4px 12px 12px 4px;
   overflow: hidden;
-  background-color: #EDE4D8;
+  background-color: #E2E2DE;
   box-shadow: 
-    -2px 3px 6px rgba(45, 30, 20, 0.12),
-    0 10px 20px -3px rgba(45, 30, 20, 0.18),
-    0 4px 6px -2px rgba(45, 30, 20, 0.08),
+    -2px 3px 6px rgba(28, 28, 27, 0.12),
+    0 10px 20px -3px rgba(28, 28, 27, 0.18),
+    0 4px 6px -2px rgba(28, 28, 27, 0.08),
     inset 0 0 0 1px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -88,9 +99,9 @@ input[type="month"]::-webkit-date-and-time-value {
 .group:hover .book-card-3d,
 .group:hover .book-hardcover {
   box-shadow: 
-    -4px 6px 12px rgba(45, 30, 20, 0.16),
-    0 20px 32px -6px rgba(45, 30, 20, 0.26),
-    0 8px 12px -3px rgba(45, 30, 20, 0.14),
+    -4px 6px 12px rgba(28, 28, 27, 0.16),
+    0 20px 32px -6px rgba(28, 28, 27, 0.26),
+    0 8px 12px -3px rgba(28, 28, 27, 0.14),
     inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
@@ -143,44 +154,44 @@ input[type="month"]::-webkit-date-and-time-value {
   );
 }
 
-/* Navy Accent Button & Pills (Pure Contrast Guarantee) */
-.btn-gradient, .btn-navy, .bg-\[\#1B2A4A\] {
-  background-color: #1B2A4A !important;
+/* Onyx Accent Button & Pills (Pure Contrast Guarantee) */
+.btn-gradient, .btn-navy, .bg-\[\#1B2A4A\], .bg-\[\#203354\] {
+  background-color: #1C1C1B !important;
   color: #FFFFFF !important;
 }
 
-.btn-gradient *, .btn-navy *, .bg-\[\#1B2A4A\] * {
+.btn-gradient *, .btn-navy *, .bg-\[\#1B2A4A\] *, .bg-\[\#203354\] * {
   color: #FFFFFF !important;
 }
 
-.btn-gradient svg, .btn-navy svg, .bg-\[\#1B2A4A\] svg {
+.btn-gradient svg, .btn-navy svg, .bg-\[\#1B2A4A\] svg, .bg-\[\#203354\] svg {
   stroke: #FFFFFF !important;
   color: #FFFFFF !important;
 }
 
 .btn-gradient:hover, .btn-navy:hover {
-  background-color: #131E33 !important;
+  background-color: #2E2E2D !important;
   color: #FFFFFF !important;
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(27, 42, 74, 0.38);
+  box-shadow: 0 6px 18px rgba(28, 28, 27, 0.38);
 }
 
 /* ==========================================================================
    3D PUSH-BUTTON DESIGN SYSTEM (Mechanical Key / Solid Hard-Extrusion / Arcade)
    ========================================================================== */
 
-/* 1. Base 3D Push Button (Cream / Light) */
+/* 1. Base 3D Push Button (Stucco / Light) */
 .btn-push, .btn-3d, .neu-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #203354;
-  background-color: #FAF7F2;
-  color: #203354;
+  border: 2px solid #1C1C1B;
+  background-color: #E2E2DE;
+  color: #1C1C1B;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #203354;
+  box-shadow: 0 4px 0 0 #1C1C1B;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -196,34 +207,34 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push:hover, .btn-3d:hover, .neu-btn:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #203354;
+  box-shadow: 0 5.5px 0 0 #1C1C1B;
   background-color: #FFFFFF;
 }
 
 .btn-push:active, .btn-3d:active, .neu-btn:active, .btn-push.is-pressed {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #203354 !important;
+  box-shadow: 0 0 0 0 #1C1C1B !important;
 }
 
 .btn-push:disabled, .btn-3d:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #203354;
+  box-shadow: 0 2px 0 0 #1C1C1B;
 }
 
-/* 2. Primary Navy 3D Push Button */
+/* 2. Primary Onyx 3D Push Button */
 .btn-push-primary, .btn-3d-navy, .neu-btn-primary {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #172F56;
-  background-color: #203354;
+  border: 2px solid #1C1C1B;
+  background-color: #1C1C1B;
   color: #FFFFFF !important;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #142B4E;
+  box-shadow: 0 4px 0 0 #6A5D52;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -239,21 +250,49 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-primary:hover, .btn-3d-navy:hover, .neu-btn-primary:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #142B4E;
-  background-color: #283F68;
+  box-shadow: 0 5.5px 0 0 #6A5D52;
+  background-color: #2E2E2D;
 }
 
 .btn-push-primary:active, .btn-3d-navy:active, .neu-btn-primary:active, .btn-push-primary.is-pressed {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #142B4E !important;
-  background-color: #162E52;
+  box-shadow: 0 0 0 0 #6A5D52 !important;
+  background-color: #1C1C1B;
 }
 
 .btn-push-primary:disabled, .btn-3d-navy:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 0 #142B4E;
+  box-shadow: 0 2px 0 0 #6A5D52;
+}
+
+/* 2b. Warm Walnut 3D Push Button */
+.btn-push-walnut {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 2px solid #1C1C1B;
+  background-color: #6A5D52;
+  color: #FFFFFF !important;
+  font-weight: 800;
+  box-shadow: 0 4px 0 0 #1C1C1B;
+  transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
+  user-select: none;
+  cursor: pointer;
+}
+
+.btn-push-walnut:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 5.5px 0 0 #1C1C1B;
+  background-color: #554A41;
+}
+
+.btn-push-walnut:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 #1C1C1B !important;
 }
 
 /* 3. Amber / Action 3D Push Button (Thu tiền, highlight) */
@@ -263,11 +302,11 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #8C5916;
-  background-color: #FFF3DF;
-  color: #8C5916;
+  border: 2px solid #6A5D52;
+  background-color: #E2E2DE;
+  color: #6A5D52;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #8C5916;
+  box-shadow: 0 4px 0 0 #6A5D52;
   transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.12s ease;
   user-select: none;
   cursor: pointer;
@@ -275,13 +314,13 @@ input[type="month"]::-webkit-date-and-time-value {
 
 .btn-push-amber:hover, .btn-3d-amber:hover, .neu-btn-amber:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #8C5916;
-  background-color: #FFF8EB;
+  box-shadow: 0 5.5px 0 0 #6A5D52;
+  background-color: #FFFFFF;
 }
 
 .btn-push-amber:active, .btn-3d-amber:active, .neu-btn-amber:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #8C5916 !important;
+  box-shadow: 0 0 0 0 #6A5D52 !important;
 }
 
 /* 4. Emerald / Success 3D Badge & Button (Đã thu, hoàn tất) */
@@ -340,37 +379,37 @@ input[type="month"]::-webkit-date-and-time-value {
 
 /* 6. 3D Card / Container */
 .card-push, .card-3d, .neu-surface {
-  background-color: #FAF7F2;
-  border: 2px solid #203354;
+  background-color: #E2E2DE;
+  border: 2px solid #1C1C1B;
   border-radius: 28px;
-  box-shadow: 0 5px 0 0 #203354;
+  box-shadow: 0 5px 0 0 #1C1C1B;
   transition: all 0.15s ease;
 }
 
 .card-push-subtle, .card-3d-subtle, .neu-surface-subtle {
   background-color: #FFFFFF;
-  border: 2px solid #203354;
+  border: 2px solid #1C1C1B;
   border-radius: 20px;
-  box-shadow: 0 4px 0 0 #203354;
+  box-shadow: 0 4px 0 0 #1C1C1B;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .card-push-subtle:hover, .card-3d-subtle:hover, .neu-surface-subtle:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #203354;
+  box-shadow: 0 5.5px 0 0 #1C1C1B;
 }
 
 /* 7. 3D Input & Search Box */
 .input-push, .input-3d, .neu-inset {
   background-color: #FFFFFF;
-  border: 2px solid #203354;
+  border: 2px solid #1C1C1B;
   border-radius: 9999px;
-  box-shadow: 0 3px 0 0 #203354;
+  box-shadow: 0 3px 0 0 #1C1C1B;
   transition: all 0.12s ease;
 }
 
 .input-push:focus-within, .input-3d:focus-within, .neu-inset:focus-within {
-  box-shadow: 0 4px 0 0 #203354;
+  box-shadow: 0 4px 0 0 #1C1C1B;
   background-color: #FCFBF8;
 }
 
@@ -379,18 +418,18 @@ input[type="month"]::-webkit-date-and-time-value {
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  border: 2px solid #203354;
-  background-color: #FAF7F2;
-  box-shadow: 0 2.5px 0 0 #203354;
+  border: 2px solid #1C1C1B;
+  background-color: #E2E2DE;
+  box-shadow: 0 2.5px 0 0 #1C1C1B;
 }
 
 .badge-push-sunken, .neu-badge-sunken {
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  border: 2px solid #203354;
-  background-color: #EFE8DE;
-  box-shadow: 0 1px 0 0 #203354;
+  border: 2px solid #1C1C1B;
+  background-color: #B7AC9B;
+  box-shadow: 0 1px 0 0 #1C1C1B;
 }
 
 /* 9. Squircle button compatibility */
@@ -400,27 +439,27 @@ input[type="month"]::-webkit-date-and-time-value {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 2px solid #203354;
-  background-color: #FAF7F2;
-  color: #203354;
+  border: 2px solid #1C1C1B;
+  background-color: #E2E2DE;
+  color: #1C1C1B;
   font-weight: 800;
-  box-shadow: 0 4px 0 0 #203354;
+  box-shadow: 0 4px 0 0 #1C1C1B;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
   cursor: pointer;
 }
 .squircle-btn:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 5.5px 0 0 #203354;
+  box-shadow: 0 5.5px 0 0 #1C1C1B;
 }
 .squircle-btn:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 0 #203354 !important;
+  box-shadow: 0 0 0 0 #1C1C1B !important;
 }
 .squircle-btn.active {
-  background-color: #203354 !important;
+  background-color: #1C1C1B !important;
   color: #FFFFFF !important;
-  border-color: #172F56 !important;
-  box-shadow: 0 4px 0 0 #142B4E !important;
+  border-color: #1C1C1B !important;
+  box-shadow: 0 4px 0 0 #6A5D52 !important;
 }
 
 .no-scrollbar::-webkit-scrollbar {

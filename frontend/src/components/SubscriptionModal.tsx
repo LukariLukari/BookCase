@@ -89,23 +89,23 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
           initial={{ opacity: 0, y: 40, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.96 }}
-          className="relative bg-[#1F1D20] rounded-3xl max-w-4xl w-full border border-[#4D4845]/60 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-[#F5ECDC]"
+          className="relative bg-[#1C1C1B] rounded-3xl max-w-4xl w-full border border-[#6A5D52]/60 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-[#E2E2DE]"
         >
           {/* Header */}
-          <div className="p-6 md:p-8 border-b border-[#4D4845]/50 flex justify-between items-center bg-[#2A272A]">
+          <div className="p-6 md:p-8 border-b border-[#6A5D52]/50 flex justify-between items-center bg-[#1C1C1B]">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="bg-[#F5ECDC] text-[#000000] text-xs font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <span className="bg-[#E2E2DE] text-[#000000] text-xs font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
                   <Crown size={13} style={{ color: '#000000' }} /> Billy VIP Member
                 </span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-black text-[#F5ECDC] tracking-tight">
+              <h2 className="text-2xl md:text-3xl font-black text-[#E2E2DE] tracking-tight">
                 Bảng Giá Đăng Ký Thành Viên
               </h2>
             </div>
             <button
               onClick={onClose}
-              className="p-2.5 bg-[#1F1D20] hover:bg-[#F5ECDC] hover:text-black text-[#F5ECDC] rounded-full transition-colors cursor-pointer border border-[#4D4845]/50"
+              className="p-2.5 bg-[#1C1C1B] hover:bg-[#E2E2DE] hover:text-black text-[#E2E2DE] rounded-full transition-colors cursor-pointer border border-[#6A5D52]/50"
             >
               <X size={20} />
             </button>
@@ -123,35 +123,35 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                       <div
                         key={plan.id}
                         onClick={() => setSelectedPlan(plan.id as any)}
-                        className={`relative bg-[#2A272A] rounded-2xl p-6 md:p-7 border transition-all duration-200 flex flex-col justify-between cursor-pointer ${
+                        className={`relative bg-[#1C1C1B] rounded-2xl p-6 md:p-7 border transition-all duration-200 flex flex-col justify-between cursor-pointer ${
                           isSelected
-                            ? 'border-[#F5ECDC] shadow-xl ring-2 ring-[#F5ECDC]/30 scale-[1.02]'
-                            : 'border-[#4D4845]/50 hover:border-[#F5ECDC]/50'
+                            ? 'border-[#E2E2DE] shadow-xl ring-2 ring-[#E2E2DE]/30 scale-[1.02]'
+                            : 'border-[#6A5D52]/50 hover:border-[#E2E2DE]/50'
                         }`}
                       >
                         {plan.badge && (
                           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                            <span className="bg-[#F5ECDC] text-[#000000] font-black text-[10px] uppercase px-3.5 py-1 rounded-full shadow-md whitespace-nowrap">
+                            <span className="bg-[#E2E2DE] text-[#000000] font-black text-[10px] uppercase px-3.5 py-1 rounded-full shadow-md whitespace-nowrap">
                               {plan.badge}
                             </span>
                           </div>
                         )}
 
                         <div>
-                          <div className="text-center pb-5 border-b border-[#4D4845]/40 mb-5 pt-1">
-                            <h3 className="font-bold text-lg text-[#F5ECDC] mb-1.5">{plan.name}</h3>
+                          <div className="text-center pb-5 border-b border-[#6A5D52]/40 mb-5 pt-1">
+                            <h3 className="font-bold text-lg text-[#E2E2DE] mb-1.5">{plan.name}</h3>
                             <p className="text-[#8A817C] text-xs mb-4 min-h-[32px] flex items-center justify-center">{plan.description}</p>
                             <div className="flex items-baseline justify-center gap-1">
-                              <span className="text-3xl md:text-4xl font-black text-[#F5ECDC] tracking-tight">{plan.price}</span>
+                              <span className="text-3xl md:text-4xl font-black text-[#E2E2DE] tracking-tight">{plan.price}</span>
                               <span className="text-[#8A817C] text-xs font-semibold">{plan.period}</span>
                             </div>
                           </div>
 
-                          <ul className="space-y-3.5 text-xs text-[#D7C9B2] mb-8">
+                          <ul className="space-y-3.5 text-xs text-[#B7AC9B] mb-8">
                             {plan.features.map((feat, idx) => (
                               <li key={idx} className="flex items-start gap-2.5 leading-relaxed">
-                                <Check size={16} className="text-[#F5ECDC] shrink-0 mt-0.5" />
-                                <span className={feat.includes('KHÔNG GIỚI HẠN') ? 'font-black text-[#F5ECDC]' : ''}>
+                                <Check size={16} className="text-[#E2E2DE] shrink-0 mt-0.5" />
+                                <span className={feat.includes('KHÔNG GIỚI HẠN') ? 'font-black text-[#E2E2DE]' : ''}>
                                   {feat}
                                 </span>
                               </li>
@@ -167,14 +167,14 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                             alert('Tính năng đăng ký tự động đang được hoàn thiện. Cảm ơn bạn đã quan tâm!');
                             onClose();
                           }}
-                          className="w-full py-3.5 px-4 rounded-xl font-black text-sm transition-all shadow-md cursor-pointer border border-[#4D4845]/50 flex items-center justify-center gap-2 mt-2"
+                          className="w-full py-3.5 px-4 rounded-xl font-black text-sm transition-all shadow-md cursor-pointer border border-[#6A5D52]/50 flex items-center justify-center gap-2 mt-2"
                           style={{
-                            backgroundColor: isSelected ? '#F5ECDC' : '#1F1D20',
-                            color: isSelected ? '#000000' : '#F5ECDC'
+                            backgroundColor: isSelected ? '#E2E2DE' : '#1C1C1B',
+                            color: isSelected ? '#000000' : '#E2E2DE'
                           }}
                         >
-                          <Sparkles size={16} style={{ color: isSelected ? '#000000' : '#F5ECDC' }} />
-                          <span style={{ color: isSelected ? '#000000' : '#F5ECDC' }}>
+                          <Sparkles size={16} style={{ color: isSelected ? '#000000' : '#E2E2DE' }} />
+                          <span style={{ color: isSelected ? '#000000' : '#E2E2DE' }}>
                             Chọn Mua
                           </span>
                         </button>
@@ -184,15 +184,15 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                 </div>
 
                 {/* Trust Footer */}
-                <div className="flex flex-wrap items-center justify-center gap-6 pt-4 border-t border-[#4D4845]/40 text-xs text-[#8A817C]">
+                <div className="flex flex-wrap items-center justify-center gap-6 pt-4 border-t border-[#6A5D52]/40 text-xs text-[#8A817C]">
                   <span className="flex items-center gap-1.5">
-                    <ShieldCheck size={16} className="text-[#F5ECDC]" /> Tải sách tốc độ cao 24/7
+                    <ShieldCheck size={16} className="text-[#E2E2DE]" /> Tải sách tốc độ cao 24/7
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Zap size={16} className="text-[#F5ECDC]" /> Đọc trực tiếp EPub / PDF online
+                    <Zap size={16} className="text-[#E2E2DE]" /> Đọc trực tiếp EPub / PDF online
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <PhoneCall size={16} className="text-[#F5ECDC]" /> Hỗ trợ tìm sách theo yêu cầu
+                    <PhoneCall size={16} className="text-[#E2E2DE]" /> Hỗ trợ tìm sách theo yêu cầu
                   </span>
                 </div>
           </div>
