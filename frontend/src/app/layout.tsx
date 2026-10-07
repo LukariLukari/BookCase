@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 
-const suaFont = localFont({
-  src: "../fonts/Fontcuasua.otf",
-  variable: "--font-sua",
+const montserrat = Montserrat({
+  subsets: ["latin", "vietnamese"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-montserrat",
   display: "swap",
-  fallback: ["cursive", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${suaFont.variable} font-sans min-h-full antialiased`}
+      className={`${montserrat.variable} font-sans min-h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
