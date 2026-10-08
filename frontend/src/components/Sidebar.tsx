@@ -32,8 +32,8 @@ export default function Sidebar() {
           title={label}
           className={`flex h-11 w-full items-center gap-3 rounded-2xl border px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-4 ${
             active(href)
-              ? 'border-transparent bg-[#18201c] text-white shadow-[0_8px_20px_rgb(24_32_28_/_0.16)]'
-              : 'border-transparent bg-white/55 text-[#18201c]/70 shadow-none hover:bg-white hover:text-[#18201c]'
+              ? 'border-transparent bg-[#16587B] text-white shadow-[0_8px_20px_rgb(22_88_123_/_0.20)]'
+              : 'border-transparent bg-white/55 text-[#16587B]/70 shadow-none hover:bg-white hover:text-[#16587B]'
           }`}
         >
           <Icon size={19} className="shrink-0" />
@@ -53,7 +53,7 @@ export default function Sidebar() {
           title={label}
           className={`flex h-12 items-center justify-start gap-2.5 rounded-2xl px-3.5 text-xs font-black transition-all ${
             active(href)
-              ? 'bg-[#18201c] text-white shadow-[0_8px_20px_rgb(24_32_28_/_0.16)]'
+              ? 'bg-[#16587B] text-white shadow-[0_8px_20px_rgb(22_88_123_/_0.20)]'
               : 'btn-push'
           }`}
         >
@@ -66,7 +66,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col rounded-[30px] border border-white/70 bg-[#fbfaf5]/95 p-2.5 pt-3.5 pb-3 shadow-[0_18px_44px_rgb(39_45_37_/_0.08)] backdrop-blur-xl no-scrollbar overflow-y-auto md:flex xl:w-52">
+      <aside className="sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col rounded-[30px] border border-white/70 bg-[#F5EEDD]/95 p-2.5 pt-3.5 pb-3 shadow-[0_18px_44px_rgb(22_88_123_/_0.08)] backdrop-blur-xl no-scrollbar overflow-y-auto md:flex xl:w-52">
         <Link
           href="/business"
           title="Billy · Bán Hàng"
@@ -78,8 +78,8 @@ export default function Sidebar() {
           </span>
         </Link>
         <nav className="space-y-2">{desktopLinks}</nav>
-        <div className="mt-auto border-t border-[#18201c]/8 pt-3">
-          <p className="hidden truncate px-3 pb-2 text-xs font-bold text-[#18201c]/60 xl:block">
+        <div className="mt-auto border-t border-[#16587B]/10 pt-3">
+          <p className="hidden truncate px-3 pb-2 text-xs font-bold text-[#16587B]/60 xl:block">
             {user?.username}
           </p>
           <button
@@ -92,18 +92,18 @@ export default function Sidebar() {
           </button>
         </div>
       </aside>
-      <header className="fixed inset-x-3.5 top-[max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))] z-50 flex h-14 items-center justify-between gap-3 rounded-[22px] border border-white/70 bg-[#fbfaf5]/95 px-5 py-2 shadow-[0_10px_30px_rgb(39_45_37_/_0.08)] backdrop-blur-xl md:hidden">
-        <Link href="/business" className="font-black text-[#18201c] tracking-wide text-sm">BILLY · BÁN HÀNG</Link>
+      <header className="fixed inset-x-3.5 top-[max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))] z-50 flex h-14 items-center justify-between gap-3 rounded-[22px] border border-white/70 bg-[#F5EEDD]/95 px-5 py-2 shadow-[0_10px_30px_rgb(22_88_123_/_0.08)] backdrop-blur-xl md:hidden">
+        <Link href="/business" className="font-black text-[#16587B] tracking-wide text-sm">BILLY · BÁN HÀNG</Link>
         <button
           onClick={() => setOpen(v => !v)}
           aria-label={open ? 'Đóng menu' : 'Mở menu'}
-          className="btn-push flex h-9 w-9 shrink-0 items-center justify-center text-[#18201c]"
+          className="btn-push flex h-9 w-9 shrink-0 items-center justify-center text-[#16587B]"
         >
           {open ? <X size={19}/> : <Menu size={19}/>}
         </button>
       </header>
       {open && (
-        <div className="fixed inset-x-3.5 top-[calc(max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))+4.25rem)] z-50 rounded-[24px] border border-white/70 bg-[#fbfaf5]/98 p-4 shadow-[0_16px_38px_rgb(39_45_37_/_0.1)] backdrop-blur-xl md:hidden">
+        <div className="fixed inset-x-3.5 top-[calc(max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))+4.25rem)] z-50 rounded-[24px] border border-white/70 bg-[#F5EEDD]/98 p-4 shadow-[0_16px_38px_rgb(22_88_123_/_0.1)] backdrop-blur-xl md:hidden">
           <nav className="grid grid-cols-2 gap-2.5">{mobileLinks}</nav>
           <button onClick={logout} className="btn-push-danger mt-3.5 flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-black">
             <LogOut size={18}/> Đăng xuất
