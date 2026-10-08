@@ -70,11 +70,13 @@ export default function Sidebar() {
         <Link
           href="/business"
           title="Billy · Bán Hàng"
-          className="btn-push-primary mb-3 flex h-11 w-full items-center justify-center font-black text-white xl:justify-start xl:px-4"
+          className="mb-2.5 flex w-full flex-col items-center justify-center border-b border-[#16587B]/10 pb-3 pt-1 text-[#16587B] transition-opacity hover:opacity-80 xl:items-start xl:px-3"
         >
-          <span className="text-sm font-black tracking-wider">Billy</span>
-          <span className="hidden truncate text-xs font-black tracking-wide text-white/90 xl:inline ml-1.5">
-            · BÁN HÀNG
+          <span className="text-2xl font-black tracking-tight text-[#16587B] xl:text-[28px] leading-tight">
+            Billy<span className="text-[#84B3CE]">.</span>
+          </span>
+          <span className="hidden text-[10px] font-black uppercase tracking-widest text-[#16587B]/60 xl:block mt-0.5">
+            Bán Hàng
           </span>
         </Link>
         <nav className="space-y-2">{desktopLinks}</nav>
@@ -93,7 +95,10 @@ export default function Sidebar() {
         </div>
       </aside>
       <header className="fixed inset-x-3.5 top-[max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))] z-50 flex h-14 items-center justify-between gap-3 rounded-[22px] border border-white/70 bg-[#F5EEDD]/95 px-5 py-2 shadow-[0_10px_30px_rgb(22_88_123_/_0.08)] backdrop-blur-xl md:hidden">
-        <Link href="/business" className="font-black text-[#16587B] tracking-wide text-sm">BILLY · BÁN HÀNG</Link>
+        <Link href="/business" className="flex items-baseline gap-1.5 text-[#16587B] transition-opacity hover:opacity-80">
+          <span className="text-xl font-black tracking-tight">Billy<span className="text-[#84B3CE]">.</span></span>
+          <span className="text-[11px] font-black uppercase tracking-widest text-[#16587B]/60">Bán Hàng</span>
+        </Link>
         <button
           onClick={() => setOpen(v => !v)}
           aria-label={open ? 'Đóng menu' : 'Mở menu'}
