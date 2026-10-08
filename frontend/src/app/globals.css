@@ -612,6 +612,14 @@ a.bg-\[\#1f365f\] svg {
   stroke: #eee9df !important;
 }
 
+button.bg-\[\#1f365f\] .bg-white *,
+button.bg-\[\#1f365f\] [class*="bg-white"] *,
+button.bg-\[\#1f365f\] .bg-white svg,
+button.bg-\[\#1f365f\] [class*="bg-white"] svg {
+  color: var(--planner-ink) !important;
+  stroke: var(--planner-ink) !important;
+}
+
 button.bg-\[\#dce6e6\],
 a.bg-\[\#dce6e6\],
 button.bg-\[\#3B507D\],
