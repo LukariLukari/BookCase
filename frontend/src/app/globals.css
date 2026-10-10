@@ -1704,12 +1704,6 @@ svg {
   background: var(--pixel-panel) !important;
   box-shadow: var(--page-shadow) !important;
   color: var(--pixel-ink) !important;
-  clip-path: polygon(
-    0 6px, 6px 6px, 6px 0,
-    calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px,
-    100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%,
-    6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px)
-  );
 }
 
 .card-push-subtle,
@@ -2023,7 +2017,8 @@ select:focus,
 [class~="rounded-full"],
 .rounded-xl,
 .rounded-2xl,
-.rounded-3xl {
+.rounded-3xl,
+[class*="rounded-["] {
   border-radius: 0 !important;
 }
 
