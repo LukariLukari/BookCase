@@ -1420,3 +1420,485 @@ select:focus,
     --sticker-shadow: 0 8px 20px rgb(53 76 88 / 0.12);
   }
 }
+
+/* ==========================================================================
+   Pixel shop design system
+   ========================================================================== */
+:root {
+  --pixel-bg: #c9bea2;
+  --pixel-bg-dark: #b9af96;
+  --pixel-panel: #d7cbae;
+  --pixel-panel-light: #e0d3b5;
+  --pixel-panel-soft: #d1c5aa;
+  --pixel-ink: #57575c;
+  --pixel-ink-dark: #45454a;
+  --pixel-muted: #8f8b82;
+  --pixel-highlight: #efe2c2;
+  --pixel-shadow: #777777;
+  --pixel-shadow-dark: #5f6066;
+  --pixel-success: #7f8c78;
+  --pixel-danger: #8b6767;
+
+  --ivory: var(--pixel-panel);
+  --champagne: var(--pixel-panel-light);
+  --moss: var(--pixel-muted);
+  --smoke: var(--pixel-muted);
+  --garden: var(--pixel-panel-soft);
+  --midnight: var(--pixel-ink);
+  --deep-teal: var(--pixel-ink-dark);
+  --butter: var(--pixel-highlight);
+  --background: var(--pixel-bg);
+  --foreground: var(--pixel-ink);
+  --surface: var(--pixel-panel);
+  --surface-muted: var(--pixel-panel-soft);
+  --surface-card: var(--pixel-panel);
+  --border-soft: var(--pixel-ink);
+  --text-main: var(--pixel-ink);
+  --text-muted: var(--pixel-muted);
+  --button-shadow: 0 5px 0 var(--pixel-shadow-dark);
+  --button-shadow-hover: 0 6px 0 var(--pixel-shadow-dark);
+  --button-shadow-disabled: 0 3px 0 var(--pixel-shadow);
+  --button-shadow-inset: inset 0 4px 0 rgb(69 69 74 / 0.22);
+  --page-shadow: 0 7px 0 var(--pixel-shadow-dark), 0 12px 0 rgb(69 69 74 / 0.18);
+  --sticker-shadow: 0 5px 0 var(--pixel-shadow-dark), 0 9px 0 rgb(69 69 74 / 0.14);
+}
+
+@theme inline {
+  --font-sans: var(--font-pixel);
+  --font-serif: var(--font-pixel);
+}
+
+html {
+  background: var(--pixel-bg) !important;
+  image-rendering: pixelated;
+}
+
+body {
+  background:
+    linear-gradient(90deg, rgb(87 87 92 / 0.045) 1px, transparent 1px),
+    linear-gradient(0deg, rgb(87 87 92 / 0.045) 1px, transparent 1px),
+    radial-gradient(circle at 18% 12%, rgb(239 226 194 / 0.24), transparent 18rem),
+    var(--pixel-bg) !important;
+  background-size: 18px 18px, 18px 18px, auto, auto !important;
+  color: var(--pixel-ink) !important;
+  font-family: var(--font-pixel), "Courier New", monospace !important;
+  font-size: 22px;
+  line-height: 1.05;
+  letter-spacing: 0.03em;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+
+body::before {
+  content: "" !important;
+  display: block !important;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(45deg, rgb(69 69 74 / 0.035) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, rgb(239 226 194 / 0.10), transparent 38%);
+  opacity: 0.55 !important;
+  mix-blend-mode: multiply;
+}
+
+body,
+p,
+span,
+b,
+small,
+label,
+button,
+input,
+textarea,
+select,
+option,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-pixel), "Courier New", monospace !important;
+}
+
+h1,
+h2,
+h3,
+.font-black.text-2xl,
+.font-black.text-3xl,
+.font-black.text-4xl,
+.font-black.text-5xl {
+  color: var(--pixel-ink-dark) !important;
+  font-family: var(--font-pixel), "Courier New", monospace !important;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em !important;
+}
+
+h1 { font-size: clamp(34px, 5vw, 56px) !important; }
+h2 { font-size: clamp(28px, 3.6vw, 42px) !important; }
+h3 { font-size: clamp(24px, 3vw, 34px) !important; }
+
+p,
+small,
+label,
+input,
+textarea,
+select {
+  font-size: 22px;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+svg {
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+  stroke-linecap: square !important;
+  stroke-linejoin: miter !important;
+}
+
+::selection {
+  background: var(--pixel-ink);
+  color: var(--pixel-panel);
+}
+
+::-webkit-scrollbar-track { background: var(--pixel-panel-soft); }
+::-webkit-scrollbar-thumb {
+  background: var(--pixel-ink);
+  border-radius: 0;
+  border: 2px solid var(--pixel-bg);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--pixel-ink-dark); }
+
+[class~="min-h-screen"][class*="bg-"] {
+  background-color: transparent !important;
+}
+
+[class*="text-[#16587B]"],
+[class*="text-[#173963]"],
+[class*="text-[#1f365f]"],
+[class*="text-[#585556]"],
+[class~="text-black"],
+[class~="text-gray-800"],
+[class~="text-slate-900"],
+[class~="text-stone-900"] {
+  color: var(--pixel-ink) !important;
+}
+
+[class~="text-gray-400"],
+[class~="text-gray-500"],
+[class~="text-gray-600"],
+[class~="text-slate-500"],
+[class~="text-stone-500"] {
+  color: var(--pixel-muted) !important;
+}
+
+[class*="bg-[#F5EEDD]"],
+[class*="bg-[#fef9f4]"],
+[class*="bg-[#eee9df]"],
+[class*="bg-[#efe6d8]"],
+[class*="bg-[#f3eadc]"],
+[class~="bg-white"],
+[class~="bg-gray-50"],
+[class~="bg-gray-100"],
+[class~="bg-stone-50"],
+[class~="bg-neutral-50"],
+[class~="bg-zinc-50"] {
+  background-color: var(--pixel-panel) !important;
+}
+
+[class*="bg-[#16587B]"],
+[class*="bg-[#173963]"],
+[class*="bg-[#1f365f]"],
+[class*="bg-[#e8e1d4]"],
+[class*="bg-[#3B507D]"],
+[class*="bg-[#585556]"],
+[class~="bg-black"] {
+  background-color: var(--pixel-ink) !important;
+}
+
+[class~="text-white"] {
+  color: var(--pixel-panel) !important;
+}
+
+[class*="border"] {
+  border-color: var(--pixel-ink) !important;
+  border-style: solid !important;
+}
+
+.pixel-panel,
+.card-push,
+.card-3d,
+.neu-surface,
+.card-push-subtle,
+.card-3d-subtle,
+.neu-surface-subtle,
+.modal-panel,
+.shadow-2xl,
+.shadow-xl,
+.shadow-lg,
+.shadow-md,
+.shadow {
+  border: 3px solid var(--pixel-ink) !important;
+  border-radius: 0 !important;
+  background: var(--pixel-panel) !important;
+  box-shadow: var(--page-shadow) !important;
+  color: var(--pixel-ink) !important;
+}
+
+.card-push-subtle,
+.card-3d-subtle,
+.neu-surface-subtle {
+  box-shadow: var(--sticker-shadow) !important;
+}
+
+.pixel-logo,
+.pixel-tile,
+.badge-push,
+.neu-badge,
+.badge-push-sunken,
+.neu-badge-sunken {
+  border: 3px solid var(--pixel-ink) !important;
+  border-radius: 0 !important;
+  background: var(--pixel-panel-light) !important;
+  box-shadow: 0 4px 0 var(--pixel-shadow-dark) !important;
+  color: var(--pixel-ink) !important;
+}
+
+.pixel-active,
+.squircle-btn.active {
+  border: 3px solid var(--pixel-ink-dark) !important;
+  border-radius: 0 !important;
+  background: var(--pixel-ink) !important;
+  color: var(--pixel-panel) !important;
+  box-shadow: inset 0 3px 0 rgb(239 226 194 / 0.12), 0 4px 0 var(--pixel-shadow-dark) !important;
+}
+
+.pixel-active *,
+.pixel-active svg,
+.squircle-btn.active *,
+.squircle-btn.active svg {
+  color: var(--pixel-panel) !important;
+  stroke: var(--pixel-panel) !important;
+}
+
+.bg-\[\#e8e1d4\],
+.bg-\[\#e8e1d4\] *,
+.bg-\[\#e8e1d4\] svg {
+  color: var(--pixel-panel) !important;
+  stroke: var(--pixel-panel) !important;
+}
+
+[class*="shadow-["] {
+  box-shadow: var(--sticker-shadow) !important;
+}
+
+.bg-\[\#e8e1d4\][class*="shadow-["] {
+  box-shadow: inset 0 3px 0 rgb(239 226 194 / 0.12), 0 4px 0 var(--pixel-shadow-dark) !important;
+}
+
+.btn-gradient,
+.btn-navy,
+.btn-push,
+.btn-3d,
+.neu-btn,
+.btn-push-primary,
+.btn-3d-navy,
+.neu-btn-primary,
+.btn-push-walnut,
+.btn-push-ironclad,
+.btn-push-amber,
+.btn-3d-amber,
+.neu-btn-amber,
+.btn-push-emerald,
+.btn-3d-emerald,
+.btn-push-danger,
+.btn-3d-danger,
+.squircle-btn,
+button.bg-\[\#16587B\],
+a.bg-\[\#16587B\] {
+  border: 3px solid var(--pixel-ink) !important;
+  border-radius: 0 !important;
+  background: var(--pixel-panel-light) !important;
+  background-image: none !important;
+  color: var(--pixel-ink) !important;
+  box-shadow: var(--button-shadow) !important;
+  font-family: var(--font-pixel), "Courier New", monospace !important;
+  font-size: 24px;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase;
+  transition: transform 0.06s steps(1), box-shadow 0.06s steps(1), background-color 0.06s steps(1) !important;
+}
+
+.btn-push-primary,
+.btn-3d-navy,
+.neu-btn-primary,
+.btn-gradient,
+.btn-navy,
+.btn-push-danger,
+.btn-3d-danger {
+  background: var(--pixel-ink) !important;
+  color: var(--pixel-panel) !important;
+  border-color: var(--pixel-ink-dark) !important;
+}
+
+.btn-push *,
+.btn-3d *,
+.neu-btn *,
+.btn-push-walnut *,
+.btn-push-ironclad *,
+.btn-push-amber *,
+.btn-3d-amber *,
+.neu-btn-amber *,
+.btn-push-emerald *,
+.btn-3d-emerald *,
+.squircle-btn *,
+.btn-push svg,
+.btn-3d svg,
+.neu-btn svg,
+.btn-push-walnut svg,
+.btn-push-ironclad svg,
+.btn-push-amber svg,
+.btn-3d-amber svg,
+.neu-btn-amber svg,
+.btn-push-emerald svg,
+.btn-3d-emerald svg,
+.squircle-btn svg {
+  color: var(--pixel-ink) !important;
+  stroke: var(--pixel-ink) !important;
+}
+
+.btn-push-primary *,
+.btn-3d-navy *,
+.neu-btn-primary *,
+.btn-gradient *,
+.btn-navy *,
+.btn-push-danger *,
+.btn-3d-danger *,
+.btn-push-primary svg,
+.btn-3d-navy svg,
+.neu-btn-primary svg,
+.btn-gradient svg,
+.btn-navy svg,
+.btn-push-danger svg,
+.btn-3d-danger svg {
+  color: var(--pixel-panel) !important;
+  stroke: var(--pixel-panel) !important;
+}
+
+.btn-push:hover,
+.btn-3d:hover,
+.neu-btn:hover,
+.btn-push-walnut:hover,
+.btn-push-ironclad:hover,
+.btn-push-amber:hover,
+.btn-3d-amber:hover,
+.neu-btn-amber:hover,
+.btn-push-emerald:hover,
+.btn-3d-emerald:hover,
+.squircle-btn:hover {
+  transform: translateY(-1px) !important;
+  background: var(--pixel-highlight) !important;
+  box-shadow: var(--button-shadow-hover) !important;
+}
+
+.btn-push-primary:hover,
+.btn-3d-navy:hover,
+.neu-btn-primary:hover,
+.btn-push-danger:hover,
+.btn-3d-danger:hover {
+  transform: translateY(-1px) !important;
+  background: var(--pixel-ink-dark) !important;
+  box-shadow: var(--button-shadow-hover) !important;
+}
+
+.btn-push:active,
+.btn-3d:active,
+.neu-btn:active,
+.btn-push-primary:active,
+.btn-3d-navy:active,
+.neu-btn-primary:active,
+.btn-push-danger:active,
+.btn-3d-danger:active,
+.squircle-btn:active {
+  transform: translateY(4px) !important;
+  box-shadow: 0 1px 0 var(--pixel-shadow-dark) !important;
+}
+
+.input-push,
+.input-3d,
+.neu-inset,
+input,
+textarea,
+select {
+  border: 3px solid var(--pixel-ink) !important;
+  border-radius: 0 !important;
+  background: var(--pixel-panel-light) !important;
+  color: var(--pixel-ink) !important;
+  box-shadow: inset 0 3px 0 rgb(87 87 92 / 0.14), 0 4px 0 var(--pixel-shadow) !important;
+  font-family: var(--font-pixel), "Courier New", monospace !important;
+  font-size: 24px !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgb(87 87 92 / 0.58) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.input-push:focus-within,
+.input-3d:focus-within,
+.neu-inset:focus-within {
+  outline: 0 !important;
+  background: var(--pixel-highlight) !important;
+  box-shadow: inset 0 3px 0 rgb(87 87 92 / 0.16), 0 0 0 3px var(--pixel-bg), 0 5px 0 var(--pixel-shadow-dark) !important;
+}
+
+[class~="rounded-full"],
+.rounded-xl,
+.rounded-2xl,
+.rounded-3xl {
+  border-radius: 0 !important;
+}
+
+[class*="animate-spin"] {
+  animation-timing-function: steps(8) !important;
+}
+
+@media (max-width: 767px) {
+  body {
+    font-size: 21px;
+  }
+
+  p,
+  small,
+  label,
+  input,
+  textarea,
+  select {
+    font-size: 21px;
+  }
+
+  .btn-gradient,
+  .btn-navy,
+  .btn-push,
+  .btn-3d,
+  .neu-btn,
+  .btn-push-primary,
+  .btn-3d-navy,
+  .neu-btn-primary,
+  .btn-push-danger,
+  .btn-3d-danger,
+  .squircle-btn {
+    font-size: 22px;
+  }
+}

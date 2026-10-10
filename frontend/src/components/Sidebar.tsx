@@ -32,8 +32,8 @@ export default function Sidebar() {
           title={label}
           className={`flex h-11 w-full items-center gap-3 rounded-2xl border px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-4 ${
             active(href)
-              ? 'border-transparent bg-[#16587B] text-white shadow-[0_8px_20px_rgb(22_88_123_/_0.20)]'
-              : 'border-transparent bg-white/55 text-[#16587B]/70 shadow-none hover:bg-white hover:text-[#16587B]'
+              ? 'pixel-active bg-[#57575c] text-[#d6cbae]'
+              : 'pixel-tile bg-[#cfc4a8] text-[#57575c] hover:bg-[#d9ceb0]'
           }`}
         >
           <Icon size={19} className="shrink-0" />
@@ -53,7 +53,7 @@ export default function Sidebar() {
           title={label}
           className={`flex h-12 items-center justify-start gap-2.5 rounded-2xl px-3.5 text-xs font-black transition-all ${
             active(href)
-              ? 'bg-[#16587B] text-white shadow-[0_8px_20px_rgb(22_88_123_/_0.20)]'
+              ? 'pixel-active bg-[#57575c] text-[#d6cbae]'
               : 'btn-push'
           }`}
         >
@@ -66,22 +66,22 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col rounded-[30px] border border-white/70 bg-[#F5EEDD]/95 p-2.5 pt-3.5 pb-3 shadow-[0_18px_44px_rgb(22_88_123_/_0.08)] backdrop-blur-xl no-scrollbar overflow-y-auto md:flex xl:w-52">
+      <aside className="pixel-panel sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col p-2.5 pt-3.5 pb-3 no-scrollbar overflow-y-auto md:flex xl:w-52">
         <Link
           href="/business"
           title="Billy · Bán Hàng"
-          className="mb-2.5 flex w-full flex-col items-center justify-center border-b border-[#16587B]/10 pb-3 pt-1 text-[#16587B] transition-opacity hover:opacity-80 xl:items-start xl:px-3"
+          className="pixel-logo mb-3 flex w-full flex-col items-center justify-center px-2 py-3 text-[#57575c] transition-transform active:translate-y-1 xl:items-start"
         >
-          <span className="text-2xl font-black tracking-tight text-[#16587B] xl:text-[28px] leading-tight">
-            Billy<span className="text-[#84B3CE]">.</span>
+          <span className="text-2xl font-black uppercase tracking-wider text-[#57575c] xl:text-[30px] leading-none">
+            Billy<span className="text-[#8f8b82]">.</span>
           </span>
-          <span className="hidden text-[10px] font-black uppercase tracking-widest text-[#16587B]/60 xl:block mt-0.5">
+          <span className="hidden text-[12px] font-black uppercase tracking-widest text-[#6d6a64] xl:block mt-1">
             Bán Hàng
           </span>
         </Link>
         <nav className="space-y-2">{desktopLinks}</nav>
-        <div className="mt-auto border-t border-[#16587B]/10 pt-3">
-          <p className="hidden truncate px-3 pb-2 text-xs font-bold text-[#16587B]/60 xl:block">
+        <div className="mt-auto pt-3">
+          <p className="hidden truncate px-3 pb-2 text-sm font-bold text-[#6d6a64] xl:block">
             {user?.username}
           </p>
           <button
@@ -94,21 +94,21 @@ export default function Sidebar() {
           </button>
         </div>
       </aside>
-      <header className="fixed inset-x-3.5 top-[max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))] z-50 flex h-14 items-center justify-between gap-3 rounded-[22px] border border-white/70 bg-[#F5EEDD]/95 px-5 py-2 shadow-[0_10px_30px_rgb(22_88_123_/_0.08)] backdrop-blur-xl md:hidden">
-        <Link href="/business" className="flex items-baseline gap-1.5 text-[#16587B] transition-opacity hover:opacity-80">
-          <span className="text-xl font-black tracking-tight">Billy<span className="text-[#84B3CE]">.</span></span>
-          <span className="text-[11px] font-black uppercase tracking-widest text-[#16587B]/60">Bán Hàng</span>
+      <header className="pixel-panel fixed inset-x-3.5 top-[max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))] z-50 flex h-14 items-center justify-between gap-3 px-5 py-2 md:hidden">
+        <Link href="/business" className="flex items-baseline gap-1.5 text-[#57575c] transition-transform active:translate-y-1">
+          <span className="text-2xl font-black uppercase tracking-wider">Billy<span className="text-[#8f8b82]">.</span></span>
+          <span className="text-sm font-black uppercase tracking-widest text-[#6d6a64]">Bán Hàng</span>
         </Link>
         <button
           onClick={() => setOpen(v => !v)}
           aria-label={open ? 'Đóng menu' : 'Mở menu'}
-          className="btn-push flex h-9 w-9 shrink-0 items-center justify-center text-[#16587B]"
+          className="btn-push flex h-9 w-9 shrink-0 items-center justify-center"
         >
           {open ? <X size={19}/> : <Menu size={19}/>}
         </button>
       </header>
       {open && (
-        <div className="fixed inset-x-3.5 top-[calc(max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))+4.25rem)] z-50 rounded-[24px] border border-white/70 bg-[#F5EEDD]/98 p-4 shadow-[0_16px_38px_rgb(22_88_123_/_0.1)] backdrop-blur-xl md:hidden">
+        <div className="pixel-panel fixed inset-x-3.5 top-[calc(max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))+4.25rem)] z-50 p-4 md:hidden">
           <nav className="grid grid-cols-2 gap-2.5">{mobileLinks}</nav>
           <button onClick={logout} className="btn-push-danger mt-3.5 flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-black">
             <LogOut size={18}/> Đăng xuất
