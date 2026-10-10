@@ -1425,27 +1425,38 @@ select:focus,
    Pixel shop design system
    ========================================================================== */
 :root {
-  --pixel-bg: #c9bea2;
-  --pixel-bg-dark: #b9af96;
-  --pixel-panel: #d7cbae;
-  --pixel-panel-light: #e0d3b5;
-  --pixel-panel-soft: #d1c5aa;
-  --pixel-ink: #57575c;
-  --pixel-ink-dark: #45454a;
-  --pixel-muted: #8f8b82;
-  --pixel-highlight: #efe2c2;
-  --pixel-shadow: #8a8780;
-  --pixel-shadow-dark: #4f5056;
-  --pixel-success: #7f8c78;
-  --pixel-danger: #8b6767;
+  --dusty-sage: #9eae94;
+  --muted-terracotta: #b65d44;
+  --rosewood: #713225;
+  --rosewood-dark: #2f211c;
+  --warm-cream: #ead9b8;
+  --warm-cream-light: #f4ead2;
+  --vintage-blue: #2d7072;
+  --vintage-blue-dark: #235658;
+
+  --pixel-bg: var(--warm-cream);
+  --pixel-bg-dark: #d8c59f;
+  --pixel-panel: var(--warm-cream-light);
+  --pixel-panel-light: #efe0bf;
+  --pixel-panel-soft: var(--dusty-sage);
+  --pixel-ink: var(--rosewood-dark);
+  --pixel-ink-dark: var(--rosewood);
+  --pixel-muted: #7f6f58;
+  --pixel-highlight: #f7efd9;
+  --pixel-shadow: #9c765a;
+  --pixel-shadow-dark: var(--rosewood);
+  --pixel-success: var(--dusty-sage);
+  --pixel-danger: var(--muted-terracotta);
+  --pixel-primary: var(--vintage-blue);
+  --pixel-primary-dark: var(--vintage-blue-dark);
 
   --ivory: var(--pixel-panel);
   --champagne: var(--pixel-panel-light);
-  --moss: var(--pixel-muted);
-  --smoke: var(--pixel-muted);
+  --moss: var(--dusty-sage);
+  --smoke: var(--vintage-blue);
   --garden: var(--pixel-panel-soft);
-  --midnight: var(--pixel-ink);
-  --deep-teal: var(--pixel-ink-dark);
+  --midnight: var(--vintage-blue);
+  --deep-teal: var(--vintage-blue-dark);
   --butter: var(--pixel-highlight);
   --background: var(--pixel-bg);
   --foreground: var(--pixel-ink);
@@ -1458,9 +1469,9 @@ select:focus,
   --button-shadow: 0 4px 0 var(--pixel-shadow-dark);
   --button-shadow-hover: 0 5px 0 var(--pixel-shadow-dark);
   --button-shadow-disabled: 0 2px 0 var(--pixel-shadow);
-  --button-shadow-inset: inset 0 4px 0 rgb(69 69 74 / 0.22);
-  --page-shadow: 0 7px 0 var(--pixel-shadow-dark), 0 12px 0 rgb(69 69 74 / 0.18);
-  --sticker-shadow: 0 5px 0 var(--pixel-shadow-dark), 0 9px 0 rgb(69 69 74 / 0.14);
+  --button-shadow-inset: inset 0 4px 0 rgb(47 33 28 / 0.18);
+  --page-shadow: 0 7px 0 var(--pixel-shadow-dark), 0 12px 0 rgb(113 50 37 / 0.16);
+  --sticker-shadow: 0 5px 0 var(--pixel-shadow-dark), 0 9px 0 rgb(113 50 37 / 0.12);
 }
 
 @theme inline {
@@ -1475,11 +1486,13 @@ html {
 
 body {
   background:
-    linear-gradient(90deg, rgb(87 87 92 / 0.045) 1px, transparent 1px),
-    linear-gradient(0deg, rgb(87 87 92 / 0.045) 1px, transparent 1px),
-    radial-gradient(circle at 18% 12%, rgb(239 226 194 / 0.24), transparent 18rem),
+    linear-gradient(90deg, rgb(113 50 37 / 0.055) 1px, transparent 1px),
+    linear-gradient(0deg, rgb(113 50 37 / 0.055) 1px, transparent 1px),
+    radial-gradient(circle at 18% 12%, rgb(158 174 148 / 0.30), transparent 18rem),
+    radial-gradient(circle at 82% 18%, rgb(45 112 114 / 0.14), transparent 20rem),
+    radial-gradient(circle at 78% 88%, rgb(182 93 68 / 0.14), transparent 18rem),
     var(--pixel-bg) !important;
-  background-size: 18px 18px, 18px 18px, auto, auto !important;
+  background-size: 18px 18px, 18px 18px, auto, auto, auto, auto !important;
   color: var(--pixel-ink) !important;
   font-family: var(--font-pixel), "Courier New", monospace !important;
   font-size: 20px;
@@ -1498,9 +1511,9 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    repeating-linear-gradient(45deg, rgb(69 69 74 / 0.035) 0 1px, transparent 1px 6px),
-    linear-gradient(180deg, rgb(239 226 194 / 0.10), transparent 38%);
-  opacity: 0.55 !important;
+    repeating-linear-gradient(45deg, rgb(47 33 28 / 0.025) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, rgb(244 234 210 / 0.18), transparent 38%);
+  opacity: 0.50 !important;
   mix-blend-mode: multiply;
 }
 
@@ -1600,6 +1613,19 @@ svg {
   color: var(--pixel-muted) !important;
 }
 
+[class*="text-red-"],
+[class*="text-orange-"],
+[class*="text-amber-"] {
+  color: var(--muted-terracotta) !important;
+}
+
+[class*="text-green-"],
+[class*="text-emerald-"],
+[class*="text-teal-"],
+[class*="text-blue-"] {
+  color: var(--vintage-blue) !important;
+}
+
 [class*="bg-[#F5EEDD]"],
 [class*="bg-[#fef9f4]"],
 [class*="bg-[#eee9df]"],
@@ -1614,6 +1640,19 @@ svg {
   background-color: var(--pixel-panel) !important;
 }
 
+[class*="bg-red-"],
+[class*="bg-orange-"],
+[class*="bg-amber-"] {
+  background-color: rgb(182 93 68 / 0.20) !important;
+}
+
+[class*="bg-green-"],
+[class*="bg-emerald-"],
+[class*="bg-teal-"],
+[class*="bg-blue-"] {
+  background-color: rgb(158 174 148 / 0.36) !important;
+}
+
 [class*="bg-[#16587B]"],
 [class*="bg-[#173963]"],
 [class*="bg-[#1f365f]"],
@@ -1621,7 +1660,7 @@ svg {
 [class*="bg-[#3B507D]"],
 [class*="bg-[#585556]"],
 [class~="bg-black"] {
-  background-color: var(--pixel-ink) !important;
+  background-color: var(--pixel-primary) !important;
 }
 
 [class*="text-xs"] { font-size: 16px !important; line-height: 1.08 !important; }
@@ -1643,7 +1682,7 @@ svg {
 }
 
 [class*="border"] {
-  border-color: var(--pixel-ink) !important;
+  border-color: var(--pixel-ink-dark) !important;
   border-style: solid !important;
 }
 
@@ -1660,7 +1699,7 @@ svg {
 .shadow-lg,
 .shadow-md,
 .shadow {
-  border: 2px solid var(--pixel-ink) !important;
+  border: 2px solid var(--pixel-ink-dark) !important;
   border-radius: 0 !important;
   background: var(--pixel-panel) !important;
   box-shadow: var(--page-shadow) !important;
@@ -1683,9 +1722,9 @@ svg {
 .pixel-tile,
 .badge-push,
 .neu-badge {
-  border: 2px solid var(--pixel-ink) !important;
+  border: 2px solid var(--pixel-ink-dark) !important;
   border-radius: 0 !important;
-  background: var(--pixel-panel-light) !important;
+  background: var(--pixel-panel-soft) !important;
   box-shadow: 0 3px 0 var(--pixel-shadow-dark) !important;
   color: var(--pixel-ink) !important;
   min-height: 42px;
@@ -1705,9 +1744,9 @@ svg {
 .squircle-btn.active {
   border: 2px solid var(--pixel-ink-dark) !important;
   border-radius: 0 !important;
-  background: var(--pixel-ink) !important;
+  background: var(--pixel-primary) !important;
   color: var(--pixel-panel) !important;
-  box-shadow: inset 0 3px 0 rgb(239 226 194 / 0.12), 0 4px 0 var(--pixel-shadow-dark) !important;
+  box-shadow: inset 0 3px 0 rgb(244 234 210 / 0.14), 0 4px 0 var(--pixel-shadow-dark) !important;
 }
 
 .pixel-active *,
@@ -1730,7 +1769,7 @@ svg {
 }
 
 .bg-\[\#e8e1d4\][class*="shadow-["] {
-  box-shadow: inset 0 3px 0 rgb(239 226 194 / 0.12), 0 4px 0 var(--pixel-shadow-dark) !important;
+  box-shadow: inset 0 3px 0 rgb(244 234 210 / 0.14), 0 4px 0 var(--pixel-shadow-dark) !important;
 }
 
 .btn-gradient,
@@ -1753,7 +1792,7 @@ svg {
 .squircle-btn,
 button.bg-\[\#16587B\],
 a.bg-\[\#16587B\] {
-  border: 2px solid var(--pixel-ink) !important;
+  border: 2px solid var(--pixel-ink-dark) !important;
   border-radius: 0 !important;
   background: var(--pixel-panel-light) !important;
   background-image: none !important;
@@ -1807,11 +1846,16 @@ a svg {
 .btn-3d-navy,
 .neu-btn-primary,
 .btn-gradient,
-.btn-navy,
+.btn-navy {
+  background: var(--pixel-primary) !important;
+  color: var(--pixel-panel) !important;
+  border-color: var(--pixel-primary-dark) !important;
+}
+
 .btn-push-danger,
 .btn-3d-danger {
-  background: var(--pixel-ink) !important;
-  color: var(--pixel-panel) !important;
+  background: var(--pixel-danger) !important;
+  color: var(--pixel-highlight) !important;
   border-color: var(--pixel-ink-dark) !important;
 }
 
@@ -1841,6 +1885,31 @@ a svg {
   stroke: var(--pixel-ink) !important;
 }
 
+.btn-push-amber,
+.btn-3d-amber,
+.neu-btn-amber {
+  background: var(--pixel-danger) !important;
+  border-color: var(--pixel-ink-dark) !important;
+  color: var(--pixel-highlight) !important;
+}
+
+.btn-push-amber *,
+.btn-3d-amber *,
+.neu-btn-amber *,
+.btn-push-amber svg,
+.btn-3d-amber svg,
+.neu-btn-amber svg {
+  color: var(--pixel-highlight) !important;
+  stroke: var(--pixel-highlight) !important;
+}
+
+.btn-push-emerald,
+.btn-3d-emerald {
+  background: var(--dusty-sage) !important;
+  border-color: var(--pixel-ink-dark) !important;
+  color: var(--pixel-ink) !important;
+}
+
 .btn-push-primary *,
 .btn-3d-navy *,
 .neu-btn-primary *,
@@ -1859,14 +1928,19 @@ a svg {
   stroke: var(--pixel-panel) !important;
 }
 
+.btn-push-danger *,
+.btn-3d-danger *,
+.btn-push-danger svg,
+.btn-3d-danger svg {
+  color: var(--pixel-highlight) !important;
+  stroke: var(--pixel-highlight) !important;
+}
+
 .btn-push:hover,
 .btn-3d:hover,
 .neu-btn:hover,
 .btn-push-walnut:hover,
 .btn-push-ironclad:hover,
-.btn-push-amber:hover,
-.btn-3d-amber:hover,
-.neu-btn-amber:hover,
 .btn-push-emerald:hover,
 .btn-3d-emerald:hover,
 .squircle-btn:hover {
@@ -1875,9 +1949,24 @@ a svg {
   box-shadow: var(--button-shadow-hover) !important;
 }
 
+.btn-push-amber:hover,
+.btn-3d-amber:hover,
+.neu-btn-amber:hover {
+  transform: translateY(-1px) !important;
+  background: var(--pixel-ink-dark) !important;
+  box-shadow: var(--button-shadow-hover) !important;
+}
+
 .btn-push-primary:hover,
 .btn-3d-navy:hover,
 .neu-btn-primary:hover,
+.btn-gradient:hover,
+.btn-navy:hover {
+  transform: translateY(-1px) !important;
+  background: var(--pixel-primary-dark) !important;
+  box-shadow: var(--button-shadow-hover) !important;
+}
+
 .btn-push-danger:hover,
 .btn-3d-danger:hover {
   transform: translateY(-1px) !important;
@@ -1904,11 +1993,11 @@ a svg {
 input,
 textarea,
 select {
-  border: 3px solid var(--pixel-ink) !important;
+  border: 2px solid var(--pixel-ink-dark) !important;
   border-radius: 0 !important;
   background: var(--pixel-panel-light) !important;
   color: var(--pixel-ink) !important;
-  box-shadow: inset 0 3px 0 rgb(87 87 92 / 0.14), 0 4px 0 var(--pixel-shadow) !important;
+  box-shadow: inset 0 3px 0 rgb(113 50 37 / 0.12), 0 4px 0 var(--pixel-shadow) !important;
   font-family: var(--font-pixel), "Courier New", monospace !important;
   font-size: 22px !important;
   line-height: 1.05 !important;
@@ -1917,7 +2006,7 @@ select {
 
 input::placeholder,
 textarea::placeholder {
-  color: rgb(87 87 92 / 0.58) !important;
+  color: rgb(127 111 88 / 0.70) !important;
 }
 
 input:focus,
@@ -1928,7 +2017,7 @@ select:focus,
 .neu-inset:focus-within {
   outline: 0 !important;
   background: var(--pixel-highlight) !important;
-  box-shadow: inset 0 3px 0 rgb(87 87 92 / 0.16), 0 0 0 3px var(--pixel-bg), 0 5px 0 var(--pixel-shadow-dark) !important;
+  box-shadow: inset 0 3px 0 rgb(113 50 37 / 0.12), 0 0 0 3px var(--dusty-sage), 0 5px 0 var(--pixel-shadow-dark) !important;
 }
 
 [class~="rounded-full"],
