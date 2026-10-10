@@ -1507,7 +1507,8 @@ body {
   font-family: var(--font-pixel), "Courier New", monospace !important;
   font-size: 20px;
   line-height: 1.12;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.018em;
+  font-weight: 650;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: geometricPrecision;
@@ -1545,6 +1546,7 @@ h4,
 h5,
 h6 {
   font-family: var(--font-pixel), "Courier New", monospace !important;
+  font-weight: 700;
 }
 
 h1,
@@ -1556,9 +1558,9 @@ h3,
 .font-black.text-5xl {
   color: var(--pixel-ink-dark) !important;
   font-family: var(--font-pixel), "Courier New", monospace !important;
-  font-weight: 400 !important;
+  font-weight: 800 !important;
   text-transform: uppercase;
-  letter-spacing: 0.04em !important;
+  letter-spacing: 0.02em !important;
 }
 
 h1 { font-size: clamp(34px, 5vw, 56px) !important; }
@@ -1804,9 +1806,12 @@ a.bg-\[\#16587B\] {
   box-shadow: var(--button-shadow) !important;
   font-family: var(--font-pixel), "Courier New", monospace !important;
   font-size: 24px;
-  font-weight: 400 !important;
-  letter-spacing: 0.04em !important;
-  text-transform: uppercase;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: transform 0.06s steps(1), box-shadow 0.06s steps(1), background-color 0.06s steps(1) !important;
 }
 
@@ -1831,6 +1836,7 @@ a svg {
   width: 1.05em !important;
   height: 1.05em !important;
   stroke-width: 2.4 !important;
+  flex-shrink: 0;
 }
 
 .btn-push,
@@ -2005,6 +2011,7 @@ select {
   font-family: var(--font-pixel), "Courier New", monospace !important;
   font-size: 22px !important;
   line-height: 1.05 !important;
+  font-weight: 700 !important;
   min-height: 44px;
 }
 

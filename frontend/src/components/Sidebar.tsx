@@ -72,7 +72,10 @@ export default function Sidebar() {
           title="Billy · Bán Hàng"
           className="pixel-logo mb-3 flex w-full flex-col items-center justify-center px-2 py-3 text-[#57575c] transition-transform active:translate-y-1 xl:items-start"
         >
-          <span className="text-2xl font-black uppercase tracking-wider text-[#57575c] xl:text-[30px] leading-none">
+          <span className="text-[30px] font-black uppercase tracking-wider text-[#57575c] leading-none xl:hidden">
+            B<span className="text-[#8f8b82]">.</span>
+          </span>
+          <span className="hidden text-2xl font-black uppercase tracking-wider text-[#57575c] xl:block xl:text-[30px] leading-none">
             Billy<span className="text-[#8f8b82]">.</span>
           </span>
           <span className="hidden text-[12px] font-black uppercase tracking-widest text-[#6d6a64] xl:block mt-1">
