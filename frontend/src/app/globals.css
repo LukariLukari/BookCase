@@ -1425,30 +1425,40 @@ select:focus,
    Pixel shop design system
    ========================================================================== */
 :root {
-  --dusty-sage: #9eae94;
-  --muted-terracotta: #b65d44;
-  --rosewood: #713225;
-  --rosewood-dark: #2f211c;
-  --warm-cream: #ead9b8;
-  --warm-cream-light: #f4ead2;
-  --vintage-blue: #2d7072;
-  --vintage-blue-dark: #235658;
+  --reps-red: #d32f2f;
+  --reps-red-dark: #a92525;
+  --reps-black: #171513;
+  --reps-charcoal: #2b2925;
+  --reps-paper: #f4f2eb;
+  --reps-paper-soft: #ebe8df;
+  --reps-page: #d8d7d2;
+  --reps-muted: #868178;
+  --reps-shadow: #bdb9ae;
 
-  --pixel-bg: var(--warm-cream);
-  --pixel-bg-dark: #d8c59f;
-  --pixel-panel: var(--warm-cream-light);
-  --pixel-panel-light: #efe0bf;
-  --pixel-panel-soft: var(--dusty-sage);
-  --pixel-ink: var(--rosewood-dark);
-  --pixel-ink-dark: var(--rosewood);
-  --pixel-muted: #7f6f58;
-  --pixel-highlight: #f7efd9;
-  --pixel-shadow: #9c765a;
-  --pixel-shadow-dark: var(--rosewood);
-  --pixel-success: var(--dusty-sage);
-  --pixel-danger: var(--muted-terracotta);
-  --pixel-primary: var(--vintage-blue);
-  --pixel-primary-dark: var(--vintage-blue-dark);
+  --dusty-sage: var(--reps-paper-soft);
+  --muted-terracotta: var(--reps-red);
+  --rosewood: var(--reps-red-dark);
+  --rosewood-dark: var(--reps-black);
+  --warm-cream: var(--reps-page);
+  --warm-cream-light: var(--reps-paper);
+  --vintage-blue: var(--reps-red);
+  --vintage-blue-dark: var(--reps-red-dark);
+
+  --pixel-bg: var(--reps-page);
+  --pixel-bg-dark: #c8c6bf;
+  --pixel-panel: var(--reps-paper);
+  --pixel-panel-light: #fbfaf5;
+  --pixel-panel-soft: var(--reps-paper-soft);
+  --pixel-ink: var(--reps-black);
+  --pixel-ink-dark: var(--reps-charcoal);
+  --pixel-muted: var(--reps-muted);
+  --pixel-highlight: #ffffff;
+  --pixel-shadow: var(--reps-shadow);
+  --pixel-shadow-dark: var(--reps-red-dark);
+  --pixel-success: var(--reps-paper-soft);
+  --pixel-danger: var(--reps-red);
+  --pixel-primary: var(--reps-red);
+  --pixel-primary-dark: var(--reps-red-dark);
 
   --ivory: var(--pixel-panel);
   --champagne: var(--pixel-panel-light);
@@ -1469,9 +1479,9 @@ select:focus,
   --button-shadow: 0 4px 0 var(--pixel-shadow-dark);
   --button-shadow-hover: 0 5px 0 var(--pixel-shadow-dark);
   --button-shadow-disabled: 0 2px 0 var(--pixel-shadow);
-  --button-shadow-inset: inset 0 4px 0 rgb(47 33 28 / 0.18);
-  --page-shadow: 0 7px 0 var(--pixel-shadow-dark), 0 12px 0 rgb(113 50 37 / 0.16);
-  --sticker-shadow: 0 5px 0 var(--pixel-shadow-dark), 0 9px 0 rgb(113 50 37 / 0.12);
+  --button-shadow-inset: inset 0 4px 0 rgb(23 21 19 / 0.14);
+  --page-shadow: 0 7px 0 var(--pixel-shadow), 0 12px 0 rgb(23 21 19 / 0.08);
+  --sticker-shadow: 0 5px 0 var(--pixel-shadow), 0 9px 0 rgb(23 21 19 / 0.06);
 }
 
 @theme inline {
@@ -1486,11 +1496,11 @@ html {
 
 body {
   background:
-    linear-gradient(90deg, rgb(113 50 37 / 0.055) 1px, transparent 1px),
-    linear-gradient(0deg, rgb(113 50 37 / 0.055) 1px, transparent 1px),
-    radial-gradient(circle at 18% 12%, rgb(158 174 148 / 0.30), transparent 18rem),
-    radial-gradient(circle at 82% 18%, rgb(45 112 114 / 0.14), transparent 20rem),
-    radial-gradient(circle at 78% 88%, rgb(182 93 68 / 0.14), transparent 18rem),
+    linear-gradient(90deg, rgb(23 21 19 / 0.045) 1px, transparent 1px),
+    linear-gradient(0deg, rgb(23 21 19 / 0.045) 1px, transparent 1px),
+    radial-gradient(circle at 16% 12%, rgb(211 47 47 / 0.10), transparent 18rem),
+    radial-gradient(circle at 82% 18%, rgb(255 255 255 / 0.28), transparent 20rem),
+    radial-gradient(circle at 78% 88%, rgb(43 41 37 / 0.06), transparent 18rem),
     var(--pixel-bg) !important;
   background-size: 18px 18px, 18px 18px, auto, auto, auto, auto !important;
   color: var(--pixel-ink) !important;
@@ -1511,9 +1521,9 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    repeating-linear-gradient(45deg, rgb(47 33 28 / 0.025) 0 1px, transparent 1px 6px),
-    linear-gradient(180deg, rgb(244 234 210 / 0.18), transparent 38%);
-  opacity: 0.50 !important;
+    repeating-linear-gradient(45deg, rgb(23 21 19 / 0.020) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, rgb(255 255 255 / 0.20), transparent 38%);
+  opacity: 0.48 !important;
   mix-blend-mode: multiply;
 }
 
@@ -1616,14 +1626,14 @@ svg {
 [class*="text-red-"],
 [class*="text-orange-"],
 [class*="text-amber-"] {
-  color: var(--muted-terracotta) !important;
+  color: var(--reps-red) !important;
 }
 
 [class*="text-green-"],
 [class*="text-emerald-"],
 [class*="text-teal-"],
 [class*="text-blue-"] {
-  color: var(--vintage-blue) !important;
+  color: var(--reps-charcoal) !important;
 }
 
 [class*="bg-[#F5EEDD]"],
@@ -1643,14 +1653,14 @@ svg {
 [class*="bg-red-"],
 [class*="bg-orange-"],
 [class*="bg-amber-"] {
-  background-color: rgb(182 93 68 / 0.20) !important;
+  background-color: rgb(211 47 47 / 0.16) !important;
 }
 
 [class*="bg-green-"],
 [class*="bg-emerald-"],
 [class*="bg-teal-"],
 [class*="bg-blue-"] {
-  background-color: rgb(158 174 148 / 0.36) !important;
+  background-color: rgb(235 232 223 / 0.90) !important;
 }
 
 [class*="bg-[#16587B]"],
@@ -1718,8 +1728,8 @@ svg {
 .neu-badge {
   border: 2px solid var(--pixel-ink-dark) !important;
   border-radius: 0 !important;
-  background: var(--pixel-panel-soft) !important;
-  box-shadow: 0 3px 0 var(--pixel-shadow-dark) !important;
+  background: var(--pixel-panel-light) !important;
+  box-shadow: 0 3px 0 var(--pixel-shadow) !important;
   color: var(--pixel-ink) !important;
   min-height: 42px;
 }
@@ -1849,8 +1859,8 @@ a svg {
 .btn-push-danger,
 .btn-3d-danger {
   background: var(--pixel-danger) !important;
-  color: var(--pixel-highlight) !important;
-  border-color: var(--pixel-ink-dark) !important;
+  color: var(--pixel-panel-light) !important;
+  border-color: var(--pixel-primary-dark) !important;
 }
 
 .btn-push *,
@@ -1883,8 +1893,8 @@ a svg {
 .btn-3d-amber,
 .neu-btn-amber {
   background: var(--pixel-danger) !important;
-  border-color: var(--pixel-ink-dark) !important;
-  color: var(--pixel-highlight) !important;
+  border-color: var(--pixel-primary-dark) !important;
+  color: var(--pixel-panel-light) !important;
 }
 
 .btn-push-amber *,
@@ -1893,8 +1903,8 @@ a svg {
 .btn-push-amber svg,
 .btn-3d-amber svg,
 .neu-btn-amber svg {
-  color: var(--pixel-highlight) !important;
-  stroke: var(--pixel-highlight) !important;
+  color: var(--pixel-panel-light) !important;
+  stroke: var(--pixel-panel-light) !important;
 }
 
 .btn-push-emerald,
@@ -1926,8 +1936,8 @@ a svg {
 .btn-3d-danger *,
 .btn-push-danger svg,
 .btn-3d-danger svg {
-  color: var(--pixel-highlight) !important;
-  stroke: var(--pixel-highlight) !important;
+  color: var(--pixel-panel-light) !important;
+  stroke: var(--pixel-panel-light) !important;
 }
 
 .btn-push:hover,
@@ -1947,7 +1957,7 @@ a svg {
 .btn-3d-amber:hover,
 .neu-btn-amber:hover {
   transform: translateY(-1px) !important;
-  background: var(--pixel-ink-dark) !important;
+  background: var(--pixel-primary-dark) !important;
   box-shadow: var(--button-shadow-hover) !important;
 }
 
@@ -1964,7 +1974,7 @@ a svg {
 .btn-push-danger:hover,
 .btn-3d-danger:hover {
   transform: translateY(-1px) !important;
-  background: var(--pixel-ink-dark) !important;
+  background: var(--pixel-primary-dark) !important;
   box-shadow: var(--button-shadow-hover) !important;
 }
 
@@ -2011,7 +2021,7 @@ select:focus,
 .neu-inset:focus-within {
   outline: 0 !important;
   background: var(--pixel-highlight) !important;
-  box-shadow: inset 0 3px 0 rgb(113 50 37 / 0.12), 0 0 0 3px var(--dusty-sage), 0 5px 0 var(--pixel-shadow-dark) !important;
+  box-shadow: inset 0 3px 0 rgb(23 21 19 / 0.10), 0 0 0 3px rgb(211 47 47 / 0.22), 0 5px 0 var(--pixel-shadow) !important;
 }
 
 [class~="rounded-full"],
