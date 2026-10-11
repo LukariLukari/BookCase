@@ -142,7 +142,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                             <h3 className="font-bold text-lg text-[#fef9f4] mb-1.5">{plan.name}</h3>
                             <p className="text-[#585556]/60 text-xs mb-4 min-h-[32px] flex items-center justify-center">{plan.description}</p>
                             <div className="flex items-baseline justify-center gap-1">
-                              <span className="text-3xl md:text-4xl font-black text-[#98C581] text-moss-money tracking-tight">{plan.price}</span>
+                              <span className="text-3xl md:text-4xl font-black text-[#15803d] text-moss-money tracking-tight">{plan.price}</span>
                               <span className="text-[#585556]/60 text-xs font-semibold">{plan.period}</span>
                             </div>
                           </div>

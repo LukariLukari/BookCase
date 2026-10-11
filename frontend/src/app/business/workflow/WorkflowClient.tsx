@@ -170,7 +170,7 @@ export default function WorkflowClient() {
                   <p className="text-[10px] font-black uppercase tracking-wider text-[#585556]/70">
                     {l}
                   </p>
-                  <b className="mt-1.5 block text-lg font-black text-[#585556] md:text-xl">
+                  <b className={`mt-1.5 block text-lg font-black md:text-xl ${l === 'Công nợ' ? 'text-moss-money' : 'text-[#3A120B]'}`}>
                     {v}
                   </b>
                 </div>
