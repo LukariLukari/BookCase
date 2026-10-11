@@ -1819,6 +1819,12 @@ a.bg-\[\#16587B\] {
   transition: transform 0.06s steps(1), box-shadow 0.06s steps(1), background-color 0.06s steps(1) !important;
 }
 
+.btn-push.\!overflow-visible,
+.btn-push.overflow-visible,
+.btn-push.\!overflow-visible * {
+  overflow: visible !important;
+}
+
 .btn-push svg,
 .btn-3d svg,
 .neu-btn svg,
