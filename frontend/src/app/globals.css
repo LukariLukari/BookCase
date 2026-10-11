@@ -1,60 +1,63 @@
 @import "tailwindcss";
 
 :root {
-  --ivory: #F5EEDD;
-  --champagne: #ede4d0;
-  --moss: #84B3CE;
-  --smoke: #84B3CE;
-  --garden: #dbe7ed;
-  --midnight: #16587B;
-  --deep-teal: #104460;
-  --butter: #F5EEDD;
-  --paper-line: rgb(22 88 123 / 0.12);
-  --background: #F5EEDD;
-  --foreground: #16587B;
-  --surface: #F5EEDD;
-  --surface-muted: #ece4d2;
-  --surface-card: #ffffff;
-  --border-soft: rgb(22 88 123 / 0.12);
-  --text-main: #16587B;
-  --text-muted: rgb(22 88 123 / 0.65);
-  --button-shadow: 0 6px 16px rgb(22 88 123 / 0.08);
-  --button-shadow-hover: 0 10px 24px rgb(22 88 123 / 0.14);
-  --button-shadow-disabled: 0 4px 10px rgb(22 88 123 / 0.04);
-  --button-shadow-inset: inset 0 1px 2px rgb(22 88 123 / 0.08);
-  --page-shadow: 0 16px 42px rgb(22 88 123 / 0.08);
-  --sticker-shadow: 0 8px 24px rgb(22 88 123 / 0.07);
-  --color-charcoal: #16587B;
-  --color-navy: #16587B;
-  --color-navy-hover: #0f405c;
-  --color-charcoal-noir: #16587B;
-  --color-ironclad: #16587B;
-  --color-urban-fog: #84B3CE;
-  --color-moonlit-silver: #F5EEDD;
-  --color-cloud-veil: #F5EEDD;
-  /* Legacy alias mappings for maximum compatibility */
-  --color-onyx: #16587B;
-  --color-walnut: #16587B;
-  --color-ash: #84B3CE;
-  --color-greige: #ede4d0;
-  --color-stucco: #F5EEDD;
+  --ivory: #F6EFE2;
+  --champagne: #EDE3D2;
+  --moss: #385E26;
+  --smoke: #9E3B34;
+  --garden: #FAF5EB;
+  --midnight: #84221D;
+  --deep-teal: #681916;
+  --butter: #FAF5EB;
+  --paper-line: rgb(132 34 29 / 0.14);
+  --background: #F6EFE2;
+  --foreground: #84221D;
+  --surface: #FAF5EB;
+  --surface-muted: #EDE3D2;
+  --surface-card: #FFFDF9;
+  --border-soft: rgb(132 34 29 / 0.14);
+  --text-main: #84221D;
+  --text-muted: #8E5E58;
+  --button-shadow: 0 4px 14px rgb(132 34 29 / 0.12);
+  --button-shadow-hover: 0 8px 22px rgb(132 34 29 / 0.18);
+  --button-shadow-disabled: 0 2px 6px rgb(132 34 29 / 0.05);
+  --button-shadow-inset: inset 0 1px 2px rgb(132 34 29 / 0.10);
+  --page-shadow: 0 14px 34px rgb(132 34 29 / 0.08);
+  --sticker-shadow: 0 6px 20px rgb(132 34 29 / 0.06);
+  --color-charcoal: #3B1815;
+  --color-navy: #84221D;
+  --color-navy-hover: #6E1B17;
+  --color-charcoal-noir: #3B1815;
+  --color-ironclad: #84221D;
+  --color-urban-fog: #8E5E58;
+  --color-moonlit-silver: #F6EFE2;
+  --color-cloud-veil: #FAF5EB;
+  --color-onyx: #84221D;
+  --color-walnut: #84221D;
+  --color-ash: #9E3B34;
+  --color-greige: #EDE3D2;
+  --color-stucco: #F6EFE2;
+  --moss-money: #385E26;
+  --moss-money-light: #98C581;
+  --moss-money-bg: rgb(56 94 38 / 0.12);
+  --moss-money-border: rgb(56 94 38 / 0.28);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
-  --color-charcoal-noir: #16587B;
-  --color-ironclad: #16587B;
-  --color-urban-fog: #84B3CE;
-  --color-moonlit-silver: #F5EEDD;
-  --color-cloud-veil: #F5EEDD;
-  --color-onyx: #16587B;
-  --color-walnut: #16587B;
-  --color-ash: #84B3CE;
-  --color-greige: #ede4d0;
-  --color-stucco: #F5EEDD;
-  --font-sans: var(--font-montserrat);
+  --color-charcoal-noir: #3B1815;
+  --color-ironclad: #84221D;
+  --color-urban-fog: #8E5E58;
+  --color-moonlit-silver: #F6EFE2;
+  --color-cloud-veil: #FAF5EB;
+  --color-onyx: #84221D;
+  --color-walnut: #84221D;
+  --color-ash: #9E3B34;
+  --color-greige: #EDE3D2;
+  --color-stucco: #F6EFE2;
+  --font-sans: var(--font-be-vietnam);
 }
 
 html, body {
@@ -1422,96 +1425,98 @@ select:focus,
 }
 
 /* ==========================================================================
-   Pixel shop design system
+   Bake Today Vintage Terracotta, Warm Ivory & Moss Green Design System
+   Inspired by editorial bakery aesthetics:
+   - Deep terracotta brick-red: #84221D
+   - Soft buttery vanilla ivory: #F6EFE2 / #FAF5EB / #FFFDF9
+   - Moss green for money & currency: #385E26
    ========================================================================== */
 :root {
-  --reps-red: #d32f2f;
-  --reps-red-dark: #a92525;
-  --reps-black: #171513;
-  --reps-charcoal: #2b2925;
-  --reps-paper: #f4f2eb;
-  --reps-paper-soft: #ebe8df;
-  --reps-page: #d8d7d2;
-  --reps-muted: #868178;
-  --reps-shadow: #bdb9ae;
+  --bake-red: #84221D;
+  --bake-red-deep: #6E1B17;
+  --bake-red-dark: #581411;
+  --bake-red-muted: #9E3B34;
+  --bake-red-soft: rgb(132 34 29 / 0.12);
+  --bake-red-ghost: rgb(132 34 29 / 0.06);
 
-  --dusty-sage: var(--reps-paper-soft);
-  --muted-terracotta: var(--reps-red);
-  --rosewood: var(--reps-red-dark);
-  --rosewood-dark: var(--reps-black);
-  --warm-cream: var(--reps-page);
-  --warm-cream-light: var(--reps-paper);
-  --vintage-blue: var(--reps-red);
-  --vintage-blue-dark: var(--reps-red-dark);
+  --bake-cream: #F6EFE2;
+  --bake-cream-deep: #EDE3D2;
+  --bake-cream-light: #FAF5EB;
+  --bake-card: #FFFDF9;
 
-  --pixel-bg: var(--reps-page);
-  --pixel-bg-dark: #c8c6bf;
-  --pixel-panel: var(--reps-paper);
-  --pixel-panel-light: #fbfaf5;
-  --pixel-panel-soft: var(--reps-paper-soft);
-  --pixel-ink: var(--reps-black);
-  --pixel-ink-dark: var(--reps-charcoal);
-  --pixel-muted: var(--reps-muted);
-  --pixel-highlight: #ffffff;
-  --pixel-shadow: var(--reps-shadow);
-  --pixel-shadow-dark: var(--reps-red-dark);
-  --pixel-success: var(--reps-paper-soft);
-  --pixel-danger: var(--reps-red);
-  --pixel-primary: var(--reps-red);
-  --pixel-primary-dark: var(--reps-red-dark);
+  --bake-text: #84221D;
+  --bake-text-dark: #3B1815;
+  --bake-text-muted: #8E5E58;
 
-  --ivory: var(--pixel-panel);
-  --champagne: var(--pixel-panel-light);
-  --moss: var(--dusty-sage);
-  --smoke: var(--vintage-blue);
-  --garden: var(--pixel-panel-soft);
-  --midnight: var(--vintage-blue);
-  --deep-teal: var(--vintage-blue-dark);
-  --butter: var(--pixel-highlight);
-  --background: var(--pixel-bg);
-  --foreground: var(--pixel-ink);
-  --surface: var(--pixel-panel);
-  --surface-muted: var(--pixel-panel-soft);
-  --surface-card: var(--pixel-panel);
-  --border-soft: var(--pixel-ink);
-  --text-main: var(--pixel-ink);
-  --text-muted: var(--pixel-muted);
-  --button-shadow: 0 4px 0 var(--pixel-shadow-dark);
-  --button-shadow-hover: 0 5px 0 var(--pixel-shadow-dark);
-  --button-shadow-disabled: 0 2px 0 var(--pixel-shadow);
-  --button-shadow-inset: inset 0 4px 0 rgb(23 21 19 / 0.14);
-  --page-shadow: 0 7px 0 var(--pixel-shadow), 0 12px 0 rgb(23 21 19 / 0.08);
-  --sticker-shadow: 0 5px 0 var(--pixel-shadow), 0 9px 0 rgb(23 21 19 / 0.06);
+  --bake-border: rgb(132 34 29 / 0.16);
+  --bake-border-bold: #84221D;
+
+  --moss-money: #385E26;
+  --moss-money-light: #98C581;
+  --moss-money-bg: rgb(56 94 38 / 0.12);
+  --moss-money-border: rgb(56 94 38 / 0.28);
+
+  --ivory: var(--bake-cream-light);
+  --champagne: var(--bake-cream-deep);
+  --moss: var(--moss-money);
+  --smoke: var(--bake-text-muted);
+  --garden: var(--bake-cream-light);
+  --midnight: var(--bake-red);
+  --deep-teal: var(--bake-red-deep);
+  --butter: var(--bake-card);
+  --background: var(--bake-cream);
+  --foreground: var(--bake-text-dark);
+  --surface: var(--bake-cream-light);
+  --surface-muted: var(--bake-cream-deep);
+  --surface-card: var(--bake-card);
+  --border-soft: var(--bake-border);
+  --text-main: var(--bake-text);
+  --text-muted: var(--bake-text-muted);
+
+  --button-shadow: 0 4px 14px rgb(132 34 29 / 0.12), 0 1px 3px rgb(132 34 29 / 0.08);
+  --button-shadow-hover: 0 8px 24px rgb(132 34 29 / 0.18), 0 2px 6px rgb(132 34 29 / 0.10);
+  --button-shadow-disabled: 0 2px 6px rgb(132 34 29 / 0.05);
+  --button-shadow-inset: inset 0 2px 4px rgb(132 34 29 / 0.14);
+  --page-shadow: 0 14px 38px rgb(132 34 29 / 0.08), 0 2px 8px rgb(132 34 29 / 0.04);
+  --sticker-shadow: 0 8px 22px rgb(132 34 29 / 0.07), 0 1px 4px rgb(132 34 29 / 0.04);
+
+  --color-charcoal: var(--bake-text-dark);
+  --color-navy: var(--bake-red);
+  --color-navy-hover: var(--bake-red-deep);
+  --color-charcoal-noir: var(--bake-text-dark);
+  --color-ironclad: var(--bake-red);
+  --color-urban-fog: var(--bake-text-muted);
+  --color-moonlit-silver: var(--bake-cream-light);
+  --color-cloud-veil: var(--bake-cream);
+  --color-onyx: var(--bake-red);
+  --color-walnut: var(--bake-red);
+  --color-ash: var(--bake-text-muted);
+  --color-greige: var(--bake-cream-deep);
+  --color-stucco: var(--bake-cream-light);
 }
 
 @theme inline {
-  --font-sans: var(--font-pixel);
-  --font-serif: var(--font-pixel);
+  --font-sans: var(--font-be-vietnam);
+  --font-serif: var(--font-be-vietnam);
 }
 
 html {
-  background: var(--pixel-bg) !important;
-  image-rendering: pixelated;
+  background: var(--bake-cream) !important;
+  color: var(--bake-text-dark) !important;
 }
 
 body {
   background:
-    linear-gradient(90deg, rgb(23 21 19 / 0.045) 1px, transparent 1px),
-    linear-gradient(0deg, rgb(23 21 19 / 0.045) 1px, transparent 1px),
-    radial-gradient(circle at 16% 12%, rgb(211 47 47 / 0.10), transparent 18rem),
-    radial-gradient(circle at 82% 18%, rgb(255 255 255 / 0.28), transparent 20rem),
-    radial-gradient(circle at 78% 88%, rgb(43 41 37 / 0.06), transparent 18rem),
-    var(--pixel-bg) !important;
-  background-size: 18px 18px, 18px 18px, auto, auto, auto, auto !important;
-  color: var(--pixel-ink) !important;
-  font-family: var(--font-pixel), "Courier New", monospace !important;
-  font-size: 20px;
-  line-height: 1.12;
-  letter-spacing: 0.018em;
-  font-weight: 650;
-  -webkit-font-smoothing: none;
+    radial-gradient(circle at 10% 8%, rgb(255 255 255 / 0.75), transparent 30rem),
+    radial-gradient(circle at 90% 90%, rgb(132 34 29 / 0.06), transparent 32rem),
+    linear-gradient(180deg, var(--bake-cream) 0%, #F4ECE0 100%) !important;
+  color: var(--bake-text-dark) !important;
+  font-family: var(--font-be-vietnam), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: geometricPrecision;
 }
 
 body::before {
@@ -1522,10 +1527,9 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    repeating-linear-gradient(45deg, rgb(23 21 19 / 0.020) 0 1px, transparent 1px 6px),
-    linear-gradient(180deg, rgb(255 255 255 / 0.20), transparent 38%);
-  opacity: 0.48 !important;
-  mix-blend-mode: multiply;
+    radial-gradient(circle at 50% 0%, rgb(255 255 255 / 0.5), transparent 60%),
+    linear-gradient(135deg, rgb(132 34 29 / 0.02) 0%, transparent 100%);
+  opacity: 0.9 !important;
 }
 
 body,
@@ -1538,166 +1542,122 @@ button,
 input,
 textarea,
 select,
-option,
+option {
+  font-family: var(--font-be-vietnam), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
 h1,
 h2,
 h3,
 h4,
 h5,
-h6 {
-  font-family: var(--font-pixel), "Courier New", monospace !important;
-  font-weight: 700;
-}
-
-h1,
-h2,
-h3,
+h6,
 .font-black.text-2xl,
 .font-black.text-3xl,
 .font-black.text-4xl,
 .font-black.text-5xl {
-  color: var(--pixel-ink-dark) !important;
-  font-family: var(--font-pixel), "Courier New", monospace !important;
+  color: var(--bake-red) !important;
+  font-family: var(--font-be-vietnam), -apple-system, BlinkMacSystemFont, sans-serif !important;
   font-weight: 800 !important;
-  text-transform: uppercase;
-  letter-spacing: 0.02em !important;
+  letter-spacing: -0.028em !important;
 }
 
-h1 { font-size: clamp(34px, 5vw, 56px) !important; }
-h2 { font-size: clamp(26px, 3.4vw, 40px) !important; }
-h3 { font-size: clamp(23px, 2.7vw, 32px) !important; }
+h1 {
+  font-size: clamp(28px, 4vw, 42px) !important;
+  line-height: 1.15 !important;
+}
+
+h2 {
+  font-size: clamp(20px, 2.5vw, 28px) !important;
+  line-height: 1.2 !important;
+}
+
+h3 {
+  font-size: clamp(17px, 2vw, 22px) !important;
+  line-height: 1.25 !important;
+}
 
 p,
 small,
-label,
-input,
-textarea,
-select {
-  font-size: 20px;
-  line-height: 1.16;
-}
-
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
-
-svg {
-  image-rendering: pixelated;
-  shape-rendering: crispEdges;
-  stroke-linecap: square !important;
-  stroke-linejoin: miter !important;
+label {
+  font-size: 14px;
 }
 
 ::selection {
-  background: var(--pixel-ink);
-  color: var(--pixel-panel);
+  background: var(--bake-red);
+  color: var(--bake-cream-light);
 }
 
-::-webkit-scrollbar-track { background: var(--pixel-panel-soft); }
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 ::-webkit-scrollbar-thumb {
-  background: var(--pixel-ink);
-  border-radius: 0;
-  border: 2px solid var(--pixel-bg);
-}
-::-webkit-scrollbar-thumb:hover { background: var(--pixel-ink-dark); }
-
-[class~="min-h-screen"][class*="bg-"] {
-  background-color: transparent !important;
+  background: rgb(132 34 29 / 0.28);
+  border-radius: 9999px;
 }
 
-[class*="text-[#16587B]"],
-[class*="text-[#173963]"],
-[class*="text-[#1f365f]"],
-[class*="text-[#585556]"],
-[class~="text-black"],
-[class~="text-gray-800"],
-[class~="text-slate-900"],
-[class~="text-stone-900"] {
-  color: var(--pixel-ink) !important;
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bake-red);
 }
 
-[class~="text-gray-400"],
-[class~="text-gray-500"],
-[class~="text-gray-600"],
-[class~="text-slate-500"],
-[class~="text-stone-500"] {
-  color: var(--pixel-muted) !important;
+/* ==========================================================================
+   MONEY & CURRENCY DATA: XANH LÁ RÊU (Moss Green)
+   High contrast, earthy, distinctive
+   ========================================================================== */
+.text-moss-money,
+[data-money],
+.money-text,
+.price-value,
+b.text-moss-money,
+span.text-moss-money {
+  color: var(--moss-money) !important;
+  font-weight: 800 !important;
 }
 
-[class*="text-red-"],
-[class*="text-orange-"],
-[class*="text-amber-"] {
-  color: var(--reps-red) !important;
+.badge-money {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--moss-money-bg) !important;
+  border: 1px solid var(--moss-money-border) !important;
+  color: var(--moss-money) !important;
+  border-radius: 9999px !important;
+  font-weight: 800 !important;
+  padding: 2px 10px;
 }
 
-[class*="text-green-"],
-[class*="text-emerald-"],
-[class*="text-teal-"],
-[class*="text-blue-"] {
-  color: var(--reps-charcoal) !important;
+/* Inverted containers: ensure money on dark red surfaces has high contrast light-moss */
+.bg-\[\#84221D\] .text-moss-money,
+.bg-\[\#84221D\] [data-money],
+.btn-push-primary .text-moss-money {
+  color: var(--moss-money-light) !important;
 }
 
-[class*="bg-[#F5EEDD]"],
-[class*="bg-[#fef9f4]"],
-[class*="bg-[#eee9df]"],
-[class*="bg-[#efe6d8]"],
-[class*="bg-[#f3eadc]"],
-[class~="bg-white"],
-[class~="bg-gray-50"],
-[class~="bg-gray-100"],
-[class~="bg-stone-50"],
-[class~="bg-neutral-50"],
-[class~="bg-zinc-50"] {
-  background-color: var(--pixel-panel) !important;
+/* Map existing emerald/green text utilities to rich moss green */
+[class*="text-emerald-700"],
+[class*="text-emerald-800"],
+[class*="text-emerald-900"],
+[class*="text-emerald-950"],
+[class*="text-green-600"],
+[class*="text-green-700"],
+[class*="text-green-800"] {
+  color: var(--moss-money) !important;
 }
 
-[class*="bg-red-"],
-[class*="bg-orange-"],
-[class*="bg-amber-"] {
-  background-color: rgb(211 47 47 / 0.16) !important;
+[class*="bg-emerald-100"] {
+  background-color: var(--moss-money-bg) !important;
+  border-color: var(--moss-money-border) !important;
+  color: var(--moss-money) !important;
 }
 
-[class*="bg-green-"],
-[class*="bg-emerald-"],
-[class*="bg-teal-"],
-[class*="bg-blue-"] {
-  background-color: rgb(235 232 223 / 0.90) !important;
+[class*="bg-emerald-100"] * {
+  color: var(--moss-money) !important;
+  stroke: var(--moss-money) !important;
 }
 
-[class*="bg-[#16587B]"],
-[class*="bg-[#173963]"],
-[class*="bg-[#1f365f]"],
-[class*="bg-[#e8e1d4]"],
-[class*="bg-[#3B507D]"],
-[class*="bg-[#585556]"],
-[class~="bg-black"] {
-  background-color: var(--pixel-primary) !important;
-}
-
-[class*="text-xs"] { font-size: 16px !important; line-height: 1.08 !important; }
-[class*="text-sm"] { font-size: 19px !important; line-height: 1.1 !important; }
-[class*="text-base"] { font-size: 21px !important; line-height: 1.1 !important; }
-[class*="text-lg"] { font-size: 25px !important; line-height: 1.05 !important; }
-[class*="text-[10px]"],
-[class*="text-[11px]"],
-[class*="text-[12px]"],
-[class*="text-[clamp(9px"],
-[class*="text-[clamp(10px"],
-[class*="text-[clamp(11px"] {
-  font-size: 15px !important;
-  line-height: 1.08 !important;
-}
-
-[class~="text-white"] {
-  color: var(--pixel-panel) !important;
-}
-
-[class*="border"] {
-  border-color: var(--pixel-ink-dark) !important;
-  border-style: solid !important;
-}
-
+/* ==========================================================================
+   CARDS, PANELS & SURFACES (Soft rounded bakery paper feel)
+   ========================================================================== */
 .pixel-panel,
 .card-push,
 .card-3d,
@@ -1705,81 +1665,92 @@ svg {
 .card-push-subtle,
 .card-3d-subtle,
 .neu-surface-subtle,
-.modal-panel,
-.shadow-2xl,
-.shadow-xl,
-.shadow-lg,
-.shadow-md,
-.shadow {
-  border: 2px solid var(--pixel-ink-dark) !important;
-  border-radius: 0 !important;
-  background: var(--pixel-panel) !important;
+.modal-panel {
+  border: 1.5px solid var(--bake-border) !important;
+  border-radius: 24px !important;
+  background: var(--bake-card) !important;
   box-shadow: var(--page-shadow) !important;
-  color: var(--pixel-ink) !important;
+  color: var(--bake-text-dark) !important;
 }
 
 .card-push-subtle,
 .card-3d-subtle,
 .neu-surface-subtle {
+  border-radius: 20px !important;
   box-shadow: var(--sticker-shadow) !important;
 }
 
-.pixel-logo,
-.pixel-tile,
-.badge-push,
-.neu-badge {
-  border: 2px solid var(--pixel-ink-dark) !important;
-  border-radius: 0 !important;
-  background: var(--pixel-panel-light) !important;
-  box-shadow: 0 3px 0 var(--pixel-shadow) !important;
-  color: var(--pixel-ink) !important;
-  min-height: 42px;
+.card-push-subtle:hover,
+.card-3d-subtle:hover,
+.neu-surface-subtle:hover {
+  border-color: rgb(132 34 29 / 0.32) !important;
+  transform: translateY(-1px);
 }
 
-.badge-push-sunken,
-.neu-badge-sunken {
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  color: var(--pixel-ink) !important;
-  min-height: 0;
+/* Modals */
+.modal-panel,
+[class*="max-w-"] .card-push {
+  border-radius: 28px !important;
 }
 
-.pixel-active,
-.squircle-btn.active {
-  border: 2px solid var(--pixel-ink-dark) !important;
-  border-radius: 0 !important;
-  background: var(--pixel-primary) !important;
-  color: var(--pixel-panel) !important;
-  box-shadow: inset 0 3px 0 rgb(244 234 210 / 0.14), 0 4px 0 var(--pixel-shadow-dark) !important;
+/* Rounded classes */
+.rounded-xl { border-radius: 18px !important; }
+.rounded-2xl { border-radius: 22px !important; }
+.rounded-3xl { border-radius: 28px !important; }
+.rounded-full { border-radius: 9999px !important; }
+
+/* Shadows */
+.shadow-2xl,
+.shadow-xl,
+.shadow-lg,
+.shadow-md,
+.shadow {
+  box-shadow: var(--page-shadow) !important;
 }
 
-.pixel-active *,
-.pixel-active svg,
-.squircle-btn.active *,
-.squircle-btn.active svg {
-  color: var(--pixel-panel) !important;
-  stroke: var(--pixel-panel) !important;
+/* ==========================================================================
+   INPUTS & FORM CONTROLS
+   ========================================================================== */
+.input-push,
+.input-3d,
+.neu-inset,
+input,
+textarea,
+select {
+  border: 1.5px solid var(--bake-border) !important;
+  border-radius: 18px !important;
+  background: var(--bake-card) !important;
+  color: var(--bake-text-dark) !important;
+  box-shadow: inset 0 1px 3px rgb(132 34 29 / 0.05) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  min-height: 44px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.bg-\[\#e8e1d4\],
-.bg-\[\#e8e1d4\] *,
-.bg-\[\#e8e1d4\] svg {
-  color: var(--pixel-panel) !important;
-  stroke: var(--pixel-panel) !important;
+input::placeholder,
+textarea::placeholder {
+  color: rgb(132 34 29 / 0.45) !important;
+  font-weight: 500 !important;
 }
 
-[class*="shadow-["] {
-  box-shadow: var(--button-shadow) !important;
+input:focus,
+textarea:focus,
+select:focus,
+.input-push:focus-within,
+.input-3d:focus-within,
+.neu-inset:focus-within {
+  outline: 0 !important;
+  border-color: var(--bake-red) !important;
+  box-shadow: 0 0 0 3px rgb(132 34 29 / 0.16) !important;
+  background: #FFFFFF !important;
 }
 
-.bg-\[\#e8e1d4\][class*="shadow-["] {
-  box-shadow: inset 0 3px 0 rgb(244 234 210 / 0.14), 0 4px 0 var(--pixel-shadow-dark) !important;
-}
-
-.btn-gradient,
-.btn-navy,
+/* ==========================================================================
+   BUTTONS: MANDATORY HIGH CONTRAST (Never washed out / sunk)
+   - Primary: Deep Terracotta Red button with Crisp Cream Text & Icons
+   - Secondary: Cream Card button with Deep Terracotta Red Border & Text
+   ========================================================================== */
 .btn-push,
 .btn-3d,
 .neu-btn,
@@ -1795,129 +1766,45 @@ svg {
 .btn-3d-emerald,
 .btn-push-danger,
 .btn-3d-danger,
+.btn-gradient,
+.btn-navy,
 .squircle-btn,
 button.bg-\[\#16587B\],
-a.bg-\[\#16587B\] {
-  border: 2px solid var(--pixel-ink-dark) !important;
-  border-radius: 0 !important;
-  background: var(--pixel-panel-light) !important;
-  background-image: none !important;
-  color: var(--pixel-ink) !important;
-  box-shadow: var(--button-shadow) !important;
-  font-family: var(--font-pixel), "Courier New", monospace !important;
-  font-size: 24px;
-  font-weight: 800 !important;
-  letter-spacing: 0.02em !important;
-  text-transform: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: transform 0.06s steps(1), box-shadow 0.06s steps(1), background-color 0.06s steps(1) !important;
-}
-
-.btn-push svg,
-.btn-3d svg,
-.neu-btn svg,
-.btn-push-primary svg,
-.btn-3d-navy svg,
-.neu-btn-primary svg,
-.btn-push-walnut svg,
-.btn-push-ironclad svg,
-.btn-push-amber svg,
-.btn-3d-amber svg,
-.neu-btn-amber svg,
-.btn-push-emerald svg,
-.btn-3d-emerald svg,
-.btn-push-danger svg,
-.btn-3d-danger svg,
-.squircle-btn svg,
-button svg,
-a svg {
-  width: 1.05em !important;
-  height: 1.05em !important;
-  stroke-width: 2.4 !important;
-  flex-shrink: 0;
-}
-
-.btn-push,
-.btn-3d,
-.neu-btn,
-.btn-push-primary,
-.btn-3d-navy,
-.neu-btn-primary,
-.btn-push-danger,
-.btn-3d-danger,
-.squircle-btn {
+a.bg-\[\#16587B\],
+button.bg-\[\#585556\],
+button.bg-\[\#84221D\],
+button.bg-\[\#82201D\] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  letter-spacing: -0.01em;
+  padding-inline: 1.15rem;
+  padding-block: 0.55rem;
   min-height: 42px;
-  padding-block: 0.4rem;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.12s ease, background-color 0.12s ease, border-color 0.12s ease !important;
 }
 
+/* 1. PRIMARY BUTTONS (Deep Terracotta Red with Cream text/icon) */
 .btn-push-primary,
 .btn-3d-navy,
 .neu-btn-primary,
 .btn-gradient,
-.btn-navy {
-  background: var(--pixel-primary) !important;
-  color: var(--pixel-panel) !important;
-  border-color: var(--pixel-primary-dark) !important;
-}
-
-.btn-push-danger,
-.btn-3d-danger {
-  background: var(--pixel-danger) !important;
-  color: var(--pixel-panel-light) !important;
-  border-color: var(--pixel-primary-dark) !important;
-}
-
-.btn-push *,
-.btn-3d *,
-.neu-btn *,
-.btn-push-walnut *,
-.btn-push-ironclad *,
-.btn-push-amber *,
-.btn-3d-amber *,
-.neu-btn-amber *,
-.btn-push-emerald *,
-.btn-3d-emerald *,
-.squircle-btn *,
-.btn-push svg,
-.btn-3d svg,
-.neu-btn svg,
-.btn-push-walnut svg,
-.btn-push-ironclad svg,
-.btn-push-amber svg,
-.btn-3d-amber svg,
-.neu-btn-amber svg,
-.btn-push-emerald svg,
-.btn-3d-emerald svg,
-.squircle-btn svg {
-  color: var(--pixel-ink) !important;
-  stroke: var(--pixel-ink) !important;
-}
-
-.btn-push-amber,
-.btn-3d-amber,
-.neu-btn-amber {
-  background: var(--pixel-danger) !important;
-  border-color: var(--pixel-primary-dark) !important;
-  color: var(--pixel-panel-light) !important;
-}
-
-.btn-push-amber *,
-.btn-3d-amber *,
-.neu-btn-amber *,
-.btn-push-amber svg,
-.btn-3d-amber svg,
-.neu-btn-amber svg {
-  color: var(--pixel-panel-light) !important;
-  stroke: var(--pixel-panel-light) !important;
-}
-
-.btn-push-emerald,
-.btn-3d-emerald {
-  background: var(--dusty-sage) !important;
-  border-color: var(--pixel-ink-dark) !important;
-  color: var(--pixel-ink) !important;
+.btn-navy,
+button.bg-\[\#16587B\],
+a.bg-\[\#16587B\],
+button.bg-\[\#585556\],
+button.bg-\[\#84221D\],
+button.bg-\[\#82201D\] {
+  background: var(--bake-red) !important;
+  background-image: none !important;
+  border: 1.5px solid var(--bake-red-deep) !important;
+  color: var(--bake-cream-light) !important;
+  box-shadow: var(--button-shadow) !important;
 }
 
 .btn-push-primary *,
@@ -1925,25 +1812,77 @@ a svg {
 .neu-btn-primary *,
 .btn-gradient *,
 .btn-navy *,
-.btn-push-danger *,
-.btn-3d-danger *,
+button.bg-\[\#16587B\] *,
+a.bg-\[\#16587B\] *,
+button.bg-\[\#585556\] *,
+button.bg-\[\#84221D\] *,
+button.bg-\[\#82201D\] *,
 .btn-push-primary svg,
 .btn-3d-navy svg,
 .neu-btn-primary svg,
 .btn-gradient svg,
 .btn-navy svg,
-.btn-push-danger svg,
-.btn-3d-danger svg {
-  color: var(--pixel-panel) !important;
-  stroke: var(--pixel-panel) !important;
+button.bg-\[\#16587B\] svg,
+a.bg-\[\#16587B\] svg,
+button.bg-\[\#585556\] svg,
+button.bg-\[\#84221D\] svg,
+button.bg-\[\#82201D\] svg {
+  color: var(--bake-cream-light) !important;
+  stroke: var(--bake-cream-light) !important;
 }
 
-.btn-push-danger *,
-.btn-3d-danger *,
-.btn-push-danger svg,
-.btn-3d-danger svg {
-  color: var(--pixel-panel-light) !important;
-  stroke: var(--pixel-panel-light) !important;
+.btn-push-primary:hover,
+.btn-3d-navy:hover,
+.neu-btn-primary:hover,
+.btn-gradient:hover,
+.btn-navy:hover,
+button.bg-\[\#16587B\]:hover,
+a.bg-\[\#16587B\]:hover,
+button.bg-\[\#585556\]:hover,
+button.bg-\[\#84221D\]:hover,
+button.bg-\[\#82201D\]:hover {
+  background: var(--bake-red-deep) !important;
+  border-color: var(--bake-red-dark) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--button-shadow-hover) !important;
+}
+
+.btn-push-primary:active,
+.btn-3d-navy:active,
+.neu-btn-primary:active,
+.btn-gradient:active,
+.btn-navy:active {
+  transform: translateY(1px) scale(0.98) !important;
+}
+
+/* 2. SECONDARY / PUSH BUTTONS (Cream surface with Terracotta Red text/icon) */
+.btn-push,
+.btn-3d,
+.neu-btn,
+.btn-push-walnut,
+.btn-push-ironclad,
+.squircle-btn {
+  background: var(--bake-card) !important;
+  background-image: none !important;
+  border: 1.5px solid var(--bake-red) !important;
+  color: var(--bake-red) !important;
+  box-shadow: var(--button-shadow) !important;
+}
+
+.btn-push *,
+.btn-3d *,
+.neu-btn *,
+.btn-push-walnut *,
+.btn-push-ironclad *,
+.squircle-btn *,
+.btn-push svg,
+.btn-3d svg,
+.neu-btn svg,
+.btn-push-walnut svg,
+.btn-push-ironclad svg,
+.squircle-btn svg {
+  color: var(--bake-red) !important;
+  stroke: var(--bake-red) !important;
 }
 
 .btn-push:hover,
@@ -1951,124 +1890,199 @@ a svg {
 .neu-btn:hover,
 .btn-push-walnut:hover,
 .btn-push-ironclad:hover,
-.btn-push-emerald:hover,
-.btn-3d-emerald:hover,
 .squircle-btn:hover {
+  background: var(--bake-cream-deep) !important;
   transform: translateY(-1px) !important;
-  background: var(--pixel-highlight) !important;
-  box-shadow: var(--button-shadow-hover) !important;
-}
-
-.btn-push-amber:hover,
-.btn-3d-amber:hover,
-.neu-btn-amber:hover {
-  transform: translateY(-1px) !important;
-  background: var(--pixel-primary-dark) !important;
-  box-shadow: var(--button-shadow-hover) !important;
-}
-
-.btn-push-primary:hover,
-.btn-3d-navy:hover,
-.neu-btn-primary:hover,
-.btn-gradient:hover,
-.btn-navy:hover {
-  transform: translateY(-1px) !important;
-  background: var(--pixel-primary-dark) !important;
-  box-shadow: var(--button-shadow-hover) !important;
-}
-
-.btn-push-danger:hover,
-.btn-3d-danger:hover {
-  transform: translateY(-1px) !important;
-  background: var(--pixel-primary-dark) !important;
   box-shadow: var(--button-shadow-hover) !important;
 }
 
 .btn-push:active,
 .btn-3d:active,
 .neu-btn:active,
-.btn-push-primary:active,
-.btn-3d-navy:active,
-.neu-btn-primary:active,
-.btn-push-danger:active,
-.btn-3d-danger:active,
 .squircle-btn:active {
-  transform: translateY(4px) !important;
-  box-shadow: 0 1px 0 var(--pixel-shadow-dark) !important;
+  transform: translateY(1px) scale(0.98) !important;
 }
 
-.input-push,
-.input-3d,
-.neu-inset,
-input,
-textarea,
-select {
-  border: 2px solid var(--pixel-ink-dark) !important;
-  border-radius: 0 !important;
-  background: var(--pixel-panel-light) !important;
-  color: var(--pixel-ink) !important;
-  box-shadow: inset 0 3px 0 rgb(113 50 37 / 0.12), 0 4px 0 var(--pixel-shadow) !important;
-  font-family: var(--font-pixel), "Courier New", monospace !important;
-  font-size: 22px !important;
-  line-height: 1.05 !important;
-  font-weight: 700 !important;
-  min-height: 44px;
+/* 3. DANGER BUTTONS */
+.btn-push-danger,
+.btn-3d-danger {
+  background: var(--bake-red-deep) !important;
+  border: 1.5px solid var(--bake-red-dark) !important;
+  color: #FFFFFF !important;
+  box-shadow: var(--button-shadow) !important;
 }
 
-input::placeholder,
-textarea::placeholder {
-  color: rgb(127 111 88 / 0.70) !important;
+.btn-push-danger *,
+.btn-3d-danger *,
+.btn-push-danger svg,
+.btn-3d-danger svg {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
 }
 
-input:focus,
-textarea:focus,
-select:focus,
-.input-push:focus-within,
-.input-3d:focus-within,
-.neu-inset:focus-within {
-  outline: 0 !important;
-  background: var(--pixel-highlight) !important;
-  box-shadow: inset 0 3px 0 rgb(23 21 19 / 0.10), 0 0 0 3px rgb(211 47 47 / 0.22), 0 5px 0 var(--pixel-shadow) !important;
+.btn-push-danger:hover,
+.btn-3d-danger:hover {
+  background: var(--bake-red-dark) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--button-shadow-hover) !important;
 }
 
-[class~="rounded-full"],
-.rounded-xl,
-.rounded-2xl,
-.rounded-3xl,
-[class*="rounded-["] {
-  border-radius: 0 !important;
+/* 4. ACTIVE NAVIGATION & SQUIRCLE BUTTONS */
+.pixel-active,
+.squircle-btn.active {
+  background: var(--bake-red) !important;
+  border: 1.5px solid var(--bake-red-deep) !important;
+  color: var(--bake-cream-light) !important;
+  box-shadow: 0 4px 12px rgb(132 34 29 / 0.22) !important;
 }
 
-.line-clamp-1,
-.line-clamp-2,
-.truncate {
-  letter-spacing: 0.02em !important;
+.pixel-active *,
+.pixel-active svg,
+.squircle-btn.active *,
+.squircle-btn.active svg {
+  color: var(--bake-cream-light) !important;
+  stroke: var(--bake-cream-light) !important;
 }
 
-[class*="border-dashed"] {
-  border-style: dashed !important;
+/* 5. INACTIVE NAV TILES */
+.pixel-tile {
+  background: var(--bake-cream-light) !important;
+  border: 1.5px solid var(--bake-border) !important;
+  color: var(--bake-text-dark) !important;
+  box-shadow: none !important;
 }
 
-[class*="animate-spin"] {
-  animation-timing-function: steps(8) !important;
+.pixel-tile:hover {
+  background: var(--bake-card) !important;
+  border-color: var(--bake-red) !important;
+  color: var(--bake-red) !important;
+  transform: translateY(-1px);
+}
+
+.pixel-tile:hover *,
+.pixel-tile:hover svg {
+  color: var(--bake-red) !important;
+  stroke: var(--bake-red) !important;
+}
+
+/* 6. LOGO & BRAND */
+.pixel-logo {
+  border: 1.5px solid var(--bake-border) !important;
+  border-radius: 20px !important;
+  background: var(--bake-card) !important;
+  box-shadow: var(--sticker-shadow) !important;
+}
+
+.pixel-logo span {
+  color: var(--bake-red) !important;
+}
+
+/* 7. BADGES & PILL STICKERS (like STEP 1 Add water from image) */
+.badge-push,
+.neu-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--bake-red) !important;
+  border-radius: 9999px !important;
+  background: var(--bake-cream-light) !important;
+  color: var(--bake-red) !important;
+  font-weight: 800 !important;
+  font-size: 12px !important;
+  padding: 3px 12px !important;
+  box-shadow: 0 2px 6px rgb(132 34 29 / 0.06) !important;
+}
+
+.badge-push *,
+.neu-badge * {
+  color: var(--bake-red) !important;
+}
+
+.badge-push-sunken,
+.neu-badge-sunken {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--bake-text-muted) !important;
+}
+
+/* SVG icons baseline inside buttons */
+button svg,
+a svg {
+  width: 1.15em !important;
+  height: 1.15em !important;
+  stroke-width: 2 !important;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   LEGACY UTILITY COMPATIBILITY OVERRIDES
+   Maps older blue/slate/neutral utilities to the Bake Today palette
+   ========================================================================== */
+[class~="min-h-screen"][class*="bg-"] {
+  background-color: transparent !important;
+}
+
+[class*="text-[#16587B]"],
+[class*="text-[#173963]"],
+[class*="text-[#1f365f]"],
+[class*="text-[#585556]"],
+[class*="text-[#57575c]"],
+[class~="text-black"],
+[class~="text-gray-900"],
+[class~="text-slate-900"],
+[class~="text-stone-900"] {
+  color: var(--bake-text) !important;
+}
+
+[class~="text-gray-400"],
+[class~="text-gray-500"],
+[class~="text-gray-600"],
+[class~="text-slate-500"],
+[class~="text-stone-500"] {
+  color: var(--bake-text-muted) !important;
+}
+
+[class*="bg-[#F5EEDD]"],
+[class*="bg-[#fef9f4]"],
+[class*="bg-[#eee9df]"],
+[class*="bg-[#efe6d8]"],
+[class*="bg-[#f3eadc]"],
+[class~="bg-white"],
+[class~="bg-gray-50"],
+[class~="bg-gray-100"],
+[class~="bg-stone-50"],
+[class~="bg-neutral-50"],
+[class~="bg-zinc-50"] {
+  background-color: var(--bake-card) !important;
+}
+
+[class*="bg-[#16587B]"],
+[class*="bg-[#173963]"],
+[class*="bg-[#1f365f]"],
+[class*="bg-[#e8e1d4]"],
+[class*="bg-[#3B507D]"],
+[class*="bg-[#585556]"],
+[class*="bg-[#57575c]"],
+[class~="bg-black"] {
+  background-color: var(--bake-red) !important;
+}
+
+[class~="text-white"] {
+  color: var(--bake-cream-light) !important;
+}
+
+[class*="border-[#16587B]"],
+[class*="border-[#585556]"],
+[class*="border-[#1f365f]"],
+[class*="border-[#57575c]"] {
+  border-color: var(--bake-border) !important;
 }
 
 @media (max-width: 767px) {
   body {
-    font-size: 19px;
+    font-size: 14px;
   }
 
-  p,
-  small,
-  label,
-  input,
-  textarea,
-  select {
-    font-size: 19px;
-  }
-
-  .btn-gradient,
-  .btn-navy,
   .btn-push,
   .btn-3d,
   .neu-btn,
@@ -2078,18 +2092,9 @@ select:focus,
   .btn-push-danger,
   .btn-3d-danger,
   .squircle-btn {
-    font-size: 19px;
     min-height: 40px;
-  }
-
-  [class*="text-xs"],
-  [class*="text-[10px]"],
-  [class*="text-[11px]"],
-  [class*="text-[12px]"],
-  [class*="text-[clamp(9px"],
-  [class*="text-[clamp(10px"],
-  [class*="text-[clamp(11px"] {
-    font-size: 14px !important;
+    font-size: 13px !important;
+    padding-inline: 0.95rem;
   }
 
   .pixel-panel,
@@ -2097,19 +2102,8 @@ select:focus,
   .card-3d,
   .neu-surface,
   .card-push-subtle,
-  .card-3d-subtle,
-  .neu-surface-subtle,
-  .modal-panel,
-  .shadow-2xl,
-  .shadow-xl,
-  .shadow-lg,
-  .shadow-md,
-  .shadow {
-    border-width: 2px !important;
-    box-shadow: 0 5px 0 var(--pixel-shadow-dark) !important;
+  .modal-panel {
+    border-radius: 20px !important;
   }
-
-  h1 { font-size: clamp(30px, 9vw, 42px) !important; }
-  h2 { font-size: clamp(25px, 7vw, 34px) !important; }
-  h3 { font-size: clamp(22px, 6vw, 30px) !important; }
 }
+

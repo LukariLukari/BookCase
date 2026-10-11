@@ -243,7 +243,7 @@ export default function WorkflowClient() {
                                 {order.code} · {new Date(order.ordered_at).toLocaleDateString('vi-VN')}
                               </p>
                             </div>
-                            <b className="shrink-0 text-xs font-black text-[#585556]">
+                            <b className="shrink-0 text-xs font-black text-moss-money text-[#385E26]">
                               {money(order.total)}
                             </b>
                           </div>
