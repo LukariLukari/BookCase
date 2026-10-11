@@ -182,7 +182,7 @@ async function mutateWithBackup(request:NextRequest,context:RouteContext<'/api/b
  const response=await handle(request,context);
  if(response.ok&&!request.nextUrl.pathname.includes('/business/backups')&&!request.nextUrl.pathname.includes('/reset')&&!request.nextUrl.pathname.includes('/clear-')){
   const user=await session(request);
-  if(user)await createAutomaticBusinessBackup(user.id);
+  if(user)try{await createAutomaticBusinessBackup(user.id)}catch(error){console.error('Automatic business backup failed after a successful mutation:',error)}
  }
  return response;
 }

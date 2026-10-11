@@ -7,7 +7,7 @@ import { Camera, Check, Loader2, PackageOpen, Pencil, Plus, Search, Trash2, X } 
 import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/app/contexts/AuthContext';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API = process.env.NEXT_PUBLIC_API_URL || '/api/backend';
 const input = 'h-12 w-full rounded-xl border border-[#16587B]/25 bg-white px-3 text-sm font-bold text-[#16587B] outline-none focus:border-[#16587B]';
 type Product = { id:string; name:string; sku?:string; category?:string; image_url?:string; selling_price:number; unit_cost:number; track_stock?:boolean; notes?:string };
 type Draft = { id:string; name:string; sku:string; category:string; image_url:string; selling_price:string; unit_cost:string; notes:string };
