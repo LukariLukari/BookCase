@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -1425,98 +1426,108 @@ select:focus,
 }
 
 /* ==========================================================================
-   Bake Today Vintage Terracotta, Warm Ivory & Moss Green Design System
-   Inspired by editorial bakery aesthetics:
-   - Deep terracotta brick-red: #84221D
-   - Soft buttery vanilla ivory: #F6EFE2 / #FAF5EB / #FFFDF9
-   - Moss green for money & currency: #385E26
+   NEO-BRUTALIST INDUSTRIAL POP DESIGN SYSTEM
+   Design reference: High-contrast neo-brutalism with solid hard shadows,
+   split-action buttons, chunky all-caps display headings, and dot matrices.
+   Palette: Warm vintage biscuit canvas, terracotta brick-red accent,
+   solid roasted espresso outlines/shadows, and moss green for money data.
    ========================================================================== */
 :root {
-  --bake-red: #84221D;
-  --bake-red-deep: #6E1B17;
-  --bake-red-dark: #581411;
-  --bake-red-muted: #9E3B34;
-  --bake-red-soft: rgb(132 34 29 / 0.12);
-  --bake-red-ghost: rgb(132 34 29 / 0.06);
+  --font-display: 'Oswald', sans-serif;
 
-  --bake-cream: #F6EFE2;
-  --bake-cream-deep: #EDE3D2;
-  --bake-cream-light: #FAF5EB;
-  --bake-card: #FFFDF9;
+  /* Color Tokens */
+  --brutal-ink: #1E0C0B;
+  --brutal-accent: #84221D;
+  --brutal-accent-hover: #6E1A16;
+  --brutal-accent-dark: #561310;
+  --brutal-accent-light: #A43932;
+  --brutal-cream: #F6EFE2;
+  --brutal-cream-deep: #EDE3D2;
+  --brutal-surface: #FFFDF9;
+  --brutal-surface-subtle: #FAF5EB;
+  --brutal-surface-muted: #EDE3D2;
 
-  --bake-text: #84221D;
-  --bake-text-dark: #3B1815;
-  --bake-text-muted: #8E5E58;
+  --brutal-text: #1E0C0B;
+  --brutal-text-red: #84221D;
+  --brutal-text-muted: #8E5E58;
 
-  --bake-border: rgb(132 34 29 / 0.16);
-  --bake-border-bold: #84221D;
+  --brutal-money: #385E26;
+  --brutal-money-light: #98C581;
+  --brutal-money-bg: #EAF2E6;
+  --brutal-money-border: #385E26;
 
-  --moss-money: #385E26;
-  --moss-money-light: #98C581;
-  --moss-money-bg: rgb(56 94 38 / 0.12);
-  --moss-money-border: rgb(56 94 38 / 0.28);
+  /* Hard-edge Block Shadows (No fuzzy blurs, solid brutalist extrusion!) */
+  --brutal-shadow: 4px 4px 0px var(--brutal-ink);
+  --brutal-shadow-sm: 2.5px 2.5px 0px var(--brutal-ink);
+  --brutal-shadow-lg: 6px 6px 0px var(--brutal-ink);
+  --brutal-shadow-hover: 5.5px 5.5px 0px var(--brutal-ink);
+  --brutal-shadow-active: 1px 1px 0px var(--brutal-ink);
 
-  --ivory: var(--bake-cream-light);
-  --champagne: var(--bake-cream-deep);
-  --moss: var(--moss-money);
-  --smoke: var(--bake-text-muted);
-  --garden: var(--bake-cream-light);
-  --midnight: var(--bake-red);
-  --deep-teal: var(--bake-red-deep);
-  --butter: var(--bake-card);
-  --background: var(--bake-cream);
-  --foreground: var(--bake-text-dark);
-  --surface: var(--bake-cream-light);
-  --surface-muted: var(--bake-cream-deep);
-  --surface-card: var(--bake-card);
-  --border-soft: var(--bake-border);
-  --text-main: var(--bake-text);
-  --text-muted: var(--bake-text-muted);
+  /* Legacy variable mappings */
+  --ivory: var(--brutal-surface-subtle);
+  --champagne: var(--brutal-cream-deep);
+  --moss: var(--brutal-money);
+  --smoke: var(--brutal-text-muted);
+  --garden: var(--brutal-surface-subtle);
+  --midnight: var(--brutal-accent);
+  --deep-teal: var(--brutal-accent-dark);
+  --butter: var(--brutal-surface);
+  --background: var(--brutal-cream);
+  --foreground: var(--brutal-text);
+  --surface: var(--brutal-surface);
+  --surface-muted: var(--brutal-surface-muted);
+  --surface-card: var(--brutal-surface);
+  --border-soft: var(--brutal-ink);
+  --text-main: var(--brutal-text);
+  --text-muted: var(--brutal-text-muted);
 
-  --button-shadow: 0 4px 14px rgb(132 34 29 / 0.12), 0 1px 3px rgb(132 34 29 / 0.08);
-  --button-shadow-hover: 0 8px 24px rgb(132 34 29 / 0.18), 0 2px 6px rgb(132 34 29 / 0.10);
-  --button-shadow-disabled: 0 2px 6px rgb(132 34 29 / 0.05);
-  --button-shadow-inset: inset 0 2px 4px rgb(132 34 29 / 0.14);
-  --page-shadow: 0 14px 38px rgb(132 34 29 / 0.08), 0 2px 8px rgb(132 34 29 / 0.04);
-  --sticker-shadow: 0 8px 22px rgb(132 34 29 / 0.07), 0 1px 4px rgb(132 34 29 / 0.04);
+  --button-shadow: var(--brutal-shadow);
+  --button-shadow-hover: var(--brutal-shadow-hover);
+  --button-shadow-disabled: 2px 2px 0px rgba(30, 12, 11, 0.35);
+  --button-shadow-inset: inset 2px 2px 0px rgba(30, 12, 11, 0.2);
+  --page-shadow: var(--brutal-shadow);
+  --sticker-shadow: var(--brutal-shadow-sm);
 
-  --color-charcoal: var(--bake-text-dark);
-  --color-navy: var(--bake-red);
-  --color-navy-hover: var(--bake-red-deep);
-  --color-charcoal-noir: var(--bake-text-dark);
-  --color-ironclad: var(--bake-red);
-  --color-urban-fog: var(--bake-text-muted);
-  --color-moonlit-silver: var(--bake-cream-light);
-  --color-cloud-veil: var(--bake-cream);
-  --color-onyx: var(--bake-red);
-  --color-walnut: var(--bake-red);
-  --color-ash: var(--bake-text-muted);
-  --color-greige: var(--bake-cream-deep);
-  --color-stucco: var(--bake-cream-light);
+  --color-charcoal: var(--brutal-text);
+  --color-navy: var(--brutal-accent);
+  --color-navy-hover: var(--brutal-accent-hover);
+  --color-charcoal-noir: var(--brutal-text);
+  --color-ironclad: var(--brutal-accent);
+  --color-urban-fog: var(--brutal-text-muted);
+  --color-moonlit-silver: var(--brutal-surface-subtle);
+  --color-cloud-veil: var(--brutal-cream);
+  --color-onyx: var(--brutal-accent);
+  --color-walnut: var(--brutal-accent);
+  --color-ash: var(--brutal-text-muted);
+  --color-greige: var(--brutal-cream-deep);
+  --color-stucco: var(--brutal-surface-subtle);
+  --moss-money: var(--brutal-money);
+  --moss-money-light: var(--brutal-money-light);
+  --moss-money-bg: var(--brutal-money-bg);
+  --moss-money-border: var(--brutal-money-border);
 }
 
 @theme inline {
   --font-sans: var(--font-be-vietnam);
-  --font-serif: var(--font-be-vietnam);
+  --font-serif: var(--font-display);
 }
 
 html {
-  background: var(--bake-cream) !important;
-  color: var(--bake-text-dark) !important;
+  background: var(--brutal-cream) !important;
+  color: var(--brutal-text) !important;
 }
 
 body {
   background:
-    radial-gradient(circle at 10% 8%, rgb(255 255 255 / 0.75), transparent 30rem),
-    radial-gradient(circle at 90% 90%, rgb(132 34 29 / 0.06), transparent 32rem),
-    linear-gradient(180deg, var(--bake-cream) 0%, #F4ECE0 100%) !important;
-  color: var(--bake-text-dark) !important;
+    radial-gradient(circle at 10% 8%, rgb(255 255 255 / 0.8), transparent 30rem),
+    radial-gradient(circle at 90% 90%, rgb(132 34 29 / 0.05), transparent 32rem),
+    var(--brutal-cream) !important;
+  color: var(--brutal-text) !important;
   font-family: var(--font-be-vietnam), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: 15px;
   line-height: 1.5;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 body::before {
@@ -1526,26 +1537,15 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 50% 0%, rgb(255 255 255 / 0.5), transparent 60%),
-    linear-gradient(135deg, rgb(132 34 29 / 0.02) 0%, transparent 100%);
-  opacity: 0.9 !important;
+  background-image: radial-gradient(rgb(30 12 11 / 0.06) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  opacity: 0.7 !important;
 }
 
-body,
-p,
-span,
-b,
-small,
-label,
-button,
-input,
-textarea,
-select,
-option {
-  font-family: var(--font-be-vietnam), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-}
-
+/* ==========================================================================
+   CHUNKY ALL-CAPS DISPLAY TYPOGRAPHY
+   Inspired by the headline style in the design reference
+   ========================================================================== */
 h1,
 h2,
 h3,
@@ -1555,37 +1555,44 @@ h6,
 .font-black.text-2xl,
 .font-black.text-3xl,
 .font-black.text-4xl,
-.font-black.text-5xl {
-  color: var(--bake-red) !important;
-  font-family: var(--font-be-vietnam), -apple-system, BlinkMacSystemFont, sans-serif !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.028em !important;
+.font-black.text-5xl,
+.brutal-title {
+  color: var(--brutal-text) !important;
+  font-family: var(--font-display), "Oswald", "Be Vietnam Pro", sans-serif !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.12 !important;
 }
 
 h1 {
-  font-size: clamp(28px, 4vw, 42px) !important;
-  line-height: 1.15 !important;
+  font-size: clamp(30px, 4.5vw, 46px) !important;
+  letter-spacing: 0.025em !important;
 }
 
 h2 {
-  font-size: clamp(20px, 2.5vw, 28px) !important;
-  line-height: 1.2 !important;
+  font-size: clamp(22px, 3vw, 32px) !important;
 }
 
 h3 {
-  font-size: clamp(17px, 2vw, 22px) !important;
-  line-height: 1.25 !important;
+  font-size: clamp(18px, 2.2vw, 24px) !important;
 }
 
-p,
-small,
-label {
-  font-size: 14px;
+/* Sub-labels in all caps bold */
+label,
+.brutal-label,
+header p.uppercase {
+  font-family: var(--font-be-vietnam), sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: var(--brutal-text) !important;
 }
 
 ::selection {
-  background: var(--bake-red);
-  color: var(--bake-cream-light);
+  background: var(--brutal-ink);
+  color: #FAF5EB;
 }
 
 ::-webkit-scrollbar-track {
@@ -1593,17 +1600,58 @@ label {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(132 34 29 / 0.28);
+  background: var(--brutal-ink);
   border-radius: 9999px;
+  border: 2px solid var(--brutal-cream);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--bake-red);
+  background: var(--brutal-accent);
+}
+
+/* ==========================================================================
+   NEO-BRUTALIST GRAPHIC ACCENTS & PATTERNS
+   - .brutal-dots: Dot matrix grid pattern (seen in corners of screens)
+   - .brutal-hazard: Diagonal warning stripe bar (seen at bottom of screens)
+   ========================================================================== */
+.brutal-dots {
+  background-image: radial-gradient(var(--brutal-ink) 1.8px, transparent 1.8px);
+  background-size: 8px 8px;
+  width: 36px;
+  height: 36px;
+  display: inline-block;
+  opacity: 0.85;
+}
+
+.brutal-dots-red {
+  background-image: radial-gradient(var(--brutal-accent) 1.8px, transparent 1.8px);
+  background-size: 8px 8px;
+}
+
+.brutal-hazard {
+  background: repeating-linear-gradient(-45deg, var(--brutal-ink) 0, var(--brutal-ink) 12px, #FAF5EB 12px, #FAF5EB 24px);
+  border-top: 2.5px solid var(--brutal-ink);
+  height: 16px;
+  width: 100%;
+}
+
+.brutal-tag-square {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--brutal-ink);
+  box-shadow: 2px 2px 0px var(--brutal-ink);
+  background: var(--brutal-accent);
+  color: #FAF5EB;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
 /* ==========================================================================
    MONEY & CURRENCY DATA: XANH LÁ RÊU (Moss Green)
-   High contrast, earthy, distinctive
+   With solid Neo-Brutalist contrast & shadow
    ========================================================================== */
 .text-moss-money,
 [data-money],
@@ -1611,29 +1659,35 @@ label {
 .price-value,
 b.text-moss-money,
 span.text-moss-money {
-  color: var(--moss-money) !important;
-  font-weight: 800 !important;
+  color: var(--brutal-money) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.01em;
 }
 
 .badge-money {
   display: inline-flex;
   align-items: center;
-  background-color: var(--moss-money-bg) !important;
-  border: 1px solid var(--moss-money-border) !important;
-  color: var(--moss-money) !important;
-  border-radius: 9999px !important;
-  font-weight: 800 !important;
-  padding: 2px 10px;
+  background-color: var(--brutal-money-bg) !important;
+  border: 2px solid var(--brutal-money-border) !important;
+  box-shadow: 2.5px 2.5px 0px var(--brutal-ink) !important;
+  color: var(--brutal-money) !important;
+  border-radius: 10px !important;
+  font-weight: 900 !important;
+  font-family: var(--font-display), "Oswald", sans-serif !important;
+  font-size: 15px !important;
+  letter-spacing: 0.02em !important;
+  padding: 3px 12px !important;
 }
 
-/* Inverted containers: ensure money on dark red surfaces has high contrast light-moss */
+/* Inverted containers: light moss for high contrast on dark surfaces */
 .bg-\[\#84221D\] .text-moss-money,
 .bg-\[\#84221D\] [data-money],
-.btn-push-primary .text-moss-money {
-  color: var(--moss-money-light) !important;
+.btn-push-primary .text-moss-money,
+.btn-brutal-primary .text-moss-money {
+  color: var(--brutal-money-light) !important;
 }
 
-/* Map existing emerald/green text utilities to rich moss green */
+/* Map green/emerald text utilities to moss green */
 [class*="text-emerald-700"],
 [class*="text-emerald-800"],
 [class*="text-emerald-900"],
@@ -1641,22 +1695,23 @@ span.text-moss-money {
 [class*="text-green-600"],
 [class*="text-green-700"],
 [class*="text-green-800"] {
-  color: var(--moss-money) !important;
+  color: var(--brutal-money) !important;
 }
 
 [class*="bg-emerald-100"] {
-  background-color: var(--moss-money-bg) !important;
-  border-color: var(--moss-money-border) !important;
-  color: var(--moss-money) !important;
+  background-color: var(--brutal-money-bg) !important;
+  border: 2px solid var(--brutal-ink) !important;
+  box-shadow: 2.5px 2.5px 0px var(--brutal-ink) !important;
+  color: var(--brutal-money) !important;
 }
 
 [class*="bg-emerald-100"] * {
-  color: var(--moss-money) !important;
-  stroke: var(--moss-money) !important;
+  color: var(--brutal-money) !important;
+  stroke: var(--brutal-money) !important;
 }
 
 /* ==========================================================================
-   CARDS, PANELS & SURFACES (Soft rounded bakery paper feel)
+   CARDS & PANELS: SOLID 2.5PX BORDERS & 4PX HARD OFFSET SHADOW
    ========================================================================== */
 .pixel-panel,
 .card-push,
@@ -1665,51 +1720,53 @@ span.text-moss-money {
 .card-push-subtle,
 .card-3d-subtle,
 .neu-surface-subtle,
-.modal-panel {
-  border: 1.5px solid var(--bake-border) !important;
-  border-radius: 24px !important;
-  background: var(--bake-card) !important;
-  box-shadow: var(--page-shadow) !important;
-  color: var(--bake-text-dark) !important;
+.modal-panel,
+.brutal-card {
+  border: 2.5px solid var(--brutal-ink) !important;
+  border-radius: 16px !important;
+  background: var(--brutal-surface) !important;
+  box-shadow: var(--brutal-shadow) !important;
+  color: var(--brutal-text) !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .card-push-subtle,
 .card-3d-subtle,
 .neu-surface-subtle {
-  border-radius: 20px !important;
-  box-shadow: var(--sticker-shadow) !important;
+  border-radius: 14px !important;
+  box-shadow: var(--brutal-shadow-sm) !important;
 }
 
 .card-push-subtle:hover,
 .card-3d-subtle:hover,
 .neu-surface-subtle:hover {
-  border-color: rgb(132 34 29 / 0.32) !important;
-  transform: translateY(-1px);
+  transform: translate(-1.5px, -1.5px);
+  box-shadow: 4px 4px 0px var(--brutal-ink) !important;
 }
 
-/* Modals */
+/* Modals with heavy 6px offset shadow */
 .modal-panel,
 [class*="max-w-"] .card-push {
-  border-radius: 28px !important;
+  border-radius: 20px !important;
+  box-shadow: var(--brutal-shadow-lg) !important;
 }
 
 /* Rounded classes */
-.rounded-xl { border-radius: 18px !important; }
-.rounded-2xl { border-radius: 22px !important; }
-.rounded-3xl { border-radius: 28px !important; }
-.rounded-full { border-radius: 9999px !important; }
+.rounded-xl { border-radius: 14px !important; }
+.rounded-2xl { border-radius: 16px !important; }
+.rounded-3xl { border-radius: 20px !important; }
 
-/* Shadows */
+/* Hard shadows */
 .shadow-2xl,
 .shadow-xl,
 .shadow-lg,
 .shadow-md,
 .shadow {
-  box-shadow: var(--page-shadow) !important;
+  box-shadow: var(--brutal-shadow) !important;
 }
 
 /* ==========================================================================
-   INPUTS & FORM CONTROLS
+   INPUTS & KEYPAD BOXES (Từng phím bấm, ô nhập)
    ========================================================================== */
 .input-push,
 .input-3d,
@@ -1717,21 +1774,22 @@ span.text-moss-money {
 input,
 textarea,
 select {
-  border: 1.5px solid var(--bake-border) !important;
-  border-radius: 18px !important;
-  background: var(--bake-card) !important;
-  color: var(--bake-text-dark) !important;
-  box-shadow: inset 0 1px 3px rgb(132 34 29 / 0.05) !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  min-height: 44px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  border: 2.5px solid var(--brutal-ink) !important;
+  border-radius: 14px !important;
+  background: var(--brutal-surface) !important;
+  color: var(--brutal-text) !important;
+  box-shadow: var(--brutal-shadow-sm) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  min-height: 48px;
+  padding-inline: 14px;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: rgb(132 34 29 / 0.45) !important;
-  font-weight: 500 !important;
+  color: rgb(30 12 11 / 0.45) !important;
+  font-weight: 600 !important;
 }
 
 input:focus,
@@ -1741,15 +1799,41 @@ select:focus,
 .input-3d:focus-within,
 .neu-inset:focus-within {
   outline: 0 !important;
-  border-color: var(--bake-red) !important;
-  box-shadow: 0 0 0 3px rgb(132 34 29 / 0.16) !important;
-  background: #FFFFFF !important;
+  border-color: var(--brutal-accent) !important;
+  box-shadow: 4.5px 4.5px 0px var(--brutal-accent) !important;
+  transform: translate(-1px, -1px);
+}
+
+/* Segmented Keypad Digit Box (like [ 2 ] [ 4 ] [ 7 ] [ 9 ] in Screen 2) */
+.brutal-keypad-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2.5px solid var(--brutal-ink);
+  border-radius: 14px;
+  background: var(--brutal-surface);
+  box-shadow: var(--brutal-shadow-sm);
+  font-family: var(--font-display), "Oswald", sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--brutal-text);
+  width: 52px;
+  height: 58px;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.brutal-keypad-box:focus-within,
+.brutal-keypad-box.active {
+  border-color: var(--brutal-accent);
+  box-shadow: 4px 4px 0px var(--brutal-accent);
+  transform: translate(-1px, -1px);
 }
 
 /* ==========================================================================
-   BUTTONS: MANDATORY HIGH CONTRAST (Never washed out / sunk)
-   - Primary: Deep Terracotta Red button with Crisp Cream Text & Icons
-   - Secondary: Cream Card button with Deep Terracotta Red Border & Text
+   BUTTONS: INDUSTRIAL POP BRUTALISM (Từng nút bấm kỹ càng)
+   - Split-Action Button [ CONTINUE | -> ]
+   - Tactile Spring Animation (:hover lifts up, :active depresses down)
+   - Strict High Contrast (Never washed out)
    ========================================================================== */
 .btn-push,
 .btn-3d,
@@ -1773,23 +1857,29 @@ button.bg-\[\#16587B\],
 a.bg-\[\#16587B\],
 button.bg-\[\#585556\],
 button.bg-\[\#84221D\],
-button.bg-\[\#82201D\] {
+button.bg-\[\#82201D\],
+.btn-brutal {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 9999px !important;
+  gap: 8px;
+  border: 2.5px solid var(--brutal-ink) !important;
+  border-radius: 14px !important;
+  font-family: var(--font-display), "Oswald", "Be Vietnam Pro", sans-serif !important;
   font-weight: 700 !important;
-  font-size: 14px !important;
-  letter-spacing: -0.01em;
-  padding-inline: 1.15rem;
-  padding-block: 0.55rem;
-  min-height: 42px;
+  font-size: 15px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  padding-inline: 1.25rem;
+  padding-block: 0.65rem;
+  min-height: 48px;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.12s ease, background-color 0.12s ease, border-color 0.12s ease !important;
+  box-shadow: var(--brutal-shadow) !important;
+  transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.1s ease !important;
 }
 
-/* 1. PRIMARY BUTTONS (Deep Terracotta Red with Cream text/icon) */
+/* 1. PRIMARY BUTTONS (Deep Terracotta Red with Cream text & icons) */
 .btn-push-primary,
 .btn-3d-navy,
 .neu-btn-primary,
@@ -1799,12 +1889,13 @@ button.bg-\[\#16587B\],
 a.bg-\[\#16587B\],
 button.bg-\[\#585556\],
 button.bg-\[\#84221D\],
-button.bg-\[\#82201D\] {
-  background: var(--bake-red) !important;
+button.bg-\[\#82201D\],
+.btn-brutal-primary {
+  background: var(--brutal-accent) !important;
   background-image: none !important;
-  border: 1.5px solid var(--bake-red-deep) !important;
-  color: var(--bake-cream-light) !important;
-  box-shadow: var(--button-shadow) !important;
+  border: 2.5px solid var(--brutal-ink) !important;
+  color: #FAF5EB !important;
+  box-shadow: var(--brutal-shadow) !important;
 }
 
 .btn-push-primary *,
@@ -1827,10 +1918,11 @@ a.bg-\[\#16587B\] svg,
 button.bg-\[\#585556\] svg,
 button.bg-\[\#84221D\] svg,
 button.bg-\[\#82201D\] svg {
-  color: var(--bake-cream-light) !important;
-  stroke: var(--bake-cream-light) !important;
+  color: #FAF5EB !important;
+  stroke: #FAF5EB !important;
 }
 
+/* Tactile Hover: Lifts up by 1.5px and increases shadow */
 .btn-push-primary:hover,
 .btn-3d-navy:hover,
 .neu-btn-primary:hover,
@@ -1841,32 +1933,36 @@ a.bg-\[\#16587B\]:hover,
 button.bg-\[\#585556\]:hover,
 button.bg-\[\#84221D\]:hover,
 button.bg-\[\#82201D\]:hover {
-  background: var(--bake-red-deep) !important;
-  border-color: var(--bake-red-dark) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: var(--button-shadow-hover) !important;
+  background: var(--brutal-accent-hover) !important;
+  transform: translate(-1.5px, -1.5px) !important;
+  box-shadow: var(--brutal-shadow-hover) !important;
 }
 
+/* Tactile Active Press: Depresses down into shadow */
 .btn-push-primary:active,
 .btn-3d-navy:active,
 .neu-btn-primary:active,
 .btn-gradient:active,
-.btn-navy:active {
-  transform: translateY(1px) scale(0.98) !important;
+.btn-navy:active,
+button.bg-\[\#16587B\]:active,
+a.bg-\[\#16587B\]:active {
+  transform: translate(2.5px, 2.5px) !important;
+  box-shadow: var(--brutal-shadow-active) !important;
 }
 
-/* 2. SECONDARY / PUSH BUTTONS (Cream surface with Terracotta Red text/icon) */
+/* 2. SECONDARY / PUSH BUTTONS (Cream Surface with Dark Roasted Ink) */
 .btn-push,
 .btn-3d,
 .neu-btn,
 .btn-push-walnut,
 .btn-push-ironclad,
-.squircle-btn {
-  background: var(--bake-card) !important;
+.squircle-btn,
+.btn-brutal-secondary {
+  background: var(--brutal-surface) !important;
   background-image: none !important;
-  border: 1.5px solid var(--bake-red) !important;
-  color: var(--bake-red) !important;
-  box-shadow: var(--button-shadow) !important;
+  border: 2.5px solid var(--brutal-ink) !important;
+  color: var(--brutal-ink) !important;
+  box-shadow: var(--brutal-shadow) !important;
 }
 
 .btn-push *,
@@ -1881,8 +1977,8 @@ button.bg-\[\#82201D\]:hover {
 .btn-push-walnut svg,
 .btn-push-ironclad svg,
 .squircle-btn svg {
-  color: var(--bake-red) !important;
-  stroke: var(--bake-red) !important;
+  color: var(--brutal-ink) !important;
+  stroke: var(--brutal-ink) !important;
 }
 
 .btn-push:hover,
@@ -1891,25 +1987,26 @@ button.bg-\[\#82201D\]:hover {
 .btn-push-walnut:hover,
 .btn-push-ironclad:hover,
 .squircle-btn:hover {
-  background: var(--bake-cream-deep) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: var(--button-shadow-hover) !important;
+  background: var(--brutal-cream-deep) !important;
+  transform: translate(-1.5px, -1.5px) !important;
+  box-shadow: var(--brutal-shadow-hover) !important;
 }
 
 .btn-push:active,
 .btn-3d:active,
 .neu-btn:active,
 .squircle-btn:active {
-  transform: translateY(1px) scale(0.98) !important;
+  transform: translate(2.5px, 2.5px) !important;
+  box-shadow: var(--brutal-shadow-active) !important;
 }
 
 /* 3. DANGER BUTTONS */
 .btn-push-danger,
 .btn-3d-danger {
-  background: var(--bake-red-deep) !important;
-  border: 1.5px solid var(--bake-red-dark) !important;
+  background: var(--brutal-accent-dark) !important;
+  border: 2.5px solid var(--brutal-ink) !important;
   color: #FFFFFF !important;
-  box-shadow: var(--button-shadow) !important;
+  box-shadow: var(--brutal-shadow) !important;
 }
 
 .btn-push-danger *,
@@ -1922,101 +2019,163 @@ button.bg-\[\#82201D\]:hover {
 
 .btn-push-danger:hover,
 .btn-3d-danger:hover {
-  background: var(--bake-red-dark) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: var(--button-shadow-hover) !important;
+  background: #3E0C09 !important;
+  transform: translate(-1.5px, -1.5px) !important;
+  box-shadow: var(--brutal-shadow-hover) !important;
 }
 
-/* 4. ACTIVE NAVIGATION & SQUIRCLE BUTTONS */
+.btn-push-danger:active,
+.btn-3d-danger:active {
+  transform: translate(2.5px, 2.5px) !important;
+  box-shadow: var(--brutal-shadow-active) !important;
+}
+
+/* 4. SPLIT ACTION BUTTONS (Signature style from reference image)
+   [ ACTION LABEL | -> ]
+*/
+.btn-split {
+  display: inline-flex !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 2.5px solid var(--brutal-ink) !important;
+  border-radius: 14px !important;
+  box-shadow: var(--brutal-shadow) !important;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease !important;
+}
+
+.btn-split-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  background: var(--brutal-accent);
+  color: #FAF5EB;
+  font-family: var(--font-display), "Oswald", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 12px 18px;
+}
+
+.btn-split-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  background: var(--brutal-ink);
+  color: #FAF5EB;
+  border-left: 2px solid var(--brutal-ink);
+  flex-shrink: 0;
+}
+
+.btn-split:hover {
+  transform: translate(-1.5px, -1.5px) !important;
+  box-shadow: var(--brutal-shadow-hover) !important;
+}
+
+.btn-split:active {
+  transform: translate(2.5px, 2.5px) !important;
+  box-shadow: var(--brutal-shadow-active) !important;
+}
+
+/* 5. ACTIVE NAVIGATION & SQUIRCLE BUTTONS */
 .pixel-active,
 .squircle-btn.active {
-  background: var(--bake-red) !important;
-  border: 1.5px solid var(--bake-red-deep) !important;
-  color: var(--bake-cream-light) !important;
-  box-shadow: 0 4px 12px rgb(132 34 29 / 0.22) !important;
+  background: var(--brutal-accent) !important;
+  border: 2.5px solid var(--brutal-ink) !important;
+  border-radius: 14px !important;
+  color: #FAF5EB !important;
+  box-shadow: var(--brutal-shadow) !important;
 }
 
 .pixel-active *,
 .pixel-active svg,
 .squircle-btn.active *,
 .squircle-btn.active svg {
-  color: var(--bake-cream-light) !important;
-  stroke: var(--bake-cream-light) !important;
+  color: #FAF5EB !important;
+  stroke: #FAF5EB !important;
 }
 
-/* 5. INACTIVE NAV TILES */
+/* 6. INACTIVE NAV TILES */
 .pixel-tile {
-  background: var(--bake-cream-light) !important;
-  border: 1.5px solid var(--bake-border) !important;
-  color: var(--bake-text-dark) !important;
-  box-shadow: none !important;
+  background: var(--brutal-surface-subtle) !important;
+  border: 2.5px solid var(--brutal-ink) !important;
+  border-radius: 14px !important;
+  color: var(--brutal-text) !important;
+  box-shadow: var(--brutal-shadow-sm) !important;
 }
 
 .pixel-tile:hover {
-  background: var(--bake-card) !important;
-  border-color: var(--bake-red) !important;
-  color: var(--bake-red) !important;
-  transform: translateY(-1px);
+  background: var(--brutal-surface) !important;
+  transform: translate(-1.5px, -1.5px);
+  box-shadow: var(--brutal-shadow) !important;
 }
 
 .pixel-tile:hover *,
 .pixel-tile:hover svg {
-  color: var(--bake-red) !important;
-  stroke: var(--bake-red) !important;
+  color: var(--brutal-accent) !important;
+  stroke: var(--brutal-accent) !important;
 }
 
-/* 6. LOGO & BRAND */
+/* 7. BRAND LOGO */
 .pixel-logo {
-  border: 1.5px solid var(--bake-border) !important;
-  border-radius: 20px !important;
-  background: var(--bake-card) !important;
-  box-shadow: var(--sticker-shadow) !important;
+  border: 2.5px solid var(--brutal-ink) !important;
+  border-radius: 16px !important;
+  background: var(--brutal-surface) !important;
+  box-shadow: var(--brutal-shadow) !important;
 }
 
 .pixel-logo span {
-  color: var(--bake-red) !important;
+  font-family: var(--font-display), "Oswald", sans-serif !important;
+  color: var(--brutal-accent) !important;
+  letter-spacing: 0.04em !important;
 }
 
-/* 7. BADGES & PILL STICKERS (like STEP 1 Add water from image) */
+/* 8. BADGES & PILL STICKERS */
 .badge-push,
 .neu-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid var(--bake-red) !important;
-  border-radius: 9999px !important;
-  background: var(--bake-cream-light) !important;
-  color: var(--bake-red) !important;
-  font-weight: 800 !important;
-  font-size: 12px !important;
+  border: 2px solid var(--brutal-ink) !important;
+  border-radius: 10px !important;
+  background: var(--brutal-surface-subtle) !important;
+  box-shadow: 2px 2px 0px var(--brutal-ink) !important;
+  color: var(--brutal-text) !important;
+  font-family: var(--font-display), "Oswald", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
   padding: 3px 12px !important;
-  box-shadow: 0 2px 6px rgb(132 34 29 / 0.06) !important;
 }
 
 .badge-push *,
 .neu-badge * {
-  color: var(--bake-red) !important;
+  color: var(--brutal-text) !important;
 }
 
 .badge-push-sunken,
 .neu-badge-sunken {
   border: 0 !important;
   background: transparent !important;
-  color: var(--bake-text-muted) !important;
+  color: var(--brutal-text-muted) !important;
+  box-shadow: none !important;
 }
 
-/* SVG icons baseline inside buttons */
 button svg,
 a svg {
   width: 1.15em !important;
   height: 1.15em !important;
-  stroke-width: 2 !important;
+  stroke-width: 2.2 !important;
   flex-shrink: 0;
 }
 
 /* ==========================================================================
    LEGACY UTILITY COMPATIBILITY OVERRIDES
-   Maps older blue/slate/neutral utilities to the Bake Today palette
    ========================================================================== */
 [class~="min-h-screen"][class*="bg-"] {
   background-color: transparent !important;
@@ -2031,7 +2190,7 @@ a svg {
 [class~="text-gray-900"],
 [class~="text-slate-900"],
 [class~="text-stone-900"] {
-  color: var(--bake-text) !important;
+  color: var(--brutal-text) !important;
 }
 
 [class~="text-gray-400"],
@@ -2039,7 +2198,7 @@ a svg {
 [class~="text-gray-600"],
 [class~="text-slate-500"],
 [class~="text-stone-500"] {
-  color: var(--bake-text-muted) !important;
+  color: var(--brutal-text-muted) !important;
 }
 
 [class*="bg-[#F5EEDD]"],
@@ -2053,7 +2212,7 @@ a svg {
 [class~="bg-stone-50"],
 [class~="bg-neutral-50"],
 [class~="bg-zinc-50"] {
-  background-color: var(--bake-card) !important;
+  background-color: var(--brutal-surface) !important;
 }
 
 [class*="bg-[#16587B]"],
@@ -2064,18 +2223,18 @@ a svg {
 [class*="bg-[#585556]"],
 [class*="bg-[#57575c]"],
 [class~="bg-black"] {
-  background-color: var(--bake-red) !important;
+  background-color: var(--brutal-accent) !important;
 }
 
 [class~="text-white"] {
-  color: var(--bake-cream-light) !important;
+  color: #FAF5EB !important;
 }
 
 [class*="border-[#16587B]"],
 [class*="border-[#585556]"],
 [class*="border-[#1f365f]"],
 [class*="border-[#57575c]"] {
-  border-color: var(--bake-border) !important;
+  border-color: var(--brutal-ink) !important;
 }
 
 @media (max-width: 767px) {
@@ -2092,9 +2251,9 @@ a svg {
   .btn-push-danger,
   .btn-3d-danger,
   .squircle-btn {
-    min-height: 40px;
-    font-size: 13px !important;
-    padding-inline: 0.95rem;
+    min-height: 44px;
+    font-size: 14px !important;
+    padding-inline: 1rem;
   }
 
   .pixel-panel,
@@ -2102,8 +2261,10 @@ a svg {
   .card-3d,
   .neu-surface,
   .card-push-subtle,
-  .modal-panel {
-    border-radius: 20px !important;
+  .modal-panel,
+  .brutal-card {
+    border-radius: 16px !important;
+    box-shadow: 3px 3px 0px var(--brutal-ink) !important;
   }
 }
 
