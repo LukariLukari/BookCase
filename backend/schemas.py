@@ -482,6 +482,7 @@ class BusinessOrderItemCreate(BaseModel):
     product_id: str
     quantity: int
     unit_price: Optional[int] = None
+    note: Optional[str] = None
 
 
 class BusinessOrderCreate(BaseModel):
@@ -507,6 +508,7 @@ class BusinessOrderItemResponse(BaseModel):
     unit_price: int
     unit_cost: int
     line_total: int
+    note: Optional[str] = None
 
 
 class BusinessOrderResponse(BaseModel):

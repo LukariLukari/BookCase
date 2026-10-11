@@ -301,6 +301,7 @@ class BusinessOrderItem(Base):
     quantity = Column(Integer, nullable=False)
     unit_price = Column(Integer, default=0)
     unit_cost = Column(Integer, default=0)
+    note = Column(Text, nullable=True)
 
     order = relationship("BusinessOrder", back_populates="items")
     product = relationship("BusinessProduct")

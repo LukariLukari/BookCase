@@ -216,6 +216,11 @@ def ensure_business_tables(db: Session):
             db.commit()
         except Exception:
             db.rollback()
+        try:
+            db.execute(text("ALTER TABLE business_order_items ADD COLUMN note TEXT"))
+            db.commit()
+        except Exception:
+            db.rollback()
         for table in [models.BusinessInventoryBatch.__table__, models.BusinessProduct.__table__, models.BusinessOrder.__table__, models.BusinessExpense.__table__, models.BusinessDataBackup.__table__]:
             for index in table.indexes:
                 index.create(bind=engine, checkfirst=True)
@@ -518,6 +523,7 @@ def serialize_business_order(order: models.BusinessOrder) -> dict:
             "unit_price": item.unit_price or 0,
             "unit_cost": item.unit_cost or 0,
             "line_total": (item.unit_price or 0) * (item.quantity or 0),
+            "note": item.note or "",
         } for item in items],
     }
 
@@ -3127,6 +3133,7 @@ def create_business_order(order_in: schemas.BusinessOrderCreate, db: Session = D
             quantity=item.quantity,
             unit_price=product.selling_price if item.unit_price is None else max(item.unit_price, 0),
             unit_cost=product.unit_cost or 0,
+            note=item.note,
         ))
     db.commit()
     order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(models.BusinessOrder.id == order.id).first()
@@ -3204,6 +3211,7 @@ def update_business_order(order_id: str, order_in: schemas.BusinessOrderCreate, 
             quantity=item.quantity,
             unit_price=product.selling_price if item.unit_price is None else max(item.unit_price, 0),
             unit_cost=product.unit_cost or 0,
+            note=item.note,
         ))
     db.commit()
     order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(models.BusinessOrder.id == order.id).first()
