@@ -245,6 +245,10 @@ input[type="month"]::-webkit-date-and-time-value {
   color: var(--midnight) !important;
 }
 
+.btn-push .cart-badge, .btn-push .cart-badge *, .btn-push .badge-count, .btn-push .badge-count *, .cart-badge, .cart-badge * {
+  color: #ffffff !important;
+}
+
 .btn-push svg, .btn-3d svg, .neu-btn svg {
   stroke: var(--midnight) !important;
 }
