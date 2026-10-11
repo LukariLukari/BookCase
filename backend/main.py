@@ -211,6 +211,11 @@ def ensure_business_tables(db: Session):
                 db.commit()
             except Exception:
                 db.rollback()
+        try:
+            db.execute(text("ALTER TABLE business_products ADD COLUMN track_stock BOOLEAN NOT NULL DEFAULT TRUE"))
+            db.commit()
+        except Exception:
+            db.rollback()
         for table in [models.BusinessInventoryBatch.__table__, models.BusinessProduct.__table__, models.BusinessOrder.__table__, models.BusinessExpense.__table__, models.BusinessDataBackup.__table__]:
             for index in table.indexes:
                 index.create(bind=engine, checkfirst=True)
@@ -233,6 +238,7 @@ def ensure_default_inventory_batch(db: Session, user_id: str) -> models.Business
     db.query(models.BusinessProduct).filter(
         models.BusinessProduct.user_id == user_id,
         models.BusinessProduct.batch_id.is_(None),
+        models.BusinessProduct.track_stock.isnot(False),
     ).update({models.BusinessProduct.batch_id: batch.id}, synchronize_session=False)
     db.commit()
     db.refresh(batch)
@@ -462,6 +468,7 @@ def serialize_business_product(p: models.BusinessProduct, transactions: Optional
         "selling_price": p.selling_price or 0,
         "unit_cost": p.unit_cost or 0,
         "stock_quantity": p.stock_quantity or 0,
+        "track_stock": p.track_stock is not False,
         "social_link": p.social_link,
         "supplier_info": p.supplier_info,
         "customer_info": p.customer_info,
@@ -2986,6 +2993,8 @@ def create_stock_receipt(receipt_in: schemas.BusinessStockReceiptCreate, db: Ses
     product_map = {product.id: product for product in products}
     if len(product_map) != len(product_ids):
         raise HTTPException(status_code=404, detail="Có sản phẩm không tồn tại")
+    if any(product.track_stock is False for product in products):
+        raise HTTPException(status_code=400, detail="Món bán POS không thể nhập vào kho")
     if any(item.quantity <= 0 or item.unit_cost < 0 for item in receipt_in.items):
         raise HTTPException(status_code=400, detail="Số lượng phải lớn hơn 0 và giá vốn không được âm")
     batch = None
@@ -3087,7 +3096,7 @@ def create_business_order(order_in: schemas.BusinessOrderCreate, db: Session = D
         product = product_map[item.product_id]
         if item.quantity <= 0:
             raise HTTPException(status_code=400, detail="Số lượng bán phải lớn hơn 0")
-        if (product.stock_quantity or 0) < item.quantity:
+        if product.track_stock is not False and (product.stock_quantity or 0) < item.quantity:
             raise HTTPException(status_code=409, detail=f"{product.name} chỉ còn {product.stock_quantity or 0} sản phẩm")
     order_count = db.query(models.BusinessOrder).filter(models.BusinessOrder.ledger_id == ledger.id).count() + 1
     order = models.BusinessOrder(
@@ -3109,7 +3118,8 @@ def create_business_order(order_in: schemas.BusinessOrderCreate, db: Session = D
     db.flush()
     for item in order_in.items:
         product = product_map[item.product_id]
-        product.stock_quantity = (product.stock_quantity or 0) - item.quantity
+        if product.track_stock is not False:
+            product.stock_quantity = (product.stock_quantity or 0) - item.quantity
         db.add(models.BusinessOrderItem(
             order_id=order.id,
             product_id=product.id,
@@ -3158,15 +3168,15 @@ def update_business_order(order_id: str, order_in: schemas.BusinessOrderCreate, 
         raise HTTPException(status_code=404, detail="Có sản phẩm không tồn tại")
     for item in order_in.items:
         product = product_map[item.product_id]
-        available = (product.stock_quantity or 0) + old_quantities.get(item.product_id, 0)
+        available = (product.stock_quantity or 0) + (old_quantities.get(item.product_id, 0) if product.track_stock is not False else 0)
         if item.quantity <= 0:
             raise HTTPException(status_code=400, detail="Số lượng bán phải lớn hơn 0")
-        if available < item.quantity:
+        if product.track_stock is not False and available < item.quantity:
             raise HTTPException(status_code=409, detail=f"{product.name} chỉ còn {available} sản phẩm")
 
     for product_id, quantity in old_quantities.items():
         product = product_map.get(product_id)
-        if product:
+        if product and product.track_stock is not False:
             product.stock_quantity = (product.stock_quantity or 0) + quantity
     for old_item in list(order.items):
         db.delete(old_item)
@@ -3185,7 +3195,8 @@ def update_business_order(order_id: str, order_in: schemas.BusinessOrderCreate, 
     order.ordered_at = order_in.ordered_at or order.ordered_at
     for item in order_in.items:
         product = product_map[item.product_id]
-        product.stock_quantity = (product.stock_quantity or 0) - item.quantity
+        if product.track_stock is not False:
+            product.stock_quantity = (product.stock_quantity or 0) - item.quantity
         db.add(models.BusinessOrderItem(
             order_id=order.id,
             product_id=product.id,
@@ -3209,7 +3220,7 @@ def delete_business_order(order_id: str, db: Session = Depends(get_db), current_
         raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
     for item in order.items:
         product = db.query(models.BusinessProduct).filter(models.BusinessProduct.id == item.product_id, models.BusinessProduct.user_id == current_user.id).first()
-        if product:
+        if product and product.track_stock is not False:
             product.stock_quantity = (product.stock_quantity or 0) + (item.quantity or 0)
     db.delete(order)
     db.commit()
@@ -3274,7 +3285,7 @@ def get_business_report(ledger_id: str, db: Session = Depends(get_db), current_u
     # Net profit includes every receipt and deducts all recorded costs. Financial
     # costs and taxes are included when they are entered as ledger expenses.
     net_profit = revenue - capital_cost - shipping_cost - other_order_fee - operating_expense
-    stock_products = db.query(models.BusinessProduct).filter(models.BusinessProduct.user_id == current_user.id, models.BusinessProduct.is_active == True).all()
+    stock_products = db.query(models.BusinessProduct).filter(models.BusinessProduct.user_id == current_user.id, models.BusinessProduct.is_active == True, models.BusinessProduct.track_stock.isnot(False)).all()
     stock_value = sum((product.stock_quantity or 0) * (product.unit_cost or 0) for product in stock_products)
     profit_after_inventory = net_profit - stock_value
     return {
@@ -3334,7 +3345,7 @@ def get_business_summary(db: Session = Depends(get_db), current_user: models.Use
         "gross_profit": total_income - total_capital,
         "net_profit": total_income - total_expense - total_capital - total_shipping - total_other_fee,
         "active_products": len([p for p in products if p.is_active]),
-        "stock_units": sum((p.stock_quantity or 0) for p in products),
+        "stock_units": sum((p.stock_quantity or 0) for p in products if p.track_stock is not False),
         "sold_units": sum((t.quantity or 0) for t in transactions if t.type == "income"),
         "recent_transactions": [serialize_business_transaction(t) for t in transactions[:8]],
         "top_products": ranked_products[:5],
@@ -3367,10 +3378,11 @@ def create_business_product(product_in: schemas.BusinessProductCreate, db: Sessi
     ensure_business_tables(db)
     payload = product_in.dict()
     batch_id = payload.pop("batch_id", None)
-    batch = db.query(models.BusinessInventoryBatch).filter(models.BusinessInventoryBatch.id == batch_id, models.BusinessInventoryBatch.user_id == current_user.id).first() if batch_id else ensure_default_inventory_batch(db, current_user.id)
-    if batch_id and not batch:
+    track_stock = payload.get("track_stock", True)
+    batch = (db.query(models.BusinessInventoryBatch).filter(models.BusinessInventoryBatch.id == batch_id, models.BusinessInventoryBatch.user_id == current_user.id).first() if batch_id else ensure_default_inventory_batch(db, current_user.id)) if track_stock else None
+    if track_stock and batch_id and not batch:
         raise HTTPException(status_code=404, detail="Không tìm thấy lô hàng")
-    product = models.BusinessProduct(user_id=current_user.id, batch_id=batch.id, **payload)
+    product = models.BusinessProduct(user_id=current_user.id, batch_id=batch.id if batch else None, **payload)
     db.add(product)
     db.commit()
     db.refresh(product)
@@ -3385,12 +3397,15 @@ def update_business_product(product_id: str, product_in: schemas.BusinessProduct
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     updates = product_in.dict(exclude_unset=True)
-    if "batch_id" in updates:
+    if "batch_id" in updates and updates.get("track_stock", product.track_stock) is not False:
         batch = db.query(models.BusinessInventoryBatch).filter(models.BusinessInventoryBatch.id == updates["batch_id"], models.BusinessInventoryBatch.user_id == current_user.id).first()
         if not batch:
             raise HTTPException(status_code=404, detail="Không tìm thấy lô hàng")
     for key, value in updates.items():
         setattr(product, key, value)
+    if product.track_stock is False:
+        product.batch_id = None
+        product.stock_quantity = 0
     db.commit()
     db.refresh(product)
     create_automatic_business_backup(db, current_user.id, "Sau khi sửa sản phẩm")

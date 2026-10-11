@@ -1,5 +1,5 @@
-import BusinessClient from '../BusinessClient';
+import ProductCatalogClient from './ProductCatalogClient';
 
 export default function BusinessProductsPage() {
-  return <BusinessClient view="inventory" />;
+  return <ProductCatalogClient />;
 }

@@ -305,6 +305,7 @@ class BusinessProductBase(BaseModel):
     selling_price: int = 0
     unit_cost: int = 0
     stock_quantity: int = 0
+    track_stock: bool = True
     social_link: Optional[str] = None
     supplier_info: Optional[str] = None
     customer_info: Optional[str] = None
@@ -323,6 +324,7 @@ class BusinessProductUpdate(BaseModel):
     selling_price: Optional[int] = None
     unit_cost: Optional[int] = None
     stock_quantity: Optional[int] = None
+    track_stock: Optional[bool] = None
     social_link: Optional[str] = None
     supplier_info: Optional[str] = None
     customer_info: Optional[str] = None

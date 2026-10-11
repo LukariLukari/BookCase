@@ -179,6 +179,7 @@ class BusinessProduct(Base):
     selling_price = Column(Integer, default=0)
     unit_cost = Column(Integer, default=0)
     stock_quantity = Column(Integer, default=0)
+    track_stock = Column(Boolean, default=True, nullable=False)
     social_link = Column(String, nullable=True)
     supplier_info = Column(Text, nullable=True)
     customer_info = Column(Text, nullable=True)

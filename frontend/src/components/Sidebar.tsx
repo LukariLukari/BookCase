@@ -2,16 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, Boxes, KeyRound, LogOut, Menu, ReceiptText, Store, Users, Workflow, X } from 'lucide-react';
+import { BarChart3, Boxes, KeyRound, LogOut, Menu, PackageOpen, ReceiptText, ShoppingCart, Users, Workflow, X } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 const items = [
-  { href: '/business', label: 'Tổng quan', icon: Store },
+  { href: '/business', label: 'Bán tại quầy', icon: ShoppingCart },
   { href: '/business/orders', label: 'Đơn hàng', icon: ReceiptText },
+  { href: '/business/products', label: 'Món bán POS', icon: PackageOpen },
   { href: '/business/workflow', label: 'Vận hành', icon: Workflow },
   { href: '/business/customers', label: 'Khách hàng', icon: Users },
-  { href: '/business/inventory', label: 'Kho hàng', icon: Boxes },
+  { href: '/business/inventory', label: 'Nhập & tồn kho', icon: Boxes },
   { href: '/business/reports', label: 'Báo cáo', icon: BarChart3 },
 ];
 

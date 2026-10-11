@@ -1,5 +1,5 @@
 import BusinessClient from './BusinessClient';
 
 export default function BusinessPage() {
-  return <BusinessClient view="dashboard" />;
+  return <BusinessClient view="orders" pos />;
 }
