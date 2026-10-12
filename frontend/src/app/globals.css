@@ -2,7 +2,10 @@
 
 @font-face {
   font-family: "DFVN Float";
-  src: local("DFVN Float"), local("DFVNFloat");
+  src:
+    url("/fonts/Float.ttf") format("truetype"),
+    local("DFVN Float"),
+    local("DFVNFloat");
   font-weight: 400 900;
   font-style: normal;
   font-display: swap;
