@@ -246,6 +246,7 @@ input[type="month"]::-webkit-date-and-time-value {
 }
 
 .btn-push .cart-badge, .btn-push .cart-badge *, .btn-push .badge-count, .btn-push .badge-count *, .cart-badge, .cart-badge * {
+  background-color: #d32f2f !important;
   color: #ffffff !important;
 }
 
@@ -2122,4 +2123,21 @@ select:focus,
   h1 { font-size: clamp(30px, 9vw, 42px) !important; }
   h2 { font-size: clamp(25px, 7vw, 34px) !important; }
   h3 { font-size: clamp(22px, 6vw, 30px) !important; }
+}
+
+/* Cart badge red background with crisp white text */
+.cart-badge,
+.cart-badge.shadow-md,
+.badge-count,
+.badge-count.shadow-md,
+.btn-push .cart-badge,
+.btn-push .badge-count {
+  background: #d32f2f !important;
+  background-color: #d32f2f !important;
+  color: #ffffff !important;
+}
+
+.cart-badge *,
+.badge-count * {
+  color: #ffffff !important;
 }
