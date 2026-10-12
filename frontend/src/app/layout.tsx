@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro, Handjet } from "next/font/google";
+import { Be_Vietnam_Pro, Handjet, Montserrat } from "next/font/google";
 import "./globals.css";
 
 const beVietnam = Be_Vietnam_Pro({
@@ -12,6 +12,12 @@ const handjet = Handjet({
   subsets: ["latin", "latin-ext", "vietnamese"],
   weight: ["500", "600", "700", "800", "900"],
   variable: "--font-pixel",
+});
+
+const montserrat = Montserrat({
+  subsets: ["latin", "latin-ext", "vietnamese"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-montserrat",
 });
 
 export const metadata: Metadata = {
@@ -32,7 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${beVietnam.variable} ${handjet.variable} font-sans min-h-full antialiased`}
+      className={`${beVietnam.variable} ${handjet.variable} ${montserrat.variable} font-sans min-h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

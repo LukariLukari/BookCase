@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "DFVN Float";
+  src:
+    url("/fonts/Float.ttf") format("truetype"),
+    local("DFVN Float"),
+    local("DFVNFloat");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --ivory: #F5EEDD;
   --champagne: #ede4d0;
@@ -1464,6 +1475,8 @@ select:focus,
   --pixel-danger: var(--reps-red);
   --pixel-primary: var(--reps-red);
   --pixel-primary-dark: var(--reps-red-dark);
+  --font-display: "DFVN Float", var(--font-pixel), "Arial Rounded MT Bold", Arial, sans-serif;
+  --font-body: var(--font-montserrat), var(--font-be-vietnam), Arial, Helvetica, sans-serif;
 
   --ivory: var(--pixel-panel);
   --champagne: var(--pixel-panel-light);
@@ -1490,8 +1503,8 @@ select:focus,
 }
 
 @theme inline {
-  --font-sans: var(--font-pixel);
-  --font-serif: var(--font-pixel);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
 }
 
 html {
@@ -1509,7 +1522,7 @@ body {
     var(--pixel-bg) !important;
   background-size: 18px 18px, 18px 18px, auto, auto, auto, auto !important;
   color: var(--pixel-ink) !important;
-  font-family: var(--font-pixel), "Courier New", monospace !important;
+  font-family: var(--font-body) !important;
   font-size: 20px;
   line-height: 1.12;
   letter-spacing: 0.018em;
@@ -1550,8 +1563,8 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-pixel), "Courier New", monospace !important;
-  font-weight: 700;
+  font-family: var(--font-body) !important;
+  font-weight: 600;
 }
 
 h1,
@@ -1562,10 +1575,17 @@ h3,
 .font-black.text-4xl,
 .font-black.text-5xl {
   color: var(--pixel-ink-dark) !important;
-  font-family: var(--font-pixel), "Courier New", monospace !important;
+  font-family: var(--font-display) !important;
   font-weight: 800 !important;
   text-transform: uppercase;
   letter-spacing: 0.02em !important;
+}
+
+.pixel-logo,
+.pixel-logo *,
+[class*="tracking-wider"],
+[class*="tracking-widest"] {
+  font-family: var(--font-display) !important;
 }
 
 h1 { font-size: clamp(34px, 5vw, 56px) !important; }
@@ -1809,9 +1829,9 @@ a.bg-\[\#16587B\] {
   background-image: none !important;
   color: var(--pixel-ink) !important;
   box-shadow: var(--button-shadow) !important;
-  font-family: var(--font-pixel), "Courier New", monospace !important;
-  font-size: 24px;
-  font-weight: 800 !important;
+  font-family: var(--font-body) !important;
+  font-size: 16px;
+  font-weight: 700 !important;
   letter-spacing: 0.02em !important;
   text-transform: none;
   white-space: nowrap;
@@ -2019,10 +2039,10 @@ select {
   background: var(--pixel-panel-light) !important;
   color: var(--pixel-ink) !important;
   box-shadow: inset 0 3px 0 rgb(113 50 37 / 0.12), 0 4px 0 var(--pixel-shadow) !important;
-  font-family: var(--font-pixel), "Courier New", monospace !important;
-  font-size: 22px !important;
-  line-height: 1.05 !important;
-  font-weight: 700 !important;
+  font-family: var(--font-body) !important;
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+  font-weight: 600 !important;
   min-height: 44px;
 }
 
