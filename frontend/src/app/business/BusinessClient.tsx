@@ -510,7 +510,7 @@ export default function BusinessClient({view='dashboard',pos=false}:{view?:View;
  if(auth||!user)return <div className="min-h-screen bg-transparent"/>;if(loading)return shell(<Loading/>);
  const props={ledgers,ledger,choose,addBook:()=>setBookForm(true),headers,notify,fail};
  if(view==='inventory')return shell(<Inventory products={products} setProducts={setProducts} receipts={receipts} setReceipts={setReceipts} batches={batches} setBatches={setBatches} headers={headers} notify={notify} fail={fail}/>);
- if(view==='orders')return shell(<OrdersV3 {...props} setLedgers={setLedgers} products={products} setProducts={setProducts} orders={orders} setOrders={setOrders} loading={loadingBook} posMode={isPos}/>);
+ if(view==='orders')return shell(<OrdersV3 {...props} setLedgers={setLedgers} products={products} setProducts={setProducts} orders={orders} setOrders={setOrders} loading={loadingBook} posMode={pos}/>);
  if(view==='reports')return shell(<Reports {...props} report={report} setReport={setReport} loading={loadingBook}/>);
  return shell(<Dashboard {...props} report={report} orders={orders} loading={loadingBook}/>);
 }
