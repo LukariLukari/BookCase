@@ -31,14 +31,14 @@ export default function Sidebar() {
           href={href}
           onClick={() => setOpen(false)}
           title={label}
-          className={`flex h-11 w-full items-center gap-3 rounded-2xl border px-3 text-sm font-black transition-all md:justify-center md:px-0 xl:justify-start xl:px-4 ${
+          className={`flex h-11 w-full flex-nowrap items-center gap-2.5 rounded-2xl border px-3 text-sm font-black transition-all md:justify-center md:px-0 lg:justify-start lg:px-3.5 xl:px-4 ${
             active(href)
               ? 'pixel-active bg-[#57575c] text-[#d6cbae]'
               : 'pixel-tile bg-[#cfc4a8] text-[#57575c] hover:bg-[#d9ceb0]'
           }`}
         >
           <Icon size={19} className="shrink-0" />
-          <span className="md:hidden xl:inline">{label}</span>
+          <span className="whitespace-nowrap md:hidden lg:inline">{label}</span>
         </Link>
       ))}
     </>
@@ -67,34 +67,34 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="pixel-panel sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col p-2.5 pt-3.5 pb-3 no-scrollbar overflow-y-auto md:flex xl:w-52">
+      <aside className="pixel-panel sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col p-2.5 pt-3.5 pb-3 no-scrollbar overflow-y-auto md:flex lg:w-60 xl:w-64">
         <Link
           href="/business"
           title="Billy · Bán Hàng"
-          className="pixel-logo mb-3 flex w-full flex-col items-center justify-center px-2 py-3 text-[#57575c] transition-transform active:translate-y-1 xl:items-start"
+          className="pixel-logo mb-3 flex w-full flex-col items-center justify-center px-2 py-3 text-[#57575c] transition-transform active:translate-y-1 lg:items-start"
         >
-          <span className="text-[30px] font-black uppercase tracking-wider text-[#57575c] leading-none xl:hidden">
+          <span className="text-[30px] font-black uppercase tracking-wider text-[#57575c] leading-none lg:hidden">
             B<span className="text-[#8f8b82]">.</span>
           </span>
-          <span className="hidden text-2xl font-black uppercase tracking-wider text-[#57575c] xl:block xl:text-[30px] leading-none">
+          <span className="hidden text-2xl font-black uppercase tracking-wider text-[#57575c] lg:block xl:text-[30px] leading-none">
             Billy<span className="text-[#8f8b82]">.</span>
           </span>
-          <span className="hidden text-[12px] font-black uppercase tracking-widest text-[#6d6a64] xl:block mt-1">
+          <span className="hidden text-[12px] font-black uppercase tracking-widest text-[#6d6a64] lg:block mt-1">
             Bán Hàng
           </span>
         </Link>
         <nav className="space-y-2">{desktopLinks}</nav>
         <div className="mt-auto pt-3">
-          <p className="hidden truncate px-3 pb-2 text-sm font-bold text-[#6d6a64] xl:block">
+          <p className="hidden truncate px-3 pb-2 text-sm font-bold text-[#6d6a64] lg:block">
             {user?.username}
           </p>
           <button
             onClick={logout}
             title="Đăng xuất"
-            className="btn-push-danger flex h-11 w-full items-center gap-3 rounded-full px-3 text-sm font-black md:justify-center md:px-0 xl:justify-start xl:px-4"
+            className="btn-push-danger flex h-11 w-full flex-nowrap items-center gap-2.5 rounded-full px-3 text-sm font-black md:justify-center md:px-0 lg:justify-start lg:px-3.5 xl:px-4"
           >
             <LogOut size={19} className="shrink-0" />
-            <span className="md:hidden xl:inline">Đăng xuất</span>
+            <span className="whitespace-nowrap md:hidden lg:inline">Đăng xuất</span>
           </button>
         </div>
       </aside>
