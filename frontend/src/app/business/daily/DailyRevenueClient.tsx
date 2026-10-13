@@ -68,11 +68,13 @@ type DailyStats = {
 const formatVNCurrency = (amount = 0) => `${Math.round(amount).toLocaleString('vi-VN')} đ`;
 
 function getTodayString(): string {
-  const d = new Date();
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  return formatter.format(new Date());
 }
 
 function formatDateLong(dateStr: string): string {
@@ -88,14 +90,16 @@ function formatDateLong(dateStr: string): string {
   }
 }
 
-function shiftDate(dateStr: string, days: number): string {
+function shiftDate(dateStr: string, days: number, maxDate: string = getTodayString()): string {
   try {
     const [y, m, d] = dateStr.split('-').map(Number);
     const date = new Date(y, m - 1, d + days, 12, 0, 0);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const result = `${year}-${month}-${day}`;
+    if (result > maxDate) return maxDate;
+    return result;
   } catch {
     return dateStr;
   }
@@ -120,13 +124,27 @@ export default function DailyRevenueClient() {
     setTimeout(() => setToast(''), 2500);
   };
 
+  const todayStr = useMemo(() => getTodayString(), []);
+  const isToday = selectedDate >= todayStr;
+
+  useEffect(() => {
+    if (selectedDate > todayStr) {
+      setSelectedDate(todayStr);
+    }
+  }, [selectedDate, todayStr]);
+
   const fetchDailyData = async (date: string, isSilent = false) => {
     if (!token) return;
+    const safeDate = date > todayStr ? todayStr : date;
+    if (safeDate !== date) {
+      setSelectedDate(safeDate);
+      return;
+    }
     if (!isSilent) setLoading(true);
     else setRefreshing(true);
 
     try {
-      const response = await axios.get<DailyStats>(`/api/business/daily?date=${date}`, { headers });
+      const response = await axios.get<DailyStats>(`/api/business/daily?date=${safeDate}`, { headers });
       setStats(response.data);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -145,9 +163,6 @@ export default function DailyRevenueClient() {
       fetchDailyData(selectedDate);
     }
   }, [token, selectedDate]);
-
-  const todayStr = useMemo(() => getTodayString(), []);
-  const isToday = selectedDate === todayStr;
 
   // Filter and sort items based on filterMode, searchDish, and minRevenueThreshold
   const processedItems = useMemo(() => {
@@ -252,7 +267,7 @@ export default function DailyRevenueClient() {
                   {/* Nút lùi 1 ngày */}
                   <button
                     type="button"
-                    onClick={() => setSelectedDate((prev) => shiftDate(prev, -1))}
+                    onClick={() => setSelectedDate((prev) => shiftDate(prev, -1, todayStr))}
                     title="Xem ngày trước"
                     aria-label="Xem ngày trước"
                     className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-[#16587B] shadow-sm transition-all hover:bg-[#16587B] hover:text-white active:scale-90"
@@ -260,27 +275,44 @@ export default function DailyRevenueClient() {
                     <ChevronLeft size={18} />
                   </button>
 
-                  {/* Input Date chọn trực tiếp */}
+                  {/* Input Date chọn trực tiếp - Chặn ngày tương lai */}
                   <div className="relative flex items-center">
                     <CalendarDays size={15} className="pointer-events-none absolute left-3 text-[#16587B]" />
                     <input
                       type="date"
                       value={selectedDate}
+                      max={todayStr}
                       onChange={(e) => {
-                        if (e.target.value) setSelectedDate(e.target.value);
+                        const val = e.target.value;
+                        if (!val) return;
+                        if (val > todayStr) {
+                          notify('Không thể xem các ngày trong tương lai chưa xảy ra.');
+                          setSelectedDate(todayStr);
+                        } else {
+                          setSelectedDate(val);
+                        }
                       }}
-                      title="Bấm để chọn ngày bất kỳ"
+                      title="Bấm để chọn ngày (tối đa là hôm nay)"
                       className="h-9 cursor-pointer rounded-xl border border-transparent bg-white pl-8 pr-3 text-xs font-black text-[#16587B] outline-none shadow-sm transition-colors hover:border-[#16587B]/30 focus:border-[#16587B]"
                     />
                   </div>
 
-                  {/* Nút tiến 1 ngày */}
+                  {/* Nút tiến 1 ngày - Cấm vượt quá hôm nay */}
                   <button
                     type="button"
-                    onClick={() => setSelectedDate((prev) => shiftDate(prev, 1))}
-                    title="Xem ngày tiếp theo"
+                    onClick={() => {
+                      if (!isToday && selectedDate < todayStr) {
+                        setSelectedDate((prev) => shiftDate(prev, 1, todayStr));
+                      }
+                    }}
+                    disabled={isToday || selectedDate >= todayStr}
+                    title={isToday || selectedDate >= todayStr ? 'Không thể xem ngày trong tương lai chưa xảy ra' : 'Xem ngày tiếp theo'}
                     aria-label="Xem ngày tiếp theo"
-                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-[#16587B] shadow-sm transition-all hover:bg-[#16587B] hover:text-white active:scale-90"
+                    className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-sm transition-all ${
+                      isToday || selectedDate >= todayStr
+                        ? 'border border-[#16587B]/10 bg-white/40 text-[#16587B]/30 cursor-not-allowed opacity-40'
+                        : 'bg-white text-[#16587B] hover:bg-[#16587B] hover:text-white active:scale-90'
+                    }`}
                   >
                     <ChevronRight size={18} />
                   </button>
@@ -346,7 +378,7 @@ export default function DailyRevenueClient() {
                     Các ngày gần nhất có đơn bán:
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-1.5">
-                    {stats.availableDates.slice(0, 7).map((d) => {
+                    {stats.availableDates.filter((d) => d.date <= todayStr).slice(0, 7).map((d) => {
                       const isSelected = d.date === selectedDate;
                       return (
                         <button

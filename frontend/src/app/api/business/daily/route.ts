@@ -29,10 +29,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ detail: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn.' }, { status: 401 });
   }
 
+  const todayVN = getVietnamDateString();
   const queryDate = request.nextUrl.searchParams.get('date')?.trim();
-  const targetDateStr = queryDate && /^\d{4}-\d{2}-\d{2}$/.test(queryDate)
+  let targetDateStr = queryDate && /^\d{4}-\d{2}-\d{2}$/.test(queryDate)
     ? queryDate
-    : getVietnamDateString();
+    : todayVN;
+
+  // Cannot query future dates:
+  if (targetDateStr > todayVN) {
+    targetDateStr = todayVN;
+  }
 
   // Create date window in UTC corresponding to Vietnam UTC+7 day:
   // VN 00:00:00 is UTC-7h of previous day:
@@ -147,6 +153,7 @@ export async function GET(request: NextRequest) {
   }
 
   const availableDates = Array.from(datesMap.values())
+    .filter(d => d.date <= todayVN)
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 30);
 
