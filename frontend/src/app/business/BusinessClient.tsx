@@ -993,15 +993,17 @@ function OrdersV3({ledgers,setLedgers,ledger,choose,addBook,headers,notify,fail,
      <div className="aspect-square overflow-hidden rounded-xl bg-[#F5EEDD]"><button type="button" onClick={()=>addPosProduct(product)} className="flex h-full w-full items-center justify-center">{product.image_url?<img src={product.image_url} alt={product.name} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"/>:<PackageOpen className="text-[#16587B]/35" size={28}/>}</button></div>
      <div className="mt-2 min-w-0"><button type="button" onClick={()=>addPosProduct(product)} className="block w-full text-left text-xs sm:text-[13px] font-extrabold leading-snug text-[#16587B] line-clamp-2 min-h-[2.5em] break-words" title={product.name}>{product.name}</button></div>
     </div>
-    <div className="mt-2.5 flex flex-col gap-2 border-t border-[#16587B]/15 pt-2">
+    <div className="mt-2.5 flex flex-col gap-1.5 border-t border-[#16587B]/15 pt-2">
      <div className="flex items-baseline justify-between gap-1">
       <span className="text-xs sm:text-sm font-black text-[#16587B] tracking-tight">{cash(product.selling_price)}</span>
       {tracksStock(product)&&<span className="text-[10px] font-bold text-[#16587B]/60">Còn {product.stock_quantity}</span>}
      </div>
-     <div className="flex h-8 w-full items-center overflow-hidden rounded-lg border border-[#16587B]/25 bg-[#F5EEDD] shadow-xs">
-      <button type="button" aria-label={`Giảm số lượng ${product.name}`} onClick={()=>setPosQuantity(product,quantity-1)} disabled={!quantity} className="flex h-full w-8 shrink-0 items-center justify-center text-[#16587B] transition hover:bg-[#16587B]/15 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed"><Minus size={14} strokeWidth={2.6} className="text-[#16587B]"/></button>
-      <input aria-label={`Số lượng ${product.name}`} type="number" min="0" max={tracksStock(product)?product.stock_quantity:9999} value={quantity} onChange={event=>setPosQuantity(product,Number(event.target.value))} className="h-full min-w-0 flex-1 appearance-none border-x border-[#16587B]/20 bg-white p-0 text-center text-xs font-black text-[#16587B] leading-none outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"/>
-      <button type="button" aria-label={`Tăng số lượng ${product.name}`} onClick={()=>setPosQuantity(product,quantity+1)} disabled={tracksStock(product)&&quantity>=product.stock_quantity} className="flex h-full w-8 shrink-0 items-center justify-center text-[#16587B] transition hover:bg-[#16587B]/15 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed"><Plus size={14} strokeWidth={2.6} className="text-[#16587B]"/></button>
+     <div className="flex justify-end">
+      <div className="flex h-7 w-[76px] sm:w-[82px] shrink-0 items-center overflow-hidden border border-[#16587B]/25 bg-[#F5EEDD] shadow-xs">
+       <button type="button" aria-label={`Giảm số lượng ${product.name}`} onClick={()=>setPosQuantity(product,quantity-1)} disabled={!quantity} className="flex h-full w-5.5 sm:w-6 shrink-0 items-center justify-center text-[#16587B] transition hover:bg-[#16587B]/15 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"><Minus size={13} strokeWidth={2.6} className="text-[#16587B]"/></button>
+       <input aria-label={`Số lượng ${product.name}`} type="number" min="0" max={tracksStock(product)?product.stock_quantity:9999} value={quantity} onChange={event=>setPosQuantity(product,Number(event.target.value))} className="h-full min-w-0 flex-1 appearance-none border-x border-[#16587B]/20 bg-white p-0 text-center text-xs font-black text-[#16587B] leading-none outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"/>
+       <button type="button" aria-label={`Tăng số lượng ${product.name}`} onClick={()=>setPosQuantity(product,quantity+1)} disabled={tracksStock(product)&&quantity>=product.stock_quantity} className="flex h-full w-5.5 sm:w-6 shrink-0 items-center justify-center text-[#16587B] transition hover:bg-[#16587B]/15 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"><Plus size={13} strokeWidth={2.6} className="text-[#16587B]"/></button>
+      </div>
      </div>
     </div>
    </div>})}</div>
