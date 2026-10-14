@@ -1441,15 +1441,17 @@ select:focus,
    Pixel shop design system
    ========================================================================== */
 :root {
-  --reps-red: #d32f2f;
-  --reps-red-dark: #a92525;
-  --reps-black: #171513;
-  --reps-charcoal: #2b2925;
-  --reps-paper: #f4f2eb;
-  --reps-paper-soft: #ebe8df;
-  --reps-page: #d8d7d2;
-  --reps-muted: #868178;
-  --reps-shadow: #bdb9ae;
+  --reps-red: #e65332;
+  --reps-red-dark: #b63824;
+  --reps-orange: #f2a007;
+  --reps-orange-dark: #d78300;
+  --reps-black: #1b1916;
+  --reps-charcoal: #302d28;
+  --reps-paper: #f7f3ea;
+  --reps-paper-soft: #eee7da;
+  --reps-page: #e9e1d3;
+  --reps-muted: #746e64;
+  --reps-shadow: #302d28;
 
   --dusty-sage: var(--reps-paper-soft);
   --muted-terracotta: var(--reps-red);
@@ -1461,7 +1463,7 @@ select:focus,
   --vintage-blue-dark: var(--reps-red-dark);
 
   --pixel-bg: var(--reps-page);
-  --pixel-bg-dark: #c8c6bf;
+  --pixel-bg-dark: #d8cebd;
   --pixel-panel: var(--reps-paper);
   --pixel-panel-light: #fbfaf5;
   --pixel-panel-soft: var(--reps-paper-soft);
@@ -1470,11 +1472,11 @@ select:focus,
   --pixel-muted: var(--reps-muted);
   --pixel-highlight: #ffffff;
   --pixel-shadow: var(--reps-shadow);
-  --pixel-shadow-dark: var(--reps-red-dark);
+  --pixel-shadow-dark: var(--reps-charcoal);
   --pixel-success: var(--reps-paper-soft);
   --pixel-danger: var(--reps-red);
-  --pixel-primary: var(--reps-red);
-  --pixel-primary-dark: var(--reps-red-dark);
+  --pixel-primary: var(--reps-orange);
+  --pixel-primary-dark: var(--reps-orange-dark);
   --font-display: "DFVN Float", var(--font-pixel), "Arial Rounded MT Bold", Arial, sans-serif;
   --font-body: var(--font-montserrat), var(--font-be-vietnam), Arial, Helvetica, sans-serif;
 
@@ -2296,4 +2298,93 @@ main > div > header {
   main :where(header, section, article, .card-push, .card-push-subtle) > p {
     line-height: 1.5 !important;
   }
+}
+
+/* Selected controls use warm orange with dark type, matching the reference and
+   preserving contrast instead of switching labels to white. */
+.choice-active,
+.choice-active:hover,
+.choice-active:active {
+  border: 2px solid var(--pixel-ink-dark) !important;
+  background: var(--pixel-primary) !important;
+  color: var(--pixel-ink) !important;
+}
+
+.choice-active *,
+.choice-active:hover *,
+.choice-active:active * {
+  color: var(--pixel-ink) !important;
+  stroke: var(--pixel-ink) !important;
+}
+
+.segmented-control {
+  min-width: min(100%, 18rem);
+  padding: 0 5px 5px 0;
+}
+
+.segmented-choice,
+.select-option {
+  border: 2px solid var(--pixel-ink-dark) !important;
+  background: var(--pixel-panel-light) !important;
+  color: var(--pixel-ink) !important;
+  box-shadow: 5px 5px 0 var(--pixel-ink-dark) !important;
+  translate: -2px -2px;
+  transition: translate 80ms ease, box-shadow 80ms ease, background-color 80ms ease !important;
+}
+
+.segmented-choice:hover,
+.select-option:hover {
+  background: var(--pixel-highlight) !important;
+  box-shadow: 6px 6px 0 var(--pixel-ink-dark) !important;
+  translate: -3px -3px;
+}
+
+.segmented-choice.choice-active,
+.select-option.choice-active {
+  background: var(--pixel-primary) !important;
+}
+
+.segmented-choice:active,
+.select-option:active {
+  box-shadow: 1px 1px 0 var(--pixel-ink-dark) !important;
+  translate: 3px 3px;
+}
+
+.pixel-active,
+.squircle-btn.active,
+.btn-push-primary,
+.btn-3d-navy,
+.neu-btn-primary,
+.btn-gradient,
+.btn-navy {
+  background: var(--pixel-primary) !important;
+  border-color: var(--pixel-ink-dark) !important;
+  color: var(--pixel-ink) !important;
+}
+
+.pixel-active *,
+.squircle-btn.active *,
+.btn-push-primary *,
+.btn-3d-navy *,
+.neu-btn-primary *,
+.btn-gradient *,
+.btn-navy *,
+.pixel-active svg,
+.squircle-btn.active svg,
+.btn-push-primary svg,
+.btn-3d-navy svg,
+.neu-btn-primary svg,
+.btn-gradient svg,
+.btn-navy svg {
+  color: var(--pixel-ink) !important;
+  stroke: var(--pixel-ink) !important;
+}
+
+.btn-push-primary:hover,
+.btn-3d-navy:hover,
+.neu-btn-primary:hover,
+.btn-gradient:hover,
+.btn-navy:hover {
+  background: var(--pixel-primary-dark) !important;
+  color: var(--pixel-ink) !important;
 }
