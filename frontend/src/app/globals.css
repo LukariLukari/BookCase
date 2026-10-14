@@ -2161,3 +2161,139 @@ select:focus,
 .badge-count * {
   color: #ffffff !important;
 }
+
+/* ==========================================================================
+   Editorial spacing & offset-button polish
+   Keeps the existing typography intact while giving controls and content the
+   clearer, airier rhythm of the visual reference.
+   ========================================================================== */
+:root {
+  --button-shadow: 5px 5px 0 var(--pixel-ink-dark);
+  --button-shadow-hover: 7px 7px 0 var(--pixel-ink-dark);
+  --button-shadow-disabled: 3px 3px 0 var(--pixel-shadow);
+}
+
+.btn-gradient,
+.btn-navy,
+.btn-push,
+.btn-3d,
+.neu-btn,
+.btn-push-primary,
+.btn-3d-navy,
+.neu-btn-primary,
+.btn-push-walnut,
+.btn-push-ironclad,
+.btn-push-amber,
+.btn-3d-amber,
+.neu-btn-amber,
+.btn-push-emerald,
+.btn-3d-emerald,
+.btn-push-danger,
+.btn-3d-danger,
+.squircle-btn,
+button[class*="bg-"] {
+  border-width: 2px !important;
+  box-shadow: var(--button-shadow) !important;
+  translate: -2px -2px;
+}
+
+.btn-gradient:hover,
+.btn-navy:hover,
+.btn-push:hover,
+.btn-3d:hover,
+.neu-btn:hover,
+.btn-push-primary:hover,
+.btn-3d-navy:hover,
+.neu-btn-primary:hover,
+.btn-push-walnut:hover,
+.btn-push-ironclad:hover,
+.btn-push-amber:hover,
+.btn-3d-amber:hover,
+.neu-btn-amber:hover,
+.btn-push-emerald:hover,
+.btn-3d-emerald:hover,
+.btn-push-danger:hover,
+.btn-3d-danger:hover,
+.squircle-btn:hover,
+button[class*="bg-"]:hover {
+  translate: -3px -3px;
+  box-shadow: var(--button-shadow-hover) !important;
+}
+
+.btn-gradient:active,
+.btn-navy:active,
+.btn-push:active,
+.btn-3d:active,
+.neu-btn:active,
+.btn-push-primary:active,
+.btn-3d-navy:active,
+.neu-btn-primary:active,
+.btn-push-walnut:active,
+.btn-push-ironclad:active,
+.btn-push-amber:active,
+.btn-3d-amber:active,
+.neu-btn-amber:active,
+.btn-push-emerald:active,
+.btn-3d-emerald:active,
+.btn-push-danger:active,
+.btn-3d-danger:active,
+.squircle-btn:active,
+button[class*="bg-"]:active {
+  translate: 3px 3px;
+  transform: none !important;
+  box-shadow: 0 1px 0 var(--pixel-ink-dark) !important;
+}
+
+.btn-gradient:focus-visible,
+.btn-navy:focus-visible,
+.btn-push:focus-visible,
+.btn-3d:focus-visible,
+.neu-btn:focus-visible,
+.btn-push-primary:focus-visible,
+.btn-3d-navy:focus-visible,
+.neu-btn-primary:focus-visible,
+.btn-push-danger:focus-visible,
+.btn-3d-danger:focus-visible,
+.squircle-btn:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--pixel-primary);
+  outline-offset: 5px;
+}
+
+/* Give titles, supporting copy and the next content block separate visual beats. */
+main :where(header, section, article, .card-push, .card-push-subtle) >
+  :where(h1, h2, h3) + :where(p, div) {
+  margin-top: 0.75rem !important;
+}
+
+main :where(header, section, article, .card-push, .card-push-subtle) > p {
+  line-height: 1.55 !important;
+}
+
+main :where(section, .card-push) > :where(h1, h2, h3):not(:last-child) {
+  margin-bottom: 1rem !important;
+}
+
+main :where(section, .card-push) > :where(p, div) + :where(h2, h3) {
+  margin-top: 2rem !important;
+}
+
+main > div > header {
+  margin-bottom: 2rem !important;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --button-shadow: 4px 4px 0 var(--pixel-ink-dark);
+    --button-shadow-hover: 5px 5px 0 var(--pixel-ink-dark);
+  }
+
+  main > div > header {
+    margin-bottom: 1.5rem !important;
+  }
+
+  main :where(header, section, article, .card-push, .card-push-subtle) > p {
+    line-height: 1.5 !important;
+  }
+}
