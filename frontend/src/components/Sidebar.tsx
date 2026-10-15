@@ -77,11 +77,11 @@ export default function Sidebar() {
           title="Billy · Bán Hàng"
           className="pixel-logo mb-3 flex w-full flex-col items-center justify-center px-2 py-3 text-[#57575c] transition-transform active:translate-y-1 lg:items-start"
         >
-          <span className="text-[30px] font-black uppercase tracking-wider text-[#57575c] leading-none lg:hidden">
-            B<span className="text-[#8f8b82]">.</span>
+          <span className="brand-orange text-[30px] font-black uppercase tracking-wider leading-none lg:hidden">
+            B.
           </span>
-          <span className="hidden text-2xl font-black uppercase tracking-wider text-[#57575c] lg:block xl:text-[30px] leading-none">
-            Billy<span className="text-[#8f8b82]">.</span>
+          <span className="brand-orange hidden text-2xl font-black uppercase tracking-wider lg:block xl:text-[30px] leading-none">
+            Billy.
           </span>
           <span className="hidden text-[12px] font-black uppercase tracking-widest text-[#6d6a64] lg:block mt-1">
             Bán Hàng
@@ -104,7 +104,7 @@ export default function Sidebar() {
       </aside>
       <header className="pixel-panel fixed inset-x-3.5 top-[max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))] z-50 flex h-14 items-center justify-between gap-3 px-5 py-2 md:hidden">
         <Link href="/business" className="flex items-baseline gap-1.5 text-[#57575c] transition-transform active:translate-y-1">
-          <span className="text-2xl font-black uppercase tracking-wider">Billy<span className="text-[#8f8b82]">.</span></span>
+          <span className="brand-orange text-2xl font-black uppercase tracking-wider">Billy.</span>
           <span className="text-sm font-black uppercase tracking-widest text-[#6d6a64]">Bán Hàng</span>
         </Link>
         <button

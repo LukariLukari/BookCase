@@ -2501,6 +2501,10 @@ a.bg-\[\#16587B\] svg {
   color: var(--pixel-primary) !important;
 }
 
+.brand-orange {
+  color: var(--pixel-primary) !important;
+}
+
 /* Icons follow white button/link copy instead of falling back to dark ink. */
 button[class*="text-white"] svg,
 a[class*="text-white"] svg,
