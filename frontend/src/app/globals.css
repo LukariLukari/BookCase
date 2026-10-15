@@ -2481,3 +2481,11 @@ a.bg-\[\#16587B\] svg {
   color: var(--pixel-ink) !important;
   stroke: var(--pixel-ink) !important;
 }
+
+/* Quick-create choices always use white glyphs on the orange buttons. */
+.quick-create-option,
+.quick-create-option *,
+.quick-create-option svg {
+  color: #fff !important;
+  stroke: #fff !important;
+}

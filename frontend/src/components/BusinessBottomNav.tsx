@@ -67,7 +67,7 @@ export default function BusinessBottomNav() {
                   href="/business/orders#new-order"
                   aria-label="Tạo đơn hàng từ hàng tồn"
                   title="Tạo đơn hàng từ hàng tồn"
-                  className="btn-push-primary flex h-14 w-14 items-center justify-center"
+                  className="quick-create-option btn-push-primary flex h-14 w-14 items-center justify-center"
                   onClick={() => setQuickOpen(false)}
                 >
                   <ReceiptText size={25} />
@@ -76,7 +76,7 @@ export default function BusinessBottomNav() {
                   href="/business/pos"
                   aria-label="Bán tại quầy"
                   title="Bán tại quầy"
-                  className="btn-push-primary flex h-14 w-14 items-center justify-center"
+                  className="quick-create-option btn-push-primary flex h-14 w-14 items-center justify-center"
                   onClick={() => setQuickOpen(false)}
                 >
                   <ShoppingCart size={25} />
@@ -89,6 +89,8 @@ export default function BusinessBottomNav() {
             aria-label={quickOpen ? 'Đóng lựa chọn tạo đơn' : 'Mở lựa chọn tạo đơn'}
             title={quickOpen ? 'Đóng' : 'Tạo đơn mới'}
             aria-expanded={quickOpen}
+            animate={quickOpen ? { y: 16, scale: 0.86 } : { y: 0, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 27 }}
             whileTap={{ scale: 0.92 }}
             onClick={() => setQuickOpen((open) => !open)}
             className="btn-push absolute -top-8 flex h-[62px] w-[62px] items-center justify-center bg-white"
