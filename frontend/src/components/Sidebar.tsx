@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 const items = [
-  { href: '/business', label: 'Bán tại quầy', icon: ShoppingCart },
+  { href: '/business/pos', label: 'Bán tại quầy', icon: ShoppingCart },
   { href: '/business/orders', label: 'Đơn hàng', icon: ReceiptText },
   { href: '/business/daily', label: 'Doanh thu ngày', icon: CalendarDays },
   { href: '/business/products', label: 'Món bán POS', icon: PackageOpen },

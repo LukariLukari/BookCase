@@ -1,5 +1,5 @@
-import BusinessClient from './BusinessClient';
+import { redirect } from 'next/navigation';
 
 export default function BusinessPage() {
-  return <BusinessClient view="orders" pos />;
+  redirect('/business/daily');
 }

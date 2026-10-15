@@ -22,6 +22,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
+import BusinessBottomNav from '@/components/BusinessBottomNav';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 type DailyItem = {
@@ -701,6 +702,7 @@ export default function DailyRevenueClient() {
           </motion.div>
         )}
       </AnimatePresence>
+      <BusinessBottomNav />
     </div>
   );
 }
