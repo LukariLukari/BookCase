@@ -37,11 +37,11 @@ export default function Sidebar() {
           title={label}
           className={`flex h-11 w-full flex-nowrap items-center gap-2.5 rounded-2xl border px-3 text-sm font-black transition-all md:justify-center md:px-0 lg:justify-start lg:px-3.5 xl:px-4 ${
             active(href)
-              ? 'pixel-active bg-[#57575c] text-[#d6cbae]'
+              ? 'pixel-active bg-[#57575c] text-white'
               : 'pixel-tile bg-[#cfc4a8] text-[#57575c] hover:bg-[#d9ceb0]'
           }`}
         >
-          <Icon size={19} className="shrink-0" />
+          <Icon size={19} className={`shrink-0 ${active(href) ? 'text-white' : ''}`} />
           <span className="whitespace-nowrap md:hidden lg:inline">{label}</span>
         </Link>
       ))}
@@ -58,11 +58,11 @@ export default function Sidebar() {
           title={label}
           className={`flex h-12 items-center justify-start gap-2.5 rounded-2xl px-3.5 text-xs font-black transition-all ${
             active(href)
-              ? 'pixel-active bg-[#57575c] text-[#d6cbae]'
+              ? 'pixel-active bg-[#57575c] text-white'
               : 'btn-push'
           }`}
         >
-          <Icon size={18} className="shrink-0" />
+          <Icon size={18} className={`shrink-0 ${active(href) ? 'text-white' : ''}`} />
           <span className="truncate">{label}</span>
         </Link>
       ))}

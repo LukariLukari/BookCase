@@ -211,7 +211,7 @@ export default function DailyRevenueClient() {
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#16587B]/70">
                 Thống Kê Bán Hàng Theo Ngày
               </p>
-              <h1 className="text-xl font-black text-[#16587B] md:text-2xl">
+              <h1 className="business-page-title text-xl font-black md:text-2xl">
                 Doanh Thu Trong Ngày
               </h1>
             </div>

@@ -148,7 +148,7 @@ export default function WorkflowClient() {
             <p className="text-[11px] font-black uppercase tracking-[.2em] text-[#585556]/70">
               Trung tâm vận hành
             </p>
-            <h1 className="mt-1 text-2xl font-black md:text-3xl text-[#585556]">
+            <h1 className="business-page-title mt-1 text-2xl font-black md:text-3xl">
               Theo dõi và xử lý đơn
             </h1>
             <p className="mt-1 text-sm font-semibold text-[#585556]/80">
