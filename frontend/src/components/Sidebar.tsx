@@ -21,7 +21,10 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
-  const navItems = user?.role === 'admin' ? [...items, { href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound }] : items;
+  const isAdmin = user?.role === 'admin';
+  const navItems = isAdmin
+    ? [...items, { href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound }]
+    : items;
   const active = (href: string) => href === '/business' ? pathname === href : pathname.startsWith(href);
 
   const desktopLinks = (
