@@ -1451,7 +1451,7 @@ select:focus,
   --reps-paper-soft: #eee7da;
   --reps-page: #e9e1d3;
   --reps-muted: #746e64;
-  --reps-shadow: #302d28;
+  --reps-shadow: #46433e;
 
   --dusty-sage: var(--reps-paper-soft);
   --muted-terracotta: var(--reps-red);
@@ -1472,7 +1472,7 @@ select:focus,
   --pixel-muted: var(--reps-muted);
   --pixel-highlight: #ffffff;
   --pixel-shadow: var(--reps-shadow);
-  --pixel-shadow-dark: var(--reps-charcoal);
+  --pixel-shadow-dark: #403d38;
   --pixel-success: var(--reps-paper-soft);
   --pixel-danger: var(--reps-red);
   --pixel-primary: var(--reps-orange);
@@ -2170,8 +2170,8 @@ select:focus,
    clearer, airier rhythm of the visual reference.
    ========================================================================== */
 :root {
-  --button-shadow: 5px 5px 0 var(--pixel-ink-dark);
-  --button-shadow-hover: 7px 7px 0 var(--pixel-ink-dark);
+  --button-shadow: 5px 5px 0 var(--pixel-shadow-dark);
+  --button-shadow-hover: 7px 7px 0 var(--pixel-shadow-dark);
   --button-shadow-disabled: 3px 3px 0 var(--pixel-shadow);
 }
 
@@ -2287,8 +2287,8 @@ main > div > header {
 
 @media (max-width: 767px) {
   :root {
-    --button-shadow: 4px 4px 0 var(--pixel-ink-dark);
-    --button-shadow-hover: 5px 5px 0 var(--pixel-ink-dark);
+    --button-shadow: 4px 4px 0 var(--pixel-shadow-dark);
+    --button-shadow-hover: 5px 5px 0 var(--pixel-shadow-dark);
   }
 
   main > div > header {
@@ -2327,7 +2327,7 @@ main > div > header {
   border: 2px solid var(--pixel-ink-dark) !important;
   background: var(--pixel-panel-light) !important;
   color: var(--pixel-ink) !important;
-  box-shadow: 5px 5px 0 var(--pixel-ink-dark) !important;
+  box-shadow: 5px 5px 0 var(--pixel-shadow-dark) !important;
   translate: -2px -2px;
   transition: translate 80ms ease, box-shadow 80ms ease, background-color 80ms ease !important;
 }
@@ -2335,7 +2335,7 @@ main > div > header {
 .segmented-choice:hover,
 .select-option:hover {
   background: var(--pixel-highlight) !important;
-  box-shadow: 6px 6px 0 var(--pixel-ink-dark) !important;
+  box-shadow: 6px 6px 0 var(--pixel-shadow-dark) !important;
   translate: -3px -3px;
 }
 
@@ -2346,7 +2346,7 @@ main > div > header {
 
 .segmented-choice:active,
 .select-option:active {
-  box-shadow: 1px 1px 0 var(--pixel-ink-dark) !important;
+  box-shadow: 1px 1px 0 var(--pixel-shadow-dark) !important;
   translate: 3px 3px;
 }
 
@@ -2495,4 +2495,13 @@ a.bg-\[\#16587B\] svg {
   height: 2.25rem !important;
   color: var(--pixel-primary) !important;
   stroke: var(--pixel-primary) !important;
+}
+
+/* Icons follow white button/link copy instead of falling back to dark ink. */
+button[class*="text-white"] svg,
+a[class*="text-white"] svg,
+[class*="text-white"] > svg,
+svg[class*="text-white"] {
+  color: #fff !important;
+  stroke: #fff !important;
 }
