@@ -406,6 +406,76 @@ async function createOrderCloseImage(order:Order,settings:PaymentSettings,ledger
  drawScallopedSeal(ctx,width-pad-32,brandY-9,shopName);
  return canvas.toDataURL('image/png');
 }
+async function createPixelOrderCloseImage(order:Order,settings:PaymentSettings,ledgerName:string){
+ await ensureMontserratLoaded();
+ const ink='#1b1916',shadow='#403d38',muted='#746e64',paper='#f7f3ea',soft='#eee7da',white='#fbfaf5',orange='#f2a007',orangeDark='#d78300';
+ const shopName=(settings.shopName||'Billy Shop').trim()||'Billy Shop';
+ const width=800,pad=42,contentWidth=width-pad*2,qrSize=238,rowHeight=58;
+ const rows=order.items.length?order.items:[{product_name:'Sản phẩm',quantity:1,unit_price:order.total}];
+ const summaryCount=2+(order.shipping_fee>0?1:0)+(order.discount>0?1:0);
+ const paymentTop=150,paymentHeight=368,orderTop=558;
+ const orderHeight=132+rows.length*rowHeight+summaryCount*38+48;
+ const footerHeight=settings.note?.trim()?172:132,height=orderTop+orderHeight+footerHeight;
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas không khả dụng.');
+ const text=(value:string,x:number,y:number,font:string,color=ink,align:CanvasTextAlign='left')=>{ctx.font=font;ctx.fillStyle=color;ctx.textAlign=align;ctx.textBaseline='alphabetic';ctx.fillText(value,x,y)};
+ const fit=(value:string,maxWidth:number,fontSize:number,weight=800)=>{let size=fontSize;ctx.font=`${weight} ${size}px Montserrat, sans-serif`;while(ctx.measureText(value).width>maxWidth&&size>12){size--;ctx.font=`${weight} ${size}px Montserrat, sans-serif`}return `${weight} ${size}px Montserrat, sans-serif`};
+ const box=(x:number,y:number,w:number,h:number,fill=white,withShadow=true)=>{if(withShadow){ctx.fillStyle=shadow;ctx.fillRect(x+8,y+8,w,h)}ctx.fillStyle=fill;ctx.fillRect(x,y,w,h);ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.strokeRect(x+1.5,y+1.5,w-3,h-3)};
+
+ ctx.fillStyle=paper;ctx.fillRect(0,0,width,height);
+ ctx.strokeStyle='rgba(64,61,56,.10)';ctx.lineWidth=1;
+ for(let x=0;x<width;x+=32){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,height);ctx.stroke()}
+ for(let y=0;y<height;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(width,y);ctx.stroke()}
+ ctx.strokeStyle=ink;ctx.lineWidth=4;ctx.strokeRect(18,18,width-36,height-36);
+
+ text('BILLY.',pad,55,'900 18px Montserrat, sans-serif',orange);
+ text((settings.tagline||'BÁN HÀNG').trim().toUpperCase(),pad,80,'800 12px Montserrat, sans-serif',muted);
+ text(shopName.toUpperCase(),pad,119,fit(shopName.toUpperCase(),430,34,900),ink);
+ ctx.fillStyle=orange;ctx.fillRect(width-pad-222,47,222,70);ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.strokeRect(width-pad-220.5,48.5,219,67);
+ text('HÓA ĐƠN',width-pad-18,76,'900 13px Montserrat, sans-serif',white,'right');
+ text(order.code,width-pad-18,101,'900 20px Montserrat, sans-serif',white,'right');
+
+ box(pad,paymentTop,contentWidth,paymentHeight,white,true);
+ ctx.fillStyle=orange;ctx.fillRect(pad,paymentTop,contentWidth,54);ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.strokeRect(pad+1.5,paymentTop+1.5,contentWidth-3,51);
+ text('QUÉT MÃ ĐỂ THANH TOÁN',pad+22,paymentTop+35,'900 16px Montserrat, sans-serif',white);
+ text(dateText(order.ordered_at),width-pad-20,paymentTop+34,'800 12px Montserrat, sans-serif',white,'right');
+ const qrX=pad+26,qrY=paymentTop+78;
+ ctx.fillStyle=soft;ctx.fillRect(qrX+7,qrY+7,qrSize,qrSize);
+ let qrDrawn=false;
+ if(settings.qrImage){try{const image=await loadCanvasImage(settings.qrImage);ctx.fillStyle=white;ctx.fillRect(qrX,qrY,qrSize,qrSize);drawContainImage(ctx,image,qrX+14,qrY+14,qrSize-28,qrSize-28);qrDrawn=true}catch(error){console.error('Failed to load QR image:',error)}}
+ if(!qrDrawn){try{const qrCanvas=document.createElement('canvas');await renderBankQrToCanvas(qrCanvas,{bankCodeOrName:settings.bankCode||settings.bankName,accountNumber:settings.accountNumber,accountName:settings.accountName,amount:order.total,memo:order.code,color:ink,width:qrSize-28});ctx.fillStyle=white;ctx.fillRect(qrX,qrY,qrSize,qrSize);ctx.drawImage(qrCanvas,qrX+14,qrY+14,qrSize-28,qrSize-28);qrDrawn=true}catch(error){console.error('QR generation error:',error)}}
+ if(!qrDrawn){ctx.fillStyle=white;ctx.fillRect(qrX,qrY,qrSize,qrSize);text('QR CODE',qrX+qrSize/2,qrY+qrSize/2,'900 22px Montserrat, sans-serif',ink,'center')}
+ ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.strokeRect(qrX+1.5,qrY+1.5,qrSize-3,qrSize-3);
+
+ const infoX=qrX+qrSize+40,infoRight=width-pad-26,infoWidth=infoRight-infoX;
+ text('SỐ TIỀN CẦN CHUYỂN',infoX,qrY+18,'800 11px Montserrat, sans-serif',muted);
+ text(cash(order.total),infoX,qrY+59,fit(cash(order.total),infoWidth,34,900),orange);
+ ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(infoX,qrY+78);ctx.lineTo(infoRight,qrY+78);ctx.stroke();
+ const detail=(label:string,value:string,y:number)=>{text(label,infoX,y,'800 10px Montserrat, sans-serif',muted);let shown=value||'Chưa cập nhật';ctx.font='800 15px Montserrat, sans-serif';while(shown.length>3&&ctx.measureText(shown+'…').width>infoWidth)shown=shown.slice(0,-1);if(shown!==value&&value)shown+='…';text(shown,infoX,y+22,'800 15px Montserrat, sans-serif',ink)};
+ detail('NGÂN HÀNG',settings.bankName||settings.bankCode||'',qrY+108);
+ detail('SỐ TÀI KHOẢN',settings.accountNumber,qrY+157);
+ detail('CHỦ TÀI KHOẢN',settings.accountName.toUpperCase(),qrY+206);
+ detail('NỘI DUNG CHUYỂN KHOẢN',order.code,qrY+255);
+
+ box(pad,orderTop,contentWidth,orderHeight,white,true);
+ text('CHI TIẾT ĐƠN HÀNG',pad+24,orderTop+42,'900 22px Montserrat, sans-serif',ink);
+ text(order.customer_name||ledgerName||'',width-pad-24,orderTop+40,'800 13px Montserrat, sans-serif',orangeDark,'right');
+ const tableLeft=pad+28,qtyX=540,priceX=width-pad-28,headerY=orderTop+92;
+ text('SẢN PHẨM',tableLeft,headerY,'800 12px Montserrat, sans-serif',muted);text('SL',qtyX,headerY,'800 12px Montserrat, sans-serif',muted,'center');text('THÀNH TIỀN',priceX,headerY,'800 12px Montserrat, sans-serif',muted,'right');
+ ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(tableLeft,headerY+19);ctx.lineTo(priceX,headerY+19);ctx.stroke();
+ let y=headerY+58;
+ for(const item of rows){ctx.font='700 17px Montserrat, sans-serif';let name=item.product_name||'Sản phẩm';while(name.length>3&&ctx.measureText(name+'…').width>390)name=name.slice(0,-1);if(name!==item.product_name)name+='…';text(name,tableLeft,y,'700 17px Montserrat, sans-serif');text(String(item.quantity),qtyX,y,'800 16px Montserrat, sans-serif',ink,'center');text(cash(item.unit_price*item.quantity),priceX,y,'800 16px Montserrat, sans-serif',ink,'right');y+=rowHeight}
+ ctx.strokeStyle=ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(tableLeft,y-27);ctx.lineTo(priceX,y-27);ctx.stroke();
+ const subtotal=order.total-order.shipping_fee+order.discount,summaryX=535;
+ const summary=(label:string,value:string,strong=false)=>{if(strong){ctx.fillStyle=orange;ctx.fillRect(summaryX-150,y-27,priceX-summaryX+150,39)}text(label,summaryX,y,`${strong?900:700} ${strong?18:14}px Montserrat, sans-serif`,strong?white:muted,'right');text(value,priceX-10,y,`${strong?900:700} ${strong?20:14}px Montserrat, sans-serif`,strong?white:ink,'right');y+=strong?43:38};
+ summary('Tạm tính',cash(subtotal));if(order.shipping_fee>0)summary('Phí ship',cash(order.shipping_fee));if(order.discount>0)summary('Giảm giá','-'+cash(order.discount));summary('TỔNG CỘNG',cash(order.total),true);
+
+ const footerTop=orderTop+orderHeight;
+ if(settings.note?.trim()){box(pad,footerTop+24,contentWidth,68,soft,false);let note=settings.note.trim();ctx.font='700 13px Montserrat, sans-serif';while(note.length>3&&ctx.measureText(note+'…').width>contentWidth-44)note=note.slice(0,-1);if(note!==settings.note.trim())note+='…';text(note,pad+22,footerTop+65,'700 13px Montserrat, sans-serif',ink)}
+ const brandY=height-48;text(shopName.toUpperCase(),pad,brandY,fit(shopName.toUpperCase(),300,20,900),orangeDark);text(`Cảm ơn ${order.customer_name||'bạn'} đã mua hàng!`,width-pad,brandY,'700 12px Montserrat, sans-serif',muted,'right');ctx.fillStyle=orange;ctx.fillRect(width-pad-20,brandY+13,20,5);
+ return canvas.toDataURL('image/png');
+}
+
 const input='input-push block h-12 min-w-0 max-w-full w-full px-4 text-[16px] font-semibold outline-none';
 const area='card-push-subtle block min-h-24 min-w-0 max-w-full w-full resize-none p-3 text-[16px] font-semibold outline-none';
 
@@ -877,7 +947,7 @@ function OrdersV3({ledgers,setLedgers,ledger,choose,addBook,headers,notify,fail,
   return()=>{active=false};
  },[paymentSettings.bankCode,paymentSettings.bankName,paymentSettings.accountNumber,paymentSettings.accountName]);
  const savePaymentSettings=()=>{localStorage.setItem(paymentSettingsKey,JSON.stringify(paymentSettings));setPaymentOpen(false);notify('Đã lưu thông tin nhận chuyển khoản.')};
- useEffect(()=>{let active=true;if(!shareOrder){setShareUrl('');return}setShareBusy(true);createOrderCloseImage(shareOrder,paymentSettings,ledgerName).then(url=>{if(active)setShareUrl(url)}).catch(()=>notify('Không tạo được ảnh chốt đơn.')).finally(()=>{if(active)setShareBusy(false)});return()=>{active=false}},[shareOrder,paymentSettings,ledgerName]);
+ useEffect(()=>{let active=true;if(!shareOrder){setShareUrl('');return}setShareBusy(true);createPixelOrderCloseImage(shareOrder,paymentSettings,ledgerName).then(url=>{if(active)setShareUrl(url)}).catch(()=>notify('Không tạo được ảnh chốt đơn.')).finally(()=>{if(active)setShareBusy(false)});return()=>{active=false}},[shareOrder,paymentSettings,ledgerName]);
  const downloadCloseImage=()=>{if(!shareOrder||!shareUrl)return;const link=document.createElement('a');link.href=shareUrl;link.download=`hoa-don-${shareOrder.code}.png`;link.click();notify('Đã tải ảnh hoá đơn về máy.')};
  const shareCloseImage=async()=>{if(!shareOrder||!shareUrl)return;try{const blob=await (await fetch(shareUrl)).blob(),file=new File([blob],`hoa-don-${shareOrder.code}.png`,{type:'image/png'});if(navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:`Hoá đơn ${shareOrder.code}`});notify('Đã mở bảng chia sẻ ảnh.')}else downloadCloseImage()}catch{downloadCloseImage()}};
  const reset=()=>{handledRoute.current='';setDraft(freshDraft());setLines([{product_id:'',quantity:1,unit_price:'',note:''}]);setDiscountMode('amount');setDiscountValue('');setDiscountCode('');setEditing(null);setCartOpen(false);setCreating(posMode);if(typeof window!=='undefined')history.replaceState(null,'',location.pathname)};
