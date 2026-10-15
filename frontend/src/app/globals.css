@@ -2388,3 +2388,96 @@ main > div > header {
   background: var(--pixel-primary-dark) !important;
   color: var(--pixel-ink) !important;
 }
+
+/* Selected controls are always orange with white labels/icons. */
+.choice-active,
+.pixel-active,
+.squircle-btn.active,
+.segmented-choice.choice-active,
+.select-option.choice-active,
+.btn-push-primary,
+.btn-3d-navy,
+.neu-btn-primary,
+.btn-gradient,
+.btn-navy {
+  background: var(--pixel-primary) !important;
+  border-color: var(--pixel-ink-dark) !important;
+  color: #fff !important;
+  opacity: 1 !important;
+}
+
+/* Other intentionally coloured actions retain their semantic backgrounds. */
+.btn-push-amber,
+.btn-3d-amber,
+.neu-btn-amber,
+.btn-push-emerald,
+.btn-3d-emerald,
+.btn-push-danger,
+.btn-3d-danger {
+  color: #fff !important;
+}
+
+.choice-active *,
+.pixel-active *,
+.squircle-btn.active *,
+.segmented-choice.choice-active *,
+.select-option.choice-active *,
+.btn-push-primary *,
+.btn-3d-navy *,
+.neu-btn-primary *,
+.btn-gradient *,
+.btn-navy *,
+.btn-push-amber *,
+.btn-3d-amber *,
+.neu-btn-amber *,
+.btn-push-emerald *,
+.btn-3d-emerald *,
+.btn-push-danger *,
+.btn-3d-danger * {
+  color: #fff !important;
+}
+
+.choice-active svg,
+.pixel-active svg,
+.squircle-btn.active svg,
+.segmented-choice.choice-active svg,
+.select-option.choice-active svg,
+.btn-push-primary svg,
+.btn-3d-navy svg,
+.neu-btn-primary svg,
+.btn-gradient svg,
+.btn-navy svg,
+.btn-push-amber svg,
+.btn-3d-amber svg,
+.neu-btn-amber svg,
+.btn-push-emerald svg,
+.btn-3d-emerald svg,
+.btn-push-danger svg,
+.btn-3d-danger svg {
+  color: #fff !important;
+  stroke: #fff !important;
+}
+
+/* Legacy selected buttons still using the old blue utility class. */
+button.bg-\[\#16587B\],
+a.bg-\[\#16587B\] {
+  background: var(--pixel-primary) !important;
+  border-color: var(--pixel-ink-dark) !important;
+  color: #fff !important;
+}
+
+button.bg-\[\#16587B\] *,
+a.bg-\[\#16587B\] *,
+button.bg-\[\#16587B\] svg,
+a.bg-\[\#16587B\] svg {
+  color: #fff !important;
+  stroke: #fff !important;
+}
+
+/* Controls nested on a white surface keep dark content for contrast. */
+.choice-active .bg-white,
+.choice-active .bg-white *,
+.choice-active .bg-white svg {
+  color: var(--pixel-ink) !important;
+  stroke: var(--pixel-ink) !important;
+}

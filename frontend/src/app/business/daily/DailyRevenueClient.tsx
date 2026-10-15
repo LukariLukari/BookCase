@@ -233,7 +233,7 @@ export default function DailyRevenueClient() {
                 disabled={isToday}
                 className={`flex h-10 items-center justify-center gap-1.5 rounded-xl px-4 text-xs font-black transition-all ${
                   isToday
-                    ? 'border border-[#16587B]/20 bg-[#e8dec7] text-[#16587B]/60 opacity-70 cursor-default'
+                    ? 'choice-active cursor-default'
                     : 'bg-[#16587B] text-white shadow-md hover:bg-[#104460] active:scale-95'
                 }`}
               >
@@ -387,7 +387,7 @@ export default function DailyRevenueClient() {
                           onClick={() => setSelectedDate(d.date)}
                           className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-[11px] font-black transition-all ${
                             isSelected
-                              ? 'bg-[#16587B] text-white shadow-sm'
+                              ? 'choice-active shadow-sm'
                               : 'border border-[#16587B]/20 bg-[#F5EEDD] text-[#16587B] hover:bg-[#16587B]/10 active:scale-95'
                           }`}
                         >
@@ -438,7 +438,7 @@ export default function DailyRevenueClient() {
                     onClick={() => setFilterMode('quantity')}
                     className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-black transition-all ${
                       filterMode === 'quantity'
-                        ? 'bg-[#16587B] text-white shadow-md'
+                        ? 'choice-active shadow-md'
                         : 'bg-transparent text-[#16587B] hover:bg-white/60'
                     }`}
                   >
@@ -452,7 +452,7 @@ export default function DailyRevenueClient() {
                     onClick={() => setFilterMode('revenue')}
                     className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-black transition-all ${
                       filterMode === 'revenue'
-                        ? 'bg-[#16587B] text-white shadow-md'
+                        ? 'choice-active shadow-md'
                         : 'bg-transparent text-[#16587B] hover:bg-white/60'
                     }`}
                   >
