@@ -2489,3 +2489,10 @@ a.bg-\[\#16587B\] svg {
   color: #fff !important;
   stroke: #fff !important;
 }
+
+.quick-create-plus {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  color: var(--pixel-primary) !important;
+  stroke: var(--pixel-primary) !important;
+}

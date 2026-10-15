@@ -61,6 +61,7 @@ export default function BusinessBottomNav() {
                 initial={{ opacity: 0, y: 12, scale: 0.85 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 12, scale: 0.85 }}
+                transition={{ type: 'spring', stiffness: 340, damping: 24, mass: 0.72 }}
                 className="absolute bottom-[calc(100%+18px)] left-1/2 flex -translate-x-1/2 gap-3"
               >
                 <Link
@@ -89,13 +90,13 @@ export default function BusinessBottomNav() {
             aria-label={quickOpen ? 'Đóng lựa chọn tạo đơn' : 'Mở lựa chọn tạo đơn'}
             title={quickOpen ? 'Đóng' : 'Tạo đơn mới'}
             aria-expanded={quickOpen}
-            animate={quickOpen ? { y: 16, scale: 0.86 } : { y: 0, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 420, damping: 27 }}
-            whileTap={{ scale: 0.92 }}
+            animate={quickOpen ? { y: 21, scale: 0.7 } : { y: 0, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 22, mass: 0.75 }}
+            whileTap={{ scale: quickOpen ? 0.66 : 0.92 }}
             onClick={() => setQuickOpen((open) => !open)}
             className="btn-push absolute -top-8 flex h-[62px] w-[62px] items-center justify-center bg-white"
           >
-            {quickOpen ? <X size={27} /> : <Plus size={29} strokeWidth={3} />}
+            {quickOpen ? <X size={27} /> : <Plus className="quick-create-plus" size={38} strokeWidth={3.5} />}
           </motion.button>
         </div>
         {right.map(item)}
