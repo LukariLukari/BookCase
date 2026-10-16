@@ -2507,7 +2507,7 @@ a.bg-\[\#16587B\] svg {
 header > p.uppercase,
 .business-page-title,
 .brand-orange {
-  color: var(--pixel-primary) !important;
+  color: #e65c00 !important;
 }
 
 /* Explicit light action labels must override the legacy dark button rules. */
