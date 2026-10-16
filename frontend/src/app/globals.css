@@ -2497,12 +2497,27 @@ a.bg-\[\#16587B\] svg {
   stroke: var(--pixel-primary) !important;
 }
 
-.business-page-title {
+/* Shared heading hierarchy, including the small section title above a heading. */
+:is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6) *,
+.font-black.text-2xl,
+.font-black.text-3xl,
+.font-black.text-4xl,
+.font-black.text-5xl,
+header > p.uppercase,
+.business-page-title,
+.brand-orange {
   color: var(--pixel-primary) !important;
 }
 
-.brand-orange {
-  color: var(--pixel-primary) !important;
+/* Explicit light action labels must override the legacy dark button rules. */
+:is(button, a):is(.text-white, [class~="text-[#FAF5EB]"]),
+:is(button, a):is(.text-white, [class~="text-[#FAF5EB]"]) * {
+  color: #fff !important;
+}
+
+:is(button, a):is(.text-white, [class~="text-[#FAF5EB]"]) svg {
+  stroke: #fff !important;
 }
 
 /* Icons follow white button/link copy instead of falling back to dark ink. */
