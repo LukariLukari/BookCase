@@ -31,8 +31,8 @@ export default function BusinessBottomNav() {
         onClick={() => setQuickOpen(false)}
         className="relative z-10 flex h-full min-w-0 items-center justify-center"
       >
-        <span className={`flex h-11 w-11 items-center justify-center border-2 border-transparent transition-all ${active ? 'pixel-active' : 'text-[#171513]'}`}>
-          <Icon size={23} strokeWidth={2.4} />
+        <span className={`flex h-11 w-11 items-center justify-center border-2 border-transparent transition-all ${active ? 'pixel-active text-white' : 'text-[#171513]'}`}>
+          <Icon size={23} strokeWidth={2.4} className={active ? 'text-white stroke-white' : ''} />
         </span>
       </Link>
     );

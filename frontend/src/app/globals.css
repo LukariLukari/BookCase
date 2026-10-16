@@ -2300,22 +2300,6 @@ main > div > header {
   }
 }
 
-/* Selected controls use warm orange with dark type, matching the reference and
-   preserving contrast instead of switching labels to white. */
-.choice-active,
-.choice-active:hover,
-.choice-active:active {
-  border: 2px solid var(--pixel-ink-dark) !important;
-  background: var(--pixel-primary) !important;
-  color: var(--pixel-ink) !important;
-}
-
-.choice-active *,
-.choice-active:hover *,
-.choice-active:active * {
-  color: var(--pixel-ink) !important;
-  stroke: var(--pixel-ink) !important;
-}
 
 .segmented-control {
   min-width: min(100%, 18rem);
@@ -2350,46 +2334,16 @@ main > div > header {
   translate: 3px 3px;
 }
 
-.pixel-active,
-.squircle-btn.active,
-.btn-push-primary,
-.btn-3d-navy,
-.neu-btn-primary,
-.btn-gradient,
-.btn-navy {
-  background: var(--pixel-primary) !important;
-  border-color: var(--pixel-ink-dark) !important;
-  color: var(--pixel-ink) !important;
-}
-
-.pixel-active *,
-.squircle-btn.active *,
-.btn-push-primary *,
-.btn-3d-navy *,
-.neu-btn-primary *,
-.btn-gradient *,
-.btn-navy *,
-.pixel-active svg,
-.squircle-btn.active svg,
-.btn-push-primary svg,
-.btn-3d-navy svg,
-.neu-btn-primary svg,
-.btn-gradient svg,
-.btn-navy svg {
-  color: var(--pixel-ink) !important;
-  stroke: var(--pixel-ink) !important;
-}
-
 .btn-push-primary:hover,
 .btn-3d-navy:hover,
 .neu-btn-primary:hover,
 .btn-gradient:hover,
 .btn-navy:hover {
   background: var(--pixel-primary-dark) !important;
-  color: var(--pixel-ink) !important;
+  color: #fff !important;
 }
 
-/* Selected controls are always orange with white labels/icons. */
+/* Selected controls are always orange with white labels and white icons. */
 .choice-active,
 .pixel-active,
 .squircle-btn.active,
@@ -2435,25 +2389,43 @@ main > div > header {
 .btn-push-danger *,
 .btn-3d-danger * {
   color: #fff !important;
+  stroke: #fff !important;
 }
 
 .choice-active svg,
+.choice-active svg *,
 .pixel-active svg,
+.pixel-active svg *,
 .squircle-btn.active svg,
+.squircle-btn.active svg *,
 .segmented-choice.choice-active svg,
+.segmented-choice.choice-active svg *,
 .select-option.choice-active svg,
+.select-option.choice-active svg *,
 .btn-push-primary svg,
+.btn-push-primary svg *,
 .btn-3d-navy svg,
+.btn-3d-navy svg *,
 .neu-btn-primary svg,
+.neu-btn-primary svg *,
 .btn-gradient svg,
+.btn-gradient svg *,
 .btn-navy svg,
+.btn-navy svg *,
 .btn-push-amber svg,
+.btn-push-amber svg *,
 .btn-3d-amber svg,
+.btn-3d-amber svg *,
 .neu-btn-amber svg,
+.neu-btn-amber svg *,
 .btn-push-emerald svg,
+.btn-push-emerald svg *,
 .btn-3d-emerald svg,
+.btn-3d-emerald svg *,
 .btn-push-danger svg,
-.btn-3d-danger svg {
+.btn-push-danger svg *,
+.btn-3d-danger svg,
+.btn-3d-danger svg * {
   color: #fff !important;
   stroke: #fff !important;
 }
@@ -2469,7 +2441,9 @@ a.bg-\[\#16587B\] {
 button.bg-\[\#16587B\] *,
 a.bg-\[\#16587B\] *,
 button.bg-\[\#16587B\] svg,
-a.bg-\[\#16587B\] svg {
+button.bg-\[\#16587B\] svg *,
+a.bg-\[\#16587B\] svg,
+a.bg-\[\#16587B\] svg * {
   color: #fff !important;
   stroke: #fff !important;
 }
@@ -2477,7 +2451,8 @@ a.bg-\[\#16587B\] svg {
 /* Controls nested on a white surface keep dark content for contrast. */
 .choice-active .bg-white,
 .choice-active .bg-white *,
-.choice-active .bg-white svg {
+.choice-active .bg-white svg,
+.choice-active .bg-white svg * {
   color: var(--pixel-ink) !important;
   stroke: var(--pixel-ink) !important;
 }
@@ -2485,7 +2460,8 @@ a.bg-\[\#16587B\] svg {
 /* Quick-create choices always use white glyphs on the orange buttons. */
 .quick-create-option,
 .quick-create-option *,
-.quick-create-option svg {
+.quick-create-option svg,
+.quick-create-option svg * {
   color: #fff !important;
   stroke: #fff !important;
 }
@@ -2516,15 +2492,32 @@ header > p.uppercase,
   color: #fff !important;
 }
 
-:is(button, a):is(.text-white, [class~="text-[#FAF5EB]"]) svg {
+:is(button, a):is(.text-white, [class~="text-[#FAF5EB]"]) svg,
+:is(button, a):is(.text-white, [class~="text-[#FAF5EB]"]) svg * {
+  color: #fff !important;
   stroke: #fff !important;
 }
 
 /* Icons follow white button/link copy instead of falling back to dark ink. */
 button[class*="text-white"] svg,
+button[class*="text-white"] svg *,
 a[class*="text-white"] svg,
+a[class*="text-white"] svg *,
 [class*="text-white"] > svg,
-svg[class*="text-white"] {
+[class*="text-white"] > svg *,
+svg[class*="text-white"],
+svg[class*="text-white"] *,
+[class*="text-white"] svg,
+[class*="text-white"] svg * {
+  color: #fff !important;
+  stroke: #fff !important;
+}
+
+/* All active/selected choices and navigation items always force white text and white icons */
+:is(.choice-active, .pixel-active, [aria-current="page"]),
+:is(.choice-active, .pixel-active, [aria-current="page"]) *,
+:is(.choice-active, .pixel-active, [aria-current="page"]) svg,
+:is(.choice-active, .pixel-active, [aria-current="page"]) svg * {
   color: #fff !important;
   stroke: #fff !important;
 }

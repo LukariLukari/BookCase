@@ -238,7 +238,7 @@ export default function DailyRevenueClient() {
                     : 'bg-[#16587B] text-white shadow-md hover:bg-[#104460] active:scale-95'
                 }`}
               >
-                <Sparkles size={14} className={isToday ? 'text-[#16587B]/60' : 'text-white'} />
+                <Sparkles size={14} className="text-white" />
                 <span>Hôm nay</span>
               </button>
             </div>
