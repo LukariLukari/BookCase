@@ -18,7 +18,6 @@ import {
   ArrowUpRight,
   Eye,
   Check,
-  Calendar,
   Sparkles,
 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -76,19 +75,6 @@ function getTodayString(): string {
     day: '2-digit',
   });
   return formatter.format(new Date());
-}
-
-function formatDateLong(dateStr: string): string {
-  if (!dateStr) return '';
-  try {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    const date = new Date(y, m - 1, d, 12, 0, 0);
-    const dayNames = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-    const dayName = dayNames[date.getDay()];
-    return `${dayName}, ngày ${String(d).padStart(2, '0')} tháng ${String(m).padStart(2, '0')} năm ${y}`;
-  } catch {
-    return dateStr;
-  }
 }
 
 function shiftDate(dateStr: string, days: number, maxDate: string = getTodayString()): string {
@@ -212,7 +198,7 @@ export default function DailyRevenueClient() {
                 Thống Kê Bán Hàng Theo Ngày
               </p>
               <h1 className="business-page-title text-xl font-black md:text-2xl">
-                Doanh Thu Trong Ngày
+                DOANH THU
               </h1>
             </div>
 
@@ -257,12 +243,6 @@ export default function DailyRevenueClient() {
             <div className="relative mx-auto flex max-w-xl flex-col items-center justify-center">
               {/* 1. BÊN TRÊN SỐ TIỀN: NGÀY THÁNG NĂM KÍCH THƯỚC NHỎ & BỘ CHỌN THỜI GIAN */}
               <div className="mb-4 flex flex-col items-center gap-2">
-                {/* Ngày tháng năm dạng chữ nhỏ trang trọng */}
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#16587B]/20 bg-[#F5EEDD]/70 px-3.5 py-1 text-xs font-bold text-[#16587B]">
-                  <Calendar size={13} className="text-[#16587B]" />
-                  <span>{formatDateLong(selectedDate)}</span>
-                </span>
-
                 {/* Bộ điều khiển chọn ngày (Next / Prev / Input Date) */}
                 <div className="flex items-center gap-1.5 rounded-2xl border border-[#16587B]/20 bg-[#F5EEDD] p-1 shadow-inner">
                   {/* Nút lùi 1 ngày */}
@@ -281,6 +261,7 @@ export default function DailyRevenueClient() {
                     <CalendarDays size={15} className="pointer-events-none absolute left-3 text-[#16587B]" />
                     <input
                       type="date"
+                      aria-label="Chọn ngày xem doanh thu"
                       value={selectedDate}
                       max={todayStr}
                       onChange={(e) => {
@@ -323,7 +304,7 @@ export default function DailyRevenueClient() {
               {/* 2. CHÍNH GIỮA: TỔNG SỐ TIỀN DOANH THU NHẬN ĐƯỢC NGÀY HÔM ĐÓ */}
               <div className="my-2 flex flex-col items-center">
                 <span className="text-[11px] font-black uppercase tracking-[0.18em] text-[#16587B]/60">
-                  Tổng Doanh Thu Trong Ngày
+                  TỔNG
                 </span>
 
                 {loading ? (
