@@ -16,13 +16,14 @@ import {
   SlidersHorizontal,
   UtensilsCrossed,
   ArrowUpRight,
-  Eye,
+  ChevronDown,
   Check,
   Sparkles,
 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import BusinessBottomNav from '@/components/BusinessBottomNav';
 import { useAuth } from '@/app/contexts/AuthContext';
+import DailyOrderDetails, { type OrderSummary } from './DailyOrderDetails';
 
 type DailyItem = {
   productId: string;
@@ -33,18 +34,6 @@ type DailyItem = {
   orderCount: number;
   percentageQuantity: number;
   percentageRevenue: number;
-};
-
-type OrderSummary = {
-  id: string;
-  code: string;
-  customerName: string;
-  customerContact?: string;
-  orderedAt: string;
-  total: number;
-  profit: number;
-  itemCount: number;
-  items: { productName: string; quantity: number; unitPrice: number }[];
 };
 
 type AvailableDate = {
@@ -326,21 +315,19 @@ export default function DailyRevenueClient() {
 
               {/* 3. BÊN DƯỚI SỐ TIỀN: TỔNG SỐ ĐƠN HÀNG TRONG NGÀY HÔM ĐÓ */}
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                <div className="inline-flex items-center gap-2 rounded-2xl border-2 border-[#16587B]/25 bg-[#F5EEDD] px-4 py-2 shadow-xs">
-                  <ReceiptText size={17} className="text-[#16587B]" />
-                  <span className="text-xs font-bold text-[#16587B]/70">Tổng số đơn hàng:</span>
-                  <b className="text-sm font-black text-[#16587B] md:text-base">
-                    {stats?.orderCount || 0} đơn
-                  </b>
-                </div>
-
-                <div className="inline-flex items-center gap-2 rounded-2xl border border-[#16587B]/20 bg-white px-3.5 py-2 shadow-xs">
-                  <ShoppingBag size={16} className="text-[#16587B]" />
-                  <span className="text-xs font-bold text-[#16587B]/70">Tổng món đã bán:</span>
-                  <b className="text-xs font-black text-[#385E26] md:text-sm">
-                    {stats?.soldUnits || 0} món
-                  </b>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowOrderList((open) => !open)}
+                  aria-expanded={showOrderList}
+                  aria-controls="daily-order-details"
+                  disabled={loading || refreshing || !stats || stats.date !== selectedDate}
+                  className="btn-push inline-flex flex-wrap items-center justify-center gap-2 px-4 py-3 disabled:opacity-50"
+                >
+                  <ReceiptText size={20} />
+                  <span className="font-bold">Tổng đơn hàng:</span>
+                  <b>{stats?.orderCount || 0} đơn</b>
+                  <ChevronDown size={18} className={showOrderList ? 'rotate-180' : ''} />
+                </button>
 
                 {stats && stats.orderCount > 0 && (
                   <div className="inline-flex items-center gap-2 rounded-2xl border border-[#16587B]/20 bg-white px-3.5 py-2 shadow-xs">
@@ -352,6 +339,16 @@ export default function DailyRevenueClient() {
                   </div>
                 )}
               </div>
+
+              {showOrderList && (
+                <div id="daily-order-details" className="mt-5 w-full text-left" role="region" aria-label="Chi tiết đơn hàng trong ngày">
+                  {loading || refreshing || stats?.date !== selectedDate ? (
+                    <p role="status">Đang tải đơn hàng...</p>
+                  ) : stats ? (
+                    <DailyOrderDetails orders={stats.orders} items={stats.items} soldUnits={stats.soldUnits} />
+                  ) : <p role="alert">Không thể tải đơn hàng. Vui lòng làm mới để thử lại.</p>}
+                </div>
+              )}
 
               {/* Danh sách các ngày gần nhất có doanh thu (quick jump chips) */}
               {stats?.availableDates && stats.availableDates.length > 0 && (
@@ -603,68 +600,6 @@ export default function DailyRevenueClient() {
               </div>
             )}
 
-            {/* BẢNG TỔNG KẾT CHI TIẾT & XEM DANH SÁCH ĐƠN HÀNG */}
-            {stats && stats.orders && stats.orders.length > 0 && (
-              <div className="mt-8 border-t border-[#16587B]/15 pt-5">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-black text-[#16587B]">
-                    Chi Tiết Các Đơn Hàng Trong Ngày ({stats.orders.length} đơn)
-                  </h3>
-
-                  {/* Nút bật/tắt xem danh sách đơn hàng với icon và text tương phản cao */}
-                  <button
-                    type="button"
-                    onClick={() => setShowOrderList((v) => !v)}
-                    className="flex items-center gap-1.5 rounded-xl border border-[#16587B]/30 bg-[#16587B] px-3 py-1.5 text-xs font-black text-white shadow-sm transition-transform hover:bg-[#104460] active:scale-95"
-                  >
-                    <Eye size={14} className="text-white" />
-                    <span>{showOrderList ? 'Thu gọn' : 'Xem chi tiết đơn'}</span>
-                  </button>
-                </div>
-
-                <AnimatePresence>
-                  {showOrderList && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="mt-4 space-y-2 overflow-hidden"
-                    >
-                      {stats.orders.map((ord) => (
-                        <div
-                          key={ord.id}
-                          className="flex flex-col gap-2 rounded-2xl border border-[#16587B]/15 bg-[#F5EEDD]/30 p-3.5 sm:flex-row sm:items-center sm:justify-between"
-                        >
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="rounded-lg bg-[#16587B] px-2 py-0.5 text-[11px] font-black text-white">
-                                {ord.code}
-                              </span>
-                              <b className="text-xs font-bold text-[#16587B]">{ord.customerName}</b>
-                              {ord.customerContact && (
-                                <span className="text-[11px] text-[#16587B]/60">({ord.customerContact})</span>
-                              )}
-                            </div>
-                            <p className="mt-1 text-xs font-semibold text-[#16587B]/70">
-                              {ord.items.map((i) => `${i.productName} (x${i.quantity})`).join(', ')}
-                            </p>
-                          </div>
-
-                          <div className="text-right sm:shrink-0">
-                            <b className="text-sm font-black text-[#385E26]">
-                              {formatVNCurrency(ord.total)}
-                            </b>
-                            <span className="block text-[10px] font-bold text-[#16587B]/60">
-                              {ord.itemCount} món
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
           </section>
         </div>
       </main>
