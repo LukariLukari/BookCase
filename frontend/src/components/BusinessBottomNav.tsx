@@ -85,19 +85,22 @@ export default function BusinessBottomNav() {
               </motion.div>
             )}
           </AnimatePresence>
-          <motion.button
-            type="button"
-            aria-label={quickOpen ? 'Đóng lựa chọn tạo đơn' : 'Mở lựa chọn tạo đơn'}
-            title={quickOpen ? 'Đóng' : 'Tạo đơn mới'}
-            aria-expanded={quickOpen}
+          <motion.div
             animate={quickOpen ? { y: 21, scale: 0.7 } : { y: 0, scale: 1 }}
             transition={{ type: 'spring', stiffness: 300, damping: 22, mass: 0.75 }}
-            whileTap={{ scale: quickOpen ? 0.66 : 0.92 }}
-            onClick={() => setQuickOpen((open) => !open)}
-            className="btn-push absolute -top-8 flex h-[62px] w-[62px] items-center justify-center bg-white"
+            className="absolute -top-8 h-[62px] w-[62px]"
           >
-            {quickOpen ? <X size={27} /> : <Plus className="quick-create-plus" size={38} strokeWidth={3.5} />}
-          </motion.button>
+            <button
+              type="button"
+              aria-label={quickOpen ? 'Đóng lựa chọn tạo đơn' : 'Mở lựa chọn tạo đơn'}
+              title={quickOpen ? 'Đóng' : 'Tạo đơn mới'}
+              aria-expanded={quickOpen}
+              onClick={() => setQuickOpen((open) => !open)}
+              className="quick-create-toggle btn-push flex h-full w-full items-center justify-center bg-white"
+            >
+              {quickOpen ? <X size={27} /> : <Plus className="quick-create-plus" size={44} strokeWidth={3.5} />}
+            </button>
+          </motion.div>
         </div>
         {right.map(item)}
       </nav>

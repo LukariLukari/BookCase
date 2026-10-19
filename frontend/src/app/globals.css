@@ -2466,11 +2466,24 @@ a.bg-\[\#16587B\] svg * {
   stroke: #fff !important;
 }
 
-.quick-create-plus {
-  width: 2.25rem !important;
-  height: 2.25rem !important;
-  color: var(--pixel-primary) !important;
-  stroke: var(--pixel-primary) !important;
+/* The wrapper owns the open/close motion, including on touch devices with sticky hover. */
+button.quick-create-toggle,
+button.quick-create-toggle:hover,
+button.quick-create-toggle:active {
+  transform: none !important;
+  translate: none !important;
+}
+
+button.quick-create-toggle svg.quick-create-plus {
+  width: 44px !important;
+  height: 44px !important;
+  stroke-width: 3.5 !important;
+}
+
+button.quick-create-toggle svg.quick-create-plus,
+button.quick-create-toggle svg.quick-create-plus * {
+  color: #ea580c !important;
+  stroke: #ea580c !important;
 }
 
 /* Shared heading hierarchy, including the small section title above a heading. */
