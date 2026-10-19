@@ -7,6 +7,7 @@ import {
   Boxes,
   CalendarDays,
   ChevronDown,
+  CircleDollarSign,
   KeyRound,
   LogOut,
   Menu,
@@ -44,6 +45,7 @@ const groups = [
       { href: '/business/reports', label: 'Báo cáo', icon: BarChart3 },
       { href: '/business/orders', label: 'Đơn hàng', icon: ReceiptText },
       { href: '/business/daily', label: 'Doanh thu ngày', icon: CalendarDays },
+      { href: '/business/expenses', label: 'Quản lý chi tiêu', icon: CircleDollarSign },
     ],
   },
 ] as const;
