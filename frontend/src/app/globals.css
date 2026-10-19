@@ -1463,6 +1463,7 @@ select:focus,
   --vintage-blue-dark: var(--reps-red-dark);
 
   --pixel-bg: var(--reps-page);
+  --pixel-page-tint: linear-gradient(135deg, rgb(211 47 47 / 0.14), rgb(211 47 47 / 0.10));
   --pixel-bg-dark: #d8cebd;
   --pixel-panel: var(--reps-paper);
   --pixel-panel-light: #fbfaf5;
@@ -1510,7 +1511,7 @@ select:focus,
 }
 
 html {
-  background: var(--pixel-bg) !important;
+  background: var(--pixel-page-tint), var(--pixel-bg) !important;
   image-rendering: pixelated;
 }
 
@@ -1518,11 +1519,9 @@ body {
   background:
     linear-gradient(90deg, rgb(23 21 19 / 0.045) 1px, transparent 1px),
     linear-gradient(0deg, rgb(23 21 19 / 0.045) 1px, transparent 1px),
-    radial-gradient(circle at 16% 12%, rgb(211 47 47 / 0.10), transparent 18rem),
-    radial-gradient(circle at 82% 18%, rgb(255 255 255 / 0.28), transparent 20rem),
-    radial-gradient(circle at 78% 88%, rgb(43 41 37 / 0.06), transparent 18rem),
+    var(--pixel-page-tint),
     var(--pixel-bg) !important;
-  background-size: 18px 18px, 18px 18px, auto, auto, auto, auto !important;
+  background-size: 18px 18px, 18px 18px, auto, auto !important;
   color: var(--pixel-ink) !important;
   font-family: var(--font-body) !important;
   font-size: 20px;
