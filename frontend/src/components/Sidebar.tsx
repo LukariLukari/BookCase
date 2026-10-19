@@ -27,6 +27,8 @@ const standaloneItems = [
   { href: '/business/expenses', label: 'Quản lý chi tiêu', icon: CircleDollarSign },
 ];
 
+const expenseTransactionItem = { href: '/business/expenses/transactions', label: 'Giao dịch', icon: ReceiptText };
+
 const groups = [
   {
     id: 'warehouse',
@@ -62,7 +64,7 @@ export default function Sidebar() {
     statistics: false,
   });
   const isAdmin = user?.role === 'admin';
-  const active = (href: string) => href === '/business' ? pathname === href : pathname.startsWith(href);
+  const active = (href: string) => href === '/business' || href === '/business/expenses' ? pathname === href : pathname.startsWith(href);
   const groupActive = (group: (typeof groups)[number]) => group.items.some(({ href }) => active(href));
 
   const toggleGroup = (id: GroupId) => {
@@ -171,6 +173,7 @@ export default function Sidebar() {
           {desktopLink(standaloneItems[1])}
           {desktopGroup(groups[1])}
           {desktopLink(standaloneItems[2])}
+          {desktopLink(expenseTransactionItem, true)}
           {isAdmin && desktopLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}
         </nav>
         <div className="mt-auto pt-3">
@@ -208,6 +211,7 @@ export default function Sidebar() {
             {mobileGroup(groups[0])}
             {mobileGroup(groups[1])}
             <div className="col-span-2">{mobileLink(standaloneItems[2])}</div>
+            <div className="col-span-2 pl-5">{mobileLink(expenseTransactionItem)}</div>
             {isAdmin && mobileLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}
           </nav>
           <button onClick={logout} className="btn-push-danger mt-3.5 flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-black">

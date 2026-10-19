@@ -16,18 +16,21 @@ model User {
   createdAt     DateTime @default(now())
 
   // Relations
-  products         BusinessProduct[]
-  transactions     BusinessTransaction[]
-  ledgers          BusinessLedger[]
-  receipts         BusinessStockReceipt[]
-  orders           BusinessOrder[]
-  expenses         BusinessExpense[]
-  customers        BusinessCustomer[]
-  orderPayments    BusinessOrderPayment[]
-  statusHistory    BusinessOrderStatusHistory[]
-  stockMovements   BusinessInventoryMovement[]
-  inventoryBatches BusinessInventoryBatch[]
-  businessBackups   BusinessDataBackup[]
+  products            BusinessProduct[]
+  transactions        BusinessTransaction[]
+  ledgers             BusinessLedger[]
+  receipts            BusinessStockReceipt[]
+  orders              BusinessOrder[]
+  expenses            BusinessExpense[]
+  customers           BusinessCustomer[]
+  orderPayments       BusinessOrderPayment[]
+  statusHistory       BusinessOrderStatusHistory[]
+  stockMovements      BusinessInventoryMovement[]
+  inventoryBatches    BusinessInventoryBatch[]
+  businessBackups     BusinessDataBackup[]
+  expenseBooks        ExpenseBook[]
+  moneyAccounts       MoneyAccount[]
+  financeTransactions FinanceTransaction[]
 }
 
 model RegistrationCode {
@@ -291,4 +294,61 @@ model BusinessDataBackup {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+}
+
+model ExpenseBook {
+  id              String   @id @default(uuid())
+  userId          String
+  name            String
+  defaultCurrency String   @default("VND")
+  note            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accounts     MoneyAccount[]
+  transactions FinanceTransaction[]
+
+  @@index([userId, createdAt])
+}
+
+model MoneyAccount {
+  id             String   @id @default(uuid())
+  userId         String
+  bookId         String
+  name           String
+  type           String
+  currency       String   @default("VND")
+  openingBalance Decimal  @default(0) @db.Decimal(18, 2)
+  creditLimit    Decimal? @db.Decimal(18, 2)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book         ExpenseBook          @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  transactions FinanceTransaction[]
+
+  @@index([userId, bookId])
+}
+
+model FinanceTransaction {
+  id              String   @id @default(uuid())
+  userId          String
+  bookId          String
+  accountId       String
+  type            String
+  amount          Decimal  @db.Decimal(18, 2)
+  currency        String   @default("VND")
+  category        String
+  description     String?
+  transactionDate DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book    ExpenseBook  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  account MoneyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([userId, bookId, transactionDate])
+  @@index([userId, accountId])
 }
