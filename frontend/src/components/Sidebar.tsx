@@ -24,6 +24,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 const standaloneItems = [
   { href: '/business/pos', label: 'Bán tại quầy', icon: ShoppingCart },
   { href: '/business/customers', label: 'Khách hàng', icon: Users },
+  { href: '/business/expenses', label: 'Quản lý chi tiêu', icon: CircleDollarSign },
 ];
 
 const groups = [
@@ -45,7 +46,6 @@ const groups = [
       { href: '/business/reports', label: 'Báo cáo', icon: BarChart3 },
       { href: '/business/orders', label: 'Đơn hàng', icon: ReceiptText },
       { href: '/business/daily', label: 'Doanh thu ngày', icon: CalendarDays },
-      { href: '/business/expenses', label: 'Quản lý chi tiêu', icon: CircleDollarSign },
     ],
   },
 ] as const;
@@ -170,6 +170,7 @@ export default function Sidebar() {
           {desktopGroup(groups[0])}
           {desktopLink(standaloneItems[1])}
           {desktopGroup(groups[1])}
+          {desktopLink(standaloneItems[2])}
           {isAdmin && desktopLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}
         </nav>
         <div className="mt-auto pt-3">
@@ -206,6 +207,7 @@ export default function Sidebar() {
             {mobileLink(standaloneItems[1])}
             {mobileGroup(groups[0])}
             {mobileGroup(groups[1])}
+            <div className="col-span-2">{mobileLink(standaloneItems[2])}</div>
             {isAdmin && mobileLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}
           </nav>
           <button onClick={logout} className="btn-push-danger mt-3.5 flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-black">
