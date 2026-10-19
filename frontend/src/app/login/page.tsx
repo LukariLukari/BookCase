@@ -98,7 +98,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((visible) => !visible)}
-                  className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-[#585556]/75 transition hover:bg-[#fef9f4]/20 hover:text-[#585556] active:scale-90"
+                  className="absolute inset-y-0 right-2.5 my-auto flex h-9 w-9 items-center justify-center rounded-xl text-[#585556]/75 transition-colors hover:text-[#585556]"
                   aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                 >
                   {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
