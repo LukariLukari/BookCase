@@ -179,7 +179,7 @@ export default function DailyRevenueClient() {
       <Sidebar />
 
       <main className="min-w-0 flex-1">
-        <div className="mx-auto max-w-5xl space-y-5">
+        <div className="mx-auto max-w-5xl space-y-10">
           {/* TOP BAR / BREADCRUMB */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -399,8 +399,8 @@ export default function DailyRevenueClient() {
                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#16587B] text-white">
                     <UtensilsCrossed size={16} />
                   </div>
-                  <h2 className="text-lg font-black text-[#16587B] md:text-xl">
-                    Biểu Đồ Các Món Được Gọi
+                  <h2 className="business-chart-title text-lg font-black md:text-xl">
+                    BIỂU ĐỒ
                   </h2>
                 </div>
                 <p className="mt-1 text-xs font-semibold text-[#16587B]/70">

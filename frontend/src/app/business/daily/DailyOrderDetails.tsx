@@ -37,7 +37,7 @@ export default function DailyOrderDetails({ orders, items, soldUnits }: {
   if (!orders.length) return <p className="border-2 p-4 text-center">Chưa có đơn hàng trong ngày này.</p>;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-10">
       <section className="border-2 border-[#585556] bg-white p-3 sm:p-4" aria-label="Tổng hợp các món">
         <h3 className="font-bold">Tổng các món: {soldUnits} món</h3>
         <div className="mt-3 divide-y divide-[#585556]/20">

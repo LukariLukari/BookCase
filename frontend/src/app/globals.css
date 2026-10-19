@@ -2281,7 +2281,7 @@ main :where(section, .card-push) > :where(p, div) + :where(h2, h3) {
 }
 
 main > div > header {
-  margin-bottom: 2rem !important;
+  margin-bottom: 4rem !important;
 }
 
 @media (max-width: 767px) {
@@ -2291,7 +2291,7 @@ main > div > header {
   }
 
   main > div > header {
-    margin-bottom: 1.5rem !important;
+    margin-bottom: 3rem !important;
   }
 
   main :where(header, section, article, .card-push, .card-push-subtle) > p {
@@ -2495,6 +2495,10 @@ button.quick-create-toggle svg.quick-create-plus * {
 header > p.uppercase,
 .business-page-title,
 .brand-orange {
+  color: #e65c00 !important;
+}
+
+h2.business-chart-title {
   color: #e65c00 !important;
 }
 

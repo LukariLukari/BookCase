@@ -126,7 +126,7 @@ export default function RegistrationCodesPage() {
     <div className="min-h-screen bg-[#fef9f4] p-3 pb-[calc(12rem+env(safe-area-inset-bottom))] pt-[calc(4.75rem+env(safe-area-inset-top,0px))] text-[#585556] md:flex md:gap-5 md:p-6 md:pt-6 md:pb-8">
       <Sidebar />
       <main className="min-w-0 flex-1">
-        <div className="mx-auto max-w-6xl space-y-4">
+        <div className="mx-auto max-w-6xl space-y-8">
           <header className="card-push rounded-3xl p-5 md:p-7">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
               <div>
