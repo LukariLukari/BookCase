@@ -24,10 +24,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 const standaloneItems = [
   { href: '/business/pos', label: 'Bán tại quầy', icon: ShoppingCart },
   { href: '/business/customers', label: 'Khách hàng', icon: Users },
-  { href: '/business/expenses', label: 'Quản lý chi tiêu', icon: CircleDollarSign },
 ];
-
-const expenseTransactionItem = { href: '/business/expenses/transactions', label: 'Giao dịch', icon: ReceiptText };
 
 const groups = [
   {
@@ -50,6 +47,15 @@ const groups = [
       { href: '/business/daily', label: 'Doanh thu ngày', icon: CalendarDays },
     ],
   },
+  {
+    id: 'expenses',
+    label: 'Quản lý chi tiêu',
+    icon: CircleDollarSign,
+    items: [
+      { href: '/business/expenses', label: 'Tổng quan', icon: CircleDollarSign },
+      { href: '/business/expenses/transactions', label: 'Giao dịch', icon: ReceiptText },
+    ],
+  },
 ] as const;
 
 type GroupId = (typeof groups)[number]['id'];
@@ -62,6 +68,7 @@ export default function Sidebar() {
   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>({
     warehouse: false,
     statistics: false,
+    expenses: false,
   });
   const isAdmin = user?.role === 'admin';
   const active = (href: string) => href === '/business' || href === '/business/expenses' ? pathname === href : pathname.startsWith(href);
@@ -96,7 +103,7 @@ export default function Sidebar() {
       href={href}
       onClick={() => setOpen(false)}
       title={label}
-      className={`flex h-12 items-center justify-start gap-2.5 rounded-2xl px-3.5 text-xs font-black transition-all ${
+      className={`flex h-11 w-full items-center justify-start gap-2 rounded-xl px-3 text-[11px] font-black transition-all ${
         active(href) ? 'pixel-active text-white' : 'btn-push'
       }`}
     >
@@ -108,7 +115,7 @@ export default function Sidebar() {
   const desktopGroup = (group: (typeof groups)[number]) => {
     const Icon = group.icon;
     const isActive = groupActive(group);
-    const expanded = openGroups[group.id] || isActive;
+    const expanded = openGroups[group.id];
     return (
       <div key={group.id} className="space-y-1.5">
         <button
@@ -135,14 +142,14 @@ export default function Sidebar() {
   const mobileGroup = (group: (typeof groups)[number]) => {
     const Icon = group.icon;
     const isActive = groupActive(group);
-    const expanded = openGroups[group.id] || isActive;
+    const expanded = openGroups[group.id];
     return (
-      <div key={group.id} className="col-span-2">
+      <div key={group.id} className="col-span-2 min-w-0">
         <button
           type="button"
           onClick={() => toggleGroup(group.id)}
           aria-expanded={expanded}
-          className={`flex h-12 w-full items-center gap-2.5 rounded-2xl px-3.5 text-xs font-black transition-all ${
+          className={`flex h-11 w-full items-center gap-2 rounded-xl px-3 text-xs font-black transition-all ${
             isActive ? 'pixel-active text-white' : 'btn-push'
           }`}
         >
@@ -150,7 +157,7 @@ export default function Sidebar() {
           <span>{group.label}</span>
           <ChevronDown size={16} className={`ml-auto transition-transform ${expanded ? 'rotate-180' : ''}`} />
         </button>
-        {expanded && <div className="mt-2.5 grid grid-cols-2 gap-2.5">{group.items.map(item => mobileLink(item))}</div>}
+        {expanded && <div className="mt-2 grid grid-cols-2 gap-2 pl-3">{group.items.map(item => mobileLink(item))}</div>}
       </div>
     );
   };
@@ -172,8 +179,7 @@ export default function Sidebar() {
           {desktopGroup(groups[0])}
           {desktopLink(standaloneItems[1])}
           {desktopGroup(groups[1])}
-          {desktopLink(standaloneItems[2])}
-          {desktopLink(expenseTransactionItem, true)}
+          {desktopGroup(groups[2])}
           {isAdmin && desktopLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}
         </nav>
         <div className="mt-auto pt-3">
@@ -204,17 +210,16 @@ export default function Sidebar() {
       </header>
 
       {open && (
-        <div className="pixel-panel fixed inset-x-3.5 top-[calc(max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))+4.25rem)] z-50 max-h-[calc(100vh-6rem-env(safe-area-inset-bottom))] overflow-y-auto p-4 md:hidden">
-          <nav className="grid grid-cols-2 gap-2.5">
+        <div className="pixel-panel fixed inset-x-3.5 top-[calc(max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))+4.25rem)] z-50 max-h-[calc(100vh-6rem-env(safe-area-inset-bottom))] overflow-y-auto p-3 md:hidden">
+          <nav className="grid grid-cols-2 gap-2">
             {mobileLink(standaloneItems[0])}
             {mobileLink(standaloneItems[1])}
             {mobileGroup(groups[0])}
             {mobileGroup(groups[1])}
-            <div className="col-span-2">{mobileLink(standaloneItems[2])}</div>
-            <div className="col-span-2 pl-5">{mobileLink(expenseTransactionItem)}</div>
-            {isAdmin && mobileLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}
+            {mobileGroup(groups[2])}
+            {isAdmin && <div className="col-span-2">{mobileLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}</div>}
           </nav>
-          <button onClick={logout} className="btn-push-danger mt-3.5 flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-black">
+          <button onClick={logout} className="btn-push-danger mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-full text-sm font-black">
             <LogOut size={18} /> Đăng xuất
           </button>
         </div>
