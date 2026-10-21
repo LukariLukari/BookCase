@@ -2498,6 +2498,47 @@ header > p.uppercase,
   color: #e65c00 !important;
 }
 
+/* Keep links and disclosure buttons on the same menu grid in every state. */
+.sidebar-nav-item,
+.sidebar-nav-item:hover,
+.sidebar-nav-item:active {
+  box-sizing: border-box;
+  min-width: 0;
+  height: 44px;
+  gap: 10px;
+  border: 2px solid var(--pixel-ink-dark) !important;
+  font-size: 16px !important;
+  line-height: 1.25 !important;
+  text-align: left;
+  transform: none !important;
+  translate: none !important;
+  box-shadow: 4px 4px 0 var(--pixel-shadow-dark) !important;
+}
+
+.sidebar-nav-item .sidebar-nav-label {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-nav-item > svg {
+  width: 20px !important;
+  height: 20px !important;
+  flex-shrink: 0;
+}
+
+.sidebar-nav-item > svg.sidebar-nav-chevron {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.sidebar-nav-item.sidebar-nav-item-nested {
+  height: 40px;
+  font-size: 14px !important;
+}
+
 h2.business-chart-title {
   color: #e65c00 !important;
 }

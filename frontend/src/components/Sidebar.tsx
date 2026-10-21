@@ -84,7 +84,7 @@ export default function Sidebar() {
       href={href}
       onClick={() => setOpen(false)}
       title={label}
-      className={`flex w-full flex-nowrap items-center gap-2.5 rounded-2xl border text-sm font-black transition-all md:justify-center md:px-0 lg:justify-start ${nested ? 'h-10 px-3 lg:pl-7 lg:pr-3.5 xl:pl-8' : 'h-11 px-3 lg:px-3.5 xl:px-4'} ${
+      className={`sidebar-nav-item ${nested ? 'sidebar-nav-item-nested' : ''} flex w-full flex-nowrap items-center gap-2.5 rounded-2xl border text-sm font-black transition-all md:justify-center md:px-0 lg:justify-start ${nested ? 'h-10 px-3 lg:pl-7 lg:pr-3.5 xl:pl-8' : 'h-11 px-3 lg:px-3.5 xl:px-4'} ${
         active(href)
           ? 'pixel-active text-white'
           : nested
@@ -93,7 +93,7 @@ export default function Sidebar() {
       }`}
     >
       <Icon size={nested ? 17 : 19} className={`shrink-0 ${active(href) ? 'text-white stroke-white' : ''}`} />
-      <span className="whitespace-nowrap md:hidden lg:inline">{label}</span>
+      <span className="sidebar-nav-label whitespace-nowrap md:hidden lg:inline">{label}</span>
     </Link>
   );
 
@@ -103,12 +103,12 @@ export default function Sidebar() {
       href={href}
       onClick={() => setOpen(false)}
       title={label}
-      className={`flex h-11 w-full items-center justify-start gap-2 rounded-xl px-3 text-[11px] font-black transition-all ${
+      className={`sidebar-nav-item flex h-11 w-full items-center justify-start gap-2 rounded-xl px-3 text-[11px] font-black transition-all ${
         active(href) ? 'pixel-active text-white' : 'btn-push'
       }`}
     >
       <Icon size={18} className={`shrink-0 ${active(href) ? 'text-white stroke-white' : ''}`} />
-      <span className="truncate">{label}</span>
+      <span className="sidebar-nav-label truncate">{label}</span>
     </Link>
   );
 
@@ -117,24 +117,24 @@ export default function Sidebar() {
     const isActive = groupActive(group);
     const expanded = openGroups[group.id];
     return (
-      <div key={group.id} className="space-y-1.5">
+      <div key={group.id} className="space-y-3">
         <button
           type="button"
           onClick={() => toggleGroup(group.id)}
           aria-expanded={expanded}
           title={group.label}
-          className={`flex h-11 w-full flex-nowrap items-center gap-2.5 rounded-2xl border px-3 text-sm font-black transition-all md:justify-center md:px-0 lg:justify-start lg:px-3.5 xl:px-4 ${
+          className={`sidebar-nav-item flex h-11 w-full flex-nowrap items-center gap-2.5 rounded-2xl border px-3 text-sm font-black transition-all md:justify-center md:px-0 lg:justify-start lg:px-3.5 xl:px-4 ${
             isActive ? 'pixel-active text-white' : 'pixel-tile bg-[#cfc4a8] text-[#57575c] hover:bg-[#d9ceb0]'
           }`}
         >
           <Icon size={19} className={`shrink-0 ${isActive ? 'text-white stroke-white' : ''}`} />
-          <span className="whitespace-nowrap md:hidden lg:inline">{group.label}</span>
+          <span className="sidebar-nav-label whitespace-nowrap md:hidden lg:inline">{group.label}</span>
           <ChevronDown
             size={16}
-            className={`ml-auto hidden shrink-0 transition-transform lg:block ${expanded ? 'rotate-180' : ''}`}
+            className={`sidebar-nav-chevron ml-auto hidden shrink-0 transition-transform lg:block ${expanded ? 'rotate-180' : ''}`}
           />
         </button>
-        {expanded && <div className="space-y-1.5">{group.items.map(item => desktopLink(item, true))}</div>}
+        {expanded && <div className="space-y-3">{group.items.map(item => desktopLink(item, true))}</div>}
       </div>
     );
   };
@@ -144,27 +144,27 @@ export default function Sidebar() {
     const isActive = groupActive(group);
     const expanded = openGroups[group.id];
     return (
-      <div key={group.id} className="col-span-2 min-w-0">
+      <div key={group.id} className="min-w-0">
         <button
           type="button"
           onClick={() => toggleGroup(group.id)}
           aria-expanded={expanded}
-          className={`flex h-11 w-full items-center gap-2 rounded-xl px-3 text-xs font-black transition-all ${
+          className={`sidebar-nav-item flex h-11 w-full items-center gap-2 rounded-xl px-3 text-xs font-black transition-all ${
             isActive ? 'pixel-active text-white' : 'btn-push'
           }`}
         >
           <Icon size={18} className={`shrink-0 ${isActive ? 'text-white stroke-white' : ''}`} />
-          <span>{group.label}</span>
-          <ChevronDown size={16} className={`ml-auto transition-transform ${expanded ? 'rotate-180' : ''}`} />
+          <span className="sidebar-nav-label">{group.label}</span>
+          <ChevronDown size={16} className={`sidebar-nav-chevron ml-auto shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
         </button>
-        {expanded && <div className="mt-2 grid grid-cols-2 gap-2 pl-3">{group.items.map(item => mobileLink(item))}</div>}
+        {expanded && <div className="mt-3 grid grid-cols-1 gap-3 pl-3">{group.items.map(item => mobileLink(item))}</div>}
       </div>
     );
   };
 
   return (
     <>
-      <aside className="pixel-panel sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col overflow-y-auto p-2.5 pb-3 pt-3.5 no-scrollbar md:flex lg:w-60 xl:w-64">
+      <aside className="pixel-panel sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col overflow-y-auto p-2.5 pb-3 pt-3.5 no-scrollbar md:flex lg:w-64">
         <Link
           href="/business"
           title="Billy · Bán Hàng"
@@ -174,7 +174,7 @@ export default function Sidebar() {
           <span className="brand-orange hidden text-2xl font-black uppercase leading-none tracking-wider lg:block xl:text-[30px]">Billy.</span>
           <span className="mt-1 hidden text-[12px] font-black uppercase tracking-widest text-[#6d6a64] lg:block">Bán Hàng</span>
         </Link>
-        <nav className="space-y-2">
+        <nav className="space-y-3">
           {desktopLink(standaloneItems[0])}
           {desktopGroup(groups[0])}
           {desktopLink(standaloneItems[1])}
@@ -187,10 +187,10 @@ export default function Sidebar() {
           <button
             onClick={logout}
             title="Đăng xuất"
-            className="btn-push-danger flex h-11 w-full flex-nowrap items-center gap-2.5 rounded-full px-3 text-sm font-black md:justify-center md:px-0 lg:justify-start lg:px-3.5 xl:px-4"
+            className="sidebar-nav-item btn-push-danger flex h-11 w-full flex-nowrap items-center gap-2.5 rounded-full px-3 text-sm font-black md:justify-center md:px-0 lg:justify-start lg:px-3.5 xl:px-4"
           >
             <LogOut size={19} className="shrink-0" />
-            <span className="whitespace-nowrap md:hidden lg:inline">Đăng xuất</span>
+            <span className="sidebar-nav-label whitespace-nowrap md:hidden lg:inline">Đăng xuất</span>
           </button>
         </div>
       </aside>
@@ -211,16 +211,16 @@ export default function Sidebar() {
 
       {open && (
         <div className="pixel-panel fixed inset-x-3.5 top-[calc(max(0.625rem,calc(env(safe-area-inset-top)+0.25rem))+4.25rem)] z-50 max-h-[calc(100vh-6rem-env(safe-area-inset-bottom))] overflow-y-auto p-3 md:hidden">
-          <nav className="grid grid-cols-2 gap-2">
+          <nav className="grid grid-cols-1 gap-3">
             {mobileLink(standaloneItems[0])}
             {mobileLink(standaloneItems[1])}
             {mobileGroup(groups[0])}
             {mobileGroup(groups[1])}
             {mobileGroup(groups[2])}
-            {isAdmin && <div className="col-span-2">{mobileLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}</div>}
+            {isAdmin && <div className="min-w-0">{mobileLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}</div>}
           </nav>
-          <button onClick={logout} className="btn-push-danger mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-full text-sm font-black">
-            <LogOut size={18} /> Đăng xuất
+          <button onClick={logout} className="sidebar-nav-item btn-push-danger mt-3 flex h-11 w-full items-center gap-2 rounded-full px-3 text-sm font-black">
+            <LogOut size={18} /> <span className="sidebar-nav-label">Đăng xuất</span>
           </button>
         </div>
       )}
