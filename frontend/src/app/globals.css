@@ -2539,6 +2539,61 @@ header > p.uppercase,
   font-size: 14px !important;
 }
 
+/* Full-screen transaction entry keeps the amount and keypad in the viewport. */
+dialog.finance-fullscreen-dialog {
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+  border: 0 !important;
+  background: var(--pixel-panel) !important;
+  color: var(--pixel-ink);
+  overflow: hidden;
+}
+
+.finance-fullscreen-dialog[open] { display: flex; flex-direction: column; }
+.finance-fullscreen-header { display: flex; justify-content: flex-end; padding: 8px 16px; flex: 0 0 auto; }
+.finance-fullscreen-content { flex: 1; min-height: 0; display: flex; }
+.finance-entry { width: 100%; max-width: 680px; margin: 0 auto; min-height: 0; padding: 0 12px 12px; display: flex; }
+.finance-entry-fields { padding: 0; border: 0; min-width: 0; width: 100%; display: flex; flex-direction: column; }
+.finance-entry-main { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; }
+.finance-entry-meta { display: grid; gap: 8px; flex: 0 0 auto; }
+.finance-entry-meta :is(input, select) { width: 100%; min-width: 0; height: 44px; padding: 8px 12px; box-shadow: none !important; }
+.finance-entry-amount { flex: 1; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 0; }
+.finance-entry-amount output { max-width: 100%; font-weight: 900; line-height: 1.1; letter-spacing: -0.04em; color: #e65c00; overflow-wrap: anywhere; }
+.finance-entry-amount > span { margin-top: 6px; font-size: 14px; font-weight: 800; }
+.finance-entry-feedback { flex: 0 0 auto; }
+.finance-entry-feedback p { margin: 0 0 8px; font-size: 13px !important; line-height: 1.3 !important; text-align: center; }
+.finance-entry-feedback [role="alert"] { color: #b63824; }
+.finance-entry-console { flex: 0 0 auto; border: 2px solid var(--pixel-ink-dark); background: #ffe69a; }
+.finance-entry-toolbar { display: grid; grid-template-columns: 42px 42px minmax(0, 1fr) minmax(0, 1.15fr); gap: 4px; padding: 6px; border-bottom: 2px solid var(--pixel-ink-dark); align-items: stretch; }
+.finance-entry-toolbar label { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.finance-entry-toolbar label > span { padding-bottom: 3px; font-size: 10px !important; line-height: 1.1; white-space: nowrap; font-weight: 800; }
+.finance-entry-toolbar :is(select, input) { width: 100%; min-width: 0; min-height: 32px; height: 32px; padding: 2px; font-size: 12px !important; box-shadow: none !important; }
+.finance-entry-toolbar input::-webkit-date-and-time-value { text-align: left; }
+.finance-entry-type { border: 2px solid var(--pixel-ink-dark); font-size: 14px !important; font-weight: 900; background: var(--pixel-panel-light); }
+.finance-entry-income[aria-pressed="true"] { background: #8ee0a8; }
+.finance-entry-expense[aria-pressed="true"] { background: #ff9f87; }
+.finance-entry-type[aria-pressed="true"] { box-shadow: inset 0 -4px 0 var(--pixel-ink-dark); }
+.finance-entry-keypad { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: clamp(44px, 8dvh, 72px); gap: 6px; padding: 8px; }
+button.finance-entry-key { min-width: 0; border: 2px solid var(--pixel-ink-dark); background: var(--pixel-panel-light); font-size: 26px !important; font-weight: 900; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 0 var(--pixel-shadow-dark) !important; }
+button.finance-entry-key:active { box-shadow: none !important; transform: translate(2px, 2px); }
+button.finance-entry-key > svg { width: 28px !important; height: 28px !important; }
+button.finance-entry-delete { background: #e65332; color: white !important; }
+button.finance-entry-add { grid-row: span 2; background: #258bd2; color: white !important; }
+button.finance-entry-done { background: #8ee0a8; }
+button:is(.finance-entry-delete, .finance-entry-add) svg,
+button:is(.finance-entry-delete, .finance-entry-add) svg * { color: white !important; stroke: white !important; }
+.finance-entry-fields:disabled button { opacity: 0.6; }
+
+@media (max-height: 520px) {
+  .finance-fullscreen-header { padding-top: 4px; padding-bottom: 4px; }
+  .finance-entry-meta { grid-template-columns: 1fr 1fr; }
+}
+
 h2.business-chart-title {
   color: #e65c00 !important;
 }
