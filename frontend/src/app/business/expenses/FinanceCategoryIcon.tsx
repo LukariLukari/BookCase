@@ -1,11 +1,12 @@
 import {
-  Apple, Baby, BadgeDollarSign, Banknote, Bath, Beer, Bike, BookOpen, BriefcaseBusiness,
+  Apple, Baby, BadgeCent, BadgeDollarSign, BadgeEuro, BadgeJapaneseYen, BadgePoundSterling,
+  Banknote, Bath, Beer, Bike, Bitcoin, BookOpen, BriefcaseBusiness, Calculator,
   Building2, Bus, Cake, Camera, Car, ChartNoAxesCombined, Church, CircleEllipsis, Coffee,
   Coins, CookingPot, Dumbbell, Film, Flower2, Fuel, Gamepad2, Gift, Glasses, GraduationCap,
-  HandHeart, Headphones, Heart, Hospital, Hotel, House, KeyRound, Landmark, Laptop, Leaf,
+  CircleDollarSign, CreditCard, HandCoins, HandHeart, Headphones, Heart, Hospital, Hotel, House, KeyRound, Landmark, Laptop, Leaf,
   Lightbulb, MapPin, Music, Palette, PartyPopper, PawPrint, PiggyBank, Pill, Pizza, Plane,
-  Receipt, School, Scissors, Shirt, ShoppingBag, ShoppingCart, Smartphone, Smile, Sparkles,
-  Sprout, Stethoscope, Ticket, Train, Trophy, Utensils, Users, WalletCards, Wifi, Wrench, Zap,
+  Percent, Receipt, School, Scissors, Shirt, ShoppingBag, ShoppingCart, Smartphone, Smile, Sparkles,
+  Sprout, Stethoscope, Ticket, Train, TrendingDown, TrendingUp, Trophy, Utensils, Users, Vault, WalletCards, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import type { CategoryIconName } from './categoryData';
 
@@ -41,6 +42,19 @@ const icons = {
   landmark: Landmark,
   'chart-no-axes-combined': ChartNoAxesCombined,
   'circle-ellipsis': CircleEllipsis,
+  'credit-card': CreditCard,
+  vault: Vault,
+  'hand-coins': HandCoins,
+  'circle-dollar-sign': CircleDollarSign,
+  'badge-cent': BadgeCent,
+  'badge-euro': BadgeEuro,
+  'badge-pound-sterling': BadgePoundSterling,
+  'badge-japanese-yen': BadgeJapaneseYen,
+  bitcoin: Bitcoin,
+  percent: Percent,
+  calculator: Calculator,
+  'trending-up': TrendingUp,
+  'trending-down': TrendingDown,
   apple: Apple,
   'badge-dollar-sign': BadgeDollarSign,
   bath: Bath,
@@ -80,7 +94,15 @@ const icons = {
   zap: Zap,
 } satisfies Record<CategoryIconName, typeof Heart>;
 
+const readableInk = (color: string) => {
+  const value = color.replace('#', '');
+  if (!/^[0-9a-f]{6}$/i.test(value)) return '#ffffff';
+  const [red, green, blue] = [0, 2, 4].map(offset => Number.parseInt(value.slice(offset, offset + 2), 16));
+  return red * 0.299 + green * 0.587 + blue * 0.114 > 168 ? '#302d28' : '#ffffff';
+};
+
 export default function FinanceCategoryIcon({ name, color, className = '' }: { name?: string; color?: string; className?: string }) {
   const Icon = icons[name as CategoryIconName] || CircleEllipsis;
-  return <span className={`finance-category-icon ${className}`} style={{ backgroundColor: color || '#7C6F64' }}><Icon aria-hidden="true" /></span>;
+  const background = color || '#7C6F64';
+  return <span className={`finance-category-icon ${className}`} style={{ backgroundColor: background, color: readableInk(background) }}><Icon aria-hidden="true" /></span>;
 }

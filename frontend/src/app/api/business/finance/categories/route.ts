@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   const name = String(body.name || '').trim();
   const type = String(body.type || 'expense');
   const icon = String(body.icon || 'circle-ellipsis');
-  const color = String(body.color || '#EF7C3B').toUpperCase();
+  const color = String(body.color || '#FFB4A2').toUpperCase();
   if (!name || name.length > 40) return NextResponse.json({ detail: 'Tên danh mục phải từ 1 đến 40 ký tự.' }, { status: 400 });
   if (!['income', 'expense'].includes(type) || !allowedIcons.has(icon) || !validColor(color)) return NextResponse.json({ detail: 'Loại, icon hoặc màu danh mục không hợp lệ.' }, { status: 400 });
   const duplicate = await prisma.financeCategory.findFirst({ where: { userId: user.id, type, name: { equals: name, mode: 'insensitive' } } });

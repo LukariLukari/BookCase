@@ -306,7 +306,7 @@ export default function DailyRevenueClient() {
                     transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                     className="my-1"
                   >
-                    <span className="block text-4xl font-black tracking-tight text-[#16587B] sm:text-5xl md:text-6xl lg:text-7xl">
+                    <span className="business-money-display block text-4xl font-black tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
                       {formatVNCurrency(stats?.totalRevenue || 0)}
                     </span>
                   </motion.div>

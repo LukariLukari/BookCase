@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/app/contexts/AuthContext';
 import FinanceCategoryIcon from './FinanceCategoryIcon';
-import { categoryColors, categoryIcons, type CategoryIconName, type FinanceCategory } from './categoryData';
+import { categoryColors, categoryIconGroups, type CategoryIconName, type FinanceCategory } from './categoryData';
 
 const iconLabels: Record<CategoryIconName, string> = {
   heart: 'Tình yêu', utensils: 'Ăn uống', house: 'Gia đình', users: 'Bạn bè',
@@ -27,9 +27,13 @@ const iconLabels: Record<CategoryIconName, string> = {
   'party-popper': 'Tiệc tùng', pizza: 'Đồ ăn nhanh', receipt: 'Hóa đơn', school: 'Trường học',
   scissors: 'Cắt tóc', 'shopping-cart': 'Siêu thị', smile: 'Giải trí', sprout: 'Làm vườn',
   ticket: 'Vé', train: 'Tàu điện', trophy: 'Giải thưởng', wrench: 'Sửa chữa', zap: 'Điện',
+  'credit-card': 'Thẻ tín dụng', vault: 'Két tiền', 'hand-coins': 'Nhận tiền',
+  'circle-dollar-sign': 'Tài chính', 'badge-cent': 'Cent', 'badge-euro': 'Euro',
+  'badge-pound-sterling': 'Bảng Anh', 'badge-japanese-yen': 'Yên Nhật', bitcoin: 'Tiền số',
+  percent: 'Lãi suất', calculator: 'Tính toán', 'trending-up': 'Tăng trưởng', 'trending-down': 'Sụt giảm',
 };
 
-const blank = () => ({ id: '', name: '', type: 'expense' as 'income' | 'expense', icon: 'utensils' as CategoryIconName, color: '#EF7C3B' });
+const blank = () => ({ id: '', name: '', type: 'expense' as 'income' | 'expense', icon: 'utensils' as CategoryIconName, color: '#FFB4A2' });
 const card = 'border-2 border-black bg-[#fffaf0] shadow-[4px_4px_0_#000]';
 
 export default function FinanceCategoriesClient() {
@@ -102,15 +106,17 @@ export default function FinanceCategoriesClient() {
 
       <div className="mt-7 grid gap-7 lg:grid-cols-[.8fr_1.2fr]">
         <form onSubmit={save} className={`${card} h-fit p-4 md:p-6`}>
-          <div className="flex items-center justify-between gap-3"><h2 className="text-xl font-black uppercase">{form.id ? 'Sửa danh mục' : 'Tạo danh mục'}</h2>{form.id&&<button type="button" className="finance-category-cancel" onClick={()=>setForm(blank())}><X/> Hủy sửa</button>}</div>
-          <label className="mt-5 block"><span className="mb-2 block text-xs font-black uppercase">Tên danh mục</span><input autoFocus={false} maxLength={40} required value={form.name} onChange={event=>setForm({...form,name:event.target.value})} placeholder="Ví dụ: Ăn trưa, Lương, Du lịch..." className="h-12 w-full px-3"/></label>
+          <div className="finance-category-name-editor">
+            <FinanceCategoryIcon name={form.icon} color={form.color}/>
+            <label className="min-w-0 flex-1"><span>{form.id ? 'Sửa tên danh mục' : 'Đặt tên danh mục'}</span><input autoFocus={false} maxLength={40} required value={form.name} onChange={event=>setForm({...form,name:event.target.value})} placeholder="Ăn trưa, Lương, Du lịch..."/></label>
+            <button disabled={saving||!form.name.trim()} className="finance-category-save" type="submit" aria-label={form.id?'Lưu thay đổi':'Tạo danh mục'} title={form.id?'Lưu thay đổi':'Tạo danh mục'}>{saving?<Loader2 className="animate-spin"/>:form.id?<Check/>:<Plus/>}</button>
+          </div>
+          {form.id&&<button type="button" className="finance-category-cancel mt-3" onClick={()=>setForm(blank())}><X/> Hủy chỉnh sửa</button>}
           <div className="mt-5"><span className="mb-2 block text-xs font-black uppercase">Loại danh mục</span><div className="grid grid-cols-2 gap-3"><button type="button" aria-pressed={form.type==='expense'} onClick={()=>setForm({...form,type:'expense'})} className="finance-category-type expense">Khoản chi</button><button type="button" aria-pressed={form.type==='income'} onClick={()=>setForm({...form,type:'income'})} className="finance-category-type income">Khoản thu</button></div></div>
-          <fieldset className="mt-5"><legend className="mb-2 text-xs font-black uppercase">Chọn biểu tượng</legend><div className="finance-category-icon-grid">{categoryIcons.map(icon=><button type="button" key={icon} title={iconLabels[icon]} aria-label={iconLabels[icon]} aria-pressed={form.icon===icon} onClick={()=>setForm({...form,icon})}><FinanceCategoryIcon name={icon} color={form.color}/></button>)}</div></fieldset>
-          <fieldset className="mt-5"><legend className="mb-2 text-xs font-black uppercase">Bảng màu</legend><div className="finance-category-color-grid">{categoryColors.map(color=><button type="button" key={color} aria-label={`Màu ${color}`} aria-pressed={form.color===color} style={{backgroundColor:color}} onClick={()=>setForm({...form,color})}>{form.color===color&&<Check/>}</button>)}</div><label className="finance-custom-color"><span>Tự chọn màu bất kỳ</span><span className="finance-custom-color-value"><i style={{backgroundColor:form.color}}/><b>{form.color}</b><input type="color" value={form.color} onChange={event=>setForm({...form,color:event.target.value.toUpperCase()})}/></span></label></fieldset>
-          <div className="mt-6 flex items-center gap-3 border-2 border-black bg-[#fff6d8] p-3"><FinanceCategoryIcon name={form.icon} color={form.color}/><div className="min-w-0"><p className="text-[10px] font-black uppercase">Xem trước</p><b className="block truncate">{form.name||'Tên danh mục'}</b></div></div>
+          <fieldset className="mt-5"><legend className="mb-2 text-xs font-black uppercase">Chọn biểu tượng</legend><div className="finance-category-icon-groups">{categoryIconGroups.map(group=><section key={group.label}><h3>{group.label}</h3><div className="finance-category-icon-grid">{group.icons.map(icon=><button type="button" key={icon} title={iconLabels[icon]} aria-label={iconLabels[icon]} aria-pressed={form.icon===icon} onClick={()=>setForm({...form,icon})}><FinanceCategoryIcon name={icon} color={form.color}/></button>)}</div></section>)}</div></fieldset>
+          <fieldset className="mt-5"><legend className="mb-2 text-xs font-black uppercase">Màu pastel</legend><div className="finance-category-color-grid">{categoryColors.map(color=><button type="button" key={color} aria-label={`Màu ${color}`} aria-pressed={form.color===color} style={{backgroundColor:color}} onClick={()=>setForm({...form,color})}>{form.color===color&&<Check/>}</button>)}<label className="finance-custom-color" title="Tự chọn màu khác" aria-label="Tự chọn màu khác"><Plus/><input type="color" value={form.color} onChange={event=>setForm({...form,color:event.target.value.toUpperCase()})}/></label></div></fieldset>
           {error&&<p role="alert" className="mt-4 border-2 border-black bg-[#ffc9ba] p-3 text-sm font-bold">{error}</p>}
           {message&&<p role="status" className="mt-4 border-2 border-black bg-[#c9f1d5] p-3 text-sm font-bold">{message}</p>}
-          <button disabled={saving||!form.name.trim()} className="finance-category-save mt-5" type="submit">{saving?<Loader2 className="animate-spin"/>:form.id?<Check/>:<Plus/>}{form.id?'Lưu thay đổi':'Tạo danh mục'}</button>
         </form>
 
         <section className="space-y-6">{loading?<div className={`${card} grid min-h-48 place-items-center`}><Loader2 className="animate-spin"/></div>:groups.map(group=>{

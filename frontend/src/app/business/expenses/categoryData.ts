@@ -1,32 +1,41 @@
-export const categoryIcons = [
-  'heart', 'utensils', 'house', 'users', 'wallet-cards', 'shopping-bag',
-  'dumbbell', 'car', 'bus', 'plane', 'graduation-cap', 'briefcase-business',
-  'gift', 'gamepad-2', 'music', 'film', 'coffee', 'paw-print', 'baby',
-  'shirt', 'smartphone', 'wifi', 'pill', 'stethoscope', 'sparkles', 'leaf',
-  'banknote', 'piggy-bank', 'landmark', 'chart-no-axes-combined', 'circle-ellipsis',
-  'apple', 'badge-dollar-sign', 'bath', 'beer', 'bike', 'book-open', 'building-2',
-  'cake', 'camera', 'church', 'coins', 'cooking-pot', 'flower-2', 'fuel', 'glasses',
-  'hand-heart', 'headphones', 'hospital', 'hotel', 'key-round', 'laptop', 'lightbulb',
-  'map-pin', 'palette', 'party-popper', 'pizza', 'receipt', 'school', 'scissors',
-  'shopping-cart', 'smile', 'sprout', 'ticket', 'train', 'trophy', 'wrench', 'zap',
+export const categoryIconGroups = [
+  {
+    label: 'Tiền bạc & tài chính',
+    icons: ['banknote', 'coins', 'wallet-cards', 'credit-card', 'piggy-bank', 'landmark', 'vault', 'hand-coins', 'circle-dollar-sign', 'badge-dollar-sign', 'badge-cent', 'badge-euro', 'badge-pound-sterling', 'badge-japanese-yen', 'bitcoin', 'percent', 'calculator', 'chart-no-axes-combined', 'trending-up', 'trending-down', 'receipt'] as const,
+  },
+  {
+    label: 'Ăn uống & mua sắm',
+    icons: ['utensils', 'cooking-pot', 'coffee', 'pizza', 'apple', 'beer', 'shopping-bag', 'shopping-cart', 'shirt', 'gift', 'cake'] as const,
+  },
+  {
+    label: 'Gia đình & đời sống',
+    icons: ['house', 'users', 'heart', 'hand-heart', 'baby', 'paw-print', 'bath', 'key-round', 'flower-2', 'sprout', 'leaf', 'sparkles'] as const,
+  },
+  {
+    label: 'Đi lại & du lịch',
+    icons: ['car', 'bus', 'bike', 'train', 'plane', 'fuel', 'map-pin', 'hotel', 'ticket'] as const,
+  },
+  {
+    label: 'Công việc & học tập',
+    icons: ['briefcase-business', 'building-2', 'laptop', 'smartphone', 'wifi', 'book-open', 'graduation-cap', 'school', 'lightbulb', 'wrench'] as const,
+  },
+  {
+    label: 'Sức khỏe & giải trí',
+    icons: ['dumbbell', 'stethoscope', 'hospital', 'pill', 'glasses', 'scissors', 'music', 'headphones', 'film', 'camera', 'palette', 'gamepad-2', 'party-popper', 'trophy', 'smile', 'church', 'zap', 'circle-ellipsis'] as const,
+  },
 ] as const;
 
+export const categoryIcons = categoryIconGroups.flatMap(group => [...group.icons]);
+
+// A compact set of calm theme-friendly pastels. Any other colour remains available
+// through the custom colour control in the category editor.
 export const categoryColors = [
-  '#7F1D1D', '#991B1B', '#B91C1C', '#DC2626', '#EF4444', '#F87171',
-  '#9A3412', '#C2410C', '#EA580C', '#F97316', '#FB923C', '#FDBA74',
-  '#854D0E', '#A16207', '#CA8A04', '#EAB308', '#FACC15', '#FDE047',
-  '#365314', '#4D7C0F', '#65A30D', '#84CC16', '#8FAF52', '#BEF264',
-  '#14532D', '#166534', '#15803D', '#16A34A', '#22C55E', '#4ADE80',
-  '#134E4A', '#0F766E', '#0D9488', '#14B8A6', '#2DD4BF', '#5EEAD4',
-  '#164E63', '#0E7490', '#0891B2', '#06B6D4', '#22D3EE', '#67E8F9',
-  '#1E3A8A', '#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD',
-  '#312E81', '#4338CA', '#4F46E5', '#6366F1', '#818CF8', '#A5B4FC',
-  '#581C87', '#7E22CE', '#9333EA', '#A855F7', '#C084FC', '#D8B4FE',
-  '#831843', '#BE185D', '#DB2777', '#EC4899', '#F472B6', '#F9A8D4',
-  '#3F3F46', '#52525B', '#71717A', '#7C6F64', '#A1A1AA', '#D4D4D8',
+  '#FFB4A2', '#FFC6A5', '#FFD6A5', '#FDE68A', '#FFF1A8', '#D9ED92',
+  '#B7E4C7', '#A7F3D0', '#99E2E2', '#A5F3FC', '#A8DADC', '#BFDBFE',
+  '#C7D2FE', '#D8B4FE', '#E9D5FF', '#F5C2E7', '#FBCFE8', '#E7D8C9',
 ] as const;
 
-export type CategoryIconName = typeof categoryIcons[number];
+export type CategoryIconName = typeof categoryIconGroups[number]['icons'][number];
 
 export type FinanceCategory = {
   id: string;
