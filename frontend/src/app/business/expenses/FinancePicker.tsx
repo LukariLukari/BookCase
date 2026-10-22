@@ -2,8 +2,9 @@
 
 import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
+import FinanceCategoryIcon from './FinanceCategoryIcon';
 
-type SelectOption = { value: string; label: string };
+type SelectOption = { value: string; label: string; icon?: string; color?: string };
 
 function PickerShell({ title, close, children }: { title: string; close: () => void; children: React.ReactNode }) {
   useEffect(() => {
@@ -50,7 +51,10 @@ export function FinanceSelect({ value, options, placeholder, label, compact = fa
         aria-controls={open ? listId : undefined}
         onClick={() => setOpen(true)}
       >
-        <span className={!selected ? 'finance-picker-placeholder' : undefined}>{selected?.label || placeholder}</span>
+        <span className={`finance-picker-trigger-value${!selected ? ' finance-picker-placeholder' : ''}`}>
+          {selected?.icon && <FinanceCategoryIcon name={selected.icon} color={selected.color} />}
+          <span>{selected?.label || placeholder}</span>
+        </span>
         <ChevronDown />
       </button>
       {open && (
@@ -67,7 +71,7 @@ export function FinanceSelect({ value, options, placeholder, label, compact = fa
                   key={option.value}
                   onClick={() => { onChange(option.value); setOpen(false); }}
                 >
-                  <span>{option.label}</span>
+                  <span className="finance-picker-option-value">{option.icon && <FinanceCategoryIcon name={option.icon} color={option.color} />}<span>{option.label}</span></span>
                   {active && <Check />}
                 </button>
               );

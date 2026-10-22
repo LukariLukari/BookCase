@@ -1,7 +1,9 @@
 'use client';
 
 import { Check, Delete, Loader2, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { FinanceDatePicker, FinanceSelect } from './FinancePicker';
+import type { FinanceCategory } from './categoryData';
 
 export type TransactionDraft = {
   type: 'income' | 'expense';
@@ -15,7 +17,7 @@ export type TransactionDraft = {
 export default function TransactionEntry({ form, accounts, categories, saving, error, message, change, changeType, press, save }: {
   form: TransactionDraft;
   accounts: { id: string; name: string; currency: string }[];
-  categories: string[];
+  categories: FinanceCategory[];
   saving: boolean;
   error: string;
   message: string;
@@ -38,9 +40,10 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
               label="Chọn danh mục"
               placeholder="Chọn danh mục"
               value={form.category}
-              options={(form.category && !categories.includes(form.category) ? [form.category, ...categories] : categories).map(category => ({ value: category, label: category }))}
+              options={categories.map(category => ({ value: category.id, label: category.name, icon: category.icon, color: category.color }))}
               onChange={category => change({ category })}
             />
+            {!categories.length && <Link href="/business/expenses/categories" className="finance-entry-category-empty">Bạn chưa có danh mục loại này · Tạo danh mục</Link>}
             <input aria-label="Ghi chú" placeholder="Ghi chú (không bắt buộc)" value={form.description} onChange={event => change({ description: event.target.value })} />
           </div>
 
