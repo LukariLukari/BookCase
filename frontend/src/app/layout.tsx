@@ -33,6 +33,7 @@ export const viewport: Viewport = {
 };
 
 import { AuthProvider } from "./contexts/AuthContext";
+import ButtonSoundEffects from "@/components/ButtonSoundEffects";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full flex flex-col bg-[#F5EEDD] text-[#16587B] font-sans" suppressHydrationWarning>
         <AuthProvider>
+          <ButtonSoundEffects />
           {children}
         </AuthProvider>
       </body>

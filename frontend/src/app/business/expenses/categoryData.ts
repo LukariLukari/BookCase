@@ -43,4 +43,5 @@ export type FinanceCategory = {
   type: 'income' | 'expense';
   icon: CategoryIconName;
   color: string;
+  usageCount?: number;
 };

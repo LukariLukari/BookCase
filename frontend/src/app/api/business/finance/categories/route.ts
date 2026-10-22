@@ -13,9 +13,9 @@ export async function GET(request: Request) {
   const categories = await prisma.financeCategory.findMany({
     where: { userId: user.id },
     orderBy: [{ type: 'asc' }, { createdAt: 'asc' }],
-    select: { id: true, name: true, type: true, icon: true, color: true },
+    select: { id: true, name: true, type: true, icon: true, color: true, _count: { select: { transactions: true } } },
   });
-  return NextResponse.json(categories);
+  return NextResponse.json(categories.map(({ _count, ...category }) => ({ ...category, usageCount: _count.transactions })));
 }
 
 export async function POST(request: Request) {
