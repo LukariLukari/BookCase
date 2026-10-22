@@ -1,6 +1,7 @@
 'use client';
 
 import { Check, Delete, Loader2, Plus } from 'lucide-react';
+import { FinanceDatePicker, FinanceSelect } from './FinancePicker';
 
 export type TransactionDraft = {
   type: 'income' | 'expense';
@@ -33,11 +34,13 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
       <fieldset disabled={saving} className="finance-entry-fields">
         <div className="finance-entry-main">
           <div className="finance-entry-meta">
-            <label><span className="sr-only">Danh mục</span><select aria-label="Danh mục" value={form.category} onChange={event => change({ category: event.target.value })}>
-              <option value="">Chọn danh mục</option>
-              {form.category && !categories.includes(form.category) && <option>{form.category}</option>}
-              {categories.map(category => <option key={category}>{category}</option>)}
-            </select></label>
+            <FinanceSelect
+              label="Chọn danh mục"
+              placeholder="Chọn danh mục"
+              value={form.category}
+              options={(form.category && !categories.includes(form.category) ? [form.category, ...categories] : categories).map(category => ({ value: category, label: category }))}
+              onChange={category => change({ category })}
+            />
             <input aria-label="Ghi chú" placeholder="Ghi chú (không bắt buộc)" value={form.description} onChange={event => change({ description: event.target.value })} />
           </div>
 
@@ -54,8 +57,8 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
           <div className="finance-entry-toolbar">
             <button type="button" aria-pressed={form.type === 'income'} onClick={() => changeType('income')} className="finance-entry-type finance-entry-income">Thu</button>
             <button type="button" aria-pressed={form.type === 'expense'} onClick={() => changeType('expense')} className="finance-entry-type finance-entry-expense">Chi</button>
-            <label><span>Khoản tiền</span><select aria-label="Tài khoản tiền" value={form.accountId} onChange={event => change({ accountId: event.target.value })}>{accounts.map(account => <option key={account.id} value={account.id}>{account.name} · {account.currency}</option>)}</select></label>
-            <label><span>Ngày giao dịch</span><input aria-label="Ngày giao dịch" type="date" value={form.date} onChange={event => change({ date: event.target.value })} /></label>
+            <label><span>Khoản tiền</span><FinanceSelect compact label="Chọn khoản tiền" placeholder="Chọn tài khoản" value={form.accountId} onChange={accountId => change({ accountId })} options={accounts.map(account => ({ value: account.id, label: `${account.name} · ${account.currency}` }))} /></label>
+            <label><span>Ngày giao dịch</span><FinanceDatePicker compact label="Chọn ngày giao dịch" value={form.date} onChange={date => change({ date })} /></label>
           </div>
           <div className="finance-entry-keypad" aria-label="Bàn phím nhập khoản tiền">
             {['1', '2', '3'].map(key)}
