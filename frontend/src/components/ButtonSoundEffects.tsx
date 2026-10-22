@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-type SoundKind = 'tap' | 'money' | 'delete';
+type SoundKind = 'tap' | 'keypad' | 'money' | 'delete';
 
 let sharedContext: AudioContext | null = null;
 
@@ -38,6 +38,11 @@ function play(kind: SoundKind) {
       note(context, 1046, now, 0.09, 0.045, 'sine');
       note(context, 1568, now + 0.055, 0.16, 0.04, 'sine');
       note(context, 2093, now + 0.09, 0.1, 0.018, 'triangle');
+    } else if (kind === 'keypad') {
+      // A firm calculator-key blip with a short low transient and clear upper tone.
+      note(context, 185, now, 0.045, 0.045, 'square');
+      note(context, 720, now + 0.004, 0.07, 0.065, 'triangle');
+      note(context, 1080, now + 0.012, 0.045, 0.025, 'sine');
     } else if (kind === 'delete') {
       note(context, 190, now, 0.075, 0.025, 'triangle');
     } else {
@@ -57,7 +62,8 @@ export default function ButtonSoundEffects() {
       const requested = target.dataset.sound;
       const moneyIcon = target.querySelector('.lucide-plus, .lucide-check, .lucide-circle-check, .lucide-badge-check');
       const deleteIcon = target.querySelector('.lucide-trash, .lucide-trash-2, .lucide-delete');
-      play(requested === 'money' || moneyIcon ? 'money' : requested === 'delete' || deleteIcon ? 'delete' : 'tap');
+      const keypadKey = target.classList.contains('finance-entry-key') && !target.matches('.finance-entry-add, .finance-entry-done, .finance-entry-delete');
+      play(requested === 'money' || moneyIcon ? 'money' : requested === 'delete' || deleteIcon ? 'delete' : keypadKey ? 'keypad' : 'tap');
     };
     document.addEventListener('click', onClick, { capture: true });
     return () => document.removeEventListener('click', onClick, { capture: true });
