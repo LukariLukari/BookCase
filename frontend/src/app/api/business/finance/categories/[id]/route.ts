@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getRequestUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { categoryColors, categoryIcons } from '@/app/business/expenses/categoryData';
+import { categoryIcons } from '@/app/business/expenses/categoryData';
 
 const deny = () => NextResponse.json({ detail: 'Phiên đăng nhập không hợp lệ.' }, { status: 401 });
 const allowedIcons = new Set<string>(categoryIcons);
-const allowedColors = new Set<string>(categoryColors);
+const validColor = (value: string) => /^#[0-9A-F]{6}$/.test(value);
 
 export async function PUT(request: Request, context: RouteContext<'/api/business/finance/categories/[id]'>) {
   const user = getRequestUser(request);
@@ -19,7 +19,7 @@ export async function PUT(request: Request, context: RouteContext<'/api/business
   const icon = String(body.icon || 'circle-ellipsis');
   const color = String(body.color || '#EF7C3B').toUpperCase();
   if (!name || name.length > 40) return NextResponse.json({ detail: 'Tên danh mục phải từ 1 đến 40 ký tự.' }, { status: 400 });
-  if (!['income', 'expense'].includes(type) || !allowedIcons.has(icon) || !allowedColors.has(color)) return NextResponse.json({ detail: 'Loại, icon hoặc màu danh mục không hợp lệ.' }, { status: 400 });
+  if (!['income', 'expense'].includes(type) || !allowedIcons.has(icon) || !validColor(color)) return NextResponse.json({ detail: 'Loại, icon hoặc màu danh mục không hợp lệ.' }, { status: 400 });
   const duplicate = await prisma.financeCategory.findFirst({ where: { userId: user.id, type, name: { equals: name, mode: 'insensitive' }, id: { not: id } } });
   if (duplicate) return NextResponse.json({ detail: 'Tên danh mục này đã tồn tại trong cùng loại.' }, { status: 409 });
   const category = await prisma.$transaction(async transaction => {

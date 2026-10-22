@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { BarChart3, Boxes, PackageOpen, Plus, ReceiptText, ShoppingCart, Store, X } from 'lucide-react';
+import { BarChart3, Boxes, CircleDollarSign, PackageOpen, Plus, ReceiptText, ShoppingCart, Store, X } from 'lucide-react';
 
 const navItems = [
   { href: '/business/pos', label: 'Bán tại quầy', icon: Store },
@@ -81,6 +81,15 @@ export default function BusinessBottomNav() {
                   onClick={() => setQuickOpen(false)}
                 >
                   <ShoppingCart size={25} />
+                </Link>
+                <Link
+                  href="/business/expenses"
+                  aria-label="Quản lý chi tiêu"
+                  title="Quản lý chi tiêu"
+                  className="quick-create-option btn-push-primary flex h-14 w-14 items-center justify-center"
+                  onClick={() => setQuickOpen(false)}
+                >
+                  <CircleDollarSign size={25} />
                 </Link>
               </motion.div>
             )}

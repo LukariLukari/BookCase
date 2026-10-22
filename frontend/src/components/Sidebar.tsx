@@ -14,6 +14,7 @@ import {
   PackageOpen,
   ReceiptText,
   ShoppingCart,
+  Tags,
   Users,
   Workflow,
   X,
@@ -54,6 +55,7 @@ const groups = [
     items: [
       { href: '/business/expenses', label: 'Tổng quan', icon: CircleDollarSign },
       { href: '/business/expenses/transactions', label: 'Giao dịch', icon: ReceiptText },
+      { href: '/business/expenses/categories', label: 'Danh mục', icon: Tags },
     ],
   },
 ] as const;
@@ -66,9 +68,9 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>({
-    warehouse: false,
-    statistics: false,
-    expenses: false,
+    warehouse: pathname.startsWith('/business/products') || pathname.startsWith('/business/inventory'),
+    statistics: pathname.startsWith('/business/workflow') || pathname.startsWith('/business/reports') || pathname.startsWith('/business/orders') || pathname.startsWith('/business/daily'),
+    expenses: pathname.startsWith('/business/expenses'),
   });
   const isAdmin = user?.role === 'admin';
   const active = (href: string) => href === '/business' || href === '/business/expenses' ? pathname === href : pathname.startsWith(href);

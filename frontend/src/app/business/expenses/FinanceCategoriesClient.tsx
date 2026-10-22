@@ -18,6 +18,15 @@ const iconLabels: Record<CategoryIconName, string> = {
   pill: 'Thuốc', stethoscope: 'Sức khỏe', sparkles: 'Làm đẹp', leaf: 'Thiên nhiên',
   banknote: 'Tiền mặt', 'piggy-bank': 'Tiết kiệm', landmark: 'Ngân hàng',
   'chart-no-axes-combined': 'Đầu tư', 'circle-ellipsis': 'Khác',
+  apple: 'Trái cây', 'badge-dollar-sign': 'Thu nhập', bath: 'Nhà tắm', beer: 'Đồ uống',
+  bike: 'Xe đạp', 'book-open': 'Sách', 'building-2': 'Công ty', cake: 'Sinh nhật',
+  camera: 'Nhiếp ảnh', church: 'Tín ngưỡng', coins: 'Tiền xu', 'cooking-pot': 'Nấu ăn',
+  'flower-2': 'Hoa', fuel: 'Nhiên liệu', glasses: 'Kính mắt', 'hand-heart': 'Từ thiện',
+  headphones: 'Tai nghe', hospital: 'Bệnh viện', hotel: 'Khách sạn', 'key-round': 'Nhà cửa',
+  laptop: 'Máy tính', lightbulb: 'Ý tưởng', 'map-pin': 'Địa điểm', palette: 'Nghệ thuật',
+  'party-popper': 'Tiệc tùng', pizza: 'Đồ ăn nhanh', receipt: 'Hóa đơn', school: 'Trường học',
+  scissors: 'Cắt tóc', 'shopping-cart': 'Siêu thị', smile: 'Giải trí', sprout: 'Làm vườn',
+  ticket: 'Vé', train: 'Tàu điện', trophy: 'Giải thưởng', wrench: 'Sửa chữa', zap: 'Điện',
 };
 
 const blank = () => ({ id: '', name: '', type: 'expense' as 'income' | 'expense', icon: 'utensils' as CategoryIconName, color: '#EF7C3B' });
@@ -97,7 +106,7 @@ export default function FinanceCategoriesClient() {
           <label className="mt-5 block"><span className="mb-2 block text-xs font-black uppercase">Tên danh mục</span><input autoFocus={false} maxLength={40} required value={form.name} onChange={event=>setForm({...form,name:event.target.value})} placeholder="Ví dụ: Ăn trưa, Lương, Du lịch..." className="h-12 w-full px-3"/></label>
           <div className="mt-5"><span className="mb-2 block text-xs font-black uppercase">Loại danh mục</span><div className="grid grid-cols-2 gap-3"><button type="button" aria-pressed={form.type==='expense'} onClick={()=>setForm({...form,type:'expense'})} className="finance-category-type expense">Khoản chi</button><button type="button" aria-pressed={form.type==='income'} onClick={()=>setForm({...form,type:'income'})} className="finance-category-type income">Khoản thu</button></div></div>
           <fieldset className="mt-5"><legend className="mb-2 text-xs font-black uppercase">Chọn biểu tượng</legend><div className="finance-category-icon-grid">{categoryIcons.map(icon=><button type="button" key={icon} title={iconLabels[icon]} aria-label={iconLabels[icon]} aria-pressed={form.icon===icon} onClick={()=>setForm({...form,icon})}><FinanceCategoryIcon name={icon} color={form.color}/></button>)}</div></fieldset>
-          <fieldset className="mt-5"><legend className="mb-2 text-xs font-black uppercase">Chọn màu sắc</legend><div className="finance-category-color-grid">{categoryColors.map(color=><button type="button" key={color} aria-label={`Màu ${color}`} aria-pressed={form.color===color} style={{backgroundColor:color}} onClick={()=>setForm({...form,color})}>{form.color===color&&<Check/>}</button>)}</div></fieldset>
+          <fieldset className="mt-5"><legend className="mb-2 text-xs font-black uppercase">Bảng màu</legend><div className="finance-category-color-grid">{categoryColors.map(color=><button type="button" key={color} aria-label={`Màu ${color}`} aria-pressed={form.color===color} style={{backgroundColor:color}} onClick={()=>setForm({...form,color})}>{form.color===color&&<Check/>}</button>)}</div><label className="finance-custom-color"><span>Tự chọn màu bất kỳ</span><span className="finance-custom-color-value"><i style={{backgroundColor:form.color}}/><b>{form.color}</b><input type="color" value={form.color} onChange={event=>setForm({...form,color:event.target.value.toUpperCase()})}/></span></label></fieldset>
           <div className="mt-6 flex items-center gap-3 border-2 border-black bg-[#fff6d8] p-3"><FinanceCategoryIcon name={form.icon} color={form.color}/><div className="min-w-0"><p className="text-[10px] font-black uppercase">Xem trước</p><b className="block truncate">{form.name||'Tên danh mục'}</b></div></div>
           {error&&<p role="alert" className="mt-4 border-2 border-black bg-[#ffc9ba] p-3 text-sm font-bold">{error}</p>}
           {message&&<p role="status" className="mt-4 border-2 border-black bg-[#c9f1d5] p-3 text-sm font-bold">{message}</p>}
