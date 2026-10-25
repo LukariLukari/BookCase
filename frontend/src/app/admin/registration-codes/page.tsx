@@ -155,10 +155,6 @@ export default function RegistrationCodesPage() {
               </span>
             </div>
 
-            <p className="mb-4 text-xs font-semibold leading-relaxed text-[#585556]/75">
-              Mỗi tài khoản là một cửa hàng riêng biệt. Khi chủ shop muốn chuyển sang mô hình kinh doanh khác, bấm nút <b className="text-red-700">"Clear dữ liệu (Đổi mô hình)"</b> để xóa sạch dữ liệu của riêng tài khoản đó. Các tài khoản khác tuyệt đối không bị đụng đến.
-            </p>
-
             {loadingUsers ? (
               <div className="flex min-h-24 items-center justify-center">
                 <Loader2 className="animate-spin text-[#585556]" />

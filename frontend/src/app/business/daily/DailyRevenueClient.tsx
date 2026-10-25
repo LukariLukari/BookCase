@@ -354,7 +354,7 @@ export default function DailyRevenueClient() {
               {stats?.availableDates && stats.availableDates.length > 0 && (
                 <div className="mt-6 w-full border-t border-[#16587B]/10 pt-4">
                   <p className="mb-2 text-[11px] font-black uppercase tracking-wider text-[#16587B]/60">
-                    Các ngày gần nhất có đơn bán:
+                    Đơn gần nhất
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-1.5">
                     {stats.availableDates.filter((d) => d.date <= todayStr).slice(0, 7).map((d) => {
@@ -404,7 +404,7 @@ export default function DailyRevenueClient() {
                   </h2>
                 </div>
                 <p className="mt-1 text-xs font-semibold text-[#16587B]/70">
-                  Phân tích số lượng gọi và tỷ trọng doanh thu của từng món trong ngày {selectedDate}
+                  Doanh thu từng món
                 </p>
               </div>
 
