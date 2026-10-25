@@ -170,6 +170,106 @@ export async function POST(request: Request) {
   });
   summary.autoFilter = { from: { row: 7, column: 1 }, to: { row: Math.max(7, totalStart - 1), column: 6 } };
 
+  const daily = workbook.addWorksheet('Theo ngày', {
+    views: [{ state: 'frozen', ySplit: 7, showGridLines: false }],
+  });
+  daily.properties.tabColor = { argb: 'FFFFC857' };
+  daily.columns = [
+    { key: 'date', width: 16 }, { key: 'currency', width: 13 }, { key: 'income', width: 18 },
+    { key: 'expense', width: 18 }, { key: 'net', width: 18 }, { key: 'count', width: 16 },
+  ];
+  daily.mergeCells('A1:F1');
+  daily.getCell('A1').value = 'BÁO CÁO GIAO DỊCH THEO NGÀY';
+  styleTitle(daily.getRow(1));
+  daily.addRow(['Sổ chi tiêu', book.name]);
+  daily.addRow(['Khoảng thời gian', `${displayDate(from)} - ${displayDate(to)}`]);
+  daily.addRow(['Loại giao dịch', typeLabel]);
+  daily.addRow(['Danh mục', categoryLabel]);
+  daily.addRow([]);
+  styleHeader(daily.addRow(['Ngày', 'Tiền tệ', 'Tổng thu', 'Tổng chi', 'Chênh lệch', 'Số giao dịch']));
+
+  const dailyGroups = new Map<string, typeof transactions>();
+  transactions.forEach(item => {
+    const day = dateKey(item.transactionDate);
+    dailyGroups.set(day, [...(dailyGroups.get(day) || []), item]);
+  });
+  dailyGroups.forEach((items, day) => {
+    const totals = new Map<string, Totals>();
+    items.forEach(item => addTotal(totals, item.currency, item.type, Number(item.amount)));
+    totals.forEach((total, currency) => {
+      const row = daily.addRow([
+        new Date(`${day}T12:00:00+07:00`), currency, total.income, total.expense,
+        total.income - total.expense, total.count,
+      ]);
+      row.eachCell(cell => { cell.border = thinBorder; });
+      row.getCell(1).numFmt = 'dd/mm/yyyy';
+      [3, 4, 5].forEach(column => { row.getCell(column).numFmt = moneyFormat; });
+    });
+  });
+  const dailyDataEnd = daily.rowCount;
+  daily.addRow([]);
+  overall.forEach((total, currency) => {
+    const row = daily.addRow(['TỔNG TOÀN KỲ', currency, total.income, total.expense, total.income - total.expense, total.count]);
+    row.font = { bold: true };
+    row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC9F1D5' } };
+    row.eachCell(cell => { cell.border = thinBorder; });
+    [3, 4, 5].forEach(column => { row.getCell(column).numFmt = moneyFormat; });
+  });
+  daily.autoFilter = { from: { row: 7, column: 1 }, to: { row: dailyDataEnd, column: 6 } };
+  daily.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9 };
+
+  const details = workbook.addWorksheet('Chi tiết giao dịch', {
+    views: [{ state: 'frozen', xSplit: 1, ySplit: 7, showGridLines: false }],
+  });
+  details.properties.tabColor = { argb: 'FF8EE0A8' };
+  details.columns = [
+    { key: 'index', width: 8 }, { key: 'date', width: 14 }, { key: 'type', width: 16 },
+    { key: 'category', width: 24 }, { key: 'account', width: 24 }, { key: 'description', width: 38 },
+    { key: 'currency', width: 12 }, { key: 'income', width: 18 }, { key: 'expense', width: 18 },
+    { key: 'net', width: 18 }, { key: 'id', width: 28 },
+  ];
+  details.mergeCells('A1:K1');
+  details.getCell('A1').value = 'CHI TIẾT GIAO DỊCH';
+  styleTitle(details.getRow(1));
+  details.addRow(['Sổ chi tiêu', book.name]);
+  details.addRow(['Khoảng thời gian', `${displayDate(from)} - ${displayDate(to)}`]);
+  details.addRow(['Loại giao dịch', typeLabel]);
+  details.addRow(['Danh mục', categoryLabel]);
+  details.addRow([]);
+  styleHeader(details.addRow([
+    'STT', 'Ngày', 'Loại', 'Danh mục', 'Tài khoản', 'Ghi chú', 'Tiền tệ',
+    'Thu', 'Chi', 'Dòng tiền', 'Mã giao dịch',
+  ]));
+  transactions.forEach((item, index) => {
+    const amount = Number(item.amount);
+    const income = item.type === 'income' ? amount : 0;
+    const expense = item.type === 'expense' ? amount : 0;
+    const row = details.addRow([
+      index + 1, item.transactionDate, item.type === 'income' ? 'Khoản thu' : 'Khoản chi',
+      item.categoryRef?.name || item.category, item.account.name, item.description || '', item.currency,
+      income || null, expense || null, income - expense, item.id,
+    ]);
+    row.eachCell(cell => { cell.border = thinBorder; cell.alignment = { vertical: 'top', wrapText: true }; });
+    row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
+    row.getCell(2).numFmt = 'dd/mm/yyyy';
+    row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
+    [8, 9, 10].forEach(column => { row.getCell(column).numFmt = moneyFormat; });
+    row.getCell(3).font = { bold: true, color: { argb: item.type === 'income' ? 'FF16733B' : 'FFB42318' } };
+  });
+  const detailDataEnd = details.rowCount;
+  details.addRow([]);
+  overall.forEach((total, currency) => {
+    const row = details.addRow([
+      'TỔNG', '', '', '', '', '', currency, total.income, total.expense, total.income - total.expense, '',
+    ]);
+    row.font = { bold: true };
+    row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC9F1D5' } };
+    row.eachCell(cell => { cell.border = thinBorder; });
+    [8, 9, 10].forEach(column => { row.getCell(column).numFmt = moneyFormat; });
+  });
+  details.autoFilter = { from: { row: 7, column: 1 }, to: { row: detailDataEnd, column: 11 } };
+  details.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9 };
+
   monthGroups.forEach((items, month) => {
     const sheet = workbook.addWorksheet(month, { views: [{ state: 'frozen', ySplit: 3 }] });
     sheet.columns = [

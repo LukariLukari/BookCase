@@ -86,7 +86,7 @@ export default function FinanceExportDialog({ bookId, transactions, categories, 
   return <ModalShell title="Xuất báo cáo Excel" busy={exporting} close={close}>
     <div className="space-y-5">
       <div className="border-2 border-black bg-[#fff6d8] p-4 text-sm font-semibold">
-        File gồm sheet tổng hợp toàn kỳ và từng sheet tháng, có tổng thu/chi theo ngày, tháng và tiền tệ.
+        File gồm tổng hợp theo tháng, báo cáo từng ngày, bảng chi tiết có thể lọc và các sheet tháng hiện tại.
       </div>
       <fieldset disabled={exporting} className="space-y-5">
         <div>
