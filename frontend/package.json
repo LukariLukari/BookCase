@@ -19,6 +19,7 @@
     "bcryptjs": "^3.0.3",
     "canvas-confetti": "^1.9.4",
     "epubjs": "^0.3.93",
+    "exceljs": "^4.4.0",
     "framer-motion": "^13.0.0",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.30.0",
