@@ -30,7 +30,7 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
 }) {
   const categoryScroller = useRef<HTMLDivElement>(null);
   const [whole, decimal] = form.amount.split('.');
-  const displayedAmount = (whole || '0').replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (decimal === undefined ? '' : `,${decimal}`);
+  const displayedAmount = (whole || '0').replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (decimal === undefined ? '' : `.${decimal}`);
   const currency = accounts.find(account => account.id === form.accountId)?.currency || 'VND';
   const key = (value: string) => <button key={value} type="button" onClick={() => press(value)} aria-label={value} className="finance-entry-key">{value}</button>;
 
