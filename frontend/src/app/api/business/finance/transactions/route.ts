@@ -10,7 +10,7 @@ const parseDate = (value: unknown, end = false) => {
   const parsed = new Date(`${raw}T${end ? '23:59:59.999' : '12:00:00'}+07:00`);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
-const json = (item: { id:string;type:string;amount:unknown;currency:string;category:string;categoryId:string|null;description:string|null;transactionDate:Date;createdAt:Date;account:{id:string;name:string;type:string};categoryRef:{name:string;icon:string;color:string}|null }) => ({ id:item.id,type:item.type,amount:Number(item.amount),currency:item.currency,categoryId:item.categoryId,category:item.categoryRef?.name||item.category,categoryIcon:item.categoryRef?.icon||null,categoryColor:item.categoryRef?.color||null,description:item.description||'',date:item.transactionDate,createdAt:item.createdAt,account:item.account });
+const json = (item: { id:string;type:string;amount:unknown;currency:string;category:string;categoryId:string|null;description:string|null;transactionDate:Date;createdAt:Date;account:{id:string;name:string;type:string};destinationAccount:{id:string;name:string;type:string}|null;categoryRef:{name:string;icon:string;color:string}|null }) => ({ id:item.id,type:item.type,amount:Number(item.amount),currency:item.currency,categoryId:item.categoryId,category:item.categoryRef?.name||item.category,categoryIcon:item.categoryRef?.icon||null,categoryColor:item.categoryRef?.color||null,description:item.description||'',date:item.transactionDate,createdAt:item.createdAt,account:item.account,destinationAccount:item.destinationAccount });
 
 export async function GET(request: NextRequest) {
   const user = getRequestUser(request);
@@ -19,13 +19,14 @@ export async function GET(request: NextRequest) {
   const from = request.nextUrl.searchParams.get('from');
   const to = request.nextUrl.searchParams.get('to');
   const type = request.nextUrl.searchParams.get('type');
+  const typeFilter = type === 'income' || type === 'expense' || type === 'transfer' ? type : undefined;
   const book = await prisma.expenseBook.findFirst({ where: { id: bookId, userId: user.id } });
   if (!book) return NextResponse.json({ detail: 'Không tìm thấy sổ chi tiêu.' }, { status: 404 });
   const fromDate = from ? parseDate(from) : null;
   const toDate = to ? parseDate(to, true) : null;
   const transactions = await prisma.financeTransaction.findMany({
-    where: { userId:user.id,bookId,...(type==='income'||type==='expense'?{type}:{}),...(fromDate||toDate?{transactionDate:{...(fromDate?{gte:fromDate}:{}),...(toDate?{lte:toDate}:{})}}:{}) },
-    include: { account: { select: { id:true,name:true,type:true } }, categoryRef: { select: { name:true,icon:true,color:true } } },
+    where: { userId:user.id,bookId,...(typeFilter?{type:typeFilter}:{}),...(fromDate||toDate?{transactionDate:{...(fromDate?{gte:fromDate}:{}),...(toDate?{lte:toDate}:{})}}:{}) },
+    include: { account: { select: { id:true,name:true,type:true } }, destinationAccount: { select: { id:true,name:true,type:true } }, categoryRef: { select: { name:true,icon:true,color:true } } },
     orderBy: [{ transactionDate:'desc' }, { createdAt:'desc' }],
   });
   return NextResponse.json({ transactions: transactions.map(json) });
@@ -35,12 +36,20 @@ export async function POST(request: Request) {
   const user = getRequestUser(request);
   if (!user) return deny();
   const body = await request.json();
-  const bookId = String(body.bookId || ''), accountId = String(body.accountId || ''), type = String(body.type || 'expense'), categoryId = String(body.categoryId || '');
+  const bookId = String(body.bookId || ''), accountId = String(body.accountId || ''), type = String(body.type || 'expense'), categoryId = String(body.categoryId || ''), destinationAccountId = String(body.destinationAccountId || '');
   const amount = Number(body.amount), description = String(body.description || '').trim(), date = String(body.date || ''), transactionDate = parseDate(date);
   const account = await prisma.moneyAccount.findFirst({ where: { id:accountId,bookId,userId:user.id } });
   if (!account) return NextResponse.json({ detail:'Tài khoản tiền không thuộc sổ đã chọn.' }, { status:404 });
+  if (type === 'transfer') {
+    const destinationAccount = await prisma.moneyAccount.findFirst({ where: { id:destinationAccountId,bookId,userId:user.id } });
+    if (!destinationAccount || destinationAccount.id === account.id) return NextResponse.json({ detail:'Vui lòng chọn hai ví khác nhau.' }, { status:400 });
+    if (destinationAccount.currency !== account.currency) return NextResponse.json({ detail:'Chỉ có thể chuyển tiền giữa hai ví cùng loại tiền tệ.' }, { status:400 });
+    if (!Number.isFinite(amount) || amount<=0 || !transactionDate) return NextResponse.json({ detail:'Vui lòng nhập số tiền và ngày chuyển hợp lệ.' }, { status:400 });
+    const transaction = await prisma.financeTransaction.create({ data:{ userId:user.id,bookId,accountId,destinationAccountId,type,amount,currency:account.currency,categoryId:null,category:'Chuyển tiền',description:description||null,transactionDate }, include:{account:{select:{id:true,name:true,type:true}},destinationAccount:{select:{id:true,name:true,type:true}},categoryRef:{select:{name:true,icon:true,color:true}}} });
+    return NextResponse.json(json(transaction), { status:201 });
+  }
   const category = await prisma.financeCategory.findFirst({ where: { id:categoryId,userId:user.id,type } });
   if (!['income','expense'].includes(type) || !Number.isFinite(amount) || amount<=0 || !category || !transactionDate) return NextResponse.json({ detail:'Vui lòng chọn một danh mục hợp lệ và nhập đầy đủ thông tin.' }, { status:400 });
-  const transaction = await prisma.financeTransaction.create({ data:{ userId:user.id,bookId,accountId,type,amount,currency:account.currency,categoryId:category.id,category:category.name,description:description||null,transactionDate }, include:{account:{select:{id:true,name:true,type:true}},categoryRef:{select:{name:true,icon:true,color:true}}} });
+  const transaction = await prisma.financeTransaction.create({ data:{ userId:user.id,bookId,accountId,type,amount,currency:account.currency,categoryId:category.id,category:category.name,description:description||null,transactionDate }, include:{account:{select:{id:true,name:true,type:true}},destinationAccount:{select:{id:true,name:true,type:true}},categoryRef:{select:{name:true,icon:true,color:true}}} });
   return NextResponse.json(json(transaction), { status:201 });
 }

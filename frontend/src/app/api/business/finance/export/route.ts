@@ -108,7 +108,7 @@ export async function POST(request: Request) {
   const transactions = await prisma.financeTransaction.findMany({
     where: {
       userId: user.id, bookId, transactionDate: { gte: from, lte: to },
-      ...(type === 'all' ? {} : { type }),
+      type: type === 'all' ? { in: ['income', 'expense'] } : type,
       ...(hasCategoryFilter ? { categoryId: { in: categoryIds } } : {}),
     },
     include: { account: { select: { name: true } }, categoryRef: { select: { name: true } } },

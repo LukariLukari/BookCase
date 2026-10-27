@@ -32,6 +32,7 @@ model User {
   moneyAccounts       MoneyAccount[]
   financeTransactions FinanceTransaction[]
   financeCategories   FinanceCategory[]
+  moneyAccountEdits   MoneyAccountEdit[]
 }
 
 model RegistrationCode {
@@ -325,11 +326,36 @@ model MoneyAccount {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book         ExpenseBook          @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  transactions FinanceTransaction[]
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book              ExpenseBook          @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  transactions      FinanceTransaction[] @relation("FinanceAccountTransactions")
+  incomingTransfers FinanceTransaction[] @relation("FinanceDestinationAccount")
+  editHistory       MoneyAccountEdit[]
 
   @@index([userId, bookId])
+}
+
+model MoneyAccountEdit {
+  id                  String   @id @default(uuid())
+  userId              String
+  accountId           String
+  previousName        String
+  newName             String
+  previousType        String
+  newType             String
+  previousCurrency    String
+  newCurrency         String
+  previousCreditLimit Decimal? @db.Decimal(18, 2)
+  newCreditLimit      Decimal? @db.Decimal(18, 2)
+  previousBalance     Decimal  @db.Decimal(18, 2)
+  newBalance          Decimal  @db.Decimal(18, 2)
+  note                String?
+  createdAt           DateTime @default(now())
+
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account MoneyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([userId, accountId, createdAt])
 }
 
 model FinanceCategory {
@@ -350,26 +376,29 @@ model FinanceCategory {
 }
 
 model FinanceTransaction {
-  id              String   @id @default(uuid())
-  userId          String
-  bookId          String
-  accountId       String
-  categoryId      String?
-  type            String
-  amount          Decimal  @db.Decimal(18, 2)
-  currency        String   @default("VND")
-  category        String
-  description     String?
-  transactionDate DateTime
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                   String   @id @default(uuid())
+  userId               String
+  bookId               String
+  accountId            String
+  destinationAccountId String?
+  categoryId           String?
+  type                 String
+  amount               Decimal  @db.Decimal(18, 2)
+  currency             String   @default("VND")
+  category             String
+  description          String?
+  transactionDate      DateTime
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
-  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book    ExpenseBook  @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  account MoneyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  categoryRef FinanceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book               ExpenseBook      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  account            MoneyAccount     @relation("FinanceAccountTransactions", fields: [accountId], references: [id], onDelete: Cascade)
+  destinationAccount MoneyAccount?    @relation("FinanceDestinationAccount", fields: [destinationAccountId], references: [id], onDelete: Cascade)
+  categoryRef        FinanceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@index([userId, bookId, transactionDate])
   @@index([userId, accountId])
+  @@index([userId, destinationAccountId])
   @@index([userId, categoryId])
 }

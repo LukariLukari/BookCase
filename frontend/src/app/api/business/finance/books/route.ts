@@ -10,7 +10,11 @@ export async function GET(request: Request) {
   if (!user) return deny();
   const books = await prisma.expenseBook.findMany({
     where: { userId: user.id },
-    include: { accounts: { include: { transactions: { select: { type: true, amount: true } } }, orderBy: { createdAt: 'asc' } } },
+    include: { accounts: { include: {
+      transactions: { select: { type: true, amount: true } },
+      incomingTransfers: { select: { type: true, amount: true } },
+      editHistory: { orderBy: { createdAt: 'desc' }, take: 20 },
+    }, orderBy: { createdAt: 'asc' } } },
     orderBy: { createdAt: 'desc' },
   });
   return NextResponse.json(books.map(book => ({
@@ -26,7 +30,30 @@ export async function GET(request: Request) {
       currency: account.currency,
       openingBalance: Number(account.openingBalance),
       creditLimit: account.creditLimit === null ? null : Number(account.creditLimit),
-      balance: account.transactions.reduce((sum, transaction) => sum + (transaction.type === 'income' ? Number(transaction.amount) : -Number(transaction.amount)), Number(account.openingBalance)),
+      balance: account.incomingTransfers.reduce(
+        (sum, transaction) => sum + (transaction.type === 'transfer' ? Number(transaction.amount) : 0),
+        account.transactions.reduce((sum, transaction) => {
+          if (transaction.type === 'income') return sum + Number(transaction.amount);
+          if (transaction.type === 'expense' || transaction.type === 'transfer') return sum - Number(transaction.amount);
+          return sum;
+        }, Number(account.openingBalance)),
+      ),
+      transactionCount: account.transactions.length + account.incomingTransfers.length,
+      editHistory: account.editHistory.map(edit => ({
+        id: edit.id,
+        previousName: edit.previousName,
+        newName: edit.newName,
+        previousType: edit.previousType,
+        newType: edit.newType,
+        previousCurrency: edit.previousCurrency,
+        newCurrency: edit.newCurrency,
+        previousCreditLimit: edit.previousCreditLimit === null ? null : Number(edit.previousCreditLimit),
+        newCreditLimit: edit.newCreditLimit === null ? null : Number(edit.newCreditLimit),
+        previousBalance: Number(edit.previousBalance),
+        newBalance: Number(edit.newBalance),
+        note: edit.note || '',
+        createdAt: edit.createdAt,
+      })),
     })),
   })));
 }
