@@ -1,34 +1,53 @@
 'use client';
 
 import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import FinanceCategoryIcon from './FinanceCategoryIcon';
 
 type SelectOption = { value: string; label: string; icon?: string; color?: string };
 
 function PickerShell({ title, close, children }: { title: string; close: () => void; children: React.ReactNode }) {
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') close();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [close]);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
 
-  return (
-    <div className="finance-picker-backdrop" role="presentation" onMouseDown={close}>
-      <section className="finance-picker-panel" role="dialog" aria-modal="true" aria-label={title} onMouseDown={event => event.stopPropagation()}>
+  useEffect(() => {
+    const element = dialog.current;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    element?.showModal();
+    document.body.style.overflow = 'hidden';
+    return () => {
+      element?.close();
+      document.body.style.overflow = previousOverflow;
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+    };
+  }, []);
+
+  // Keep the picker outside labels/forms and above any parent modal's top layer.
+  return createPortal(
+    <dialog
+      ref={dialog}
+      className="finance-picker-backdrop"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      onCancel={event => { event.preventDefault(); event.stopPropagation(); close(); }}
+      onClick={event => { event.stopPropagation(); if (event.target === event.currentTarget) close(); }}
+    >
+      <section className="finance-picker-panel">
         <header className="finance-picker-header">
-          <h3>{title}</h3>
+          <h3 id={titleId}>{title}</h3>
           <button type="button" onClick={close} aria-label="Đóng bộ chọn"><X /></button>
         </header>
         {children}
       </section>
-    </div>
+    </dialog>,
+    document.body,
   );
 }
 
-export function FinanceSelect({ value, options, placeholder, label, compact = false, onChange }: {
+export function FinanceSelect({ value, options, placeholder, label, compact = false, triggerLabel, onChange }: {
+  triggerLabel?: string;
   value: string;
   options: SelectOption[];
   placeholder: string;
@@ -53,7 +72,7 @@ export function FinanceSelect({ value, options, placeholder, label, compact = fa
       >
         <span className={`finance-picker-trigger-value${!selected ? ' finance-picker-placeholder' : ''}`}>
           {selected?.icon && <FinanceCategoryIcon name={selected.icon} color={selected.color} />}
-          <span>{selected?.label || placeholder}</span>
+          <span>{triggerLabel || selected?.label || placeholder}</span>
         </span>
         <ChevronDown />
       </button>

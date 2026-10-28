@@ -68,11 +68,11 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
 
         <div className="finance-entry-console">
           <div className="finance-entry-toolbar">
-            <button type="button" onClick={openTransfer} aria-label="Chuyển tiền giữa các tài khoản" title="Chuyển tiền giữa các tài khoản" aria-pressed={!!transfer} className="finance-entry-type finance-entry-transfer"><ArrowRightLeft size={18}/></button>
+            <button type="button" onClick={openTransfer} aria-label="Chuyển tiền giữa các tài khoản" title="Chuyển tiền giữa các tài khoản" aria-pressed={!!transfer} className="finance-entry-type finance-entry-transfer"><ArrowRightLeft size={24}/></button>
             <button type="button" aria-pressed={!transfer && form.type === 'income'} onClick={() => changeType('income')} className="finance-entry-type finance-entry-income">Thu</button>
             <button type="button" aria-pressed={!transfer && form.type === 'expense'} onClick={() => changeType('expense')} className="finance-entry-type finance-entry-expense">Chi</button>
-            <label><span>{transfer ? 'Từ khoản tiền' : 'Khoản tiền'}</span><FinanceSelect compact label="Chọn khoản tiền" placeholder="Chọn tài khoản" value={form.accountId} onChange={accountId => change({ accountId })} options={accounts.map(account => ({ value: account.id, label: `${account.name} · ${account.currency}` }))} /></label>
-            <label><span>Ngày giao dịch</span><FinanceDatePicker compact label="Chọn ngày giao dịch" value={form.date} onChange={date => change({ date })} /></label>
+            <div className="finance-entry-account"><FinanceSelect compact triggerLabel={accounts.find(account => account.id === form.accountId)?.name} label={transfer ? "Chọn tài khoản chuyển tiền" : "Chọn khoản tiền"} placeholder="Chọn tài khoản" value={form.accountId} onChange={accountId => change({ accountId })} options={accounts.map(account => ({ value: account.id, label: `${account.name} · ${account.currency}` }))} /></div>
+            <div className="finance-entry-date"><FinanceDatePicker compact label="Chọn ngày giao dịch" value={form.date} onChange={date => change({ date })} /></div>
           </div>
           <div className="finance-entry-keypad" aria-label="Bàn phím nhập khoản tiền">
             {['1', '2', '3'].map(key)}
