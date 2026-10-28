@@ -1,6 +1,5 @@
 'use client';
 
-import PieChart from '@/components/PieChart';
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,6 +15,7 @@ import {
   Search,
   SlidersHorizontal,
   UtensilsCrossed,
+  ArrowUpRight,
   ChevronDown,
   Check,
   Sparkles,
@@ -159,6 +159,17 @@ export default function DailyRevenueClient() {
     return list;
   }, [stats, filterMode, searchDish, minRevenueThreshold]);
 
+  // Max values for chart scaling
+  const maxQuantity = useMemo(() => {
+    if (!processedItems.length) return 1;
+    return Math.max(...processedItems.map((i) => i.quantity), 1);
+  }, [processedItems]);
+
+  const maxRevenue = useMemo(() => {
+    if (!processedItems.length) return 1;
+    return Math.max(...processedItems.map((i) => i.revenue), 1);
+  }, [processedItems]);
+
   if (authLoading || !user) {
     return <div className="min-h-screen bg-[#F5EEDD]" />;
   }
@@ -167,10 +178,10 @@ export default function DailyRevenueClient() {
     <div className="min-h-screen bg-[#F5EEDD] p-3 pb-[calc(10rem+env(safe-area-inset-bottom))] pt-[calc(4.75rem+env(safe-area-inset-top,0px))] text-[#16587B] md:flex md:gap-5 md:p-6 md:pb-8 md:pt-6">
       <Sidebar />
 
-      <main className="workspace-content min-w-0 flex-1">
+      <main className="min-w-0 flex-1">
         <div className="mx-auto max-w-5xl space-y-10">
           {/* TOP BAR / BREADCRUMB */}
-          <div className="workspace-header flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#16587B]/70">
                 Thống Kê Bán Hàng Theo Ngày
@@ -465,7 +476,7 @@ export default function DailyRevenueClient() {
               )}
             </div>
 
-            {/* Tỷ trọng theo bộ lọc hiện tại */}
+            {/* BIỂU ĐỒ BARS */}
             {loading ? (
               <div className="space-y-3 py-6">
                 {[1, 2, 3, 4].map((i) => (
@@ -483,12 +494,110 @@ export default function DailyRevenueClient() {
                 </p>
               </div>
             ) : (
-              <PieChart
-                title={filterMode === 'quantity' ? 'Tỷ trọng số lượng món' : 'Tỷ trọng doanh thu món'}
-                caption="Tỷ trọng được tính trên các món phù hợp với bộ lọc hiện tại."
-                data={processedItems.map(item => ({ label: item.productName, value: filterMode === 'quantity' ? item.quantity : item.revenue, detail: filterMode === 'quantity' ? formatVNCurrency(item.revenue) : `${item.quantity} phần` }))}
-                formatValue={filterMode === 'quantity' ? value => `${value.toLocaleString('vi-VN')} phần` : formatVNCurrency}
-              />
+              <div className="space-y-3.5">
+                {processedItems.map((item, index) => {
+                  const barPercent =
+                    filterMode === 'quantity'
+                      ? Math.max(6, Math.round((item.quantity / maxQuantity) * 100))
+                      : Math.max(6, Math.round((item.revenue / maxRevenue) * 100));
+
+                  const isTop1 = index === 0;
+                  const isTop3 = index < 3;
+
+                  return (
+                    <motion.div
+                      key={item.productId || item.productName}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, delay: index * 0.03 }}
+                      className="group relative rounded-2xl border border-[#16587B]/15 bg-white p-3.5 shadow-xs transition-all hover:border-[#16587B]/40 hover:shadow-md"
+                    >
+                      {/* Dish title & key stats */}
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-2.5">
+                          {/* Rank badge */}
+                          <span
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-xl text-xs font-black ${
+                              isTop1
+                                ? 'bg-amber-400 text-amber-950 shadow-xs'
+                                : isTop3
+                                ? 'bg-[#16587B] text-white'
+                                : 'bg-[#F5EEDD] text-[#16587B]'
+                            }`}
+                          >
+                            #{index + 1}
+                          </span>
+
+                          <div className="min-w-0">
+                            <b className="block truncate text-sm font-black text-[#16587B]">
+                              {item.productName}
+                            </b>
+                            <span className="text-[11px] font-semibold text-[#16587B]/60">
+                              Đơn giá: {formatVNCurrency(item.unitPrice)} · Xuất hiện trong{' '}
+                              {item.orderCount} đơn
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Value highlight depending on filter */}
+                        <div className="shrink-0 text-right">
+                          {filterMode === 'quantity' ? (
+                            <>
+                              <b className="block text-base font-black text-[#16587B]">
+                                {item.quantity} <span className="text-xs font-normal">phần</span>
+                              </b>
+                              <span className="text-[11px] font-black text-[#385E26]">
+                                {formatVNCurrency(item.revenue)} ({item.percentageRevenue}%)
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <b className="block text-base font-black text-[#385E26]">
+                                {formatVNCurrency(item.revenue)}
+                              </b>
+                              <span className="text-[11px] font-black text-[#16587B]/70">
+                                {item.quantity} phần ({item.percentageQuantity}%)
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Visual Interactive Bar */}
+                      <div className="relative h-4 w-full overflow-hidden rounded-full bg-[#F5EEDD]">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${barPercent}%` }}
+                          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                          className={`h-full rounded-full ${
+                            filterMode === 'quantity'
+                              ? isTop1
+                                ? 'bg-gradient-to-r from-[#16587B] to-[#84B3CE]'
+                                : 'bg-[#16587B]'
+                              : isTop1
+                              ? 'bg-gradient-to-r from-[#2e521e] to-[#487a32]'
+                              : 'bg-[#385E26]'
+                          }`}
+                        />
+                      </div>
+
+                      {/* Mini footer on bar: percentages */}
+                      <div className="mt-1.5 flex items-center justify-between text-[10px] font-bold text-[#16587B]/60">
+                        <span>
+                          {filterMode === 'quantity'
+                            ? `Tỷ trọng số lượng: ${item.percentageQuantity}% tổng món`
+                            : `Tỷ trọng doanh thu: ${item.percentageRevenue}% tổng tiền`}
+                        </span>
+                        <span className="text-right">
+                          {filterMode === 'quantity'
+                            ? `Doanh thu món: ${formatVNCurrency(item.revenue)}`
+                            : `Số lượng gọi: ${item.quantity} phần`}
+                        </span>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
             )}
 
           </section>
