@@ -1,5 +1,6 @@
 'use client';
 
+import PieChart from '@/components/PieChart';
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import {
@@ -155,26 +156,12 @@ export default function WorkflowClient() {
               Nhìn toàn bộ tiến độ, chuyển bước và thu công nợ ngay tại một màn hình.
             </p>
 
-            {/* 4 Chunky 3D Stat Cards */}
-            <div className="mt-6 grid grid-cols-2 gap-3.5 md:grid-cols-4">
-              {[
-                ['Cần đóng gói', orders.filter((o) => o.status === 'confirmed').length],
-                ['Đang giao', orders.filter((o) => o.status === 'shipping').length],
-                ['Chưa thu đủ', pending.length],
-                ['Công nợ', money(pending.reduce((s, o) => s + o.total, 0))],
-              ].map(([l, v]) => (
-                <div
-                  key={String(l)}
-                  className="rounded-2xl border-2 border-[#585556] bg-white p-4 shadow-[0_4px_0_0_#585556] flex flex-col justify-between"
-                >
-                  <p className="text-[10px] font-black uppercase tracking-wider text-[#585556]/70">
-                    {l}
-                  </p>
-                  <b className="mt-1.5 block text-lg font-black text-[#585556] md:text-xl">
-                    {v}
-                  </b>
-                </div>
-              ))}
+            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+              <PieChart title="Tiến độ đơn hàng" data={Array.from(new Set([...states.map(state=>state.key),...orders.map(order=>order.status||'confirmed')])).map(status=>({label:states.find(state=>state.key===status)?.label||(status==='cancelled'?'Đã hủy':status),value:orders.filter(order=>(order.status||'confirmed')===status).length}))} formatValue={value=>`${value} đơn`}/>
+              <div>
+                <PieChart title="Tình trạng thanh toán" data={[{label:'Đã thu đủ',value:orders.filter(order=>order.payment_status==='paid'&&order.status!=='cancelled').length},{label:'Chưa thu đủ',value:pending.length}]} formatValue={value=>`${value} đơn`}/>
+                <p className="mt-4 text-sm font-semibold">Giá trị đơn chưa thu đủ: <b>{money(pending.reduce((sum,order)=>sum+order.total,0))}</b></p>
+              </div>
             </div>
           </header>
 
