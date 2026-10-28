@@ -2805,3 +2805,15 @@ svg[class*="text-white"] *,
 @media (max-width: 380px) {
   .finance-entry-toolbar { grid-template-columns: 28px 28px 28px minmax(0, 1fr) minmax(0, 1.1fr); gap: 3px; padding: 4px; }
 }
+
+/* Distinguish child links from their section headings on mobile and desktop. */
+.sidebar-nav-children { margin-left: 10px; padding-left: 8px; border-left: 2px solid #b9ad90; }
+.sidebar-nav-item.sidebar-nav-item-nested:not(.pixel-active) {
+  background: #e5dcc4 !important;
+  color: #57575c !important;
+}
+.sidebar-nav-item.sidebar-nav-item-nested:not(.pixel-active):hover { background: #eee6d2 !important; }
+.sidebar-nav-item.sidebar-nav-item-nested { min-height: 40px; }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sidebar-nav-children { margin-left: 0; padding-left: 0; border-left: 0; }
+}

@@ -68,25 +68,29 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
-  const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>({
-    warehouse: pathname.startsWith('/business/products') || pathname.startsWith('/business/inventory'),
-    statistics: pathname.startsWith('/business/workflow') || pathname.startsWith('/business/reports') || pathname.startsWith('/business/orders') || pathname.startsWith('/business/daily'),
-    expenses: pathname.startsWith('/business/expenses'),
-  });
   const isAdmin = user?.role === 'admin';
   const active = (href: string) => href === '/business' || href === '/business/expenses' ? pathname === href : pathname.startsWith(href);
   const groupActive = (group: (typeof groups)[number]) => group.items.some(({ href }) => active(href));
 
+  const activeGroupId = groups.find(groupActive)?.id ?? null;
+  const [groupSelection, setGroupSelection] = useState<{ pathname: string; id: GroupId | null }>(() => ({ pathname, id: activeGroupId }));
+  const expandedGroup = groupSelection.pathname === pathname ? groupSelection.id : activeGroupId;
+
   const toggleGroup = (id: GroupId) => {
-    setOpenGroups(current => ({ ...current, [id]: !current[id] }));
+    setGroupSelection({ pathname, id: expandedGroup === id ? null : id });
+  };
+  const selectItem = (nested: boolean) => {
+    setOpen(false);
+    if (!nested) setGroupSelection({ pathname, id: null });
   };
 
   const desktopLink = ({ href, label, icon: Icon }: NavItem, nested = false) => (
     <Link
       key={href}
       href={href}
-      onClick={() => setOpen(false)}
+      onClick={() => selectItem(nested)}
       title={label}
+      aria-current={active(href) ? 'page' : undefined}
       className={`sidebar-nav-item ${nested ? 'sidebar-nav-item-nested' : ''} flex w-full flex-nowrap items-center gap-2.5 rounded-2xl border text-sm font-black transition-all md:justify-center md:px-0 lg:justify-start ${nested ? 'h-10 px-3 lg:pl-7 lg:pr-3.5 xl:pl-8' : 'h-11 px-3 lg:px-3.5 xl:px-4'} ${
         active(href)
           ? 'pixel-active text-white'
@@ -100,13 +104,14 @@ export default function Sidebar() {
     </Link>
   );
 
-  const mobileLink = ({ href, label, icon: Icon }: NavItem) => (
+  const mobileLink = ({ href, label, icon: Icon }: NavItem, nested = false) => (
     <Link
       key={href}
       href={href}
-      onClick={() => setOpen(false)}
+      onClick={() => selectItem(nested)}
       title={label}
-      className={`sidebar-nav-item flex h-11 w-full items-center justify-start gap-2 rounded-xl px-3 text-[11px] font-black transition-all ${
+      aria-current={active(href) ? 'page' : undefined}
+      className={`sidebar-nav-item ${nested ? 'sidebar-nav-item-nested' : ''} flex h-11 w-full items-center justify-start gap-2 rounded-xl px-3 text-[11px] font-black transition-all ${
         active(href) ? 'pixel-active text-white' : 'btn-push'
       }`}
     >
@@ -118,13 +123,14 @@ export default function Sidebar() {
   const desktopGroup = (group: (typeof groups)[number]) => {
     const Icon = group.icon;
     const isActive = groupActive(group);
-    const expanded = openGroups[group.id];
+    const expanded = expandedGroup === group.id;
     return (
       <div key={group.id} className="space-y-3">
         <button
           type="button"
           onClick={() => toggleGroup(group.id)}
           aria-expanded={expanded}
+          aria-controls={`desktop-group-${group.id}`}
           title={group.label}
           className={`sidebar-nav-item flex h-11 w-full flex-nowrap items-center gap-2.5 rounded-2xl border px-3 text-sm font-black transition-all md:justify-center md:px-0 lg:justify-start lg:px-3.5 xl:px-4 ${
             isActive ? 'pixel-active text-white' : 'pixel-tile bg-[#cfc4a8] text-[#57575c] hover:bg-[#d9ceb0]'
@@ -137,7 +143,7 @@ export default function Sidebar() {
             className={`sidebar-nav-chevron ml-auto hidden shrink-0 transition-transform lg:block ${expanded ? 'rotate-180' : ''}`}
           />
         </button>
-        {expanded && <div className="space-y-3">{group.items.map(item => desktopLink(item, true))}</div>}
+        {expanded && <div id={`desktop-group-${group.id}`} className="sidebar-nav-children space-y-3">{group.items.map(item => desktopLink(item, true))}</div>}
       </div>
     );
   };
@@ -145,13 +151,14 @@ export default function Sidebar() {
   const mobileGroup = (group: (typeof groups)[number]) => {
     const Icon = group.icon;
     const isActive = groupActive(group);
-    const expanded = openGroups[group.id];
+    const expanded = expandedGroup === group.id;
     return (
       <div key={group.id} className="min-w-0">
         <button
           type="button"
           onClick={() => toggleGroup(group.id)}
           aria-expanded={expanded}
+          aria-controls={`mobile-group-${group.id}`}
           className={`sidebar-nav-item flex h-11 w-full items-center gap-2 rounded-xl px-3 text-xs font-black transition-all ${
             isActive ? 'pixel-active text-white' : 'btn-push'
           }`}
@@ -160,7 +167,7 @@ export default function Sidebar() {
           <span className="sidebar-nav-label">{group.label}</span>
           <ChevronDown size={16} className={`sidebar-nav-chevron ml-auto shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
         </button>
-        {expanded && <div className="mt-3 grid grid-cols-1 gap-3 pl-3">{group.items.map(item => mobileLink(item))}</div>}
+        {expanded && <div id={`mobile-group-${group.id}`} className="sidebar-nav-children mt-3 grid grid-cols-1 gap-3">{group.items.map(item => mobileLink(item, true))}</div>}
       </div>
     );
   };
