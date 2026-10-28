@@ -140,12 +140,12 @@ export default function WorkflowClient() {
   const pending = orders.filter((o) => o.payment_status !== 'paid' && o.status !== 'cancelled');
 
   return (
-    <div className="min-h-screen bg-[#fef9f4] p-3 pb-[calc(12rem+env(safe-area-inset-bottom))] pt-[calc(4.75rem+env(safe-area-inset-top,0px))] text-[#585556] md:flex md:gap-5 md:p-6 md:pb-8 md:pt-6">
+    <div className="business-shell min-h-screen bg-[#fef9f4] p-3 pb-[calc(12rem+env(safe-area-inset-bottom))] pt-[calc(4.75rem+env(safe-area-inset-top,0px))] text-[#585556] md:flex md:gap-5 md:p-6 md:pb-8 md:pt-6">
       <Sidebar />
-      <main className="min-w-0 flex-1">
-        <div className="mx-auto max-w-[1500px]">
+      <main className="business-main min-w-0 flex-1">
+        <div className="business-content mx-auto max-w-[1500px]">
           {/* Header 3D Card in Cloud Veil */}
-          <header className="mb-12 rounded-3xl border-2 border-[#585556] bg-[#fef9f4] p-6 shadow-[0_5px_0_0_#585556] md:p-8">
+          <header className="page-heading page-heading-panel mb-12 rounded-3xl border-2 border-[#585556] bg-[#fef9f4] p-6 shadow-[0_5px_0_0_#585556] md:p-8">
             <p className="text-[11px] font-black uppercase tracking-[.2em] text-[#585556]/70">
               Trung tâm vận hành
             </p>
@@ -156,14 +156,15 @@ export default function WorkflowClient() {
               Nhìn toàn bộ tiến độ, chuyển bước và thu công nợ ngay tại một màn hình.
             </p>
 
-            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            </header>
+          <section className="stats-overview content-panel card-push grid gap-8 xl:grid-cols-2">
               <PieChart title="Tiến độ đơn hàng" data={Array.from(new Set([...states.map(state=>state.key),...orders.map(order=>order.status||'confirmed')])).map(status=>({label:states.find(state=>state.key===status)?.label||(status==='cancelled'?'Đã hủy':status),value:orders.filter(order=>(order.status||'confirmed')===status).length}))} formatValue={value=>`${value} đơn`}/>
               <div>
                 <PieChart title="Tình trạng thanh toán" data={[{label:'Đã thu đủ',value:orders.filter(order=>order.payment_status==='paid'&&order.status!=='cancelled').length},{label:'Chưa thu đủ',value:pending.length}]} formatValue={value=>`${value} đơn`}/>
                 <p className="mt-4 text-sm font-semibold">Giá trị đơn chưa thu đủ: <b>{money(pending.reduce((sum,order)=>sum+order.total,0))}</b></p>
               </div>
-            </div>
-          </header>
+            </section>
+
 
           {/* 3D Search Bar */}
           <div className="input-push mb-6 flex items-center px-4 py-1.5">
@@ -192,17 +193,17 @@ export default function WorkflowClient() {
               <Loader2 className="animate-spin text-[#585556]" size={36} />
             </div>
           ) : (
-            <section className="grid gap-8 xl:grid-cols-4">
+            <section className="kanban-grid grid gap-8 md:grid-cols-2 2xl:grid-cols-4">
               {states.map((state, index) => {
                 const Icon = state.icon;
                 const list = shown.filter((o) => (o.status || 'confirmed') === state.key);
                 return (
                   <div
                     key={state.key}
-                    className="min-w-0 rounded-3xl border-2 border-[#585556] bg-[#fef9f4] p-4 shadow-[0_5px_0_0_#585556]"
+                    className="kanban-column min-w-0 rounded-3xl border-2 border-[#585556] bg-[#fef9f4] p-4 shadow-[0_5px_0_0_#585556]"
                   >
                     {/* Column Header */}
-                    <div className="mb-4 flex items-center justify-between">
+                    <div className="kanban-column-heading mb-4 flex items-center justify-between">
                       <div className="badge-push flex items-center gap-2 px-3.5 py-1.5">
                         <span className={`flex h-6 w-6 items-center justify-center rounded-full ${state.color}`}>
                           <Icon size={14} />
@@ -219,7 +220,7 @@ export default function WorkflowClient() {
                       {list.map((order) => (
                         <article
                           key={order.id}
-                          className="card-push-subtle p-4 space-y-3"
+                          className="kanban-card card-push-subtle p-4 space-y-3"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">

@@ -164,13 +164,13 @@ export default function DailyRevenueClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5EEDD] p-3 pb-[calc(10rem+env(safe-area-inset-bottom))] pt-[calc(4.75rem+env(safe-area-inset-top,0px))] text-[#16587B] md:flex md:gap-5 md:p-6 md:pb-8 md:pt-6">
+    <div className="business-shell min-h-screen bg-[#F5EEDD] p-3 pb-[calc(10rem+env(safe-area-inset-bottom))] pt-[calc(4.75rem+env(safe-area-inset-top,0px))] text-[#16587B] md:flex md:gap-5 md:p-6 md:pb-8 md:pt-6">
       <Sidebar />
 
-      <main className="min-w-0 flex-1">
-        <div className="mx-auto max-w-5xl space-y-10">
+      <main className="business-main min-w-0 flex-1">
+        <div className="business-content mx-auto max-w-5xl space-y-10">
           {/* TOP BAR / BREADCRUMB */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="page-heading flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#16587B]/70">
                 Thống Kê Bán Hàng Theo Ngày
@@ -214,7 +214,7 @@ export default function DailyRevenueClient() {
               - Ở giữa: Tổng số tiền doanh thu ngày hôm đó nhận được
               - Bên dưới số tiền: Tổng số đơn hàng trong ngày hôm đó
               ========================================================================= */}
-          <section className="relative overflow-hidden rounded-3xl border-2 border-[#16587B]/20 bg-white p-6 text-center shadow-[0_10px_30px_rgb(22_88_123_/_0.08)] md:p-10">
+          <section className="daily-hero content-panel relative overflow-hidden rounded-3xl border-2 border-[#16587B]/20 bg-white p-6 text-center shadow-[0_10px_30px_rgb(22_88_123_/_0.08)] md:p-10">
             {/* Subtle decorative background glow */}
             <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-96 -translate-x-1/2 rounded-full bg-[#84B3CE]/15 blur-3xl" />
 
@@ -295,7 +295,7 @@ export default function DailyRevenueClient() {
                     transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                     className="my-1"
                   >
-                    <span className="business-money-display block text-4xl font-black tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                    <span className="daily-money business-money-display block text-4xl font-black tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
                       {formatVNCurrency(stats?.totalRevenue || 0)}
                     </span>
                   </motion.div>
@@ -380,9 +380,9 @@ export default function DailyRevenueClient() {
               PHÍA DƯỚI CÙNG: BIỂU ĐỒ BIỂU THỊ CÁC MÓN ĐƯỢC GỌI THEO SỐ LƯỢNG
               CÓ THỂ FILTER THEO TỔNG DOANH THU
               ========================================================================= */}
-          <section className="card-push rounded-3xl border-2 border-[#16587B]/20 bg-white p-5 md:p-7">
+          <section className="content-panel card-push rounded-3xl border-2 border-[#16587B]/20 bg-white p-5 md:p-7">
             {/* Header & Controls bar */}
-            <div className="mb-6 flex flex-col gap-4 border-b border-[#16587B]/10 pb-5 md:flex-row md:items-center md:justify-between">
+            <div className="daily-controls mb-6 flex flex-col gap-4 border-b border-[#16587B]/10 pb-5 md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#16587B] text-white">
@@ -398,8 +398,8 @@ export default function DailyRevenueClient() {
               </div>
 
               {/* FILTER & TOGGLE BUTTONS - ĐẢM BẢO MÀU SẮC TƯƠNG PHẢN TUYỆT ĐỐI */}
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="flex rounded-2xl border-2 border-[#16587B] bg-[#F5EEDD] p-1 shadow-inner">
+              <div className="daily-filter-group flex flex-wrap items-center gap-2">
+                <div className="daily-measure-switch flex rounded-2xl border-2 border-[#16587B] bg-[#F5EEDD] p-1 shadow-inner">
                   {/* Filter theo số lượng */}
                   <button
                     type="button"
@@ -445,7 +445,7 @@ export default function DailyRevenueClient() {
             </div>
 
             {/* Tìm kiếm món */}
-            <div className="relative mb-5">
+            <div className="daily-search relative mb-5">
               <Search size={16} className="absolute left-3.5 top-3.5 text-[#16587B]/50" />
               <input
                 type="text"

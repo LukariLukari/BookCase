@@ -1,0 +1,112 @@
+/* An 8px spacing rhythm for business pages. Keep the existing shop palette,
+   display type, square frames and offset controls. Dialogs keep their layout. */
+.business-shell {
+  --panel-space: 20px;
+  padding-inline: 16px;
+}
+.business-main { min-width: 0; }
+.business-main .business-content { padding-block: 8px 32px; }
+.business-main .page-heading {
+  gap: 24px;
+  margin-bottom: 32px !important;
+}
+.business-main .page-heading h1 {
+  font-size: clamp(28px, 3vw, 36px) !important;
+  line-height: 1.2 !important;
+  margin-top: 8px !important;
+}
+.business-main .page-heading p { max-width: 64ch; line-height: 1.7 !important; }
+.business-main .page-heading p:last-child:not(:first-child) {
+  margin-top: 12px !important;
+  font-weight: 500;
+}
+.business-main :is(.content-panel, .finance-panel, .page-heading-panel) {
+  padding: var(--panel-space);
+}
+.business-main .page-heading-panel {
+  margin-bottom: 32px !important;
+  box-shadow: 0 4px 0 var(--pixel-shadow) !important;
+}
+.business-main .content-panel {
+  box-shadow: 0 4px 0 var(--pixel-shadow) !important;
+}
+.business-main .section-heading {
+  margin-bottom: 20px !important;
+  line-height: 1.4 !important;
+}
+.business-main .page-toolbar {
+  gap: 16px;
+  margin-bottom: 32px;
+  row-gap: 16px;
+}
+.business-main .page-tabs { gap: 12px; margin-block: 0 32px; padding: 12px; }
+.business-main .finance-tabs { gap: 12px; margin-block: 24px 32px; }
+.business-main .summary-grid { gap: 16px; margin-bottom: 40px; }
+.business-main .stats-overview { margin-bottom: 32px; gap: 32px; }
+.business-main .summary-grid > .content-panel { padding: 20px; }
+.business-main .summary-grid p { font-size: 12px; font-weight: 600; line-height: 1.6; }
+.business-main .summary-value {
+  margin-top: 12px;
+  font-family: var(--font-montserrat), sans-serif !important;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(20px, 2.2vw, 28px) !important;
+  line-height: 1.25 !important;
+  letter-spacing: -.03em;
+}
+.business-main .chart-grid { gap: 32px; margin-top: 32px; align-items: start; }
+.business-main .chart-grid > .content-panel { min-width: 0; height: 100%; }
+.business-main .field-label { margin-bottom: 10px; font-weight: 700; line-height: 1.5; }
+.business-main .form-grid { gap: 24px; }
+.business-main .customer-grid,
+.business-main .catalog-grid { gap: 24px; }
+.business-main .customer-card { padding: 24px; }
+.business-main .catalog-card .catalog-card-body { padding: 20px; }
+.business-main .customer-card,
+.business-main .catalog-card,
+.business-main .kanban-card { box-shadow: 0 2px 0 var(--pixel-shadow) !important; }
+.business-main .kanban-grid { gap: 24px; }
+.business-main .kanban-column { padding: 20px; }
+.business-main .kanban-column-heading { gap: 12px; margin-bottom: 24px; }
+.business-main .kanban-card { padding: 20px; }
+.business-main .daily-controls { gap: 20px; margin-bottom: 24px; padding-bottom: 24px; align-items: start; }
+.business-main .daily-filter-group { gap: 16px; }
+.business-main .daily-measure-switch { gap: 8px; padding: 8px; }
+.business-main .daily-measure-switch button { min-height: 44px; }
+.business-main .daily-search { margin-bottom: 28px; }
+.business-main .daily-hero { padding: 32px 20px; }
+.business-main .daily-hero .daily-money { margin-block: 16px 24px; }
+.business-main .finance-panel { margin-top: 32px; }
+.business-main .finance-chart-grid { gap: 32px; }
+.business-main .finance-chart-grid > .finance-panel { margin-top: 0; }
+.business-main .finance-category-row { padding: 16px 20px; gap: 16px; }
+.business-main .finance-category-icon-groups > section + section { margin-top: 24px; padding-top: 20px; }
+
+@media (min-width: 768px) {
+  .business-shell {
+    --panel-space: 28px;
+    gap: 32px;
+    padding: 28px;
+  }
+  .business-main .business-content { padding-block: 4px 32px; }
+  .business-main .page-heading { margin-bottom: 40px !important; }
+  .business-main .page-heading-panel { padding: 32px; }
+  .business-main .daily-hero { padding: 48px 32px; }
+  .business-main .catalog-card .catalog-card-body { padding: 24px; }
+}
+@media (min-width: 1024px) {
+  .business-main .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+}
+@media (min-width: 1280px) {
+  .business-main .chart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+  .business-main .chart-grid { gap: 24px; margin-top: 24px; }
+  .business-main .summary-grid { margin-bottom: 32px; gap: 12px; }
+  .business-main .summary-grid > .content-panel { padding: 16px; }
+  .business-main .daily-controls { flex-direction: column; }
+  .business-main .daily-filter-group { width: 100%; }
+  .business-main .daily-filter-group > select { width: 100%; }
+  .business-main .daily-measure-switch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .business-main .daily-measure-switch button { min-width: 0; justify-content: center; padding-inline: 8px; }
+  .business-main .customer-card { padding: 20px; }
+}
