@@ -69,8 +69,62 @@
 .business-main .kanban-card { padding: 20px; }
 .business-main .daily-controls { gap: 20px; margin-bottom: 24px; padding-bottom: 24px; align-items: start; }
 .business-main .daily-filter-group { gap: 16px; }
-.business-main .daily-measure-switch { gap: 8px; padding: 8px; }
-.business-main .daily-measure-switch button { min-height: 44px; }
+.business-main .daily-measure-switch {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  padding: 4px;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #e8e1d2 !important;
+  box-shadow: none !important;
+}
+.business-main .daily-measure-switch::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 4px auto 4px 4px;
+  width: calc((100% - 8px) / 2);
+  border-radius: inherit;
+  background: var(--pixel-primary);
+  transition: transform 200ms ease;
+}
+.business-main .daily-measure-switch[data-mode="revenue"]::before {
+  transform: translateX(100%);
+}
+.business-main .daily-measure-switch button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  translate: none !important;
+  color: #625d54 !important;
+  font-size: 14px !important;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 200ms ease;
+}
+.business-main .daily-measure-switch button[aria-pressed="true"] { color: #fff !important; }
+.business-main .daily-measure-switch button :is(span, svg, svg *) { color: inherit !important; }
+.business-main .daily-measure-switch button :is(svg, svg *) { stroke: currentColor !important; }
+.business-main .daily-measure-switch button > svg { flex-shrink: 0; }
+.business-main .daily-measure-switch button:focus-visible {
+  outline: 2px solid #a34b10;
+  outline-offset: 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .business-main .daily-measure-switch::before,
+  .business-main .daily-measure-switch button { transition: none; }
+}
 .business-main .daily-search { margin-bottom: 28px; }
 .business-main .daily-hero { padding: 32px 20px; }
 .business-main .daily-hero .daily-money { margin-block: 16px 24px; }

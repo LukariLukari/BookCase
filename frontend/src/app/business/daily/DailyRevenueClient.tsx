@@ -399,32 +399,21 @@ export default function DailyRevenueClient() {
 
               {/* FILTER & TOGGLE BUTTONS - ĐẢM BẢO MÀU SẮC TƯƠNG PHẢN TUYỆT ĐỐI */}
               <div className="daily-filter-group flex flex-wrap items-center gap-2">
-                <div className="daily-measure-switch flex rounded-2xl border-2 border-[#16587B] bg-[#F5EEDD] p-1 shadow-inner">
-                  {/* Filter theo số lượng */}
+                <div className="daily-measure-switch" data-mode={filterMode} role="group" aria-label="C?ch hi?n th? bi?u ??">
                   <button
                     type="button"
                     onClick={() => setFilterMode('quantity')}
-                    className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-black transition-all ${
-                      filterMode === 'quantity'
-                        ? 'choice-active shadow-md'
-                        : 'bg-transparent text-[#16587B] hover:bg-white/60'
-                    }`}
+                    aria-pressed={filterMode === 'quantity'}
                   >
-                    <ShoppingBag size={14} className={filterMode === 'quantity' ? 'text-white' : 'text-[#16587B]'} />
-                    <span>Theo số lượng</span>
+                    <ShoppingBag size={18} aria-hidden="true" />
+                    <span>Theo s? l??ng</span>
                   </button>
-
-                  {/* Filter theo tổng doanh thu */}
                   <button
                     type="button"
                     onClick={() => setFilterMode('revenue')}
-                    className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-black transition-all ${
-                      filterMode === 'revenue'
-                        ? 'choice-active shadow-md'
-                        : 'bg-transparent text-[#16587B] hover:bg-white/60'
-                    }`}
+                    aria-pressed={filterMode === 'revenue'}
                   >
-                    <CircleDollarSign size={14} className={filterMode === 'revenue' ? 'text-white' : 'text-[#16587B]'} />
+                    <CircleDollarSign size={18} aria-hidden="true" />
                     <span>Theo doanh thu</span>
                   </button>
                 </div>

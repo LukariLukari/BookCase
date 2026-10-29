@@ -6,6 +6,7 @@ import {
   BarChart3,
   Boxes,
   CalendarDays,
+  CalendarClock,
   ChevronDown,
   CircleDollarSign,
   KeyRound,
@@ -25,6 +26,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 const standaloneItems = [
   { href: '/business/pos', label: 'Bán tại quầy', icon: ShoppingCart },
   { href: '/business/customers', label: 'Khách hàng', icon: Users },
+  { href: '/business/subscriptions', label: 'Lịch gia hạn', icon: CalendarClock },
 ];
 
 const groups = [
@@ -188,6 +190,7 @@ export default function Sidebar() {
           {desktopLink(standaloneItems[0])}
           {desktopGroup(groups[0])}
           {desktopLink(standaloneItems[1])}
+          {desktopLink(standaloneItems[2])}
           {desktopGroup(groups[1])}
           {desktopGroup(groups[2])}
           {isAdmin && desktopLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}
@@ -224,6 +227,7 @@ export default function Sidebar() {
           <nav className="grid grid-cols-1 gap-3">
             {mobileLink(standaloneItems[0])}
             {mobileLink(standaloneItems[1])}
+            {mobileLink(standaloneItems[2])}
             {mobileGroup(groups[0])}
             {mobileGroup(groups[1])}
             {mobileGroup(groups[2])}
