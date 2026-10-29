@@ -399,14 +399,14 @@ export default function DailyRevenueClient() {
 
               {/* FILTER & TOGGLE BUTTONS - ĐẢM BẢO MÀU SẮC TƯƠNG PHẢN TUYỆT ĐỐI */}
               <div className="daily-filter-group flex flex-wrap items-center gap-2">
-                <div className="daily-measure-switch" data-mode={filterMode} role="group" aria-label="C?ch hi?n th? bi?u ??">
+                <div className="daily-measure-switch" data-mode={filterMode} role="group" aria-label="Cách hiển thị biểu đồ">
                   <button
                     type="button"
                     onClick={() => setFilterMode('quantity')}
                     aria-pressed={filterMode === 'quantity'}
                   >
                     <ShoppingBag size={18} aria-hidden="true" />
-                    <span>Theo s? l??ng</span>
+                    <span>Theo số lượng</span>
                   </button>
                   <button
                     type="button"
