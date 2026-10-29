@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import FinanceNav from './FinanceNav';
-import { ArrowRightLeft, BookOpen, Check, CreditCard, FileSpreadsheet, History, Landmark, Loader2, Plus, Pencil, ReceiptText, Trash2, Wallet } from 'lucide-react';
+import { ArrowRightLeft, BookOpen, Check, CreditCard, FileSpreadsheet, History, Landmark, Loader2, Minus, Plus, Pencil, ReceiptText, Trash2, Wallet } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import PieChart from '@/components/PieChart';
@@ -266,7 +266,7 @@ export default function FinanceClient({view}:{view:'overview'|'transactions'|'ac
 
 function TransactionRows({items,remove,edit}:{items:Transaction[];remove:(item:Transaction)=>void;edit:(item:Transaction)=>void}){
   return items.length?<div>{items.map(item=><div key={item.id} className="flex flex-wrap items-center gap-3 border-b-2 border-black p-4 last:border-b-0">
-    {item.type==='transfer'?<div className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-black bg-[#b99cff]"><ArrowRightLeft size={19}/></div>:item.categoryIcon?<FinanceCategoryIcon name={item.categoryIcon} color={item.categoryColor||undefined}/>:<div className={`flex h-10 w-10 shrink-0 items-center justify-center border-2 border-black ${item.type==='income'?'bg-[#8ee0a8]':'bg-[#ff9f87]'}`}>{item.type==='income'?'+':'−'}</div>}
+    {item.type==='transfer'?<span className="finance-transaction-icon" data-type="transfer"><ArrowRightLeft aria-hidden="true"/></span>:item.categoryIcon?<FinanceCategoryIcon name={item.categoryIcon} color={item.categoryColor||undefined}/>:<span className="finance-transaction-icon" data-type={item.type}>{item.type==='income'?<Plus aria-hidden="true"/>:<Minus aria-hidden="true"/>}</span>}
     <div className="min-w-0 flex-1"><b className={`block truncate text-sm ${item.type==='transfer'?'text-[#7046b5]':''}`}>{item.category}</b><p className="truncate text-xs font-semibold">{item.account.name}{item.destinationAccount&&` → ${item.destinationAccount.name}`}{item.description&&` · ${item.description}`}</p></div>
     <div className="ml-auto flex w-full max-w-full flex-wrap items-center justify-end gap-3 sm:w-auto">
       <b className={`break-all text-sm ${item.type==='income'?'text-green-700':item.type==='expense'?'text-red-700':'text-[#7046b5]'}`}>{item.type==='income'?'+':item.type==='expense'?'-':'↔ '}{money(item.amount,item.currency)}</b>

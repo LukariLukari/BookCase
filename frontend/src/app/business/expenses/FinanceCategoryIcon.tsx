@@ -94,15 +94,8 @@ const icons = {
   zap: Zap,
 } satisfies Record<CategoryIconName, typeof Heart>;
 
-const readableInk = (color: string) => {
-  const value = color.replace('#', '');
-  if (!/^[0-9a-f]{6}$/i.test(value)) return '#ffffff';
-  const [red, green, blue] = [0, 2, 4].map(offset => Number.parseInt(value.slice(offset, offset + 2), 16));
-  return red * 0.299 + green * 0.587 + blue * 0.114 > 168 ? '#302d28' : '#ffffff';
-};
-
 export default function FinanceCategoryIcon({ name, color, className = '' }: { name?: string; color?: string; className?: string }) {
   const Icon = icons[name as CategoryIconName] || CircleEllipsis;
-  const background = color || '#7C6F64';
-  return <span className={`finance-category-icon ${className}`} style={{ backgroundColor: background, color: readableInk(background) }}><Icon aria-hidden="true" /></span>;
+  const ink = color || '#7C6F64';
+  return <span className={`finance-category-icon ${className}`} style={{ color: `color-mix(in srgb, ${ink} 65%, #302d28)` }}><Icon aria-hidden="true" /></span>;
 }
