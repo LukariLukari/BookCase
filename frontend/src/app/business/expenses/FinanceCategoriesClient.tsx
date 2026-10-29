@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import FinanceNav from './FinanceNav';
 import { Check, Loader2, Pencil, Plus, Tags, Trash2, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
@@ -102,7 +102,7 @@ export default function FinanceCategoriesClient() {
   return <div className="business-shell min-h-screen bg-[#f4ead6] p-3 pb-16 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] font-sans text-[#171513] md:flex md:gap-5 md:p-6" style={{backgroundImage:'linear-gradient(rgba(23,21,19,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(23,21,19,.055) 1px,transparent 1px)',backgroundSize:'28px 28px'}}>
     <Sidebar/><main className="business-main min-w-0 flex-1"><div className="business-content mx-auto max-w-7xl">
       <header className={`page-heading page-heading-panel ${card} p-5 md:p-7`}><p className="text-xs font-black uppercase tracking-[.2em]">Tùy chỉnh thu & chi</p><h1 className="mt-1 text-3xl font-black uppercase text-[#df5b2a] md:text-5xl">Danh mục của bạn</h1><p className="mt-2 text-sm font-semibold">Tự tạo danh mục bằng màu sắc và biểu tượng phù hợp với cách bạn quản lý tiền.</p></header>
-      <nav className="finance-tabs mt-6 grid grid-cols-2 gap-2 md:grid-cols-4 md:w-fit md:gap-3"><Link href="/business/expenses" className="finance-nav-link">Tổng quan</Link><Link href="/business/expenses/transactions" className="finance-nav-link">Giao dịch</Link><Link href="/business/expenses/accounts" className="finance-nav-link">Khoản tiền</Link><Link href="/business/expenses/categories" className="finance-nav-link is-active"><Tags/> Danh mục</Link></nav>
+      <FinanceNav view="categories"/>
 
       <div className="mt-7 grid gap-7 lg:grid-cols-[.8fr_1.2fr]">
         <form onSubmit={save} className={`${card} h-fit p-4 md:p-6`}>

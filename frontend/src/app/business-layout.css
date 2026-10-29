@@ -1,5 +1,4 @@
-/* An 8px spacing rhythm for business pages. Keep the existing shop palette,
-   display type, square frames and offset controls. Dialogs keep their layout. */
+/* An 8px spacing rhythm for business pages. */
 .business-shell {
   --panel-space: 20px;
   padding-inline: 16px;
@@ -80,6 +79,59 @@
 .business-main .finance-chart-grid > .finance-panel { margin-top: 0; }
 .business-main .finance-category-row { padding: 16px 20px; gap: 16px; }
 .business-main .finance-category-icon-groups > section + section { margin-top: 24px; padding-top: 20px; }
+
+/* Secondary navigation and small choices use copy and icons without a tile. */
+.ui-flat-control.ui-flat-control,
+.sidebar-nav-item.sidebar-nav-item-nested.ui-flat-control {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--pixel-ink) !important;
+  transform: none !important;
+  translate: none !important;
+  transition: color 150ms ease !important;
+}
+.ui-flat-control.ui-flat-control :is(span, svg, svg *) {
+  color: inherit !important;
+}
+.ui-flat-control.ui-flat-control :is(svg, svg *) {
+  stroke: currentColor !important;
+}
+.ui-flat-control.ui-flat-control:is(:hover, [aria-current="page"], [aria-pressed="true"]) {
+  color: #a34b10 !important;
+}
+.ui-flat-control[aria-current="page"] .sidebar-nav-label,
+.finance-nav-link[aria-current="page"] span,
+.segmented-choice.ui-flat-control[aria-pressed="true"] {
+  text-decoration: underline;
+  text-underline-offset: 7px;
+  text-decoration-thickness: 2px;
+}
+.ui-flat-control:focus-visible {
+  outline: 2px solid var(--pixel-primary);
+  outline-offset: 2px;
+}
+.business-main .finance-tabs { gap: 4px 24px; }
+.finance-nav-link.ui-flat-control {
+  min-height: 44px;
+  justify-content: flex-start;
+  padding: 8px 0;
+  font-weight: 600;
+}
+.business-main .segmented-control {
+  min-width: 0;
+  padding: 0;
+  gap: 16px;
+}
+.segmented-choice.ui-flat-control {
+  min-height: 44px;
+  padding-inline: 0;
+  white-space: nowrap;
+}
+.sidebar-nav-item.sidebar-nav-item-nested.ui-flat-control {
+  padding-inline: 12px;
+  font-weight: 600;
+}
 
 @media (min-width: 768px) {
   .business-shell {

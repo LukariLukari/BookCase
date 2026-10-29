@@ -92,14 +92,14 @@ export default function Sidebar() {
       title={label}
       aria-current={active(href) ? 'page' : undefined}
       className={`sidebar-nav-item ${nested ? 'sidebar-nav-item-nested' : ''} flex w-full flex-nowrap items-center gap-2.5 rounded-2xl border text-sm font-black transition-all md:justify-center md:px-0 lg:justify-start ${nested ? 'h-10 px-3 lg:pl-7 lg:pr-3.5 xl:pl-8' : 'h-11 px-3 lg:px-3.5 xl:px-4'} ${
-        active(href)
+        nested
+          ? 'ui-flat-control text-[#57575c]'
+          : active(href)
           ? 'pixel-active text-white'
-          : nested
-            ? 'border-[#57575c]/20 bg-[#e5dcc4] text-[#57575c] hover:bg-[#eee6d2]'
-            : 'pixel-tile bg-[#cfc4a8] text-[#57575c] hover:bg-[#d9ceb0]'
+          : 'pixel-tile bg-[#cfc4a8] text-[#57575c] hover:bg-[#d9ceb0]'
       }`}
     >
-      <Icon size={nested ? 17 : 19} className={`shrink-0 ${active(href) ? 'text-white stroke-white' : ''}`} />
+      <Icon size={nested ? 17 : 19} className={`shrink-0 ${!nested && active(href) ? 'text-white stroke-white' : ''}`} />
       <span className="sidebar-nav-label whitespace-nowrap md:hidden lg:inline">{label}</span>
     </Link>
   );
@@ -112,10 +112,10 @@ export default function Sidebar() {
       title={label}
       aria-current={active(href) ? 'page' : undefined}
       className={`sidebar-nav-item ${nested ? 'sidebar-nav-item-nested' : ''} flex h-11 w-full items-center justify-start gap-2 rounded-xl px-3 text-[11px] font-black transition-all ${
-        active(href) ? 'pixel-active text-white' : 'btn-push'
+        nested ? 'ui-flat-control text-[#57575c]' : active(href) ? 'pixel-active text-white' : 'btn-push'
       }`}
     >
-      <Icon size={18} className={`shrink-0 ${active(href) ? 'text-white stroke-white' : ''}`} />
+      <Icon size={18} className={`shrink-0 ${!nested && active(href) ? 'text-white stroke-white' : ''}`} />
       <span className="sidebar-nav-label truncate">{label}</span>
     </Link>
   );
@@ -143,7 +143,7 @@ export default function Sidebar() {
             className={`sidebar-nav-chevron ml-auto hidden shrink-0 transition-transform lg:block ${expanded ? 'rotate-180' : ''}`}
           />
         </button>
-        {expanded && <div id={`desktop-group-${group.id}`} className="sidebar-nav-children space-y-3">{group.items.map(item => desktopLink(item, true))}</div>}
+        {expanded && <div id={`desktop-group-${group.id}`} className="sidebar-nav-children space-y-1">{group.items.map(item => desktopLink(item, true))}</div>}
       </div>
     );
   };
@@ -167,7 +167,7 @@ export default function Sidebar() {
           <span className="sidebar-nav-label">{group.label}</span>
           <ChevronDown size={16} className={`sidebar-nav-chevron ml-auto shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
         </button>
-        {expanded && <div id={`mobile-group-${group.id}`} className="sidebar-nav-children mt-3 grid grid-cols-1 gap-3">{group.items.map(item => mobileLink(item, true))}</div>}
+        {expanded && <div id={`mobile-group-${group.id}`} className="sidebar-nav-children mt-2 grid grid-cols-1 gap-1">{group.items.map(item => mobileLink(item, true))}</div>}
       </div>
     );
   };
