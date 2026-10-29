@@ -2814,6 +2814,43 @@ svg[class*="text-white"] *,
 
 .finance-entry-transfer { display: flex; align-items: center; justify-content: center; }
 .finance-entry-transfer[aria-pressed="true"] { background: #c4a7ff; }
+
+/* Export selection keeps native checkbox behavior with a standalone tick. */
+.finance-export-category { position: relative; min-height: 60px; }
+.finance-export-checkbox {
+  position: absolute;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.finance-export-category .finance-export-tick {
+  width: 32px !important;
+  height: 32px !important;
+  flex-shrink: 0;
+  color: #9b9690 !important;
+  stroke: currentColor !important;
+  opacity: .45;
+  transition: color 150ms ease, opacity 150ms ease;
+}
+.finance-export-checkbox:checked + .finance-export-tick {
+  color: #e65b20 !important;
+  opacity: 1;
+}
+.finance-export-category .finance-export-tick * { stroke: currentColor !important; }
+.finance-export-category:has(.finance-export-checkbox:focus-visible) {
+  outline: 2px solid #e65b20;
+  outline-offset: -3px;
+}
+.finance-export-category:has(.finance-export-checkbox:disabled) {
+  cursor: wait;
+  opacity: .6;
+}
 /* Distinguish child links from their section headings on mobile and desktop. */
 .sidebar-nav-children { margin-left: 10px; padding-left: 8px; border-left: 2px solid #b9ad90; }
 .sidebar-nav-item.sidebar-nav-item-nested { min-height: 40px; }

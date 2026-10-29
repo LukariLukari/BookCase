@@ -1,6 +1,6 @@
 'use client';
 
-import { FileSpreadsheet, Loader2 } from 'lucide-react';
+import { Check, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import ModalShell from './FinanceDialog';
 import { FinanceDatePicker } from './FinancePicker';
@@ -105,12 +105,12 @@ export default function FinanceExportDialog({ bookId, transactions, categories, 
             <span className="text-xs font-black uppercase tracking-wide">Danh mục cần xuất</span>
             <button type="button" onClick={toggleAll} className="text-xs font-black underline">{allVisibleSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}</button>
           </div>
-          <div className="max-h-52 space-y-2 overflow-y-auto border-2 border-black bg-white p-3">
+          <div className="max-h-52 overflow-y-auto border-2 border-black bg-white">
             {visibleCategories.map(category => {
               const checked = selected.has(category.id);
-              return <label key={category.id} className="flex cursor-pointer items-center gap-3 border-b border-black/15 py-2 last:border-0">
-                <input type="checkbox" checked={checked} onChange={() => setSelected(current => { const next = new Set(current); if (checked) next.delete(category.id); else next.add(category.id); return next; })} className="h-5 w-5 accent-[#df5b2a]" />
-                <span className="h-4 w-4 shrink-0 border border-black" style={{ backgroundColor: category.color }} />
+              return <label key={category.id} className="finance-export-category flex cursor-pointer items-center gap-3 border-b border-black/15 px-3 py-3 last:border-0" style={{ backgroundColor: `color-mix(in srgb, ${category.color} ${checked ? 24 : 14}%, #fffaf0)` }}>
+                <input type="checkbox" checked={checked} onChange={() => setSelected(current => { const next = new Set(current); if (checked) next.delete(category.id); else next.add(category.id); return next; })} className="finance-export-checkbox" />
+                <Check aria-hidden="true" className="finance-export-tick" strokeWidth={3} />
                 <span className="min-w-0 flex-1 truncate text-sm font-bold">{category.name}</span>
                 <small className="font-bold text-black/55">{category.type === 'income' ? 'Thu' : 'Chi'}</small>
               </label>;
