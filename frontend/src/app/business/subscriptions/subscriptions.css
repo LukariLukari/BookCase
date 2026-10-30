@@ -78,6 +78,9 @@
 .subscription-tracker .subscription-form :is(input, select, textarea):focus-visible { border-color: #e65c00 !important; outline: 2px solid #e65c00; outline-offset: 2px; box-shadow: inset 2px 3px 5px rgb(86 65 35 / .18), inset -1px -1px 0 rgb(255 255 255 / .9) !important; }
 .subscription-form small { font-size: 11px !important; line-height: 1.6; color: #82796a; }
 .subscription-period { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.subscription-app-field, .subscription-app-editor { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.subscription-app-editor { padding: 12px; border: 1px solid #d9c9ac; background: #fff0d1; }
+.subscription-tracker .subscription-app-add { display: inline-flex; align-items: center; justify-content: center; gap: 6px; align-self: flex-start; min-height: 36px; padding: 6px 10px; font-size: 12px !important; cursor: pointer; }
 .subscription-tracker .subscription-form-hint { font-size: 13px !important; line-height: 1.7; background: #fff0d1; padding: 10px 12px; grid-column: 1 / -1; }
 .subscription-save { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px; font-size: 14px !important; }
 .subscription-detail h3 { margin-block: 12px 20px; font-size: 22px !important; }

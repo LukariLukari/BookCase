@@ -8,7 +8,7 @@ export const BUSINESS_BACKUP_VERSION = 2;
 const tableNames = [
   'inventoryBatches','products','transactions','ledgers','customers','stockReceipts',
   'stockReceiptItems','orders','orderItems','expenses','orderPayments',
-  'orderStatusHistory','inventoryMovements','subscriptions',
+  'orderStatusHistory','inventoryMovements','subscriptions','subscriptionApps',
 ] as const;
 
 type BackupData = Record<(typeof tableNames)[number], Record<string, unknown>[]>;
@@ -23,7 +23,7 @@ type DbClient = PrismaClient | Prisma.TransactionClient;
 const plain = <T>(value:T):T => JSON.parse(JSON.stringify(value)) as T;
 
 export async function buildBusinessBackup(client:DbClient,userId:string):Promise<BusinessBackupPayload>{
-  const [inventoryBatches,products,transactions,ledgers,customers,stockReceipts,stockReceiptItems,orders,orderItems,expenses,orderPayments,orderStatusHistory,inventoryMovements,subscriptions]=await Promise.all([
+  const [inventoryBatches,products,transactions,ledgers,customers,stockReceipts,stockReceiptItems,orders,orderItems,expenses,orderPayments,orderStatusHistory,inventoryMovements,subscriptions,subscriptionApps]=await Promise.all([
     client.businessInventoryBatch.findMany({where:{userId}}),
     client.businessProduct.findMany({where:{userId}}),
     client.businessTransaction.findMany({where:{userId}}),
@@ -38,8 +38,9 @@ export async function buildBusinessBackup(client:DbClient,userId:string):Promise
     client.businessOrderStatusHistory.findMany({where:{userId}}),
     client.businessInventoryMovement.findMany({where:{userId}}),
     client.customerSubscription.findMany({where:{userId}}),
+    client.subscriptionApp.findMany({where:{userId}}),
   ]);
-  return plain({format:BUSINESS_BACKUP_FORMAT,version:BUSINESS_BACKUP_VERSION,exportedAt:new Date().toISOString(),data:{inventoryBatches,products,transactions,ledgers,customers,stockReceipts,stockReceiptItems,orders,orderItems,expenses,orderPayments,orderStatusHistory,inventoryMovements,subscriptions}});
+  return plain({format:BUSINESS_BACKUP_FORMAT,version:BUSINESS_BACKUP_VERSION,exportedAt:new Date().toISOString(),data:{inventoryBatches,products,transactions,ledgers,customers,stockReceipts,stockReceiptItems,orders,orderItems,expenses,orderPayments,orderStatusHistory,inventoryMovements,subscriptions,subscriptionApps}});
 }
 
 export async function createBusinessBackup(userId:string,label='Tự động',source='automatic'){
@@ -58,6 +59,7 @@ const dateFields:Record<string,string[]>={
   inventoryBatches:['createdAt','updatedAt'],products:['createdAt','updatedAt'],transactions:['transactionDate','createdAt','updatedAt'],
   ledgers:['createdAt','updatedAt'],customers:['createdAt','updatedAt'],stockReceipts:['receivedAt','createdAt'],orders:['orderedAt','createdAt','updatedAt'],
   subscriptions:['startDate','endDate','cancelDate','createdAt','updatedAt'],
+  subscriptionApps:['createdAt'],
   expenses:['spentAt','createdAt'],orderPayments:['paidAt','createdAt'],orderStatusHistory:['createdAt'],inventoryMovements:['createdAt'],
 };
 
@@ -68,6 +70,7 @@ function validatePayload(value:unknown):asserts value is BusinessBackupPayload{
   if(!isValidFormat||payload.version!==BUSINESS_BACKUP_VERSION||!payload.data)throw new Error('File sao lưu không đúng phiên bản toàn bộ dữ liệu.');
   // Version 2 backups created before subscription tracking have no subscription rows.
   if(payload.data.subscriptions===undefined)payload.data.subscriptions=[];
+  if(payload.data.subscriptionApps===undefined)payload.data.subscriptionApps=[];
   for(const table of tableNames)if(!Array.isArray(payload.data[table]))throw new Error(`File sao lưu thiếu bảng ${table}.`);
   const ids=Object.fromEntries(tableNames.map(table=>[table,new Set(payload.data![table].map(row=>row.id))])) as Record<string,Set<unknown>>;
   for(const table of tableNames)if(ids[table].size!==payload.data[table].length||ids[table].has(undefined))throw new Error(`Bảng ${table} có ID không hợp lệ.`);
@@ -100,6 +103,7 @@ export async function restoreBusinessBackup(userId:string,value:unknown){
     await tx.businessTransaction.deleteMany({where:{userId}});
     await tx.businessProduct.deleteMany({where:{userId}});
     await tx.customerSubscription.deleteMany({where:{userId}});
+    await tx.subscriptionApp.deleteMany({where:{userId}});
     await tx.businessCustomer.deleteMany({where:{userId}});
     await tx.businessLedger.deleteMany({where:{userId}});
     await tx.businessInventoryBatch.deleteMany({where:{userId}});
@@ -111,6 +115,7 @@ export async function restoreBusinessBackup(userId:string,value:unknown){
     await create('ledgers',tx.businessLedger);
     await create('customers',tx.businessCustomer);
     await create('subscriptions',tx.customerSubscription);
+    await create('subscriptionApps',tx.subscriptionApp);
     await create('stockReceipts',tx.businessStockReceipt);
     await create('stockReceiptItems',tx.businessStockReceiptItem);
     await create('orders',tx.businessOrder);
@@ -149,6 +154,7 @@ export async function clearBusinessAccountData(
     await tx.businessTransaction.deleteMany({ where: { userId } });
     await tx.businessProduct.deleteMany({ where: { userId } });
     await tx.customerSubscription.deleteMany({ where: { userId } });
+    await tx.subscriptionApp.deleteMany({ where: { userId } });
     await tx.businessCustomer.deleteMany({ where: { userId } });
     await tx.businessLedger.deleteMany({ where: { userId } });
     await tx.businessInventoryBatch.deleteMany({ where: { userId } });

@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Dialog from '../expenses/FinanceDialog';
 import { addDays, calendarDays, defaultCancelDate, reminderState, subscriptionCurrencies, subscriptionEnd, todayKey, validateSubscription, type DurationUnit, type Subscription, type SubscriptionInput } from '@/lib/subscriptions';
+import { formatSubscriptionPrice, parseSubscriptionPrice } from '@/lib/subscriptionPrice';
 
 type Customer = { id: string; name: string; phone?: string; email?: string };
 type Form = SubscriptionInput & { id?: string; renewFromId?: string };
@@ -14,7 +15,7 @@ const units = { day: 'ngày', month: 'tháng', year: 'năm' };
 const states = { overdue: 'Quá hạn hủy', today: 'Cần hủy hôm nay', upcoming: 'Sắp tới', cancelled: 'Đã hủy', renewed: 'Đã gia hạn' };
 const dateText = (value: string) => value.split('-').reverse().join('/');
 const money = (item: Pick<Subscription, 'price' | 'currency'>) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: item.currency, maximumFractionDigits: item.currency === 'VND' ? 0 : 2 }).format(Number(item.price));
-const newForm = (startDate: string): Form => ({ customerId: null, customerName: '', customerContact: '', appName: '', planName: '', account: '', durationValue: 1, durationUnit: 'month', price: '', currency: 'VND', startDate, cancelDate: subscriptionEnd(startDate, 1, 'month'), note: '' });
+const newForm = (startDate: string): Form => ({ customerId: null, customerName: 'Khách lẻ', customerContact: '', appName: '', planName: '', account: '', durationValue: 1, durationUnit: 'month', price: '', currency: 'VND', startDate, cancelDate: subscriptionEnd(startDate, 1, 'month'), note: '' });
 
 async function responseData<T>(response: Response): Promise<T> {
   const body = await response.json().catch(() => null);
@@ -29,6 +30,8 @@ export default function SubscriptionsClient() {
   const [selectedDate, setSelectedDate] = useState(() => todayKey());
   const [items, setItems] = useState<Subscription[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [appNames, setAppNames] = useState<string[]>(['Canva', 'Netflix']);
+  const [appError, setAppError] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [customerError, setCustomerError] = useState('');
@@ -55,6 +58,9 @@ export default function SubscriptionsClient() {
     fetch('/api/sales/customers', { headers, signal: controller.signal })
       .then(responseData<Customer[]>).then(data => { setCustomers(data); setCustomerError(''); })
       .catch(() => { if (!controller.signal.aborted) setCustomerError('Chưa tải được danh sách khách. Bạn vẫn có thể nhập tên và liên hệ trực tiếp.'); });
+    fetch('/api/sales/subscriptions/apps', { headers, signal: controller.signal })
+      .then(responseData<string[]>).then(data => { setAppNames(data); setAppError(''); })
+      .catch(() => { if (!controller.signal.aborted) setAppError('Chưa tải được danh sách ứng dụng.'); });
     return () => controller.abort();
   }, [token, headers, revision]);
 
@@ -94,6 +100,11 @@ export default function SubscriptionsClient() {
     selectDate(`${next}-01`);
   }
   function beginForm(value: Form) { setActionError(''); setDetail(null); setForm(value); }
+  async function addApp(name: string) {
+    const app = await fetch('/api/sales/subscriptions/apps', { method: 'POST', headers, body: JSON.stringify({ name }) }).then(responseData<{ name: string }>);
+    setAppNames(current => [...new Set([...current, app.name])].sort((a, b) => a.localeCompare(b, 'vi')));
+    return app.name;
+  }
   function renew(item: Subscription) {
     const startDate = item.endDate;
     const endDate = subscriptionEnd(startDate, item.durationValue, item.durationUnit);
@@ -188,7 +199,7 @@ export default function SubscriptionsClient() {
       </div>
     </main>
 
-    {form && <SubscriptionForm key={form.id || form.renewFromId || 'new'} initial={form} customers={customers} customerError={customerError} busy={saving} error={actionError} save={save} close={() => { if (!saving) setForm(null); }} />}
+    {form && <SubscriptionForm key={form.id || form.renewFromId || 'new'} initial={form} customers={customers} customerError={customerError} appNames={[...new Set([...appNames, ...items.map(item => item.appName)])]} appError={appError} reloadApps={() => setRevision(value => value + 1)} addApp={addApp} busy={saving} error={actionError} save={save} close={() => { if (!saving) setForm(null); }} />}
     {detail && <Dialog title={`${detail.appName}${detail.planName ? ` · ${detail.planName}` : ''}`} close={() => { if (!saving) setDetail(null); }} busy={saving}>
       <div className="subscription-detail"><span className="subscription-state" data-state={reminderState(detail, today)}>{states[reminderState(detail, today)]}</span><h3>{detail.customerName}</h3><dl>{[['Tài khoản ứng dụng', detail.account], ['Liên hệ khách', detail.customerContact || 'Chưa có'], ['Thời hạn', `${detail.durationValue} ${units[detail.durationUnit]}`], ['Giá gói', money(detail)], ['Bắt đầu', dateText(detail.startDate)], ['Hết hạn', dateText(detail.endDate)], ['Ngày nhắc hủy', dateText(detail.cancelDate)]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>{detail.note && <p className="subscription-note">{detail.note}</p>}{actionError && <p className="subscription-error" role="alert">{actionError}</p>}
         <div className="subscription-detail-actions">
@@ -204,10 +215,27 @@ export default function SubscriptionsClient() {
   </div>;
 }
 
-function SubscriptionForm({ initial, customers, customerError, busy, error, save, close }: { initial: Form; customers: Customer[]; customerError: string; busy: boolean; error: string; save: (value: Form) => Promise<void>; close: () => void }) {
+function SubscriptionForm({ initial, customers, customerError, appNames, appError, reloadApps, addApp, busy, error, save, close }: { initial: Form; customers: Customer[]; customerError: string; appNames: string[]; appError: string; reloadApps: () => void; addApp: (name: string) => Promise<string>; busy: boolean; error: string; save: (value: Form) => Promise<void>; close: () => void }) {
   const [value, setValue] = useState(initial);
+  const [showAppEditor, setShowAppEditor] = useState(false);
+  const [newAppName, setNewAppName] = useState('');
+  const [addingApp, setAddingApp] = useState(false);
+  const [addAppError, setAddAppError] = useState('');
   const id = useId();
   const end = subscriptionEnd(value.startDate, value.durationValue, value.durationUnit);
+  const options = [...new Set([...appNames, ...(value.appName ? [value.appName] : [])])].sort((a, b) => a.localeCompare(b, 'vi'));
+  async function createApp() {
+    const name = newAppName.trim();
+    if (!name) { setAddAppError('Nhập tên ứng dụng cần thêm.'); return; }
+    if (addingApp) return;
+    setAddingApp(true); setAddAppError('');
+    try {
+      const savedName = await addApp(name);
+      setValue(current => ({ ...current, appName: savedName }));
+      setNewAppName(''); setShowAppEditor(false);
+    } catch (error) { setAddAppError(error instanceof Error ? error.message : 'Không thể thêm ứng dụng.'); }
+    finally { setAddingApp(false); }
+  }
   function changePeriod(patch: Partial<Form>) {
     const next = { ...value, ...patch };
     const nextEnd = subscriptionEnd(next.startDate, next.durationValue, next.durationUnit);
@@ -216,18 +244,40 @@ function SubscriptionForm({ initial, customers, customerError, busy, error, save
     next.cancelDate = defaultCancelDate(next.startDate, nextEnd, lead);
     setValue(next);
   }
-  return <Dialog title={value.id ? 'Chỉnh sửa gói' : value.renewFromId ? 'Gia hạn kỳ tiếp' : 'Thêm gói đăng ký'} busy={busy} close={close}>
-    <form onSubmit={event => { event.preventDefault(); void save(value); }}><fieldset disabled={busy} className="subscription-form">
+  return <Dialog title={value.id ? 'Chỉnh sửa gói' : value.renewFromId ? 'Gia hạn kỳ tiếp' : 'Thêm gói đăng ký'} busy={busy || addingApp} close={close}>
+    <form onSubmit={event => { event.preventDefault(); if (!addingApp) void save(value); }}><fieldset disabled={busy || addingApp} className="subscription-form">
       {customerError && <p className="subscription-form-hint">{customerError}</p>}
-      <label className="subscription-form-wide">Khách hàng có sẵn<select value={value.customerId || ''} onChange={event => { const customer = customers.find(item => item.id === event.target.value); setValue({ ...value, customerId: customer?.id || null, ...(customer ? { customerName: customer.name, customerContact: customer.phone || customer.email || '' } : {}) }); }}><option value="">Nhập thông tin khách trực tiếp</option>{customers.map(customer => <option key={customer.id} value={customer.id}>{customer.name}{customer.phone ? ` · ${customer.phone}` : ''}</option>)}</select></label>
+      <label className="subscription-form-wide">Khách hàng có sẵn<select value={value.customerId || ''} onChange={event => { const customer = customers.find(item => item.id === event.target.value); setValue({ ...value, customerId: customer?.id || null, customerName: customer?.name || 'Khách lẻ', customerContact: customer ? customer.phone || customer.email || '' : '' }); }}><option value="">Nhập thông tin khách trực tiếp</option>{customers.map(customer => <option key={customer.id} value={customer.id}>{customer.name}{customer.phone ? ` · ${customer.phone}` : ''}</option>)}</select></label>
       <label>Tên khách *<input required maxLength={250} value={value.customerName} onChange={event => setValue({ ...value, customerName: event.target.value })} data-dialog-initial-focus /></label>
       <label>Liên hệ khách<input maxLength={250} value={value.customerContact} placeholder="SĐT, email hoặc link liên hệ" onChange={event => setValue({ ...value, customerContact: event.target.value })} /></label>
-      <label>Ứng dụng *<input required maxLength={250} placeholder="VD: Canva, Netflix…" value={value.appName} onChange={event => setValue({ ...value, appName: event.target.value })} /></label>
+      <div className="subscription-app-field">
+        <label htmlFor={`${id}-app`}>Ứng dụng *</label>
+        <select id={`${id}-app`} required value={value.appName} onChange={event => setValue({ ...value, appName: event.target.value })}><option value="">Chọn ứng dụng</option>{options.map(name => <option key={name} value={name}>{name}</option>)}</select>
+        <button type="button" className="subscription-app-add" onClick={() => { setShowAppEditor(current => !current); setAddAppError(''); }}><Plus size={16} /> Thêm ứng dụng</button>
+        {appError && <div className="subscription-error" role="alert">{appError} <button type="button" onClick={reloadApps}>Thử lại</button></div>}
+        {showAppEditor && <div className="subscription-app-editor">
+          <label htmlFor={`${id}-new-app`}>Tên ứng dụng mới</label>
+          <input id={`${id}-new-app`} maxLength={250} value={newAppName} placeholder="VD: Spotify, YouTube…" onChange={event => setNewAppName(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); void createApp(); } }} />
+          <button type="button" className="btn-push subscription-app-add" onClick={() => void createApp()}>{addingApp ? 'Đang thêm…' : 'Lưu ứng dụng'}</button>
+          {addAppError && <p className="subscription-error" role="alert">{addAppError}</p>}
+        </div>}
+      </div>
       <label>Tên gói<input maxLength={250} placeholder="VD: Pro, Premium…" value={value.planName} onChange={event => setValue({ ...value, planName: event.target.value })} /></label>
       <label className="subscription-form-wide">Tài khoản sử dụng *<input required maxLength={250} placeholder="Email hoặc tên tài khoản của khách" value={value.account} onChange={event => setValue({ ...value, account: event.target.value })} /></label>
       <label>Thời hạn *<div className="subscription-period"><input aria-label="Số kỳ" required type="number" min="1" max={{ day: 3650, month: 120, year: 10 }[value.durationUnit]} value={value.durationValue || ''} onChange={event => changePeriod({ durationValue: Number(event.target.value) })} /><select aria-label="Đơn vị thời hạn" value={value.durationUnit} onChange={event => changePeriod({ durationUnit: event.target.value as DurationUnit })}>{Object.entries(units).map(([unit, label]) => <option key={unit} value={unit}>{label}</option>)}</select></div></label>
       <label>Ngày bắt đầu *<input required type="date" min="2000-01-01" max="2199-12-31" value={value.startDate} onChange={event => changePeriod({ startDate: event.target.value })} /></label>
-      <label>Giá gói *<input required type="number" min="0" max="999999999999.99" step="0.01" value={value.price} onChange={event => setValue({ ...value, price: event.target.value })} /></label>
+      <label>Giá gói *<input required type="text" inputMode="decimal" placeholder="VD: 150,000" value={formatSubscriptionPrice(value.price)} onChange={event => {
+        const input = event.currentTarget;
+        const raw = parseSubscriptionPrice(input.value);
+        if (raw === null) return;
+        const position = input.selectionStart ?? input.value.length;
+        const digitsBefore = input.value.slice(0, position).replace(/,/g, '').length;
+        const formatted = formatSubscriptionPrice(raw);
+        let caret = 0, count = 0;
+        while (caret < formatted.length && count < digitsBefore) { if (formatted[caret] !== ',') count++; caret++; }
+        setValue({ ...value, price: raw });
+        requestAnimationFrame(() => { if (document.activeElement === input) input.setSelectionRange(caret, caret); });
+      }} onBlur={() => { if (value.price.endsWith('.')) setValue(current => ({ ...current, price: current.price.slice(0, -1) })); }} /></label>
       <label>Tiền tệ<select value={value.currency} onChange={event => setValue({ ...value, currency: event.target.value })}>{subscriptionCurrencies.map(currency => <option key={currency}>{currency}</option>)}</select></label>
       <div className="subscription-form-hint subscription-form-wide">Ngày hết hạn: <b>{end ? dateText(end) : 'Chọn ngày bắt đầu và thời hạn'}</b></div>
       <label className="subscription-form-wide" htmlFor={`${id}-cancel`}>Ngày nhắc hủy *<input id={`${id}-cancel`} required type="date" min={value.startDate} max={end || '2199-12-31'} value={value.cancelDate} onChange={event => setValue({ ...value, cancelDate: event.target.value })} /><small>Mặc định đúng ngày hết hạn. Có thể chọn ngày sớm hơn.</small></label>

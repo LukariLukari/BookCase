@@ -21,6 +21,14 @@ function load(file, imports = {}) {
 }
 
 const util = load('src/lib/subscriptions.ts');
+const priceInput = load('src/lib/subscriptionPrice.ts');
+test('Price input groups thousands without losing decimals or accepting invalid amounts', () => {
+  for (const [raw, formatted] of [['', ''], ['0', '0'], ['150000', '150,000'], ['123456789012.50', '123,456,789,012.50'], ['1500.', '1,500.']]) {
+    assert.equal(priceInput.formatSubscriptionPrice(raw), formatted);
+    assert.equal(priceInput.parseSubscriptionPrice(formatted), raw);
+  }
+  for (const invalid of ['-1', '1e4', '12.345', '1234567890123', 'abc', '1.2.3']) assert.equal(priceInput.parseSubscriptionPrice(invalid), null);
+});
 const valid = () => ({ customerId: null, customerName: 'Khách An', customerContact: 'an@example.com', appName: 'Canva', planName: 'Pro', account: 'an@example.com', durationValue: 1, durationUnit: 'month', price: '150000', currency: 'VND', startDate: '2026-10-30', cancelDate: '2026-11-30', note: '' });
 
 test('Monthly and yearly periods clamp to the last valid day', () => {
@@ -145,7 +153,7 @@ test('Overlapping renewals, invalid state updates and malformed requests are rej
 function backupFixture() {
   const stores = {};
   const db = {};
-  for (const model of ['businessInventoryBatch', 'businessProduct', 'businessTransaction', 'businessLedger', 'businessCustomer', 'businessStockReceipt', 'businessStockReceiptItem', 'businessOrder', 'businessOrderItem', 'businessExpense', 'businessOrderPayment', 'businessOrderStatusHistory', 'businessInventoryMovement', 'customerSubscription', 'businessDataBackup']) {
+  for (const model of ['businessInventoryBatch', 'businessProduct', 'businessTransaction', 'businessLedger', 'businessCustomer', 'businessStockReceipt', 'businessStockReceiptItem', 'businessOrder', 'businessOrderItem', 'businessExpense', 'businessOrderPayment', 'businessOrderStatusHistory', 'businessInventoryMovement', 'customerSubscription', 'subscriptionApp', 'businessDataBackup']) {
     stores[model] = [];
     db[model] = {
       findMany: async ({ where, skip } = {}) => stores[model].filter(row => !where?.userId || row.userId === where.userId).slice(skip || 0),
@@ -159,6 +167,7 @@ function backupFixture() {
   stores.businessCustomer.push({ id: 'customer-alice', userId: 'alice', name: 'An', createdAt: new Date() });
   const subscription = { id: 'sub-alice', userId: 'alice', ...valid(), customerId: 'customer-alice', status: 'active', startDate: new Date('2026-10-30T00:00:00Z'), endDate: new Date('2026-11-30T00:00:00Z'), cancelDate: new Date('2026-11-30T00:00:00Z') };
   stores.customerSubscription.push(subscription, { ...subscription, id: 'sub-bob', userId: 'bob', customerId: null });
+  stores.subscriptionApp.push({ id: 'app-alice', userId: 'alice', name: 'Spotify', createdAt: new Date() }, { id: 'app-bob', userId: 'bob', name: 'YouTube', createdAt: new Date() });
   return { backup, db, stores };
 }
 test('Business backup round-trip preserves subscriptions and only affects its owner', async () => {
@@ -166,6 +175,8 @@ test('Business backup round-trip preserves subscriptions and only affects its ow
   const payload = await backup.buildBusinessBackup(db, 'alice');
   assert.equal(payload.data.subscriptions.length, 1);
   assert.equal(payload.data.subscriptions[0].id, 'sub-alice');
+  assert.equal(payload.data.subscriptionApps.length, 1);
+  assert.equal(payload.data.subscriptionApps[0].name, 'Spotify');
   stores.customerSubscription[0].account = 'changed@example.com';
   await backup.restoreBusinessBackup('alice', payload);
   assert.equal(stores.customerSubscription.length, 2);
@@ -174,12 +185,47 @@ test('Business backup round-trip preserves subscriptions and only affects its ow
   assert.ok(restored.cancelDate instanceof Date);
   assert.equal(restored.cancelDate.toISOString(), '2026-11-30T00:00:00.000Z');
   assert.equal(stores.customerSubscription.find(row => row.userId === 'bob').id, 'sub-bob');
+  assert.equal(stores.subscriptionApp.find(row => row.userId === 'alice').name, 'Spotify');
+  assert.equal(stores.subscriptionApp.find(row => row.userId === 'bob').name, 'YouTube');
 });
 test('Older v2 backups without subscription data can still be restored', async () => {
   const { backup, db, stores } = backupFixture();
   const legacy = await backup.buildBusinessBackup(db, 'alice');
   delete legacy.data.subscriptions;
+  delete legacy.data.subscriptionApps;
   await backup.restoreBusinessBackup('alice', legacy);
   assert.equal(stores.customerSubscription.filter(row => row.userId === 'alice').length, 0);
   assert.equal(stores.customerSubscription.filter(row => row.userId === 'bob').length, 1);
+  assert.equal(stores.subscriptionApp.filter(row => row.userId === 'alice').length, 0);
+  assert.equal(stores.subscriptionApp.filter(row => row.userId === 'bob').length, 1);
+});
+
+test('App catalog persists additions without a count limit, deduplicates and isolates accounts', async () => {
+  const apps = [];
+  const next = { NextResponse: { json: (body, options = {}) => new Response(JSON.stringify(body), options) } };
+  const server = load('src/lib/subscriptionServer.ts', { 'next/server': next });
+  const route = load('src/app/api/sales/subscriptions/apps/route.ts', {
+    'next/server': next,
+    '@/lib/auth': { getRequestUser: request => { const id = request.headers.get('authorization'); return id ? { id } : null; } },
+    '@/lib/subscriptionServer': server,
+    '@/lib/db': { prisma: {
+      subscriptionApp: {
+        findMany: async ({ where }) => apps.filter(app => app.userId === where.userId),
+        upsert: async ({ where, create }) => { const existing = apps.find(app => app.userId === where.userId_name.userId && app.name === where.userId_name.name); if (existing) return existing; apps.push(create); return create; },
+      },
+      customerSubscription: { findMany: async ({ where }) => where.userId === 'alice' ? [{ appName: 'Legacy App' }] : [] },
+    } },
+  });
+  const request = (method, body, user = 'alice') => new Request('http://localhost/api/sales/subscriptions/apps', { method, headers: user ? { authorization: user } : {}, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+  assert.equal((await route.GET(request('GET', undefined, ''))).status, 401);
+  assert.equal((await route.POST(request('POST', { name: 'Spotify' }, ''))).status, 401);
+  for (const name of ['', ' ', 'x'.repeat(251), 123]) assert.equal((await route.POST(request('POST', { name }))).status, 400);
+  for (let i = 0; i < 110; i++) assert.equal((await route.POST(request('POST', { name: `App ${i}` }))).status, 200);
+  await route.POST(request('POST', { name: ' App 0 ' }));
+  assert.equal(apps.length, 110);
+  const alice = await route.GET(request('GET')).then(response => response.json());
+  assert.ok(alice.includes('Legacy App'));
+  assert.ok(alice.includes('App 109'));
+  const bob = await route.GET(request('GET', undefined, 'bob')).then(response => response.json());
+  assert.deepEqual(bob, ['Canva', 'Netflix']);
 });

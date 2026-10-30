@@ -3,6 +3,8 @@
 Trang `/business/subscriptions`, mở từ mục **Lịch gia hạn** trong menu.
 
 - Lưu khách hàng (chọn từ CRM hoặc nhập trực tiếp), tài khoản ứng dụng, tên gói, thời hạn, giá, tiền tệ và ghi chú.
+- Tên khách mặc định là **Khách lẻ**. Ứng dụng chọn từ danh sách (có sẵn Canva, Netflix và ứng dụng từng dùng); **Thêm ứng dụng** lưu app riêng theo tài khoản, không giới hạn số lượng. Danh sách app được sao lưu cùng dữ liệu kinh doanh.
+- Giá gói tự chèn dấu phẩy phân nhóm mỗi 3 chữ số khi nhập, ví dụ `1,500,000`; hỗ trợ tối đa 2 chữ số thập phân với dấu chấm. API vẫn nhận chuỗi số chưa phân nhóm.
 - Kỳ hạn tính theo ngày / tháng / năm; các kỳ tháng và năm được chặn về ngày cuối tháng khi cần.
 - Ngày nhắc mặc định **đúng ngày hết hạn**, có thể chỉnh sớm hơn trong thời gian gói.
 - Lịch tháng hiển thị hẹn theo **ngày nhắc hủy**. Chi tiết hiển thị cả ngày bắt đầu và ngày hết hạn.
@@ -12,7 +14,7 @@ Trang `/business/subscriptions`, mở từ mục **Lịch gia hạn** trong menu
 
 ## Cơ sở dữ liệu
 
-Model mới: `CustomerSubscription` trong `prisma/schema.prisma`.
+Model: `CustomerSubscription` và `SubscriptionApp` trong `prisma/schema.prisma`.
 Sau khi cấu hình `DATABASE_URL` cho môi trường phát triển:
 
 ```sh
