@@ -72,9 +72,10 @@
 .subscription-error { background: #fbe6df; color: #943d2d; padding: 12px; margin-block: 8px; font-size: 13px !important; line-height: 1.6; }
 .subscription-error button { text-decoration: underline; margin-top: 8px; cursor: pointer; }
 .subscription-tracker .subscription-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; border: 0; min-width: 0; }
-.subscription-form label { display: flex; flex-direction: column; gap: 8px; min-width: 0; font-size: 13px !important; font-weight: 600; }
+.subscription-tracker .subscription-form label { display: flex; flex-direction: column; gap: 8px; min-width: 0; color: #e65c00 !important; font-size: 13px !important; font-weight: 600; }
 .subscription-form-wide { grid-column: 1 / -1; }
-.subscription-tracker .subscription-form :is(input, select, textarea) { width: 100%; min-width: 0; min-height: 44px; border: 1px solid #b9ad90 !important; background: #fffdf7 !important; box-shadow: none !important; padding: 10px; font-size: 14px !important; font-weight: 500; }
+.subscription-tracker .subscription-form :is(input, select, textarea) { width: 100%; min-width: 0; min-height: 44px; border: 1px solid #b9ad90 !important; background: #fffdf7 !important; color: #403d38 !important; box-shadow: inset 2px 3px 5px rgb(86 65 35 / .14), inset -1px -1px 0 rgb(255 255 255 / .9), 0 2px 0 rgb(255 255 255 / .8) !important; padding: 10px; font-size: 14px !important; font-weight: 500; }
+.subscription-tracker .subscription-form :is(input, select, textarea):focus-visible { border-color: #e65c00 !important; outline: 2px solid #e65c00; outline-offset: 2px; box-shadow: inset 2px 3px 5px rgb(86 65 35 / .18), inset -1px -1px 0 rgb(255 255 255 / .9) !important; }
 .subscription-form small { font-size: 11px !important; line-height: 1.6; color: #82796a; }
 .subscription-period { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .subscription-tracker .subscription-form-hint { font-size: 13px !important; line-height: 1.7; background: #fff0d1; padding: 10px 12px; grid-column: 1 / -1; }
