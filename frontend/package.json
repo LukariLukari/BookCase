@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:subscriptions": "node scripts/test-subscriptions.mjs",
+    "test:push": "node scripts/test-web-push.mjs",
+    "push:keys": "node scripts/generate-push-keys.mjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -29,7 +31,8 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-reader": "^2.0.15",
-    "tesseract.js": "^7.0.0"
+    "tesseract.js": "^7.0.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -39,6 +42,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "prisma": "^5.21.1",

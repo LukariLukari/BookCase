@@ -3,6 +3,7 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { CalendarClock, Check, ChevronLeft, ChevronRight, Loader2, Pencil, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
+import SubscriptionReminders from './SubscriptionReminders';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Dialog from '../expenses/FinanceDialog';
 import { addDays, calendarDays, defaultCancelDate, reminderState, subscriptionCurrencies, subscriptionEnd, todayKey, validateSubscription, type DurationUnit, type Subscription, type SubscriptionInput } from '@/lib/subscriptions';
@@ -153,9 +154,11 @@ export default function SubscriptionsClient() {
     <main className="business-main min-w-0 flex-1">
       <div className="business-content mx-auto max-w-7xl">
         <header className="subscription-heading">
-          <div><p className="subscription-eyebrow"><CalendarClock size={18} /> Lịch nhắc trong ứng dụng</p><h1>Lịch gia hạn</h1><p>Theo dõi gói của khách, nhớ đúng ngày cần hủy.</p></div>
+          <div><p className="subscription-eyebrow"><CalendarClock size={18} /> Lịch nhắc hủy gói</p><h1>Lịch gia hạn</h1><p>Theo dõi gói của khách, nhớ đúng ngày cần hủy.</p></div>
           <button type="button" className="btn-push-primary subscription-add" onClick={() => beginForm(newForm(today))} disabled={loading || !!loadError}><Plus size={20} /> Thêm gói</button>
         </header>
+
+        <SubscriptionReminders items={items} disabled={loading || !!loadError} />
 
         <div className="subscription-summary" aria-label="Tổng hợp lịch nhắc">
           <button type="button" data-tone="overdue" onClick={() => selectSummary('overdue')}><span>Quá hạn cần hủy</span><strong>{overdue.length}</strong></button>

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { stopDevicePush } from '@/lib/webPushClient';
 
 interface User {
   id: string;
@@ -80,7 +81,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.replace(userData.role === 'admin' ? '/admin' : '/business/daily');
   };
 
-  const logout = () => {
+  const logout = async () => {
+    if (token) {
+      try { await stopDevicePush(token); }
+      catch { /* Local unsubscribe is attempted even if the server is offline. */ }
+    }
     setToken(null);
     setUser(null);
     clearStoredSession();

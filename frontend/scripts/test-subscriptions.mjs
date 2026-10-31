@@ -16,12 +16,73 @@ function load(file, imports = {}) {
   vm.runInNewContext(code, { exports, require: name => {
     if (!(name in imports)) throw new Error(`Unexpected import ${name}`);
     return imports[name];
-  }, Date, Intl, console, Error, Map, Set }, { filename: file });
+  }, Date, Intl, console, Error, Map, Set, TextEncoder }, { filename: file });
   return exports;
 }
 
 const util = load('src/lib/subscriptions.ts');
 const priceInput = load('src/lib/subscriptionPrice.ts');
+const reminders = load('src/lib/subscriptionReminders.ts', { './subscriptions': util });
+
+test('Clicking a notification focuses the tracker or opens it on the same origin', async () => {
+  const source = fs.readFileSync(path.join(directory, '../public/subscription-reminders-sw.js'), 'utf8');
+  for (const existing of [true, false]) {
+    let handler, pending, closed = false, focused = false, opened;
+    vm.runInNewContext(source, { URL, self: {
+      location: { origin: 'https://billy.example' },
+      addEventListener: (name, callback) => { if (name === 'notificationclick') handler = callback; },
+      clients: {
+        matchAll: async () => existing ? [{ url: 'https://billy.example/business/subscriptions', focus: () => { focused = true; } }] : [],
+        openWindow: url => { opened = url; },
+      },
+    } });
+    handler({ notification: { close: () => { closed = true; } }, waitUntil: promise => { pending = promise; } });
+    await pending;
+    assert.equal(closed, true);
+    assert.equal(focused, existing);
+    assert.equal(opened, existing ? undefined : 'https://billy.example/business/subscriptions');
+  }
+});
+
+test('Reminders include overdue, due today and lead window, excluding processed plans', () => {
+  const rows = [
+    { id: 'overdue', status: 'active', cancelDate: '2026-10-30' },
+    { id: 'today', status: 'active', cancelDate: '2026-11-01' },
+    { id: 'soon', status: 'active', cancelDate: '2026-11-02' },
+    { id: 'later', status: 'active', cancelDate: '2026-11-03' },
+    { id: 'done', status: 'cancelled', cancelDate: '2026-11-01' },
+    { id: 'renewed', status: 'renewed', cancelDate: '2026-11-01' },
+  ];
+  assert.equal(reminders.dueReminders(rows, '2026-11-01', 1).map(row => row.id).join(','), 'overdue,today,soon');
+  assert.equal(reminders.dueReminders(rows, '2026-11-01', 0).length, 2);
+  assert.notEqual(reminders.reminderKey(rows[0], '2026-11-01'), reminders.reminderKey(rows[0], '2026-11-02'));
+  assert.notEqual(reminders.reminderKey(rows[0], '2026-11-01'), reminders.reminderKey({ ...rows[0], cancelDate: '2026-11-03' }, '2026-11-01'));
+});
+
+test('Calendar uses UTC+7 morning, two alarms, stable IDs and excludes past/processed plans', () => {
+  const base = { id: 'one', customerName: 'Khách Việt', appName: 'Canva', planName: 'Pro', account: 'private-account', customerContact: 'private-phone', cancelDate: '2026-11-03', status: 'active' };
+  const output = reminders.subscriptionCalendar([base, { ...base, id: 'old', cancelDate: '2026-10-31' }, { ...base, id: 'done', status: 'cancelled' }, { ...base, id: 'renewed', status: 'renewed' }], '2026-11-01', 3, new Date('2026-11-01T00:00:00Z'));
+  assert.equal((output.match(/BEGIN:VEVENT/g) || []).length, 1);
+  assert.ok(output.includes('DTSTART:20261103T020000Z\r\n'));
+  assert.ok(output.includes('UID:one@billy-subscriptions'));
+  assert.ok(output.includes('TRIGGER:-P3D'));
+  assert.ok(output.includes('TRIGGER:PT0S'));
+  assert.ok(!output.includes('private-account') && !output.includes('private-phone'));
+  const sameDay = reminders.subscriptionCalendar([base], '2026-11-01', 0);
+  assert.equal((sameDay.match(/BEGIN:VALARM/g) || []).length, 1);
+  assert.throws(() => reminders.subscriptionCalendar([base], '2026-11-01', -1));
+});
+
+test('Calendar escapes injected content and folds Vietnamese at UTF-8 byte boundaries', () => {
+  const name = 'Khách tiếng Việt 😀;,' .repeat(20) + '\r\nBEGIN:VEVENT';
+  const output = reminders.subscriptionCalendar([{ id: 'safe', customerName: name, appName: 'Canva', planName: '', status: 'active', cancelDate: '2026-11-03' }], '2026-11-01', 1);
+  for (const line of output.split('\r\n')) assert.ok(Buffer.byteLength(line, 'utf8') <= 75);
+  const unfolded = output.replace(/\r\n /g, '');
+  assert.ok(unfolded.includes('Việt 😀\\;\\,'));
+  assert.ok(unfolded.includes('\\nBEGIN:VEVENT'));
+  assert.equal((output.match(/^BEGIN:VEVENT$/gm) || []).length, 1);
+  assert.ok(!output.includes('\uFFFD'));
+});
 test('Price input groups thousands without losing decimals or accepting invalid amounts', () => {
   for (const [raw, formatted] of [['', ''], ['0', '0'], ['150000', '150,000'], ['123456789012.50', '123,456,789,012.50'], ['1500.', '1,500.']]) {
     assert.equal(priceInput.formatSubscriptionPrice(raw), formatted);

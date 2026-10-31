@@ -24,6 +24,8 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "Billy.",
   description: "Hệ thống quản lý bán hàng thông minh - Billy.",
+  appleWebApp: { capable: true, title: 'Billy', statusBarStyle: 'default' },
+  icons: { apple: '/icons/billy-192.png' },
 };
 
 export const viewport: Viewport = {

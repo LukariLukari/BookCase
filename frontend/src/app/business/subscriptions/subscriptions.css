@@ -116,3 +116,11 @@
 @media (max-width: 380px) {
   .subscription-tracker .subscription-form { grid-template-columns: minmax(0, 1fr); }
 }
+.subscription-reminders { margin-bottom: 22px; padding: 18px; border: 1px solid #dfd5c4; border-radius: 14px; background: #fffaf0; }
+.subscription-tracker .subscription-reminders h2 { display: flex; align-items: center; gap: 8px; font-size: 17px !important; font-weight: 700; }
+.subscription-tracker .subscription-reminders p { margin-top: 9px; color: #766b59; font-size: 12px !important; line-height: 1.7; }
+.subscription-reminder-actions { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin-block: 14px; }
+.subscription-reminder-actions label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+.subscription-reminder-actions select { padding: 10px; border: 1px solid #dfd5c4; border-radius: 8px; background: white; max-width: 100%; }
+.subscription-reminder-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 10px 14px; }
+@media (max-width: 600px) { .subscription-reminder-actions > :is(label, button) { width: 100%; } }

@@ -35,6 +35,28 @@ model User {
   moneyAccountEdits   MoneyAccountEdit[]
   subscriptions       CustomerSubscription[]
   subscriptionApps    SubscriptionApp[]
+  pushDevices         SubscriptionPushDevice[]
+}
+
+// Device registrations intentionally stay out of portable business backups.
+model SubscriptionPushDevice {
+  id             String   @id @default(uuid())
+  userId         String
+  endpointHash   String   @unique
+  endpoint       String
+  p256dh         String
+  auth           String
+  vapidPublicKey String
+  daysBefore     Int      @default(3)
+  lastSentDate   String?
+  lockedUntil    DateTime?
+  lastTestAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model SubscriptionApp {
