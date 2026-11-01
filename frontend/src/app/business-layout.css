@@ -165,13 +165,29 @@
   outline: 2px solid var(--pixel-primary);
   outline-offset: 2px;
 }
-.business-main .finance-tabs { gap: 4px 24px; }
+.business-main .finance-tabs { gap: 4px 28px; margin-block: 32px 12px; }
+.business-main .finance-tabs + section { margin-top: 0; }
 .finance-nav-link.ui-flat-control {
+  position: relative;
   min-height: 44px;
   justify-content: flex-start;
-  padding: 8px 0;
+  padding: 10px 0;
+  font-size: 17px;
+  line-height: 1.4;
   font-weight: 600;
 }
+.finance-nav-link.ui-flat-control > svg { width: 20px; height: 20px; flex-shrink: 0; }
+.finance-nav-progress {
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  background: currentColor;
+  opacity: 0;
+  transform: scaleX(0.4);
+  transform-origin: left;
+  transition: opacity var(--motion-fast) ease-out, transform 240ms var(--motion-ease);
+}
+.finance-nav-progress.is-pending { opacity: .65; transform: scaleX(1); }
 .business-main .segmented-control {
   min-width: 0;
   padding: 0;
@@ -250,3 +266,45 @@
 .business-main .finance-day-heading h2 { font-size: 18.75px !important; }
 .business-main .finance-day-heading p { font-size: 12px !important; line-height: 1.08 !important; }
 .business-main .finance-day-heading span { padding: 3px 9px; font-size: 12px !important; }
+
+/* Continuous, short motion keeps controls responsive without animating layout. */
+.business-shell :is(button, a[href], [role="button"]) { touch-action: manipulation; }
+.business-shell :is(button, a[href]):not(.ui-flat-control) {
+  transition-property: color, background-color, border-color, opacity, transform, translate !important;
+  transition-duration: var(--motion-fast) !important;
+  transition-timing-function: var(--motion-ease) !important;
+}
+.business-shell button:active:not(:disabled):not(.ui-flat-control) { transition-duration: 65ms !important; }
+/* Framer Motion owns transforms on these controls; CSS must not lag behind it. */
+.business-shell :is(button, a[href])[style*="transform"] { transition-property: color, background-color, border-color, opacity !important; }
+
+@keyframes finance-dialog-enter {
+  from { opacity: 0; transform: translateY(12px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes finance-backdrop-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.finance-picker-backdrop[open] .finance-picker-panel,
+dialog.finance-dialog[open],
+dialog.finance-fullscreen-dialog[open] {
+  animation: finance-dialog-enter 240ms var(--motion-ease) both;
+}
+.finance-picker-backdrop::backdrop,
+.finance-dialog::backdrop,
+.finance-fullscreen-dialog::backdrop { animation: finance-backdrop-enter 160ms ease-out both; }
+
+@media (max-width: 767px) {
+  .business-main .finance-tabs { column-gap: 16px; margin-top: 24px; }
+  .finance-nav-link.ui-flat-control { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .business-shell *, .business-shell *::before, .business-shell *::after,
+  .finance-picker-panel, dialog.finance-dialog, dialog.finance-fullscreen-dialog,
+  .finance-picker-backdrop::backdrop, .finance-dialog::backdrop, .finance-fullscreen-dialog::backdrop {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+  }
+}

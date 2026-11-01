@@ -36,7 +36,7 @@ const amountText = (value:string) => {const [whole,decimal]=value.split('.');con
 const rawAmount = (value:string,allowNegative=false) => {const raw=value.replace(/,/g,'').trim();return (allowNegative?/^-?\d*(\.\d*)?$/:/^\d*(\.\d*)?$/).test(raw)?raw:null};
 const accountLabel = (type:string) => accountTypes.find(item=>item.value===type)?.label || 'Tài khoản';
 
-function PushButton({className='',children,...props}:React.ComponentProps<typeof motion.button>){return <motion.button whileHover={{x:2,y:2,boxShadow:'2px 2px 0 rgba(0,0,0,1)'}} whileTap={{x:4,y:4,boxShadow:'0 0 0 rgba(0,0,0,1)'}} className={`${button} ${className}`} {...props}>{children}</motion.button>}
+function PushButton({className='',children,...props}:React.ComponentProps<typeof motion.button>){return <motion.button whileHover={{y:-1}} whileTap={{scale:0.97,y:1}} className={`${button} ${className}`} {...props}>{children}</motion.button>}
 function Field({label,children}:{label:string;children:React.ReactNode}){return <label className="block"><span className="mb-2 block text-xs font-black uppercase tracking-wide">{label}</span>{children}</label>}
 
 

@@ -12,6 +12,8 @@
 }
 
 :root {
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-fast: 160ms;
   --ivory: #F5EEDD;
   --champagne: #ede4d0;
   --moss: #84B3CE;
@@ -1838,7 +1840,7 @@ a.bg-\[\#16587B\] {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: transform 0.06s steps(1), box-shadow 0.06s steps(1), background-color 0.06s steps(1) !important;
+  transition: transform var(--motion-fast) var(--motion-ease), background-color var(--motion-fast) ease-out, color var(--motion-fast) ease-out !important;
 }
 
 .btn-push.\!overflow-visible,
@@ -2082,7 +2084,7 @@ select:focus,
 }
 
 [class*="animate-spin"] {
-  animation-timing-function: steps(8) !important;
+  animation-timing-function: linear !important;
 }
 
 @media (max-width: 767px) {

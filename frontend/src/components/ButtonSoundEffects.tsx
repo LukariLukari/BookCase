@@ -5,11 +5,12 @@ import { useEffect } from 'react';
 type SoundKind = 'tap' | 'keypad' | 'money' | 'delete';
 
 let sharedContext: AudioContext | null = null;
+const CLICK_GAIN = 2.5;
 
 function audioContext() {
   const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AudioContextClass) return null;
-  if (!sharedContext || sharedContext.state === 'closed') sharedContext = new AudioContextClass();
+  if (!sharedContext || sharedContext.state === 'closed') sharedContext = new AudioContextClass({ latencyHint: 'interactive' });
   if (sharedContext.state === 'suspended') void sharedContext.resume();
   return sharedContext;
 }
@@ -20,12 +21,13 @@ function note(context: AudioContext, frequency: number, start: number, duration:
   oscillator.type = type;
   oscillator.frequency.setValueAtTime(frequency, start);
   gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(volume, start + 0.006);
+  gain.gain.exponentialRampToValueAtTime(volume * CLICK_GAIN, start + 0.006);
   gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
   oscillator.connect(gain);
   gain.connect(context.destination);
   oscillator.start(start);
   oscillator.stop(start + duration + 0.01);
+  oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
 }
 
 function play(kind: SoundKind) {
