@@ -234,3 +234,19 @@
   .business-main .daily-measure-switch button { min-width: 0; justify-content: center; padding-inline: 8px; }
   .business-main .customer-card { padding: 20px; }
 }
+
+/* Compact finance rows use 75% of the previous padding, gaps and icon sizes. */
+.finance-transaction-row { gap: 9px; padding: 12px; }
+.finance-transaction-row .finance-transaction-actions { gap: 9px; }
+.finance-transaction-row :is(.finance-category-icon, .finance-transaction-icon) { width: 30px; height: 30px; }
+.finance-transaction-row :is(.finance-category-icon, .finance-transaction-icon) > svg { width: 24px !important; height: 24px !important; }
+.finance-transaction-row b { font-size: 14.25px !important; line-height: 1.1 !important; }
+.finance-transaction-row p { font-size: 12px !important; line-height: 1.08 !important; }
+.finance-transaction-row .finance-transaction-actions button { width: 30px; height: 30px; min-height: 30px; }
+.finance-transaction-row .finance-transaction-actions button svg { width: 15px !important; height: 15px !important; }
+.finance-transaction-row > label { min-width: 33px; min-height: 33px; }
+.finance-transaction-row > label input { width: 18px; height: 18px; min-height: 18px; }
+.business-main .finance-day-heading { gap: 9px; padding: 15px; }
+.business-main .finance-day-heading h2 { font-size: 18.75px !important; }
+.business-main .finance-day-heading p { font-size: 12px !important; line-height: 1.08 !important; }
+.business-main .finance-day-heading span { padding: 3px 9px; font-size: 12px !important; }

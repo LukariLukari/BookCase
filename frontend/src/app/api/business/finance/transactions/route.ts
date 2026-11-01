@@ -12,6 +12,21 @@ const parseDate = (value: unknown, end = false) => {
 };
 const json = (item: { id:string;type:string;amount:unknown;currency:string;category:string;categoryId:string|null;description:string|null;transactionDate:Date;createdAt:Date;account:{id:string;name:string;type:string};destinationAccount:{id:string;name:string;type:string}|null;categoryRef:{name:string;icon:string;color:string}|null }) => ({ id:item.id,type:item.type,amount:Number(item.amount),currency:item.currency,categoryId:item.categoryId,category:item.categoryRef?.name||item.category,categoryIcon:item.categoryRef?.icon||null,categoryColor:item.categoryRef?.color||null,description:item.description||'',date:item.transactionDate,createdAt:item.createdAt,account:item.account,destinationAccount:item.destinationAccount });
 
+export async function DELETE(request: Request) {
+  const user = getRequestUser(request);
+  if (!user) return deny();
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body.bookId !== 'string' || !body.bookId || !Array.isArray(body.ids) || !body.ids.length || body.ids.some((id: unknown) => typeof id !== 'string' || !id.trim())) {
+    return NextResponse.json({ detail: 'Vui lòng chọn sổ và các giao dịch cần xóa.' }, { status: 400 });
+  }
+  const book = await prisma.expenseBook.findFirst({ where: { id: body.bookId, userId: user.id } });
+  if (!book) return NextResponse.json({ detail: 'Không tìm thấy sổ chi tiêu.' }, { status: 404 });
+  // One atomic deletion, scoped to this user's book and the confirmed snapshot of IDs.
+  // Wallet balances and statistics are derived from the remaining transactions.
+  const result = await prisma.financeTransaction.deleteMany({ where: { userId: user.id, bookId: book.id, id: { in: [...new Set<string>(body.ids)] } } });
+  return NextResponse.json({ success: true, deletedCount: result.count });
+}
+
 export async function GET(request: NextRequest) {
   const user = getRequestUser(request);
   if (!user) return deny();
