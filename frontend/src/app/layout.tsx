@@ -32,11 +32,11 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: 'Billy', statusBarStyle: 'default' },
   icons: {
     icon: [
-      { url: '/icons/billy-cat-v1-32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icons/billy-cat-v1-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/billy-cat-v2-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/billy-cat-v2-192.png', sizes: '192x192', type: 'image/png' },
     ],
-    shortcut: '/icons/billy-cat-v1-32.png',
-    apple: [{ url: '/icons/billy-cat-v1-180.png', sizes: '180x180', type: 'image/png' }],
+    shortcut: '/icons/billy-cat-v2-32.png',
+    apple: [{ url: '/icons/billy-cat-v2-180.png', sizes: '180x180', type: 'image/png' }],
   },
 };
 

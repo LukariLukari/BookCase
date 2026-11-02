@@ -8,7 +8,7 @@ self.addEventListener('push', event => {
     typeof payload.title === 'string' ? payload.title : 'Billy · Nhắc hủy gói', {
       body: typeof payload.body === 'string' ? payload.body : 'Mở Lịch gia hạn để kiểm tra gói cần xử lý.',
       tag: typeof payload.tag === 'string' ? payload.tag : 'billy-subscriptions',
-      icon: '/icons/billy-192.png', badge: '/icons/billy-192.png',
+      icon: '/icons/billy-cat-v2-192.png', badge: '/icons/billy-cat-v2-192.png',
     },
   ));
 });
