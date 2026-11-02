@@ -40,7 +40,19 @@ function fixture() {
         incomingTransfers: rows.filter(row => row.destinationAccountId === account.id),
       })) }],
     },
-    financeTransaction: { deleteMany: async ({ where }) => {
+    financeTransaction: { groupBy: async ({ by, where }) => {
+      const groups = new Map();
+      for (const row of rows.filter(row => row.userId === where.userId && (!where.type || row.type === where.type))) {
+        const values = by.map(key => row[key]);
+        if (values.some(value => value === undefined || value === null)) continue;
+        const key = JSON.stringify(values);
+        const group = groups.get(key) || { ...Object.fromEntries(by.map((key, index) => [key, values[index]])), _sum: { amount: 0 }, _count: { _all: 0 } };
+        group._sum.amount += row.amount;
+        group._count._all++;
+        groups.set(key, group);
+      }
+      return [...groups.values()];
+    }, deleteMany: async ({ where }) => {
       mutations++;
       const remaining = rows.filter(row => !(row.userId === where.userId && row.bookId === where.bookId && where.id.in.includes(row.id)));
       const count = rows.length - remaining.length;

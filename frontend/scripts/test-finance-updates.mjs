@@ -7,7 +7,7 @@ import ts from 'typescript';
 const source = fs.readFileSync(new URL('../src/app/business/expenses/transactionUpdates.ts', import.meta.url), 'utf8');
 const exports = {};
 vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, { exports });
-const { accountDelta, categoryDelta, mergeTransaction } = exports;
+const { accountDelta, categoryDelta, mergeTransaction, overlayTransactions } = exports;
 const row = (patch = {}) => ({ id: 'one', type: 'expense', amount: 30, categoryId: 'food', date: '2026-11-02T05:00:00.000Z', createdAt: '2026-11-02T06:00:00.000Z', account: { id: 'cash' }, destinationAccount: null, ...patch });
 const delta = (...args) => ({ ...accountDelta(...args) });
 
@@ -51,4 +51,20 @@ test('Incremental merge orders backdated entries and edits, without duplicates o
   assert.deepEqual(Array.from(mergeTransaction(items, row({ id: 'new', createdAt: '2026-11-02T07:00:00.000Z' })), item => item.id), ['new', 'one', 'old']);
   assert.equal(items.length, 2);
   assert.equal(items[0].date, '2026-11-02T05:00:00.000Z');
+});
+
+test('Pending rows appear immediately, roll back independently and never duplicate a server snapshot', () => {
+  const snapshot = [row()];
+  const first = row({ id: 'pending-a', amount: 11 });
+  const second = row({ id: 'pending-b', amount: 22 });
+  assert.equal(overlayTransactions(snapshot, [first, second]).length, 3);
+  // First request fails while the other is still in flight.
+  const rolledBack = overlayTransactions(snapshot, [second]);
+  assert.equal(rolledBack.length, 2);
+  assert.ok(!rolledBack.some(item => item.id === first.id));
+  // Second commits before its HTTP acknowledgement arrives.
+  const committed = mergeTransaction(snapshot, second);
+  assert.equal(overlayTransactions(committed, [second]).length, 2);
+  assert.equal(overlayTransactions(snapshot, []), snapshot);
+  assert.equal(snapshot.length, 1);
 });

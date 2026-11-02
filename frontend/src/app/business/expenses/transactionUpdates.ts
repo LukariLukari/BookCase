@@ -27,10 +27,27 @@ export function categoryDelta(id: string, saved: SavedTransaction, previous: Sav
   return Number(saved.categoryId === id) - Number(previous?.categoryId === id);
 }
 
-// Merge only the server-confirmed row; preserve the same ordering as the API.
+// Binary search the insertion point; copy once and preserve references to unchanged rows.
 export function mergeTransaction<T extends SavedTransaction>(items: T[], saved: T): T[] {
   const remaining = items.filter(item => item.id !== saved.id);
-  const before = remaining.findIndex(item => item.date < saved.date || (item.date === saved.date && item.createdAt < saved.createdAt));
-  remaining.splice(before < 0 ? remaining.length : before, 0, saved);
+  let low = 0, high = remaining.length;
+  while (low < high) {
+    const middle = (low + high) >>> 1, item = remaining[middle];
+    if (item.date > saved.date || (item.date === saved.date && item.createdAt >= saved.createdAt)) low = middle + 1;
+    else high = middle;
+  }
+  remaining.splice(low, 0, saved);
   return remaining;
+}
+
+export function overlayTransactions<T extends SavedTransaction>(items: T[], pending: T[]): T[] {
+  if (!pending.length) return items;
+  // A snapshot can already contain an in-flight write. The UUID is the identity.
+  const known = new Set(items.map(item => item.id));
+  let result = items;
+  for (const item of pending) if (!known.has(item.id)) {
+    result = mergeTransaction(result, item);
+    known.add(item.id);
+  }
+  return result;
 }
