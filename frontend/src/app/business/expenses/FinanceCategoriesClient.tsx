@@ -99,7 +99,7 @@ export default function FinanceCategoriesClient() {
 
   const groups: Array<{ type: 'expense' | 'income'; title: string }> = [{ type: 'expense', title: 'Danh mục chi' }, { type: 'income', title: 'Danh mục thu' }];
 
-  return <div className="business-shell min-h-screen bg-[#f4ead6] p-3 pb-16 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] font-sans text-[#171513] md:flex md:gap-5 md:p-6" style={{backgroundImage:'linear-gradient(rgba(23,21,19,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(23,21,19,.055) 1px,transparent 1px)',backgroundSize:'28px 28px'}}>
+  return <div className="business-shell min-h-screen bg-[#f4ead6] p-3 pb-16 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] font-sans text-[#171513] md:flex md:gap-5 md:p-6" style={{paddingBottom:'calc(8rem + env(safe-area-inset-bottom,0px))',backgroundImage:'linear-gradient(rgba(23,21,19,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(23,21,19,.055) 1px,transparent 1px)',backgroundSize:'28px 28px'}}>
     <Sidebar/><main className="business-main min-w-0 flex-1"><div className="business-content mx-auto max-w-7xl">
       <header className={`page-heading page-heading-panel ${card} p-5 md:p-7`}><p className="text-xs font-black uppercase tracking-[.2em]">Tùy chỉnh thu & chi</p><h1 className="mt-1 text-3xl font-black uppercase text-[#df5b2a] md:text-5xl">Danh mục của bạn</h1><p className="mt-2 text-sm font-semibold">Tự tạo danh mục bằng màu sắc và biểu tượng phù hợp với cách bạn quản lý tiền.</p></header>
       <FinanceNav view="categories"/>

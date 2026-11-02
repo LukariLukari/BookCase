@@ -36,15 +36,18 @@ function play(kind: SoundKind) {
     if (!context) return;
     const now = context.currentTime;
     if (kind === 'money') {
-      // A short bright coin drop / cash-register confirmation.
-      note(context, 1046, now, 0.09, 0.045, 'sine');
-      note(context, 1568, now + 0.055, 0.16, 0.04, 'sine');
-      note(context, 2093, now + 0.09, 0.1, 0.018, 'triangle');
+      // Staggered, inharmonic metallic impacts: a handful of jingling coins.
+      [0, 0.045, 0.105, 0.17, 0.245].forEach((delay, index) => {
+        const frequency = [1870, 2480, 2130, 2950, 2340][index];
+        note(context, frequency, now + delay, 0.22, 0.055);
+        note(context, frequency * 1.47, now + delay, 0.13, 0.025);
+        note(context, 370 + index * 35, now + delay, 0.025, 0.018, 'triangle');
+      });
     } else if (kind === 'keypad') {
       // A firm calculator-key blip with a short low transient and clear upper tone.
-      note(context, 185, now, 0.045, 0.045, 'square');
-      note(context, 720, now + 0.004, 0.07, 0.065, 'triangle');
-      note(context, 1080, now + 0.012, 0.045, 0.025, 'sine');
+      note(context, 185, now, 0.045, 0.07, 'square');
+      note(context, 720, now + 0.004, 0.07, 0.11, 'triangle');
+      note(context, 1080, now + 0.012, 0.045, 0.04, 'sine');
     } else if (kind === 'delete') {
       note(context, 190, now, 0.075, 0.025, 'triangle');
     } else {
@@ -60,15 +63,22 @@ export default function ButtonSoundEffects() {
     const onClick = (event: MouseEvent) => {
       if (!event.isTrusted) return;
       const target = event.target instanceof Element ? event.target.closest<HTMLElement>('button, a[href], [role="button"]') : null;
-      if (!target || target.matches(':disabled, [aria-disabled="true"]')) return;
+      if (!target || target.matches(':disabled, [aria-disabled="true"]') || target.dataset.sound === 'none') return;
       const requested = target.dataset.sound;
       const moneyIcon = target.querySelector('.lucide-plus, .lucide-check, .lucide-circle-check, .lucide-badge-check');
       const deleteIcon = target.querySelector('.lucide-trash, .lucide-trash-2, .lucide-delete');
       const keypadKey = target.classList.contains('finance-entry-key') && !target.matches('.finance-entry-add, .finance-entry-done, .finance-entry-delete');
       play(requested === 'money' || moneyIcon ? 'money' : requested === 'delete' || deleteIcon ? 'delete' : keypadKey ? 'keypad' : 'tap');
     };
+    const onInput = (event: Event) => {
+      if (event.isTrusted && event.target instanceof HTMLInputElement && event.target.inputMode === 'decimal') play('keypad');
+    };
     document.addEventListener('click', onClick, { capture: true });
-    return () => document.removeEventListener('click', onClick, { capture: true });
+    document.addEventListener('input', onInput);
+    return () => {
+      document.removeEventListener('click', onClick, { capture: true });
+      document.removeEventListener('input', onInput);
+    };
   }, []);
 
   return null;

@@ -2859,3 +2859,23 @@ svg[class*="text-white"] *,
 @media (min-width: 768px) and (max-width: 1023px) {
   .sidebar-nav-children { margin-left: 0; padding-left: 0; border-left: 0; }
 }
+/* Floating finance navigation and collapsible book selector. */
+.finance-footer {
+  position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%); z-index: 70; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: calc(100% - 28px); max-width: 576px; padding: 6px; gap: 5px;
+  border: 2px solid var(--pixel-ink-dark); background: var(--pixel-panel-light); box-shadow: 4px 4px 0 var(--pixel-shadow-dark);
+}
+.finance-footer .finance-nav-link { position: relative; min-width: 0; min-height: 60px; flex-direction: column; gap: 4px; padding: 5px 2px; border-color: transparent; box-shadow: none; font-size: 11px; }
+.finance-footer .finance-nav-link svg { width: 23px; height: 23px; }
+.finance-footer .finance-nav-link[aria-current="page"] { border-color: var(--pixel-ink-dark); background: var(--pixel-primary); color: white; }
+.finance-book-panel { position: sticky; top: calc(4.75rem + env(safe-area-inset-top, 0px)); z-index: 30; margin-top: 24px; border: 2px solid var(--pixel-ink-dark); background: #fff6d8; box-shadow: 4px 4px 0 var(--pixel-shadow-dark); }
+.finance-book-toggle { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 8px 14px; font-size: 13px; font-weight: 900; }
+.finance-book-details { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .22s ease, opacity .22s ease; opacity: 1; }
+.finance-book-details > div { min-height: 0; overflow: hidden; padding: 0 14px 14px; transition: padding .22s ease; }
+.finance-book-panel.is-collapsed .finance-book-details { grid-template-rows: 0fr; opacity: 0; }
+.finance-book-panel.is-collapsed .finance-book-details > div { padding-bottom: 0; }
+input[inputmode="decimal"]:focus::placeholder { color: transparent; }
+@media (min-width: 768px) { .finance-book-panel { top: 12px; } }
+@media (min-width: 1024px) { .finance-footer { left: calc(50% + 138px); } }
+@media (prefers-reduced-motion: reduce) { .finance-book-details, .finance-book-details > div { transition: none; } }

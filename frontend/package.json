@@ -7,7 +7,7 @@
     "build": "node scripts/vercel-build.mjs",
     "start": "next start",
     "lint": "eslint",
-    "test:finance": "node scripts/test-finance-deletion.mjs",
+    "test:finance": "node scripts/test-finance-deletion.mjs && node scripts/test-finance-updates.mjs",
     "test:subscriptions": "node scripts/test-subscriptions.mjs",
     "test:push": "node scripts/test-web-push.mjs",
     "push:keys": "node scripts/generate-push-keys.mjs",
