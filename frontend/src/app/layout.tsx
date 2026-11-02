@@ -22,10 +22,22 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` :
+      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
+  ),
   title: "Billy.",
   description: "Hệ thống quản lý bán hàng thông minh - Billy.",
   appleWebApp: { capable: true, title: 'Billy', statusBarStyle: 'default' },
-  icons: { apple: '/icons/billy-192.png' },
+  icons: {
+    icon: [
+      { url: '/icons/billy-cat-v1-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/billy-cat-v1-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    shortcut: '/icons/billy-cat-v1-32.png',
+    apple: [{ url: '/icons/billy-cat-v1-180.png', sizes: '180x180', type: 'image/png' }],
+  },
 };
 
 export const viewport: Viewport = {
