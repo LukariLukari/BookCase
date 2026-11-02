@@ -2,6 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro, Handjet, Montserrat } from "next/font/google";
 import "./globals.css";
 import "./business-layout.css";
+import "./theme.css";
+import { themeBootstrapScript } from '@/lib/theme';
+import { SOUND_URLS } from '@/lib/soundEffects';
+import { PublicThemeToggle } from '@/components/ThemeToggle';
 
 const beVietnam = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
@@ -59,6 +63,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
+        {Object.values(SOUND_URLS).map(url => <link key={url} rel="preload" href={url} as="fetch" crossOrigin="anonymous" />)}
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -80,6 +86,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full flex flex-col bg-[#F5EEDD] text-[#16587B] font-sans" suppressHydrationWarning>
         <AuthProvider>
+          <PublicThemeToggle />
           <ButtonSoundEffects />
           <MotionProvider>{children}</MotionProvider>
         </AuthProvider>

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
+import ThemeToggle from './ThemeToggle';
 
 const standaloneItems = [
   { href: '/business/pos', label: 'Bán tại quầy', icon: ShoppingCart },
@@ -196,6 +197,7 @@ export default function Sidebar() {
           {isAdmin && desktopLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}
         </nav>
         <div className="business-sidebar-footer mt-auto shrink-0 pt-3">
+          <ThemeToggle />
           <p className="hidden truncate px-3 pb-2 text-sm font-bold text-[#6d6a64] lg:block">{user?.username}</p>
           <button
             onClick={logout}
@@ -213,6 +215,8 @@ export default function Sidebar() {
           <span className="brand-orange text-2xl font-black uppercase tracking-wider">Billy.</span>
           <span className="text-sm font-black uppercase tracking-widest text-[#6d6a64]">Bán Hàng</span>
         </Link>
+        <div className="flex items-center gap-2">
+        <ThemeToggle compact />
         <button
           onClick={() => setOpen(value => !value)}
           aria-label={open ? 'Đóng menu' : 'Mở menu'}
@@ -220,6 +224,7 @@ export default function Sidebar() {
         >
           {open ? <X size={19} /> : <Menu size={19} />}
         </button>
+        </div>
       </header>
 
       {open && (

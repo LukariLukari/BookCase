@@ -1,0 +1,163 @@
+/* Palette values are contrast-balanced in lib/theme.ts, before the first paint. */
+:root { color-scheme: light; }
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --reps-black: var(--theme-text);
+  --reps-charcoal: var(--theme-text);
+  --reps-paper: var(--theme-panel);
+  --reps-paper-soft: var(--theme-raised);
+  --reps-page: var(--theme-page);
+  --reps-muted: var(--theme-muted);
+  --reps-red: var(--theme-danger);
+  --reps-red-dark: #9c3528;
+  --reps-orange: var(--theme-action);
+  --reps-orange-dark: var(--theme-action-hover);
+  --reps-shadow: #0b0d10;
+  --pixel-bg-dark: #121418;
+  --pixel-page-tint: linear-gradient(135deg, transparent, rgb(242 160 7 / .025));
+  --pixel-panel-light: var(--theme-raised);
+  --pixel-ink-dark: var(--theme-text);
+  --pixel-highlight: var(--theme-hover);
+  --pixel-shadow-dark: #0b0d10;
+  --border-soft: var(--theme-border);
+  --paper-line: rgb(232 227 219 / .08);
+}
+
+html[data-theme="dark"] body {
+  background: var(--theme-page) !important;
+}
+html[data-theme="dark"] body::before { display: none !important; }
+
+/* Legacy utilities still carry light-theme hex values. Limit these bridges to
+   CSS surfaces/copy; photographs, covers, charts and category swatches retain
+   their original colours, with no page-wide inversion/filter. */
+html[data-theme="dark"] [class*="bg-[#"],
+html[data-theme="dark"] [class*="bg-white/"],
+html[data-theme="dark"] [class*="bg-green-"],
+html[data-theme="dark"] [class*="bg-emerald-"],
+html[data-theme="dark"] [class*="bg-blue-"],
+html[data-theme="dark"] [class*="bg-teal-"] { background-color: var(--theme-raised) !important; }
+html[data-theme="dark"] [class*="text-[#"],
+html[data-theme="dark"] [class*="text-gray-"],
+html[data-theme="dark"] [class*="text-slate-"],
+html[data-theme="dark"] [class*="text-stone-"],
+html[data-theme="dark"] [class~="text-black"] { color: var(--theme-text) !important; }
+html[data-theme="dark"] [class*="text-[#16587B]/"],
+html[data-theme="dark"] [class*="text-[#585556]/"],
+html[data-theme="dark"] [class*="text-gray-"],
+html[data-theme="dark"] [class*="text-slate-"] { color: var(--theme-muted) !important; }
+html[data-theme="dark"] [class*="border"],
+html[data-theme="dark"] :is(button, a, input, select, textarea, fieldset, dialog, th, td, .finance-entry-toolbar, .finance-category-row, .finance-calendar-footer) { border-color: var(--theme-border) !important; }
+html[data-theme="dark"] :is(.pixel-panel, .pixel-tile, .pixel-logo, .card-push, .card-3d, .content-panel, .page-heading-panel, .finance-panel, .sidebar-nav-item, .finance-picker-panel) {
+  border-color: var(--theme-border) !important;
+}
+
+html[data-theme="dark"] :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), textarea, select, option) {
+  background-color: var(--theme-raised) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: inset 0 2px 3px rgb(0 0 0 / .18) !important;
+}
+html[data-theme="dark"] :is(input, textarea)::placeholder { color: var(--theme-muted) !important; opacity: 1; }
+html[data-theme="dark"] :is(input, button, select) { accent-color: var(--theme-accent); }
+html[data-theme="dark"] :is(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--theme-accent) !important;
+  outline-offset: 3px;
+}
+html[data-theme="dark"] :is(h1, h2, h3, h4, h5, h6, .business-page-title, .brand-orange),
+html[data-theme="dark"] :is(h1, h2, h3, h4, h5, h6) *,
+html[data-theme="dark"] header > p.uppercase,
+html[data-theme="dark"] .subscription-tracker .subscription-form label { color: var(--theme-accent) !important; }
+html[data-theme="dark"] :is(.text-moss-money, .business-money-display, .finance-entry-amount output, strong.mt-4.block.text-2xl.font-black),
+html[data-theme="dark"] [class*="text-green-"],
+html[data-theme="dark"] [class*="text-emerald-"],
+html[data-theme="dark"] [class*="text-[#2f7a45]"],
+html[data-theme="dark"] [class*="text-[#385E26]"] { color: var(--theme-success) !important; }
+html[data-theme="dark"] :is([role="alert"], .finance-entry-feedback [role="alert"]),
+html[data-theme="dark"] [class*="text-red-"],
+html[data-theme="dark"] [class*="text-[#b63824]"] { color: var(--theme-danger) !important; }
+html[data-theme="dark"] [class*="text-orange-"],
+html[data-theme="dark"] [class*="text-amber-"] { color: var(--theme-accent) !important; }
+html[data-theme="dark"] :is(.ui-flat-control.ui-flat-control, .business-main .daily-measure-switch button) { color: var(--theme-muted) !important; }
+html[data-theme="dark"] .ui-flat-control.ui-flat-control:is(:hover, [aria-current="page"], [aria-pressed="true"]) { color: var(--theme-accent) !important; }
+
+/* Finance sheets and calendars have deliberately separate surface levels. */
+html[data-theme="dark"] :is(.finance-entry-categories, .finance-entry-console, .finance-picker-header, .finance-calendar-footer, .finance-category-name-editor, .finance-book-panel, .finance-sync-panel, .finance-sync-failed button, .finance-load-more) {
+  background: var(--theme-raised) !important;
+  color: var(--theme-text);
+  border-color: var(--theme-border) !important;
+}
+html[data-theme="dark"] .finance-picker-placeholder { color: var(--theme-muted); }
+html[data-theme="dark"] :is(.finance-entry-income, .finance-category-type.income)[aria-pressed="true"],
+html[data-theme="dark"] button.finance-entry-done { background: #244534 !important; color: var(--theme-success) !important; }
+html[data-theme="dark"] :is(.finance-entry-expense, .finance-category-type.expense)[aria-pressed="true"],
+html[data-theme="dark"] .finance-category-row > button:last-child { background: #4a2b2a !important; color: var(--theme-danger) !important; }
+html[data-theme="dark"] .finance-entry-transfer[aria-pressed="true"] { background: #493857 !important; }
+html[data-theme="dark"] button.finance-entry-add { background: #20587e !important; }
+html[data-theme="dark"] :is(button.finance-entry-delete, .finance-category-dialog-button.danger) { background: #9c3528 !important; }
+html[data-theme="dark"] :is(.finance-category-icon-grid > button[aria-pressed="true"], .finance-calendar > button:hover) { background: var(--theme-hover) !important; }
+html[data-theme="dark"] .finance-calendar > button.is-today { color: var(--theme-accent); }
+
+/* Subscription-specific copy and status colours also need dark equivalents. */
+html[data-theme="dark"] .subscription-tracker { color: var(--theme-text); }
+html[data-theme="dark"] :is(.subscription-calendar, .subscription-reminders) { background: var(--theme-panel); border-color: var(--theme-border); }
+html[data-theme="dark"] :is(.subscription-weekdays, .subscription-day[data-outside="true"], .subscription-welcome, .subscription-app-editor, .subscription-form-hint) { background: var(--theme-raised) !important; }
+html[data-theme="dark"] .subscription-day { border-color: var(--theme-border); }
+html[data-theme="dark"] .subscription-day[data-selected="true"] { background: #403324; outline-color: var(--theme-accent); }
+html[data-theme="dark"] .subscription-tracker :is(.subscription-calendar-event, .subscription-calendar-event[data-state="overdue"], .subscription-calendar-event[data-state="today"], .subscription-calendar-event[data-state="cancelled"], .subscription-calendar-event[data-state="renewed"]) {
+  background: var(--theme-raised) !important;
+  color: var(--theme-success) !important;
+  border-color: currentColor !important;
+}
+html[data-theme="dark"] .subscription-tracker .subscription-calendar-event[data-state="overdue"],
+html[data-theme="dark"] .subscription-tracker :is([data-tone="overdue"] strong, [data-state="overdue"] .subscription-state, .subscription-state[data-state="overdue"]) { color: var(--theme-danger) !important; }
+html[data-theme="dark"] .subscription-tracker .subscription-calendar-event[data-state="today"],
+html[data-theme="dark"] .subscription-tracker :is([data-tone="today"] strong, [data-state="today"] .subscription-state, .subscription-state[data-state="today"]) { color: var(--theme-accent) !important; }
+html[data-theme="dark"] :is(.subscription-eyebrow, .subscription-summary span, .subscription-weekdays span, .subscription-legend span, .subscription-account, .subscription-agenda-caption, .subscription-agenda-empty, .subscription-form small, .subscription-detail dt, .subscription-reminders p, .subscription-more) { color: var(--theme-muted) !important; }
+html[data-theme="dark"] .subscription-state { color: var(--theme-success) !important; }
+html[data-theme="dark"] .subscription-tracker :is(.subscription-calendar-event[data-state="cancelled"], .subscription-calendar-event[data-state="renewed"], [data-state="cancelled"] .subscription-state, [data-state="renewed"] .subscription-state, .subscription-state[data-state="cancelled"], .subscription-state[data-state="renewed"]) { color: var(--theme-muted) !important; }
+html[data-theme="dark"] .subscription-error { background: #4a2b2a; color: var(--theme-danger); }
+
+/* Apply action colours after legacy utility bridges; labels remain white. */
+html[data-theme="dark"] :is(.choice-active, .pixel-active, .squircle-btn.active, .btn-push-primary, .btn-3d-navy, .neu-btn-primary, .btn-gradient, .btn-navy, .finance-category-save, .finance-picker-option[aria-selected="true"], .finance-calendar > button[aria-pressed="true"], .finance-entry-category-track > button[aria-pressed="true"], .subscription-day-number[aria-current="date"], button.bg-\[\#16587B\], a.bg-\[\#16587B\]) {
+  background: var(--theme-action) !important;
+  color: #fff !important;
+  border-color: var(--theme-border) !important;
+}
+html[data-theme="dark"] :is(.btn-push-primary, .btn-3d-navy, .neu-btn-primary, .btn-gradient, .btn-navy):hover { background: var(--theme-action-hover) !important; }
+html[data-theme="dark"] :is(.btn-push-amber, .btn-3d-amber, .neu-btn-amber) { background: var(--theme-action) !important; }
+html[data-theme="dark"] :is(.btn-push-emerald, .btn-3d-emerald) { background: #256341 !important; }
+html[data-theme="dark"] :is(.btn-push-danger, .btn-3d-danger) { background: #9c3528 !important; }
+html[data-theme="dark"] :is(.choice-active, .pixel-active, .btn-push-primary, .btn-3d-navy, .neu-btn-primary, .btn-gradient, .btn-navy) * { color: #fff !important; }
+html[data-theme="dark"] .choice-active .bg-white,
+html[data-theme="dark"] .choice-active .bg-white * { color: var(--theme-text) !important; }
+html[data-theme="dark"] [class~="text-white"] { color: #fff !important; }
+html[data-theme="dark"] .business-main .daily-measure-switch { background: var(--theme-raised) !important; }
+html[data-theme="dark"] .business-main .daily-measure-switch button[aria-pressed="true"] { color: #fff !important; }
+html[data-theme="dark"] .finance-entry-done svg,
+html[data-theme="dark"] .finance-entry-done svg * { color: var(--theme-success) !important; stroke: currentColor !important; }
+html[data-theme="dark"] [class~="min-h-screen"] { background-color: var(--theme-page) !important; }
+html[data-theme="dark"] .business-shell { background-image: none !important; }
+
+.theme-control { position: relative; margin-bottom: 12px; }
+.theme-control .theme-toggle { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 8px 12px; font-size: 13px !important; text-align: left; }
+.theme-control .theme-toggle svg { flex-shrink: 0; }
+.theme-options { position: absolute; bottom: calc(100% + 10px); left: 0; z-index: 90; min-width: 185px; padding: 6px; background: var(--pixel-panel); color: var(--pixel-ink); border: 2px solid var(--pixel-muted); box-shadow: 3px 3px 0 var(--pixel-shadow-dark); }
+.theme-options button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 8px 10px; font-size: 14px !important; text-align: left; cursor: pointer; }
+.theme-options button:hover { background: var(--pixel-panel-soft); }
+.theme-options button[aria-pressed="true"] { background: var(--pixel-primary); color: white; }
+.theme-control-compact { margin: 0; }
+.theme-control-compact .theme-toggle { width: 36px; min-height: 36px; justify-content: center; padding: 6px; }
+.theme-control-compact .theme-toggle > span { display: none; }
+.theme-control-compact .theme-options { top: calc(100% + 10px); bottom: auto; left: auto; right: 0; }
+.public-theme-toggle { position: fixed; top: max(16px, env(safe-area-inset-top)); right: 16px; z-index: 60; }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .business-sidebar .theme-toggle { justify-content: center; padding-inline: 0; }
+  .business-sidebar .theme-toggle > span { display: none; }
+  .business-sidebar .theme-options { min-width: 0; width: 54px; }
+  .business-sidebar .theme-options button { justify-content: center; padding: 8px; gap: 0; }
+  .business-sidebar .theme-option-label { display: none; }
+}
+@media print {
+  .theme-control, .public-theme-toggle { display: none !important; }
+}
