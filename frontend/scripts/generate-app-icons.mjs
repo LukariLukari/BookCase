@@ -7,14 +7,15 @@ const source = path('../branding/billy-cat-v2-original.jpg');
 const icons = path('../public/icons/');
 await fs.mkdir(icons, { recursive: true });
 
-// Preserve the supplied artwork. Only resize and convert it into platform formats.
-const png = size => sharp(fileURLToPath(source)).rotate().resize(size, size, { fit: 'contain', background: '#ffffff' }).toColourspace('srgb').png().toBuffer();
+// Trim excess white canvas for a 1.5x larger mascot; preserve the original artwork.
+const crop = { left: 184, top: 168, width: 688, height: 688 };
+const png = size => sharp(fileURLToPath(source)).rotate().extract(crop).resize(size, size, { fit: 'contain', background: '#ffffff' }).toColourspace('srgb').png().toBuffer();
 const sizes = [16, 32, 48, 64, 180, 192, 512, 1024];
 const buffers = new Map();
 for (const size of sizes) {
   const buffer = await png(size);
   buffers.set(size, buffer);
-  await fs.writeFile(path(`../public/icons/billy-cat-v2-${size}.png`), buffer);
+  await fs.writeFile(path(`../public/icons/billy-cat-v3-${size}.png`), buffer);
 }
 
 // iOS file convention and the conventional URL used by older home-screen clients.
@@ -23,8 +24,10 @@ await fs.writeFile(path('../public/apple-touch-icon.png'), buffers.get(180));
 // Keep existing notification URLs working with the same new identity.
 for (const size of [192, 512]) await fs.writeFile(path(`../public/icons/billy-${size}.png`), buffers.get(size));
 
-// This artwork already has enough white margin for launcher masks.
-await fs.writeFile(path('../public/icons/billy-cat-v2-maskable-512.png'), buffers.get(512));
+// Leave extra safe margin for launchers that apply a circular mask.
+const maskable = await sharp({ create: { width: 512, height: 512, channels: 3, background: '#ffffff' } })
+  .composite([{ input: await png(400), left: 56, top: 56 }]).png().toBuffer();
+await fs.writeFile(path('../public/icons/billy-cat-v3-maskable-512.png'), maskable);
 
 // An ICO directory containing PNG frames supports small browser tabs and Windows.
 const faviconSizes = [16, 32, 48, 64];

@@ -14,9 +14,10 @@ The script preserves the artwork and creates PNGs from 16 to 1024 pixels,
 an iOS 180px touch icon, a 512px maskable icon, a multi-size favicon,
 and the link preview image. The 1024px PNG is the master export for future
 app packaging. Existing notification icon URLs also use this artwork.
-The new artwork already includes white margins suitable for launcher masks;
-the generator preserves the supplied composition. Current public assets use
-the `billy-cat-v2-` prefix so clients fetch the updated artwork.
+The generator crops the excess white canvas to 688px square, making the mascot
+approximately 1.5 times larger. The source artwork remains unchanged. The
+maskable variant adds safe padding for circular launcher masks. Current public
+assets use the `billy-cat-v3-` prefix so clients fetch the enlarged artwork.
 
 The root layout explicitly declares the versioned 180px `apple-touch-icon`.
 `src/app/apple-icon.png` and `public/apple-touch-icon.png` provide conventional
