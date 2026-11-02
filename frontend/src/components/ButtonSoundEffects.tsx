@@ -1,83 +1,76 @@
-'use client';
+﻿'use client';
 
 import { useEffect } from 'react';
 
-type SoundKind = 'tap' | 'keypad' | 'money' | 'delete';
-
-let sharedContext: AudioContext | null = null;
-const CLICK_GAIN = 2.5;
-
-function audioContext() {
-  const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!AudioContextClass) return null;
-  if (!sharedContext || sharedContext.state === 'closed') sharedContext = new AudioContextClass({ latencyHint: 'interactive' });
-  if (sharedContext.state === 'suspended') void sharedContext.resume();
-  return sharedContext;
-}
-
-function note(context: AudioContext, frequency: number, start: number, duration: number, volume: number, type: OscillatorType = 'sine') {
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-  oscillator.type = type;
-  oscillator.frequency.setValueAtTime(frequency, start);
-  gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(volume * CLICK_GAIN, start + 0.006);
-  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-  oscillator.connect(gain);
-  gain.connect(context.destination);
-  oscillator.start(start);
-  oscillator.stop(start + duration + 0.01);
-  oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
-}
-
-function play(kind: SoundKind) {
-  try {
-    const context = audioContext();
-    if (!context) return;
-    const now = context.currentTime;
-    if (kind === 'money') {
-      // Staggered, inharmonic metallic impacts: a handful of jingling coins.
-      [0, 0.045, 0.105, 0.17, 0.245].forEach((delay, index) => {
-        const frequency = [1870, 2480, 2130, 2950, 2340][index];
-        note(context, frequency, now + delay, 0.22, 0.055);
-        note(context, frequency * 1.47, now + delay, 0.13, 0.025);
-        note(context, 370 + index * 35, now + delay, 0.025, 0.018, 'triangle');
-      });
-    } else if (kind === 'keypad') {
-      // A firm calculator-key blip with a short low transient and clear upper tone.
-      note(context, 185, now, 0.045, 0.07, 'square');
-      note(context, 720, now + 0.004, 0.07, 0.11, 'triangle');
-      note(context, 1080, now + 0.012, 0.045, 0.04, 'sine');
-    } else if (kind === 'delete') {
-      note(context, 190, now, 0.075, 0.025, 'triangle');
-    } else {
-      note(context, 480, now, 0.035, 0.018, 'sine');
-    }
-  } catch {
-    // Sound is progressive enhancement; controls remain fully functional without it.
-  }
-}
+const SOUND_URLS = {
+  click: '/sounds/minecraft-click-menu.mp3',
+  complete: '/sounds/nintendo-switch-click.mp3',
+  input: '/sounds/click-123.mp3',
+};
+type SoundKind = keyof typeof SOUND_URLS;
+const AUDIO_POOL_SIZE = 4;
 
 export default function ButtonSoundEffects() {
   useEffect(() => {
+    // Reuse preloaded players so rapid clicks can overlap without downloading again.
+    const pools = Object.fromEntries(Object.entries(SOUND_URLS).map(([kind, url]) => [kind, {
+      players: Array.from({ length: AUDIO_POOL_SIZE }, () => {
+        const audio = new Audio(url);
+        audio.preload = 'auto';
+        audio.load();
+        return audio;
+      }),
+      nextPlayer: 0,
+    }])) as Record<SoundKind, { players: HTMLAudioElement[]; nextPlayer: number }>;
+
+    const play = (kind: SoundKind) => {
+      const pool = pools[kind];
+      const audio = pool.players[pool.nextPlayer];
+      pool.nextPlayer = (pool.nextPlayer + 1) % pool.players.length;
+      try {
+        audio.currentTime = 0;
+        void audio.play().catch(() => {
+          // Unavailable audio must never interrupt the control.
+        });
+      } catch {
+        // Controls also work when the browser cannot play audio.
+      }
+    };
+
     const onClick = (event: MouseEvent) => {
       if (!event.isTrusted) return;
-      const target = event.target instanceof Element ? event.target.closest<HTMLElement>('button, a[href], [role="button"]') : null;
-      if (!target || target.matches(':disabled, [aria-disabled="true"]') || target.dataset.sound === 'none') return;
-      const requested = target.dataset.sound;
-      const moneyIcon = target.querySelector('.lucide-plus, .lucide-check, .lucide-circle-check, .lucide-badge-check');
-      const deleteIcon = target.querySelector('.lucide-trash, .lucide-trash-2, .lucide-delete');
-      const keypadKey = target.classList.contains('finance-entry-key') && !target.matches('.finance-entry-add, .finance-entry-done, .finance-entry-delete');
-      play(requested === 'money' || moneyIcon ? 'money' : requested === 'delete' || deleteIcon ? 'delete' : keypadKey ? 'keypad' : 'tap');
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest(':disabled, [aria-disabled="true"]')) return;
+      // Labels forward a click to their control; let that click play the sound once.
+      const label = target?.closest('label');
+      if (label?.control && target !== label.control && !label.control.contains(target)) return;
+
+      const requested = target?.closest<HTMLElement>('[data-sound]')?.dataset.sound;
+      if (requested === 'none') return;
+      play(requested === 'complete' || requested === 'input' ? requested : 'click');
     };
+
     const onInput = (event: Event) => {
-      if (event.isTrusted && event.target instanceof HTMLInputElement && event.target.inputMode === 'decimal') play('keypad');
+      if (!event.isTrusted) return;
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || target.closest('[data-sound="none"], :disabled, [aria-disabled="true"]')) return;
+      const textInput = target instanceof HTMLInputElement &&
+        ['text', 'search', 'email', 'url', 'tel', 'password', 'number'].includes(target.type) && !target.readOnly;
+      if (textInput || (target instanceof HTMLTextAreaElement && !target.readOnly) || target.isContentEditable) {
+        play('input');
+      }
     };
+
     document.addEventListener('click', onClick, { capture: true });
-    document.addEventListener('input', onInput);
+    document.addEventListener('input', onInput, { capture: true });
     return () => {
       document.removeEventListener('click', onClick, { capture: true });
-      document.removeEventListener('input', onInput);
+      document.removeEventListener('input', onInput, { capture: true });
+      Object.values(pools).flatMap(pool => pool.players).forEach((audio) => {
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load();
+      });
     };
   }, []);
 

@@ -34,7 +34,7 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
   const [whole, decimal] = form.amount.split('.');
   const displayedAmount = (whole || '0').replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (decimal === undefined ? '' : `.${decimal}`);
   const currency = accounts.find(account => account.id === form.accountId)?.currency || 'VND';
-  const key = (value: string) => <button key={value} type="button" onClick={() => press(value)} aria-label={value} className="finance-entry-key">{value}</button>;
+  const key = (value: string) => <button key={value} type="button" data-sound="input" onClick={() => press(value)} aria-label={value} className="finance-entry-key">{value}</button>;
 
   useEffect(() => {
     const scroller = categoryScroller.current;
@@ -76,11 +76,11 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
           </div>
           <div className="finance-entry-keypad" aria-label="Bàn phím nhập khoản tiền">
             {['1', '2', '3'].map(key)}
-            <button type="button" onClick={() => press('backspace')} aria-label="Xóa một số" className="finance-entry-key finance-entry-delete"><Delete /></button>
+            <button type="button" data-sound="input" onClick={() => press('backspace')} aria-label="Xóa một số" className="finance-entry-key finance-entry-delete"><Delete /></button>
             {['4', '5', '6'].map(key)}
             <button type="button" data-sound="money" onClick={() => save(false)} aria-label="Thêm giao dịch và tiếp tục" className="finance-entry-key finance-entry-add">{saving ? <Loader2 className="animate-spin" /> : <Plus />}</button>
             {['7', '8', '9', '000', '0', '.'].map(key)}
-            <button type="submit" data-sound="money" aria-label="Hoàn thành thêm giao dịch" className="finance-entry-key finance-entry-done">{saving ? <Loader2 className="animate-spin" /> : <Check />}</button>
+            <button type="submit" data-sound="complete" aria-label="Hoàn thành thêm giao dịch" className="finance-entry-key finance-entry-done">{saving ? <Loader2 className="animate-spin" /> : <Check />}</button>
           </div>
         </div>
       </fieldset>
