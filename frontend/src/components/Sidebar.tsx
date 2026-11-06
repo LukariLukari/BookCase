@@ -56,7 +56,6 @@ const groups = [
     label: 'Quản lý chi tiêu',
     icon: CircleDollarSign,
     items: [
-      { href: '/business/expenses', label: 'Tổng quan', icon: CircleDollarSign },
       { href: '/business/expenses/transactions', label: 'Giao dịch', icon: ReceiptText },
       { href: '/business/expenses/accounts', label: 'Khoản tiền', icon: CircleDollarSign },
       { href: '/business/expenses/categories', label: 'Danh mục', icon: Tags },

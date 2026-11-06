@@ -96,6 +96,24 @@ test('background interruption recreates context and reuses decoded audio on retu
   player.dispose();
 });
 
+test('foreground return replaces even a running but silent context and retains cached sounds', async () => {
+  const h = harness(); const player = h.createSoundPlayer();
+  const cleanup = h.attachSoundEffects(player);
+  await settle();
+  player.play('click');
+  const cached = h.played[0].buffer;
+  h.document.visibilityState = 'hidden'; h.document.fire('visibilitychange');
+  assert.equal(h.contexts.length, 1);
+  h.document.visibilityState = 'visible'; h.document.fire('visibilitychange');
+  assert.equal(h.contexts[0].state, 'closed');
+  player.play('click');
+  assert.equal(h.contexts.length, 2);
+  assert.equal(h.played.length, 2);
+  assert.equal(h.played[1].buffer, cached);
+  assert.equal(h.fetches.length, 3);
+  cleanup();
+});
+
 test('cold loads discard stale taps instead of playing a delayed burst', async () => {
   const h = harness(); const player = h.createSoundPlayer();
   player.play('click'); h.advance(300); await settle();

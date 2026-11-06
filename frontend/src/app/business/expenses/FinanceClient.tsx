@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import FinanceNav from './FinanceNav';
 import FinanceBookPanel from './FinanceBookPanel';
 import { accountDelta, categoryDelta, mergeTransaction, overlayTransactions } from './transactionUpdates';
-import { ArrowRightLeft, BookOpen, Check, CreditCard, FileSpreadsheet, History, Landmark, Loader2, Minus, Plus, Pencil, ReceiptText, Trash2, Wallet } from 'lucide-react';
+import { ArrowRightLeft, BookOpen, Check, ChevronDown, Search, CreditCard, FileSpreadsheet, History, Landmark, Loader2, Minus, Plus, Pencil, ReceiptText, Trash2, Wallet } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import PieChart from '@/components/PieChart';
@@ -86,7 +86,7 @@ export default function FinanceClient({view}:{view:'statistics'|'transactions'|'
   const [transactionForm,setTransactionForm]=useState({type:'expense' as 'income'|'expense',accountId:'',amount:'',category:'',description:'',date:today()});
   const [transferForm,setTransferForm]=useState({accountId:'',destinationAccountId:'',amount:'',description:'',date:today()});
   const [editingTransaction,setEditingTransaction]=useState<Transaction|null>(null);
-  const [deleteTarget,setDeleteTarget]=useState<Transaction|null>(null);
+  const deletingTransaction=useRef(false);
   const [selection,setSelection]=useState<{bookId:string;ids:Set<string>}|null>(null);
   const [bulkDeleteTarget,setBulkDeleteTarget]=useState<{bookId:string;ids:string[];all:boolean}|null>(null);
   const selectedCategoryByType=useRef<Record<'income'|'expense',string>>({income:'',expense:''});
@@ -316,17 +316,17 @@ export default function FinanceClient({view}:{view:'statistics'|'transactions'|'
       notify(editingTransaction?'Đã cập nhật giao dịch.':closeAfter?'Đã hoàn thành thêm giao dịch.':'Đã thêm giao dịch. Có thể nhập giao dịch tiếp theo.');
     }catch(reason){setError(reason instanceof Error?reason.message:'Không lưu được giao dịch.')}finally{setSaving(false)}
   };
-  const remove=useCallback((item:Transaction)=>{if(saving)return;setDeleteTarget(item);setError('')},[saving,setDeleteTarget,setError]);
-  const confirmRemove=async()=>{
-    if(!deleteTarget||saving)return;
+  const confirmRemove=async(item:Transaction)=>{
+    if(saving||deletingTransaction.current)return;
+    deletingTransaction.current=true;
     setSaving(true);setError('');
     try{
-      const response=await fetch(`/api/business/finance/transactions/${deleteTarget.id}`,{method:'DELETE',headers});
+      const response=await fetch(`/api/business/finance/transactions/${item.id}`,{method:'DELETE',headers});
       if(!response.ok){const data=await response.json();throw new Error(data.detail||'Không xóa được giao dịch.')}
-      setDeleteTarget(null);
+      setTransactions(items=>items.filter(row=>row.id!==item.id));
       await Promise.all([loadBooks(),loadTransactions(bookId),loadCategories()]);
       notify('Đã xóa giao dịch.');
-    }catch(reason){setError(reason instanceof Error?reason.message:'Không xóa được giao dịch.')}finally{setSaving(false)}
+    }catch(reason){setError(reason instanceof Error?reason.message:'Không xóa được giao dịch.')}finally{deletingTransaction.current=false;setSaving(false)}
   };
 
 
@@ -371,7 +371,7 @@ export default function FinanceClient({view}:{view:'statistics'|'transactions'|'
     </>:view==='statistics'?<>
       <div className="mt-7 space-y-6">{Array.from(new Set([...current.accounts.map(account=>account.currency),...transactions.map(item=>item.currency)])).map(currency=><section key={currency} className={`finance-panel ${card} grid gap-8 p-5 xl:grid-cols-2`}><PieChart title={`Thu & chi · ${currency}`} data={['income','expense'].map(type=>({label:type==='income'?'Khoản thu':'Khoản chi',value:transactions.filter(item=>item.type===type&&item.currency===currency).reduce((sum,item)=>sum+item.amount,0)}))} formatValue={value=>money(value,currency)}/><PieChart title={`Chi tiêu theo danh mục · ${currency}`} data={Array.from(new Set(transactions.filter(item=>item.type==='expense'&&item.currency===currency).map(item=>item.category))).map(category=>({label:category||'Chưa phân loại',value:transactions.filter(item=>item.type==='expense'&&item.currency===currency&&item.category===category).reduce((sum,item)=>sum+item.amount,0)}))} formatValue={value=>money(value,currency)}/></section>)}</div>
       <div className="finance-chart-grid mt-6 grid gap-6 xl:grid-cols-2">{Array.from(new Set(current.accounts.map(account=>account.currency))).map(currency=><section key={currency} className={`finance-panel ${card} p-5`}><PieChart title={`Phân bổ khoản tiền · ${currency}`} data={current.accounts.filter(account=>account.currency===currency).map(account=>({label:account.name,value:account.balance}))} formatValue={value=>money(value,currency)}/></section>)}</div>
-    </>:<TransactionList key={bookId} transactions={transactions} saving={saving} bookId={bookId} selection={selection} setSelection={setSelection} setBulkDeleteTarget={setBulkDeleteTarget} setError={setError} remove={remove} editTransaction={editTransaction} pendingIds={pendingIds}/>}
+    </>:<TransactionList key={bookId} transactions={transactions} saving={saving} bookId={bookId} selection={selection} setSelection={setSelection} setBulkDeleteTarget={setBulkDeleteTarget} setError={setError} remove={item=>void confirmRemove(item)} editTransaction={editTransaction} pendingIds={pendingIds}/>}
 
   </div></main>
   <AnimatePresence>{modal==='book'&&<ModalShell key="book" title="Tạo sổ chi tiêu" close={()=>setModal(null)}><form className="space-y-5" onSubmit={event=>{event.preventDefault();request('/api/business/finance/books',bookForm)}}><Field label="Tên sổ"><input required value={bookForm.name} onChange={event=>setBookForm({...bookForm,name:event.target.value})} placeholder="Ví dụ: Chi tiêu cửa hàng" className={field}/></Field><Field label="Tiền tệ mặc định"><FinanceSelect label="Chọn tiền tệ mặc định" placeholder="Chọn tiền tệ" value={bookForm.defaultCurrency} onChange={defaultCurrency=>setBookForm({...bookForm,defaultCurrency})} options={currencies.map(currency=>({value:currency,label:currency}))}/></Field><Field label="Ghi chú"><textarea value={bookForm.note} onChange={event=>setBookForm({...bookForm,note:event.target.value})} className={`${field} min-h-24 py-3`}/></Field><PushButton disabled={saving} className="h-12 w-full bg-[#ef7c3b]">{saving?<Loader2 className="animate-spin"/>:<Plus/>} Tạo sổ</PushButton></form></ModalShell>}
@@ -409,7 +409,7 @@ export default function FinanceClient({view}:{view:'statistics'|'transactions'|'
   </ModalShell>}
   {modal==='transaction'&&current&&editingTransaction&&<ModalShell key="transaction" title={editingTransaction?'Chỉnh sửa giao dịch':'Thêm giao dịch'} busy={saving} close={()=>{if(!mutating)setModal(null)}}><form onSubmit={event=>{event.preventDefault();if(editingTransaction)void saveTransaction(true)}}><fieldset disabled={saving} className="min-w-0 space-y-4"><div className="grid grid-cols-2 gap-3"><PushButton type="button" onClick={()=>setTransactionForm({...transactionForm,type:'income',category:transactionForm.type==='income'?transactionForm.category:''})} className={`h-12 ${transactionForm.type==='income'?'bg-[#8ee0a8]':'bg-white'}`}>Khoản thu</PushButton><PushButton type="button" onClick={()=>setTransactionForm({...transactionForm,type:'expense',category:transactionForm.type==='expense'?transactionForm.category:''})} className={`h-12 ${transactionForm.type==='expense'?'bg-[#ff9f87]':'bg-white'}`}>Khoản chi</PushButton></div><div className="grid grid-cols-2 gap-3"><Field label="Tài khoản tiền"><FinanceSelect compact label="Chọn tài khoản tiền" placeholder="Chọn tài khoản" value={transactionForm.accountId} onChange={accountId=>setTransactionForm({...transactionForm,accountId})} options={current.accounts.map(account=>({value:account.id,label:`${account.name} · ${account.currency}`}))}/></Field><Field label="Ngày giao dịch"><FinanceDatePicker compact label="Chọn ngày giao dịch" value={transactionForm.date} onChange={date=>setTransactionForm({...transactionForm,date})}/></Field></div><Field label="Danh mục"><FinanceSelect label="Chọn danh mục" placeholder="Chọn danh mục" value={transactionForm.category} onChange={category=>setTransactionForm({...transactionForm,category})} options={categoriesFor(transactionForm.type).map(category=>({value:category.id,label:category.name,icon:category.icon,color:category.color}))}/></Field><Field label="Ghi chú"><textarea aria-label="Ghi chú" value={transactionForm.description} onChange={event=>setTransactionForm({...transactionForm,description:event.target.value})} className={`${field} min-h-16 py-2`}/></Field>{error&&<div role="alert" className="border-2 border-black bg-[#ffc9ba] p-3 text-sm font-bold">{error}</div>}<Field label="Số tiền"><div className="relative"><input inputMode="decimal" onChange={event=>{const amount=rawAmount(event.target.value);if(amount!==null)setTransactionForm({...transactionForm,amount})}} value={amountText(transactionForm.amount)} onFocus={()=>{if(Number(transactionForm.amount)===0)setTransactionForm(form=>({...form,amount:''}))}} placeholder="0" aria-label="Số tiền" className={`${field} !h-16 pr-20 text-right text-3xl`}/><span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-black">{current.accounts.find(account=>account.id===transactionForm.accountId)?.currency}</span></div></Field><PushButton type="submit" disabled={saving} className="h-12 w-full bg-[#ef7c3b]">{saving?<Loader2 className="animate-spin"/>:<Check/>} Lưu thay đổi</PushButton></fieldset></form></ModalShell>}
   {modal==='transfer-history'&&<ModalShell key="transfer-history" title="Lịch sử chuyển tiền" close={()=>setModal(null)}>
-    {transactions.some(item=>item.type==='transfer')?transactions.filter(item=>item.type==='transfer').map(item=><section key={item.id} className="mb-3 border-2 border-black"><p className="border-b-2 border-black bg-[#e8dcff] px-4 py-2 text-xs font-bold">{dateText(item.date)}</p><TransactionRows items={[item]} remove={remove} edit={editTransaction}/></section>):<p className="py-8 text-center text-sm font-bold">Chưa có lịch sử chuyển tiền trong sổ này.</p>}
+    {transactions.some(item=>item.type==='transfer')?transactions.filter(item=>item.type==='transfer').map(item=><section key={item.id} className="mb-3 border-2 border-black"><p className="border-b-2 border-black bg-[#e8dcff] px-4 py-2 text-xs font-bold">{dateText(item.date)}</p><TransactionRows disabled={saving} items={[item]} remove={item=>void confirmRemove(item)} edit={editTransaction}/></section>):<p className="py-8 text-center text-sm font-bold">Chưa có lịch sử chuyển tiền trong sổ này.</p>}
   </ModalShell>}
   {modal==='export'&&current&&<FinanceExportDialog key="export" bookId={bookId} transactions={transactions.filter((item):item is Transaction&{type:'income'|'expense'}=>item.type!=='transfer')} categories={categories} headers={headers} close={()=>setModal(null)} notify={notify}/>}
   {deleteAccountTarget&&<ModalShell key="delete-account" title="Xóa khoản tiền?" alert busy={saving} close={()=>{if(!saving)setDeleteAccountTarget(null)}}><div className="space-y-4"><p>Bạn sắp xóa <b>{deleteAccountTarget.name}</b>. Số dư, lịch sử chỉnh sửa và mọi giao dịch gắn với khoản tiền này sẽ bị xóa.</p>{deleteAccountTarget.transactionCount>0&&<p className="border-2 border-black bg-[#ffc9ba] p-3 text-sm font-bold">Có {deleteAccountTarget.transactionCount} giao dịch liên quan. Việc xóa có thể làm thay đổi lịch sử và số dư của ví nhận/chuyển liên quan.</p>}<div className="border-2 border-black bg-[#fff6d8] p-4"><p className="text-sm font-black">{accountLabel(deleteAccountTarget.type)} · {deleteAccountTarget.currency}</p><p className="mt-1 text-xl font-black">{money(deleteAccountTarget.balance,deleteAccountTarget.currency)}</p></div>{error&&<p role="alert" className="border-2 border-black bg-[#ffc9ba] p-3 font-bold">{error}</p>}<div className="grid grid-cols-2 gap-4"><PushButton type="button" data-dialog-initial-focus disabled={saving} onClick={()=>setDeleteAccountTarget(null)} className="h-12 bg-white">Hủy</PushButton><PushButton type="button" disabled={saving} onClick={()=>void confirmDeleteAccount()} className="h-12 bg-[#e65332] text-white">{saving?<Loader2 className="animate-spin"/>:<Trash2 size={18}/>} Xóa khoản tiền</PushButton></div></div></ModalShell>}
@@ -421,41 +421,59 @@ export default function FinanceClient({view}:{view:'statistics'|'transactions'|'
       <div className="flex flex-wrap gap-3"><PushButton type="button" data-dialog-initial-focus disabled={saving} onClick={()=>setBulkDeleteTarget(null)} className="h-12 bg-white">Hủy</PushButton><PushButton type="button" disabled={saving} onClick={()=>void confirmBulkRemove()} className="min-h-12 bg-[#e65332] text-white">{saving?<Loader2 className="animate-spin"/>:<Trash2 size={18}/>} Xóa {bulkDeleteTarget.ids.length} giao dịch</PushButton></div>
     </div>
   </ModalShell>}
-  {deleteTarget&&<ModalShell key="delete" title="Xóa giao dịch?" alert busy={saving} close={()=>{if(!saving)setDeleteTarget(null)}}>
-    <div className="space-y-4">
-      <p>Bạn muốn xóa giao dịch này? Thao tác này không thể hoàn tác.</p>
-      <div className="space-y-2 border-2 border-[#302d28] bg-[#fff6d8] p-4">
-        <p className="font-black">{deleteTarget.type==='income'?'Khoản thu':deleteTarget.type==='expense'?'Khoản chi':'Chuyển tiền'} · {deleteTarget.category}</p>
-        <p className="text-xl font-black">{money(deleteTarget.amount,deleteTarget.currency)}</p>
-        <p>{deleteTarget.account.name}{deleteTarget.destinationAccount&&` → ${deleteTarget.destinationAccount.name}`} · {dateText(deleteTarget.date)}</p>
-      </div>
-      {error&&<p role="alert" className="border-2 border-black bg-[#ffc9ba] p-3 font-bold">{error}</p>}
-      <div className="grid grid-cols-2 gap-4 pt-2">
-        <PushButton type="button" data-dialog-initial-focus disabled={saving} onClick={()=>setDeleteTarget(null)} className="h-12 bg-white">Hủy</PushButton>
-        <PushButton type="button" disabled={saving} onClick={()=>void confirmRemove()} className="h-12 bg-[#e65332] text-white">{saving?<Loader2 className="animate-spin"/>:<Trash2 size={18}/>} Xóa</PushButton>
-      </div>
-    </div>
-  </ModalShell>}
+
   {message&&<motion.div key="notification" initial={{opacity:0,y:-12}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-12}} className="fixed left-1/2 top-20 z-[130] -translate-x-1/2 border-2 border-black bg-[#ffd978] px-5 py-3 text-sm font-black shadow-[4px_4px_0_#000]">{message}</motion.div>}</AnimatePresence>
   {current&&<motion.button type="button" onClick={()=>openTransaction()} initial={false} animate={{scale:scrolling?0.625:1}} transition={{duration:0.18,ease:'easeOut'}} whileTap={{scale:scrolling?0.56:0.94}} aria-label="Thêm giao dịch" title="Thêm giao dịch" className="fixed bottom-[calc(7rem+env(safe-area-inset-bottom,0px))] right-5 z-[80] flex h-16 w-16 origin-bottom-right items-center justify-center rounded-full border-2 border-black bg-[#ef7c3b] text-white shadow-[6px_6px_0_#000] md:bottom-[calc(7rem+env(safe-area-inset-bottom,0px))] md:right-7"><Plus size={32} strokeWidth={3}/></motion.button>}
   </div>
 }
 
-const TransactionRows=memo(function TransactionRows({items,remove,edit,selection,pendingIds}:{items:Transaction[];remove:(item:Transaction)=>void;edit:(item:Transaction)=>void;selection?:{ids:Set<string>;toggle:(id:string)=>void};pendingIds?:Set<string>}){
-  return items.length?<div>{items.map(item=><div key={item.id} className="finance-transaction-row flex flex-wrap items-center border-b-2 border-black last:border-b-0">
-    {selection&&<label className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center"><input type="checkbox" className="h-6 w-6 accent-[#df5b2a]" aria-label={`Chọn ${item.category} · ${money(item.amount,item.currency)} · ${dateText(item.date)} · ${item.account.name}`} checked={selection.ids.has(item.id)} onChange={()=>selection.toggle(item.id)}/></label>}
-    {item.type==='transfer'?<span className="finance-transaction-icon" data-type="transfer"><ArrowRightLeft aria-hidden="true"/></span>:item.categoryIcon?<FinanceCategoryIcon name={item.categoryIcon} color={item.categoryColor||undefined}/>:<span className="finance-transaction-icon" data-type={item.type}>{item.type==='income'?<Plus aria-hidden="true"/>:<Minus aria-hidden="true"/>}</span>}
-    <div className="min-w-0 flex-1"><b className={`block truncate text-sm ${item.type==='transfer'?'text-[#7046b5]':''}`}>{item.category}</b><p className="truncate text-xs font-semibold">{item.account.name}{item.destinationAccount&&` → ${item.destinationAccount.name}`}{item.description&&` · ${item.description}`}</p></div>
-    <div className="finance-transaction-actions ml-auto flex w-full max-w-full flex-wrap items-center justify-end sm:w-auto">
-      <b className={`break-all text-sm ${item.type==='income'?'text-green-700':item.type==='expense'?'text-red-700':'text-[#7046b5]'}`}>{item.type==='income'?'+':item.type==='expense'?'-':'↔ '}{money(item.amount,item.currency)}</b>
-      {pendingIds?.has(item.id)?<span role="status" className="finance-sync-pending"><Loader2 size={13} className="animate-spin"/> Đang lưu</span>:!selection&&<><button type="button" onClick={()=>edit(item)} aria-label="Chỉnh sửa giao dịch" title="Chỉnh sửa giao dịch" className="btn-push flex h-10 w-10 shrink-0 items-center justify-center"><Pencil size={17}/></button>
-      <button type="button" onClick={()=>remove(item)} aria-label="Xóa giao dịch" title="Xóa giao dịch" className="btn-push flex h-10 w-10 shrink-0 items-center justify-center"><Trash2 size={17}/></button></>}
+type RowProps = {item:Transaction;remove:(item:Transaction)=>void;edit:(item:Transaction)=>void;selection?:{ids:Set<string>;toggle:(id:string)=>void};pending?:boolean;disabled?:boolean};
+
+function TransactionRow({item,remove,edit,selection,pending,disabled}:RowProps){
+  const [revealed,setRevealed]=useState(false);
+  const [offset,setOffset]=useState(0);
+  const gesture=useRef<{id:number;x:number;y:number;horizontal:boolean;cancelled:boolean}|null>(null);
+  const suppressClick=useRef(false);
+  const blocked=!!selection||pending||disabled;
+  const finish=(event:React.PointerEvent<HTMLButtonElement>,cancelled=false)=>{
+    const start=gesture.current;
+    gesture.current=null;
+    setOffset(0);
+    if(!start||start.id!==event.pointerId)return;
+    if(start.cancelled||cancelled){suppressClick.current=true;return}
+    if(!start.horizontal)return;
+    suppressClick.current=true;
+    const dx=event.clientX-start.x;
+    if(dx < -48){if(revealed)remove(item);else setRevealed(true)}
+    else if(dx>30)setRevealed(false);
+  };
+  return <div className="finance-swipe-row">
+    {!blocked&&<button type="button" tabIndex={revealed?0:-1} aria-hidden={!revealed} className="finance-swipe-delete" aria-label={`Xóa ${item.category} · ${money(item.amount,item.currency)}`} onClick={()=>remove(item)}><Trash2 size={20}/>Xóa</button>}
+    <div className="finance-transaction-row finance-swipe-content" style={{transform:`translateX(${!blocked&&revealed?-88:0}px)`}}>
+      {selection&&<label className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center"><input type="checkbox" className="h-6 w-6 accent-[#df5b2a]" aria-label={`Chọn ${item.category} · ${money(item.amount,item.currency)}`} checked={selection.ids.has(item.id)} onChange={()=>selection.toggle(item.id)}/></label>}
+      <button type="button" className="finance-transaction-open" disabled={pending||disabled} aria-label={`Chỉnh sửa ${item.category} · ${money(item.amount,item.currency)}`} style={{transform:`translateX(${offset}px)`}}
+        onPointerDown={event=>{suppressClick.current=false;if(blocked||event.button!==0)return;gesture.current={id:event.pointerId,x:event.clientX,y:event.clientY,horizontal:false,cancelled:false}}}
+        onPointerMove={event=>{const start=gesture.current;if(!start||start.id!==event.pointerId||start.cancelled)return;const dx=event.clientX-start.x,dy=event.clientY-start.y;if(!start.horizontal){if(Math.abs(dy)>10&&Math.abs(dy)>=Math.abs(dx)){start.cancelled=true;return}if(Math.abs(dx)<12)return;start.horizontal=true;event.currentTarget.setPointerCapture(event.pointerId)}setOffset(Math.max(-70,Math.min(revealed?88:0,dx)))}}
+        onPointerUp={event=>finish(event)} onPointerCancel={event=>finish(event,true)}
+        onClick={()=>{if(suppressClick.current){suppressClick.current=false;return}if(selection)selection.toggle(item.id);else if(revealed)setRevealed(false);else edit(item)}}
+        onKeyDown={event=>{if(!blocked&&event.key==='Delete'){event.preventDefault();setRevealed(true)}if(event.key==='Escape')setRevealed(false)}}>
+        {item.type==='transfer'?<span className="finance-transaction-icon" data-type="transfer"><ArrowRightLeft aria-hidden="true"/></span>:item.categoryIcon?<FinanceCategoryIcon name={item.categoryIcon} color={item.categoryColor||undefined}/>:<span className="finance-transaction-icon" data-type={item.type}>{item.type==='income'?<Plus aria-hidden="true"/>:<Minus aria-hidden="true"/>}</span>}
+        <span className="finance-transaction-details">
+          <strong className={`finance-transaction-amount ${item.type==='income'?'text-green-700':item.type==='expense'?'text-red-700':'text-[#7046b5]'}`}>{item.type==='income'?'+':item.type==='expense'?'-':'↔ '}{money(item.amount,item.currency)}</strong>
+          <b className="block truncate text-sm">{item.category}</b>
+          <span className="block truncate text-xs font-semibold">{item.account.name}{item.destinationAccount&&` → ${item.destinationAccount.name}`}{item.description&&` · ${item.description}`}</span>
+        </span>
+        {pending&&<span role="status" className="finance-sync-pending"><Loader2 size={13} className="animate-spin"/> Đang lưu</span>}
+      </button>
     </div>
-  </div>)}</div>:<p className="p-8 text-center text-sm font-bold">Chưa có giao dịch trong sổ này.</p>
+  </div>;
+}
+
+const TransactionRows=memo(function TransactionRows({items,remove,edit,selection,pendingIds,disabled}:{items:Transaction[];remove:(item:Transaction)=>void;edit:(item:Transaction)=>void;selection?:RowProps['selection'];pendingIds?:Set<string>;disabled?:boolean}){
+  return <div>{items.map(item=><TransactionRow key={item.id} item={item} remove={remove} edit={edit} selection={selection} pending={pendingIds?.has(item.id)} disabled={disabled}/>)}</div>;
 });
 
-
-const TransactionList=memo(function TransactionList({transactions,saving,bookId,selection,setSelection,setBulkDeleteTarget,setError,remove,editTransaction,pendingIds}:{
+const TransactionList=memo(function TransactionList({transactions:allTransactions,saving,bookId,selection,setSelection,setBulkDeleteTarget,setError,remove,editTransaction,pendingIds}:{
   transactions:Transaction[];saving:boolean;bookId:string;
   selection:{bookId:string;ids:Set<string>}|null;
   setSelection:React.Dispatch<React.SetStateAction<{bookId:string;ids:Set<string>}|null>>;
@@ -463,6 +481,17 @@ const TransactionList=memo(function TransactionList({transactions,saving,bookId,
   setError:React.Dispatch<React.SetStateAction<string>>;
   remove:(item:Transaction)=>void;editTransaction:(item:Transaction)=>void;pendingIds:Set<string>;
 }){
+  const [query,setQuery]=useState('');
+  const [collapsedDays,setCollapsedDays]=useState<Set<string>>(()=>new Set());
+  const transactions=useMemo(()=>{
+    const normalize=(value:string)=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase();
+    const terms=normalize(query).trim().split(/\s+/).filter(Boolean);
+    return allTransactions.filter(item=>terms.every(term=>{
+      const text=normalize(`${item.description} ${item.category}`);
+      const digits=term.replace(/[.,\s]/g,'');
+      return text.includes(term)||(/^\d+$/.test(digits)&&String(item.amount).replace('.','').includes(digits));
+    }));
+  },[allTransactions,query]);
   const selecting=selection?.bookId===bookId;
   const selectedIds=selecting?selection!.ids:new Set<string>();
   const toggleSelection=(id:string)=>setSelection(previous=>{const ids=new Set(previous?.bookId===bookId?previous.ids:[]);if(ids.has(id))ids.delete(id);else ids.add(id);return {bookId,ids}});
@@ -490,13 +519,16 @@ const TransactionList=memo(function TransactionList({transactions,saving,bookId,
     return()=>observer.disconnect();
   },[visibleCount,transactions.length]);
   const currencyTotals=(items:Transaction[],type:'income'|'expense')=>{const totals=new Map<string,number>();items.filter(item=>item.type===type).forEach(item=>totals.set(item.currency,(totals.get(item.currency)||0)+item.amount));return [...totals.entries()]};
-  return <section className="mt-7 flex flex-col gap-[18px]">{transactions.length>0&&<div className={`${card} flex flex-wrap items-center gap-3 p-4`} role="region" aria-label="Chọn và thao tác giao dịch">
+  return <section className="mt-7 flex flex-col gap-[18px]">
+    <label className="finance-transaction-search"><Search size={20} aria-hidden="true"/><input type="search" value={query} onChange={event=>{setQuery(event.target.value);setVisibleCount(80)}} aria-label="Tìm giao dịch" placeholder="Tìm số tiền, ghi chú, danh mục..."/><span>{transactions.length}/{allTransactions.length}</span></label>
+    {allGroups.length>0&&<div className="flex flex-wrap gap-3"><button type="button" className="finance-load-more" onClick={()=>setCollapsedDays(new Set(allGroups.map(([day])=>day)))}>Thu gọn tất cả</button><button type="button" className="finance-load-more" onClick={()=>setCollapsedDays(new Set())}>Mở rộng tất cả</button></div>}
+    {transactions.length>0&&<div className={`${card} flex flex-wrap items-center gap-3 p-4`} role="region" aria-label="Chọn và thao tác giao dịch">
       {selecting?<>
         <label className="flex min-h-11 cursor-pointer items-center gap-2 font-bold"><input type="checkbox" className="h-5 w-5 accent-[#df5b2a]" checked={transactions.every(item=>selectedIds.has(item.id))} ref={node=>{if(node)node.indeterminate=selectedIds.size>0&&!transactions.every(item=>selectedIds.has(item.id))}} onChange={event=>setSelection({bookId,ids:new Set(event.target.checked?transactions.map(item=>item.id):[])})}/> Chọn tất cả ({transactions.length})</label>
         <span aria-live="polite" className="text-sm font-bold">Đã chọn {selectedIds.size}</span>
         <PushButton disabled={saving||!selectedIds.size} onClick={()=>{setError('');setBulkDeleteTarget({bookId,ids:[...selectedIds],all:false})}} className="min-h-11 bg-[#ffc9ba]"><Trash2 size={18}/> Xóa đã chọn</PushButton>
         <PushButton disabled={saving} onClick={()=>setSelection(null)} className="min-h-11 bg-white">Hủy chọn</PushButton>
       </>:<PushButton onClick={()=>setSelection({bookId,ids:new Set()})} className="min-h-11 bg-[#ffe69a]"><Check size={18}/> Chọn giao dịch</PushButton>}
-      <PushButton disabled={saving} onClick={()=>{setError('');setBulkDeleteTarget({bookId,ids:transactions.map(item=>item.id),all:true})}} className="min-h-11 bg-[#ffc9ba]"><Trash2 size={18}/> Xóa toàn bộ</PushButton>
-    </div>}{groups.length?groups.map(([day,items])=><article key={day} className={`finance-day-group ${card} overflow-hidden`}><header className="finance-day-heading flex flex-col border-b-2 border-black bg-[#ffe69a] md:flex-row md:items-center md:justify-between"><div><p className="text-xs font-black uppercase tracking-wide">Giao dịch trong ngày</p><h2 className="mt-1 text-lg font-black capitalize">{dateText(items[0].date)}</h2></div><div className="flex flex-wrap gap-2">{currencyTotals(fullDayItems.get(day)||items,'income').map(([currency,total])=><span key={`i-${currency}`} className="border-2 border-black bg-[#c9f1d5] px-3 py-1 text-xs font-black text-green-800">Tổng thu +{money(total,currency)}</span>)}{currencyTotals(fullDayItems.get(day)||items,'expense').map(([currency,total])=><span key={`e-${currency}`} className="border-2 border-black bg-[#ffc9ba] px-3 py-1 text-xs font-black text-red-700">Tổng chi -{money(total,currency)}</span>)}</div></header><TransactionRows items={items} remove={remove} edit={editTransaction} pendingIds={pendingIds} selection={selecting?{ids:selectedIds,toggle:toggleSelection}:undefined}/></article>):<div className={`${card} flex min-h-64 flex-col items-center justify-center p-6 text-center`}><ReceiptText size={42}/><h2 className="mt-3 text-xl font-black uppercase">Chưa có giao dịch</h2></div>}{visibleCount<transactions.length&&<button ref={loadMore} type="button" onClick={()=>setVisibleCount(count=>count+80)} className="finance-load-more">{'Hiển thị thêm'} ({transactions.length-visibleCount})</button>}</section>;
+      <PushButton disabled={saving} onClick={()=>{setError('');setBulkDeleteTarget({bookId,ids:transactions.map(item=>item.id),all:!query.trim()})}} className="min-h-11 bg-[#ffc9ba]"><Trash2 size={18}/> {query.trim()?'Xóa kết quả tìm kiếm':'Xóa toàn bộ'}</PushButton>
+    </div>}{groups.length?groups.map(([day,items])=><article key={day} className={`finance-day-group ${card} overflow-hidden`}><header className="bg-[#ffe69a]"><button type="button" className="finance-day-heading finance-day-toggle" aria-expanded={!collapsedDays.has(day)} aria-controls={`finance-day-${day}`} onClick={()=>setCollapsedDays(previous=>{const next=new Set(previous);if(next.has(day))next.delete(day);else next.add(day);return next})}><ChevronDown size={20} className={collapsedDays.has(day)?'-rotate-90':''}/><div><p className="text-xs font-black uppercase tracking-wide">Giao dịch trong ngày</p><h2 className="mt-1 text-lg font-black capitalize">{dateText(items[0].date)} <small>({fullDayItems.get(day)?.length})</small></h2></div><div className="flex flex-wrap gap-2">{currencyTotals(fullDayItems.get(day)||items,'income').map(([currency,total])=><span key={`i-${currency}`} className="border-2 border-black bg-[#c9f1d5] px-3 py-1 text-xs font-black text-green-800">Tổng thu +{money(total,currency)}</span>)}{currencyTotals(fullDayItems.get(day)||items,'expense').map(([currency,total])=><span key={`e-${currency}`} className="border-2 border-black bg-[#ffc9ba] px-3 py-1 text-xs font-black text-red-700">Tổng chi -{money(total,currency)}</span>)}</div></button></header><div id={`finance-day-${day}`} hidden={collapsedDays.has(day)}><TransactionRows disabled={saving} items={items} remove={remove} edit={editTransaction} pendingIds={pendingIds} selection={selecting?{ids:selectedIds,toggle:toggleSelection}:undefined}/></div></article>):<div className={`${card} flex min-h-64 flex-col items-center justify-center p-6 text-center`}><ReceiptText size={42}/><h2 className="mt-3 text-xl font-black uppercase">{query.trim()?'Không tìm thấy giao dịch':'Chưa có giao dịch'}</h2></div>}{visibleCount<transactions.length&&<button ref={loadMore} type="button" onClick={()=>setVisibleCount(count=>count+80)} className="finance-load-more">{'Hiển thị thêm'} ({transactions.length-visibleCount})</button>}</section>;
 });

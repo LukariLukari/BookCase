@@ -27,14 +27,19 @@ export function createSoundPlayer() {
   const sources = new Set<AudioBufferSourceNode>();
   const abort = new AbortController();
 
+  const resetContext = () => {
+    sources.forEach(source => { try { source.stop(); source.disconnect(); } catch {} });
+    sources.clear();
+    const previous = context;
+    context = null;
+    if (previous) void previous.close().catch(() => {});
+  };
+
   const getContext = () => {
     if (disposed) return null;
     // iOS can leave the old context interrupted after locking/backgrounding a PWA.
     if (context && ['closed', 'interrupted'].includes(context.state)) {
-      sources.forEach(source => { try { source.stop(); source.disconnect(); } catch {} });
-      sources.clear();
-      void context.close().catch(() => {});
-      context = null;
+      resetContext();
     }
     if (!context) {
       const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -124,7 +129,9 @@ export function createSoundPlayer() {
     },
     restore() {
       pending = null;
-      // Only resume here; the next real tap also retries within a user gesture.
+      // Mobile browsers can report "running" while the audio output is dead after
+      // switching apps. Replace that session, keeping the decoded PCM cache.
+      resetContext();
       const active = getContext();
       if (active && active.state !== 'running') void active.resume().catch(() => {});
       preload();

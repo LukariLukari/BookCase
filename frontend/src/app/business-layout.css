@@ -262,6 +262,23 @@
 .finance-transaction-row .finance-transaction-actions button svg { width: 15px !important; height: 15px !important; }
 .finance-transaction-row > label { min-width: 33px; min-height: 33px; }
 .finance-transaction-row > label input { width: 18px; height: 18px; min-height: 18px; }
+.finance-swipe-row { position: relative; overflow: hidden; border-bottom: 2px solid #171513; }
+.finance-swipe-row:last-child { border-bottom: 0; }
+.finance-swipe-content { position: relative; display: flex; align-items: center; padding: 0; background: #fffaf0; transition: transform .18s ease; }
+.finance-transaction-open { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; min-height: 88px; padding: 14px; text-align: left; touch-action: pan-y; cursor: pointer; }
+.finance-transaction-open:disabled { cursor: default; }
+.finance-transaction-open:focus-visible, .finance-swipe-delete:focus-visible, .finance-day-toggle:focus-visible { outline: 3px solid #7046b5; outline-offset: -4px; }
+.finance-transaction-details { flex: 1; min-width: 0; }
+.finance-transaction-amount { display: block; margin-bottom: 6px; font-size: 21px !important; line-height: 1.25 !important; overflow-wrap: anywhere; }
+.finance-swipe-delete { position: absolute; inset: 0 0 0 auto; width: 88px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: #dc2626; color: white; font-weight: 800; }
+.finance-day-toggle { display: flex; width: 100%; align-items: center; justify-content: space-between; flex-wrap: wrap; text-align: left; }
+.finance-day-toggle > div:first-of-type { flex: 1; }
+.finance-day-toggle > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
+.finance-transaction-search { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 2px solid #171513; background: #fffaf0; }
+.finance-transaction-search input { width: 100%; min-width: 0; min-height: 32px; outline: none; }
+.finance-transaction-search:focus-within { outline: 2px solid #7046b5; }
+.finance-transaction-search > span { font-size: 12px; white-space: nowrap; }
+.finance-entry-balance { width: 100%; margin-top: 16px; text-align: center; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
 .business-main .finance-day-heading { gap: 9px; padding: 15px; }
 .business-main .finance-day-heading h2 { font-size: 18.75px !important; }
 .business-main .finance-day-heading p { font-size: 12px !important; line-height: 1.08 !important; }

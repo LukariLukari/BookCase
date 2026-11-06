@@ -20,7 +20,7 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
   transfer?: { destinationAccountId: string; changeDestination: (id: string) => void };
   openTransfer: () => void;
   form: TransactionDraft;
-  accounts: { id: string; name: string; currency: string }[];
+  accounts: { id: string; name: string; currency: string; balance: number }[];
   categories: FinanceCategory[];
   saving: boolean;
   error: string;
@@ -33,7 +33,12 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
   const categoryScroller = useRef<HTMLDivElement>(null);
   const [whole, decimal] = form.amount.split('.');
   const displayedAmount = (whole || '0').replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (decimal === undefined ? '' : `.${decimal}`);
-  const currency = accounts.find(account => account.id === form.accountId)?.currency || 'VND';
+  const account = accounts.find(account => account.id === form.accountId);
+  const currency = account?.currency || 'VND';
+  const amount = Number(form.amount) || 0;
+  const formatBalance = (balance: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency, maximumFractionDigits: ['VND', 'JPY'].includes(currency) ? 0 : 2 }).format(balance);
+  const destination = accounts.find(account => account.id === transfer?.destinationAccountId);
+  const delta = !transfer && form.type === 'income' ? amount : -amount;
   const key = (value: string) => <button key={value} type="button" data-sound="input" onClick={() => press(value)} aria-label={value} className="finance-entry-key">{value}</button>;
 
   useEffect(() => {
@@ -60,6 +65,11 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
           <div className="finance-entry-amount">
             <output aria-label="Số tiền" style={{ fontSize: `clamp(24px, ${Math.min(14, 145 / displayedAmount.length)}vw, 80px)` }}>{displayedAmount}</output>
             <span>{currency}</span>
+            {account && <div className="finance-entry-balance" aria-label="Dự tính số dư">
+              <p>{account.name} · Số dư hiện tại: <strong>{formatBalance(account.balance)}</strong></p>
+              <p>Sau {transfer ? 'chuyển tiền' : form.type === 'income' ? 'thu' : 'chi'}: <strong className={account.balance + delta < 0 ? 'text-red-700' : 'text-green-700'}>{formatBalance(account.balance + delta)}</strong></p>
+              {transfer && destination && <p>{destination.name}: {formatBalance(destination.balance)} → <strong>{formatBalance(destination.balance + amount)}</strong></p>}
+            </div>}
           </div>
           <div className="finance-entry-feedback">
             {error ? <p role="alert">{error}</p> : message ? <p role="status">{message}</p> : null}
