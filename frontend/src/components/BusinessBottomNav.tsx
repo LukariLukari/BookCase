@@ -7,10 +7,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { BarChart3, Boxes, CircleDollarSign, PackageOpen, Plus, ReceiptText, ShoppingCart, Store, X } from 'lucide-react';
 
 const navItems = [
-  { href: '/business/pos', label: 'Bán tại quầy', icon: Store },
-  { href: '/business/products', label: 'Món bán POS', icon: PackageOpen },
-  { href: '/business/inventory', label: 'Nhập và tồn kho', icon: Boxes },
-  { href: '/business/reports', label: 'Thống kê', icon: BarChart3 },
+  { href: '/business/pos', label: 'Bán tại quầy', shortLabel: 'Tại quầy', icon: Store },
+  { href: '/business/products', label: 'Món bán POS', shortLabel: 'Món bán', icon: PackageOpen },
+  { href: '/business/inventory', label: 'Nhập và tồn kho', shortLabel: 'Tồn kho', icon: Boxes },
+  { href: '/business/reports', label: 'Thống kê', shortLabel: 'Thống kê', icon: BarChart3 },
 ];
 
 export default function BusinessBottomNav() {
@@ -19,7 +19,7 @@ export default function BusinessBottomNav() {
   const left = navItems.slice(0, 2);
   const right = navItems.slice(2);
 
-  const item = ({ href, label, icon: Icon }: (typeof navItems)[number]) => {
+  const item = ({ href, label, shortLabel, icon: Icon }: (typeof navItems)[number]) => {
     const active = pathname === href;
     return (
       <Link
@@ -29,11 +29,10 @@ export default function BusinessBottomNav() {
         title={label}
         aria-current={active ? 'page' : undefined}
         onClick={() => setQuickOpen(false)}
-        className="relative z-10 flex h-full min-w-0 items-center justify-center"
+        className="business-bottom-nav-link ui-flat-control relative z-10 flex h-full min-w-0 flex-col items-center justify-center gap-1 px-1"
       >
-        <span className={`flex h-11 w-11 items-center justify-center border-2 border-transparent transition-all ${active ? 'pixel-active text-white' : 'text-[#171513]'}`}>
-          <Icon size={23} strokeWidth={2.4} className={active ? 'text-white stroke-white' : ''} />
-        </span>
+        <Icon size={20} strokeWidth={2.3} aria-hidden="true" />
+        <span className="business-bottom-nav-label">{shortLabel}</span>
       </Link>
     );
   };

@@ -10,7 +10,7 @@
   margin-bottom: 32px !important;
 }
 .business-main .page-heading h1 {
-  font-size: clamp(28px, 3vw, 36px) !important;
+  font-size: clamp(32px, 3.3vw, 40px) !important;
   line-height: 1.2 !important;
   margin-top: 8px !important;
 }
@@ -164,10 +164,29 @@
 }
 .ui-flat-control[aria-current="page"] .sidebar-nav-label,
 .finance-nav-link[aria-current="page"] span,
+.business-bottom-nav-link[aria-current="page"] .business-bottom-nav-label,
 .segmented-choice.ui-flat-control[aria-pressed="true"] {
   text-decoration: underline;
   text-underline-offset: 7px;
   text-decoration-thickness: 2px;
+}
+.business-bottom-nav-link.ui-flat-control > svg {
+  width: 20px !important;
+  height: 20px !important;
+  flex-shrink: 0;
+}
+.business-bottom-nav-label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  font-weight: 700;
+}
+.business-bottom-nav-link[aria-current="page"] .business-bottom-nav-label {
+  text-underline-offset: 4px;
 }
 .ui-flat-control:focus-visible {
   outline: 2px solid var(--pixel-primary);

@@ -1,23 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro, Handjet, Montserrat } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import "./business-layout.css";
 import "./theme.css";
 import { themeBootstrapScript } from '@/lib/theme';
 import { SOUND_URLS } from '@/lib/soundEffects';
 import { PublicThemeToggle } from '@/components/ThemeToggle';
-
-const beVietnam = Be_Vietnam_Pro({
-  subsets: ["latin", "vietnamese"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-be-vietnam",
-});
-
-const handjet = Handjet({
-  subsets: ["latin", "latin-ext", "vietnamese"],
-  weight: ["500", "600", "700", "800", "900"],
-  variable: "--font-pixel",
-});
 
 const montserrat = Montserrat({
   subsets: ["latin", "latin-ext", "vietnamese"],
@@ -59,7 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${beVietnam.variable} ${handjet.variable} ${montserrat.variable} font-sans min-h-full antialiased`}
+      className={`${montserrat.variable} font-sans min-h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
