@@ -195,11 +195,10 @@ export default function DailyRevenueClient() {
                 type="button"
                 onClick={() => setSelectedDate(todayStr)}
                 disabled={isToday}
-                className={`flex h-10 items-center justify-center gap-1.5 rounded-xl px-4 text-xs font-black transition-all ${
-                  isToday
+                className={`flex h-10 items-center justify-center gap-1.5 rounded-xl px-4 text-xs font-black transition-all ${isToday
                     ? 'choice-active cursor-default'
                     : 'bg-[#16587B] text-white shadow-md hover:bg-[#104460] active:scale-95'
-                }`}
+                  }`}
               >
                 <Sparkles size={14} className="text-white" />
                 <span>Hôm nay</span>
@@ -267,11 +266,10 @@ export default function DailyRevenueClient() {
                     disabled={isToday || selectedDate >= todayStr}
                     title={isToday || selectedDate >= todayStr ? 'Không thể xem ngày trong tương lai chưa xảy ra' : 'Xem ngày tiếp theo'}
                     aria-label="Xem ngày tiếp theo"
-                    className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-sm transition-all ${
-                      isToday || selectedDate >= todayStr
+                    className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-sm transition-all ${isToday || selectedDate >= todayStr
                         ? 'border border-[#16587B]/10 bg-white/40 text-[#16587B]/30 cursor-not-allowed opacity-40'
                         : 'bg-white text-[#16587B] hover:bg-[#16587B] hover:text-white active:scale-90'
-                    }`}
+                      }`}
                   >
                     <ChevronRight size={18} />
                   </button>
@@ -351,17 +349,15 @@ export default function DailyRevenueClient() {
                           key={d.date}
                           type="button"
                           onClick={() => setSelectedDate(d.date)}
-                          className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-[11px] font-black transition-all ${
-                            isSelected
+                          className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-[11px] font-black transition-all ${isSelected
                               ? 'choice-active shadow-sm'
                               : 'border border-[#16587B]/20 bg-[#F5EEDD] text-[#16587B] hover:bg-[#16587B]/10 active:scale-95'
-                          }`}
+                            }`}
                         >
                           <span>{d.date.slice(5).replace('-', '/')}</span>
                           <span
-                            className={`rounded-md px-1 py-0.5 text-[9px] font-black ${
-                              isSelected ? 'bg-white/20 text-white' : 'bg-white text-[#16587B]'
-                            }`}
+                            className={`rounded-md px-1 py-0.5 text-[9px] font-black ${isSelected ? 'bg-white/20 text-white' : 'bg-white text-[#16587B]'
+                              }`}
                           >
                             {formatVNCurrency(d.revenue).replace(' đ', '')}
                           </span>
