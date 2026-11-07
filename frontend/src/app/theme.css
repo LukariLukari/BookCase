@@ -12,13 +12,13 @@ html[data-theme="dark"] {
   --reps-red-dark: #9c3528;
   --reps-orange: var(--theme-action);
   --reps-orange-dark: var(--theme-action-hover);
-  --reps-shadow: #0b0d10;
-  --pixel-bg-dark: #121418;
-  --pixel-page-tint: linear-gradient(135deg, transparent, rgb(242 160 7 / .025));
+  --reps-shadow: #000000;
+  --pixel-bg-dark: #000000;
+  --pixel-page-tint: none;
   --pixel-panel-light: var(--theme-raised);
   --pixel-ink-dark: var(--theme-text);
   --pixel-highlight: var(--theme-hover);
-  --pixel-shadow-dark: #0b0d10;
+  --pixel-shadow-dark: #000000;
   --border-soft: var(--theme-border);
   --paper-line: rgb(232 227 219 / .08);
 }
@@ -26,7 +26,8 @@ html[data-theme="dark"] {
 html[data-theme="dark"] body {
   background: var(--theme-page) !important;
 }
-html[data-theme="dark"] body::before { display: none !important; }
+html[data-theme="dark"] body::before,
+html[data-theme="dark"] .pointer-events-none[class*="blur-"] { display: none !important; }
 
 /* Legacy utilities still carry light-theme hex values. Limit these bridges to
    CSS surfaces/copy; photographs, covers, charts and category swatches retain
@@ -47,7 +48,7 @@ html[data-theme="dark"] [class*="text-[#585556]/"],
 html[data-theme="dark"] [class*="text-gray-"],
 html[data-theme="dark"] [class*="text-slate-"] { color: var(--theme-muted) !important; }
 html[data-theme="dark"] [class*="border"],
-html[data-theme="dark"] :is(button, a, input, select, textarea, fieldset, dialog, th, td, .finance-entry-toolbar, .finance-category-row, .finance-calendar-footer) { border-color: var(--theme-border) !important; }
+html[data-theme="dark"] :is(button, a, input, select, textarea, fieldset, dialog, th, td, .finance-entry-toolbar, .finance-category-row, .finance-calendar-footer, .finance-swipe-row, .finance-transaction-search) { border-color: var(--theme-border) !important; }
 html[data-theme="dark"] :is(.pixel-panel, .pixel-tile, .pixel-logo, .card-push, .card-3d, .content-panel, .page-heading-panel, .finance-panel, .sidebar-nav-item, .finance-picker-panel) {
   border-color: var(--theme-border) !important;
 }
@@ -79,17 +80,29 @@ html[data-theme="dark"] [class*="text-[#b63824]"] { color: var(--theme-danger) !
 html[data-theme="dark"] [class*="text-orange-"],
 html[data-theme="dark"] [class*="text-amber-"] { color: var(--theme-accent) !important; }
 html[data-theme="dark"] :is(.ui-flat-control.ui-flat-control, .business-main .daily-measure-switch button) { color: var(--theme-muted) !important; }
-html[data-theme="dark"] .ui-flat-control.ui-flat-control:is(:hover, [aria-current="page"], [aria-pressed="true"]) { color: var(--theme-accent) !important; }
+html[data-theme="dark"] .daily-order-toggle.ui-flat-control { color: var(--theme-text) !important; }
+html[data-theme="dark"] .ui-flat-control.ui-flat-control:is(:hover, [aria-current="page"], [aria-pressed="true"], [aria-expanded="true"]) { color: var(--theme-accent) !important; }
 
 /* Finance sheets and calendars have deliberately separate surface levels. */
-html[data-theme="dark"] :is(.finance-entry-categories, .finance-entry-console, .finance-picker-header, .finance-calendar-footer, .finance-category-name-editor, .finance-book-panel, .finance-sync-panel, .finance-sync-failed button, .finance-load-more) {
+html[data-theme="dark"] :is(.finance-entry-categories, .finance-entry-console, .finance-picker-header, .finance-calendar-footer, .finance-category-name-editor, .finance-book-panel, .finance-sync-panel, .finance-sync-failed button, .finance-load-more, .finance-transaction-search) {
   background: var(--theme-raised) !important;
   color: var(--theme-text);
   border-color: var(--theme-border) !important;
 }
-html[data-theme="dark"] .finance-picker-placeholder { color: var(--theme-muted); }
+html[data-theme="dark"] .finance-swipe-content {
+  background: var(--theme-panel) !important;
+  color: var(--theme-text);
+}
+html[data-theme="dark"] .finance-transaction-search input {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] :is(.finance-picker-placeholder, .finance-calendar > b, .finance-sync-pending) { color: var(--theme-muted); }
+html[data-theme="dark"] .finance-custom-color::before { background: var(--theme-raised); }
+html[data-theme="dark"] .finance-custom-color > svg { stroke: var(--theme-text) !important; }
 html[data-theme="dark"] :is(.finance-entry-income, .finance-category-type.income)[aria-pressed="true"],
-html[data-theme="dark"] button.finance-entry-done { background: #244534 !important; color: var(--theme-success) !important; }
+html[data-theme="dark"] :is(button.finance-entry-done, .finance-calendar-footer .finance-calendar-done) { background: #244534 !important; color: var(--theme-success) !important; }
 html[data-theme="dark"] :is(.finance-entry-expense, .finance-category-type.expense)[aria-pressed="true"],
 html[data-theme="dark"] .finance-category-row > button:last-child { background: #4a2b2a !important; color: var(--theme-danger) !important; }
 html[data-theme="dark"] .finance-entry-transfer[aria-pressed="true"] { background: #493857 !important; }

@@ -127,7 +127,15 @@
 }
 .business-main .daily-search { margin-bottom: 28px; }
 .business-main .daily-hero { padding: 32px 20px; }
-.business-main .daily-hero .daily-money { margin-block: 16px 24px; }
+.business-main .daily-hero .daily-money {
+  margin-block: 16px 24px;
+  font-size: clamp(2.75rem, 7vw, 4.75rem) !important;
+  line-height: 1.05 !important;
+}
+.business-main .daily-order-toggle > svg {
+  width: 15px !important;
+  height: 15px !important;
+}
 .business-main .finance-panel { margin-top: 32px; }
 .business-main .finance-chart-grid { gap: 32px; }
 .business-main .finance-chart-grid > .finance-panel { margin-top: 0; }
@@ -279,7 +287,7 @@
 .finance-day-toggle > div:first-of-type { flex: 1; }
 .finance-day-toggle > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
 .finance-transaction-search { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 2px solid #171513; background: #fffaf0; }
-.finance-transaction-search input { width: 100%; min-width: 0; min-height: 32px; outline: none; }
+.finance-transaction-search input { width: 100%; min-width: 0; min-height: 32px; border: 0 !important; background: transparent !important; box-shadow: none !important; outline: none; }
 .finance-transaction-search:focus-within { outline: 2px solid #7046b5; }
 .finance-transaction-search > span { font-size: 12px; white-space: nowrap; }
 .finance-entry-balance { flex: 0 0 auto; width: 100%; margin: 0 0 10px; text-align: left; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }

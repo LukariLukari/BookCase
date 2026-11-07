@@ -108,7 +108,7 @@ export default function FinanceExportDialog({ bookId, transactions, categories, 
           <div className="max-h-52 overflow-y-auto border-2 border-black bg-white">
             {visibleCategories.map(category => {
               const checked = selected.has(category.id);
-              return <label key={category.id} className="finance-export-category flex cursor-pointer items-center gap-3 border-b border-black/15 px-3 py-3 last:border-0" style={{ backgroundColor: `color-mix(in srgb, ${category.color} ${checked ? 24 : 14}%, #fffaf0)` }}>
+              return <label key={category.id} className="finance-export-category flex cursor-pointer items-center gap-3 border-b border-black/15 px-3 py-3 last:border-0" style={{ backgroundColor: `color-mix(in srgb, ${category.color} ${checked ? 24 : 14}%, var(--reps-paper, #fffaf0))` }}>
                 <input type="checkbox" checked={checked} onChange={() => setSelected(current => { const next = new Set(current); if (checked) next.delete(category.id); else next.add(category.id); return next; })} className="finance-export-checkbox" />
                 <Check aria-hidden="true" className="finance-export-tick" strokeWidth={3} />
                 <span className="min-w-0 flex-1 truncate text-sm font-bold">{category.name}</span>

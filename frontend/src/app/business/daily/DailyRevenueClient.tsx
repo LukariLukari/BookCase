@@ -9,7 +9,6 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleDollarSign,
-  ReceiptText,
   ShoppingBag,
   TrendingUp,
   RotateCcw,
@@ -310,12 +309,11 @@ export default function DailyRevenueClient() {
                   aria-expanded={showOrderList}
                   aria-controls="daily-order-details"
                   disabled={loading || refreshing || !stats || stats.date !== selectedDate}
-                  className="btn-push inline-flex flex-wrap items-center justify-center gap-2 px-4 py-3 disabled:opacity-50"
+                  className="daily-order-toggle ui-flat-control inline-flex cursor-pointer items-center justify-center gap-1.5 px-2 py-1 text-sm font-bold disabled:cursor-default disabled:opacity-50"
                 >
-                  <ReceiptText size={20} />
                   <span className="font-bold">Tổng đơn hàng:</span>
                   <b>{stats?.orderCount || 0} đơn</b>
-                  <ChevronDown size={18} className={showOrderList ? 'rotate-180' : ''} />
+                  <ChevronDown size={15} className={`transition-transform ${showOrderList ? 'rotate-180' : ''}`} />
                 </button>
 
                 {stats && stats.orderCount > 0 && (
