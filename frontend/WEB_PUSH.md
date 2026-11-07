@@ -28,6 +28,25 @@ CRON_SECRET=<chuỗi bí mật vừa tạo>
 
 Thay địa chỉ trong `WEB_PUSH_SUBJECT` bằng email thật của người vận hành, giữ tiền tố `mailto:`. Khóa riêng và `CRON_SECRET` chỉ đặt trên máy chủ, không dùng tiền tố `NEXT_PUBLIC_`, không đưa vào Git hoặc gửi cho người dùng. Giữ nguyên cặp khóa sau các lần deploy. Đổi khóa buộc mọi thiết bị bật đăng ký lại; đổi tên miền cũng cần đăng ký trên tên miền mới.
 
+### Nếu chạy trên Cloudflare Workers
+
+Worker dùng bốn secret `WEB_PUSH_PUBLIC_KEY`, `WEB_PUSH_PRIVATE_KEY`,
+`WEB_PUSH_SUBJECT`, `CRON_SECRET`; giữ nguyên các giá trị qua mỗi lần deploy.
+`wrangler.jsonc` đặt Cron Trigger `0 2 * * *` (09:00 giờ Việt Nam), và
+`cloudflare/worker.mjs` chuyển sự kiện lịch qua service binding nội bộ đến
+API nhắc hạn có kiểm tra secret. Không đặt secret trong URL.
+
+Chạy `npm.cmd run build:cloudflare` rồi `npm.cmd run deploy:cloudflare` để
+cập nhật mã và lịch. Nếu dùng `wrangler versions upload/deploy`, chạy thêm
+`npx.cmd wrangler triggers deploy` để đồng bộ lịch. Thay đổi cron có thể mất
+khoảng 15 phút để lan truyền. Gói Free vẫn có giới hạn CPU; kiểm tra lỗi lịch
+trong Workers Observability khi số thiết bị hoặc dữ liệu tăng.
+
+Sau khi chuyển tên miền, mở **Lịch gia hạn** trên địa chỉ Cloudflare, bật Web
+Push và bấm **Gửi thử** trên từng thiết bị. Đăng ký ở địa chỉ Vercel không tự
+chuyển sang địa chỉ Cloudflare. Trình duyệt/người dùng quyết định quyền nhận
+thông báo; máy chủ không thể tự cấp quyền.
+
 ### Nếu chạy trên Vercel
 
 1. Trong project Vercel, kiểm tra **Root Directory = `frontend`**, **Build Command = `npm run build`**. File cấu hình cron là `frontend/vercel.json`, nên thư mục gốc của project phải đúng.

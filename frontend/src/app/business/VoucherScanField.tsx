@@ -5,6 +5,7 @@ import axios from 'axios';
 import { ScanBarcode, Loader2, X } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import FinanceDialog from './expenses/FinanceDialog';
+import { validateVoucherBenefit, voucherBenefitLabel, type VoucherBenefit } from '@/lib/vouchers';
 
 function BarcodeCamera({ onRead }: { onRead: (value: string) => void }) {
   const video = useRef<HTMLVideoElement>(null);
@@ -39,7 +40,7 @@ function BarcodeCamera({ onRead }: { onRead: (value: string) => void }) {
   </div>;
 }
 
-export default function VoucherScanField({ value, onChange, onBusyChange }: { value: string; onChange: (code: string) => void; onBusyChange: (busy: boolean) => void }) {
+export default function VoucherScanField({ value, benefit, onChange, onBusyChange }: { value: string; benefit?: VoucherBenefit | null; onChange: (code: string, benefit?: VoucherBenefit | null) => void; onBusyChange: (busy: boolean) => void }) {
   const { token } = useAuth();
   const [input, setInput] = useState('');
   const [note, setNote] = useState('');
@@ -54,8 +55,9 @@ export default function VoucherScanField({ value, onChange, onBusyChange }: { va
     if (!token || !raw.trim() || submitting.current) return;
     submitting.current = true; setBusy(true); onBusyChange(true); setError('');
     try {
-      const response = await axios.post<{ code: string; note: string | null }>('/api/sales/vouchers/resolve', { value: raw }, { headers: { Authorization: `Bearer ${token}` } });
-      if (alive.current) { onChange(response.data.code); setNote(response.data.note || ''); setInput(''); }
+      const response = await axios.post<VoucherBenefit & { code: string; note: string | null }>('/api/sales/vouchers/resolve', { value: raw }, { headers: { Authorization: `Bearer ${token}` } });
+      if (validateVoucherBenefit(response.data)) { setError('Voucher chưa có quyền lợi. Hãy sửa voucher trước khi sử dụng.'); return; }
+      if (alive.current) { onChange(response.data.code, response.data); setNote(response.data.note || ''); setInput(''); }
     } catch (reason) {
       if (alive.current) setError(axios.isAxiosError<{ detail?: string }>(reason) ? reason.response?.data.detail || 'Không kiểm tra được voucher. Vui lòng thử lại.' : 'Không kiểm tra được voucher.');
     } finally { submitting.current = false; if (alive.current) { setBusy(false); onBusyChange(false); } }
@@ -68,7 +70,7 @@ export default function VoucherScanField({ value, onChange, onBusyChange }: { va
       <button type="button" disabled={busy || !input.trim()} onClick={() => void read(input)} className="btn-push px-2 text-xs">{busy ? <Loader2 size={16} className="animate-spin"/> : 'Áp dụng'}</button>
       <button type="button" disabled={busy} onClick={() => { setError(''); setOpen(true); }} aria-label="Quét barcode voucher" title="Quét barcode voucher" className="btn-push voucher-scan-button"><ScanBarcode size={22}/></button>
     </div>
-    {value && <div role="status" className="mt-2 text-sm"><div className="flex items-center justify-between gap-2"><b className="break-all text-green-700">Đã áp dụng: {value}</b><button type="button" disabled={busy} onClick={() => { onChange(''); setNote(''); setError(''); }} aria-label="Bỏ voucher" className="flex h-9 w-9 shrink-0 items-center justify-center"><X size={16}/></button></div>{note && <p className="break-words text-xs">{note}</p>}</div>}
+    {value && <div role="status" className="mt-2 text-sm"><div className="flex items-center justify-between gap-2"><b className="break-all text-green-700">Đã áp dụng: {value}</b><button type="button" disabled={busy} onClick={() => { onChange(''); setNote(''); setError(''); }} aria-label="Bỏ voucher" className="flex h-9 w-9 shrink-0 items-center justify-center"><X size={16}/></button></div>{benefit && <p className="mt-1 break-words text-sm font-bold">{voucherBenefitLabel(benefit)}</p>}{benefit?.benefitType==='custom'&&<p className="text-xs">Nhân viên thực hiện quyền lợi; không tự trừ kho quà tặng.</p>}{note && <p className="break-words text-xs">{note}</p>}</div>}
     {error && <p role="alert" className="mt-2 text-xs text-red-700">{error}</p>}
     {open && <FinanceDialog title="Quét barcode voucher" close={() => setOpen(false)}><BarcodeCamera onRead={onRead}/></FinanceDialog>}
   </div>;

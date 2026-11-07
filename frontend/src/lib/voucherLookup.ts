@@ -5,6 +5,6 @@ export function findVoucher(client: Pick<PrismaClient, 'businessVoucher'>, userI
   const text = value.trim();
   return client.businessVoucher.findFirst({
     where: { userId, ...(/^BV:/i.test(text) ? { id: text.slice(3) } : { code: normalizeVoucherCode(text) }) },
-    select: { id: true, code: true, note: true },
+    select: { id: true, code: true, note: true, benefitType: true, benefitValue: true, benefitText: true },
   });
 }

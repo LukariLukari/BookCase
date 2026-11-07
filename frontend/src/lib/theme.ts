@@ -39,7 +39,7 @@ export function ensureContrast(seed: string, surfaces: string[], minimum = 4.5):
 }
 
 export const darkSurfaces = [
-  '#000000', '#050505', '#0d0d0d', '#161616',
+  '#121418', '#1c2026', '#272c35', '#333a46',
   '#244534', '#4a2b2a', '#493857', '#403324',
 ];
 export const darkPalette = {

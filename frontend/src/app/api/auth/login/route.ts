@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { prisma } from '@/lib/db';
+import { prisma, getDatabaseSource } from '@/lib/db';
 import { signJwt } from '@/lib/auth';
 
 export async function POST(request: Request) {
@@ -29,13 +29,13 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Login error:', error);
-    const hasDatabase = Boolean(process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING);
+    const hasDatabase = Boolean(getDatabaseSource());
     const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : undefined;
     const detail = !hasDatabase
-      ? 'Vercel chưa được gắn PostgreSQL. Hãy thêm DATABASE_URL trong Environment Variables.'
+      ? 'Máy chủ chưa cấu hình kết nối PostgreSQL.'
       : code === 'P2021'
-        ? 'Database chưa có bảng dữ liệu. Redeploy để hệ thống tự đồng bộ Prisma schema.'
-        : 'Vercel có cấu hình database nhưng không thể kết nối. Kiểm tra URL và quyền truy cập PostgreSQL.';
+        ? 'Database chưa có bảng dữ liệu cần thiết. Cần đồng bộ Prisma schema.'
+        : 'Máy chủ không thể kết nối database. Kiểm tra cấu hình và quyền truy cập PostgreSQL.';
     return NextResponse.json({ detail, code: code || 'DATABASE_CONNECTION_FAILED' }, { status: 503 });
   }
 }

@@ -3,10 +3,10 @@ import { makeVoucherBarcode } from '@/lib/voucherBarcode';
 import { getRequestUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { createAutomaticBusinessBackup } from '@/lib/businessBackup';
-import { normalizeVoucherCode, validateVoucherCode } from '@/lib/vouchers';
+import { normalizeVoucherCode, validateVoucherCode, validateVoucherBenefit, type VoucherBenefit } from '@/lib/vouchers';
 
 export const runtime = 'nodejs';
-const select = { id: true, code: true, note: true, createdAt: true } as const;
+const select = { id: true, code: true, note: true, createdAt: true, benefitType: true, benefitValue: true, benefitText: true } as const;
 const deny = () => NextResponse.json({ detail: 'Phiên đăng nhập không hợp lệ.' }, { status: 401 });
 export async function GET(request: Request) {
   const user = getRequestUser(request);
@@ -24,13 +24,39 @@ export async function POST(request: Request) {
   const code = normalizeVoucherCode(body.code);
   const error = validateVoucherCode(code);
   const note = 'note' in body && typeof body.note === 'string' ? body.note.trim() : '';
+  const benefit = benefitInput(body);
+  const benefitError = validateVoucherBenefit(benefit);
+  if (benefitError) return NextResponse.json({ detail: benefitError }, { status: 400 });
   if (error || note.length > 500) return NextResponse.json({ detail: error || 'Ghi chú tối đa 500 ký tự.' }, { status: 400 });
   try {
-    const voucher = await prisma.businessVoucher.create({ data: { userId: user.id, code, note: note || null }, select });
+    const voucher = await prisma.businessVoucher.create({ data: { userId: user.id, code, note: note || null, ...benefit }, select });
     await createAutomaticBusinessBackup(user.id, 'Sau khi tạo voucher');
     return NextResponse.json({ ...voucher, barcodeDataUrl: await makeVoucherBarcode(voucher.id) }, { status: 201 });
   } catch (reason) {
     if (reason && typeof reason === 'object' && 'code' in reason && reason.code === 'P2002') return NextResponse.json({ detail: 'Mã voucher này đã tồn tại trong tài khoản của bạn.' }, { status: 409 });
     throw reason;
   }
+}
+
+function benefitInput(body: object): VoucherBenefit {
+  const value = body as Record<string, unknown>;
+  return { benefitType: value.benefitType as VoucherBenefit['benefitType'],
+    benefitValue: value.benefitType === 'custom' ? 0 : value.benefitValue as number,
+    benefitText: value.benefitType === 'custom' && typeof value.benefitText === 'string' ? value.benefitText.trim() : null };
+}
+
+export async function PATCH(request: Request) {
+  const user = getRequestUser(request);
+  if (!user) return deny();
+  let body: Record<string, unknown>;
+  try { body = await request.json(); } catch { return NextResponse.json({ detail: 'Dữ liệu không hợp lệ.' }, { status: 400 }); }
+  if (!body || typeof body !== 'object' || typeof body.id !== 'string') return NextResponse.json({ detail: 'Voucher không hợp lệ.' }, { status: 400 });
+  const benefit = benefitInput(body), error = validateVoucherBenefit(benefit);
+  const note = typeof body.note === 'string' ? body.note.trim() : '';
+  if (error || note.length > 500) return NextResponse.json({ detail: error || 'Ghi chú tối đa 500 ký tự.' }, { status: 400 });
+  const owned = await prisma.businessVoucher.findFirst({ where: { id: body.id, userId: user.id }, select: { id: true } });
+  if (!owned) return NextResponse.json({ detail: 'Không tìm thấy voucher.' }, { status: 404 });
+  const voucher = await prisma.businessVoucher.update({ where: { id: owned.id }, data: { ...benefit, note: note || null }, select });
+  await createAutomaticBusinessBackup(user.id, 'Sau khi sửa quyền lợi voucher');
+  return NextResponse.json({ ...voucher, barcodeDataUrl: await makeVoucherBarcode(voucher.id) });
 }

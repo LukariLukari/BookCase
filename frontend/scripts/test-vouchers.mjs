@@ -18,12 +18,13 @@ function load(file, imports = {}) {
 const util = load('src/lib/vouchers.ts');
 const barcode = load('src/lib/voucherBarcode.ts', { 'bwip-js/node': bwipjs });
 const lookup = load('src/lib/voucherLookup.ts', { './vouchers': util });
-const request = (method = 'GET', body, owner = 'alice') => new Request('https://test.local/api/sales/vouchers', { method, headers: owner ? { authorization: `Bearer ${owner}` } : {}, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+const request = (method = 'GET', body, owner = 'alice') => new Request('https://test.local/api/sales/vouchers', { method, headers: owner ? { authorization: `Bearer ${owner}` } : {}, ...(body === undefined ? {} : { body: JSON.stringify(body && typeof body==='object' && 'code' in body ? {benefitType:'amount',benefitValue:5000,...body} : body) }) });
 
 function fixture() {
   const rows = [], barcodeInputs = [], backups = [];
   const prisma = { businessVoucher: {
-    findFirst: async ({where}) => {const row=rows.find(row=>row.userId===where.userId && (where.id ? row.id===where.id : row.code===where.code));return row?{id:row.id,code:row.code,note:row.note}:null;},
+    findFirst: async ({where}) => {const row=rows.find(row=>row.userId===where.userId && (where.id ? row.id===where.id : row.code===where.code));return row?{id:row.id,code:row.code,note:row.note,benefitType:row.benefitType,benefitValue:row.benefitValue,benefitText:row.benefitText}:null;},
+    update: async ({where,data}) => { const row=rows.find(row=>row.id===where.id);Object.assign(row,data);const {userId,...result}=row;return result; },
     findMany: async ({ where }) => rows.filter(row => row.userId === where.userId).map(({ userId, ...row }) => row),
     create: async ({ data }) => {
       if (rows.some(row => row.userId === data.userId && row.code === data.code)) throw { code: 'P2002' };
@@ -113,4 +114,22 @@ test('Voucher lookup accepts manual codes, rejects unknown and foreign barcodes,
   assert.equal((await f.resolve.POST(request('POST',{value:'BV:missing'}))).status,404);
   assert.equal((await f.resolve.POST(request('POST',{value:'CAMON'},null))).status,401);
   for(const value of ['',null,123,'x'.repeat(129)])assert.equal((await f.resolve.POST(request('POST',{value}))).status,400);
+});
+
+test('Benefits reject invalid discounts and edits preserve the barcode and account ownership', async () => {
+  const f=fixture();
+  for(const benefit of [
+    {benefitType:'none'}, {benefitType:'amount',benefitValue:-1},
+    {benefitType:'amount',benefitValue:1.5}, {benefitType:'percent',benefitValue:101},
+    {benefitType:'percent',benefitValue:0}, {benefitType:'custom',benefitText:''},
+  ]) assert.equal((await f.route.POST(request('POST',{code:'INVALID',...benefit}))).status,400);
+  const first=await f.route.POST(request('POST',{code:'GIFT',benefitType:'custom',benefitText:'Tặng một ly cà phê'})).then(r=>r.json());
+  const patch={id:first.id,benefitType:'percent',benefitValue:10,note:'Khách thân thiết'};
+  assert.equal((await f.route.PATCH(request('PATCH',patch,'bob'))).status,404);
+  assert.equal((await f.route.PATCH(request('PATCH',patch,null))).status,401);
+  const edited=await f.route.PATCH(request('PATCH',patch)).then(r=>r.json());
+  assert.equal(edited.code,first.code);
+  assert.equal(edited.barcodeDataUrl,first.barcodeDataUrl);
+  assert.equal(edited.benefitType,'percent');
+  assert.equal(edited.benefitValue,10);
 });

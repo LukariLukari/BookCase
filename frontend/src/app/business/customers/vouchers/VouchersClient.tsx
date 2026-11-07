@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Check, Copy, Download, Loader2, Plus, Search, Ticket } from 'lucide-react';
+import { Check, Copy, Download, Loader2, Plus, Search, Ticket, Pencil } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
 import CustomersNav from '../CustomersNav';
-import { normalizeVoucherCode, validateVoucherCode } from '@/lib/vouchers';
+import { normalizeVoucherCode, validateVoucherCode, validateVoucherBenefit, voucherBenefitLabel, type VoucherBenefit } from '@/lib/vouchers';
 
-type Voucher = { id: string; code: string; note: string | null; createdAt: string; barcodeDataUrl: string };
+type Voucher = VoucherBenefit & { id: string; code: string; note: string | null; createdAt: string; barcodeDataUrl: string };
 const errorText = (reason: unknown, fallback: string) => axios.isAxiosError<{ detail?: string }>(reason) ? reason.response?.data.detail || fallback : fallback;
 
 export default function VouchersClient() {
@@ -19,6 +19,10 @@ export default function VouchersClient() {
   const [reload, setReload] = useState(0);
   const [code, setCode] = useState('');
   const [note, setNote] = useState('');
+  const [editing, setEditing] = useState<string | null>(null);
+  const [benefitType, setBenefitType] = useState<VoucherBenefit['benefitType']>('amount');
+  const [benefitValue, setBenefitValue] = useState('');
+  const [benefitText, setBenefitText] = useState('');
   const [search, setSearch] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -40,12 +44,15 @@ export default function VouchersClient() {
     const normalized = normalizeVoucherCode(code);
     const invalid = validateVoucherCode(normalized);
     if (invalid) { setError(invalid); return; }
+    const benefit: VoucherBenefit = { benefitType, benefitValue: benefitType === 'custom' ? 0 : Number(benefitValue), benefitText: benefitType === 'custom' ? benefitText.trim() : null };
+    const invalidBenefit = validateVoucherBenefit(benefit);
+    if (invalidBenefit) { setError(invalidBenefit); return; }
     setSaving(true); setError(''); setMessage('');
     try {
-      const response = await axios.post<Voucher>('/api/sales/vouchers', { code: normalized, note }, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.request<Voucher>({ url: '/api/sales/vouchers', method: editing ? 'PATCH' : 'POST', data: { id: editing, code: normalized, note, ...benefit }, headers: { Authorization: `Bearer ${token}` } });
       setVouchers(previous => [response.data, ...previous.filter(voucher => voucher.id !== response.data.id)]);
-      setCode(''); setNote(''); setSearch('');
-      setMessage(`Đã tạo voucher ${response.data.code} và barcode không hết hạn.`);
+      setCode(''); setNote(''); setSearch(''); setEditing(null); setBenefitValue(''); setBenefitText('');
+      setMessage(`Đã lưu voucher ${response.data.code}: ${voucherBenefitLabel(response.data)}.`);
     } catch (reason) { setError(errorText(reason, 'Không tạo được voucher. Vui lòng thử lại.')); }
     finally { setSaving(false); }
   };
@@ -67,11 +74,15 @@ export default function VouchersClient() {
       </header>
       <CustomersNav view="vouchers"/>
       <section className="card-push p-4 md:p-6" aria-labelledby="create-voucher-heading">
-        <h2 id="create-voucher-heading" className="voucher-section-title">Tạo voucher</h2>
+        <h2 id="create-voucher-heading" className="voucher-section-title">{editing ? 'Sửa quyền lợi voucher' : 'Tạo voucher'}</h2>
         <form onSubmit={save} className="mt-4 grid gap-4 md:grid-cols-[1fr_1fr_auto] md:items-end">
-          <label className="block min-w-0"><span className="mb-2 block text-sm font-bold">Mã voucher</span><input required autoCapitalize="characters" autoComplete="off" spellCheck={false} value={code} onChange={event => { setCode(event.target.value.toUpperCase()); setError(''); }} maxLength={64} disabled={saving} placeholder="VD: CAMON2026" aria-describedby="voucher-code-help" className="input-push h-12 w-full min-w-0 px-3"/></label>
+          <label className="block min-w-0"><span className="mb-2 block text-sm font-bold">Mã voucher</span><input required autoCapitalize="characters" autoComplete="off" spellCheck={false} value={code} onChange={event => { setCode(event.target.value.toUpperCase()); setError(''); }} maxLength={64} disabled={saving || !!editing} placeholder="VD: CAMON2026" aria-describedby="voucher-code-help" className="input-push h-12 w-full min-w-0 px-3"/></label>
           <label className="block min-w-0"><span className="mb-2 block text-sm font-bold">Ghi chú (không bắt buộc)</span><input value={note} onChange={event => setNote(event.target.value)} maxLength={500} disabled={saving} placeholder="Ưu đãi, điều kiện sử dụng..." className="input-push h-12 w-full min-w-0 px-3"/></label>
-          <button type="submit" disabled={saving || loading || !!loadError} className="btn-push-primary flex h-12 items-center justify-center gap-2 px-4 text-sm font-bold disabled:opacity-50">{saving ? <Loader2 size={18} className="animate-spin"/> : <Plus size={18}/>}Tạo voucher</button>
+          <button type="submit" disabled={saving || loading || !!loadError} className="btn-push-primary flex h-12 items-center justify-center gap-2 px-4 text-sm font-bold disabled:opacity-50">{saving ? <Loader2 size={18} className="animate-spin"/> : <Plus size={18}/>}{editing ? 'Lưu quyền lợi' : 'Tạo voucher'}</button>
+          <label className="block min-w-0"><span className="mb-2 block text-sm font-bold">Loại quyền lợi</span><select value={benefitType} disabled={saving} onChange={e => setBenefitType(e.target.value as VoucherBenefit['benefitType'])} className="input-push h-12 w-full px-3"><option value="amount">Giảm số tiền (đ)</option><option value="percent">Giảm phần trăm (%)</option><option value="custom">Quyền lợi khác / tặng quà</option></select></label>
+          {benefitType === 'custom' ? <label className="block min-w-0 md:col-span-2"><span className="mb-2 block text-sm font-bold">Nội dung quyền lợi</span><input required value={benefitText} onChange={e => setBenefitText(e.target.value)} disabled={saving} maxLength={500} placeholder="VD: Tặng 1 ly cà phê" className="input-push h-12 w-full px-3"/></label> : <label className="block min-w-0"><span className="mb-2 block text-sm font-bold">{benefitType === 'percent' ? 'Phần trăm giảm' : 'Số tiền giảm (đ)'}</span><input required type="number" min="1" max={benefitType === 'percent' ? 100 : 2147483647} step="1" value={benefitValue} onChange={e => setBenefitValue(e.target.value)} disabled={saving} className="input-push h-12 w-full px-3"/></label>}
+          <p className="text-xs md:col-span-3">{benefitType === 'custom' ? 'Nhân viên thực hiện quyền lợi ghi trên đơn; hệ thống không tự trừ kho quà tặng.' : 'Tự giảm trên tiền hàng, không gồm phí ship. Không cộng dồn với giảm thủ công; mức giảm tối đa bằng tiền hàng.'}</p>
+          {editing && <button type="button" disabled={saving} onClick={() => { setEditing(null); setCode(''); setNote(''); setBenefitType('amount'); setBenefitValue(''); setBenefitText(''); setError(''); }} className="btn-push px-3 py-2 text-sm">Hủy sửa</button>}
           <p id="voucher-code-help" className="text-xs md:col-span-3">Chữ được tự động viết hoa. Dùng chữ, số, dấu - hoặc _, tối đa 64 ký tự.</p>
         </form>
         {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
@@ -91,10 +102,12 @@ export default function VouchersClient() {
             </div>
             <div className="min-w-0 flex-1">
               <b className="voucher-code select-all">{voucher.code}</b>
+              <p className={`mt-2 text-sm font-bold ${voucher.benefitType === 'none' ? 'text-amber-700' : 'text-green-700'}`}>{voucherBenefitLabel(voucher)}</p>
               <p className="mt-2 flex items-center gap-1 text-xs text-green-700"><Check size={15}/>Không hết hạn</p>
               {voucher.note && <p className="mt-2 break-words text-sm">{voucher.note}</p>}
               <p className="mt-2 text-xs">Ngày tạo: {new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short' }).format(new Date(voucher.createdAt))}</p>
               <div className="mt-4 flex flex-wrap gap-2">
+                <button type="button" onClick={() => { setEditing(voucher.id); setCode(voucher.code); setNote(voucher.note || ''); setBenefitType(voucher.benefitType === 'none' ? 'amount' : voucher.benefitType); setBenefitValue(voucher.benefitValue ? String(voucher.benefitValue) : ''); setBenefitText(voucher.benefitText || ''); setError(''); document.getElementById('create-voucher-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} className="voucher-action btn-push"><Pencil size={16}/>Sửa quyền lợi</button>
                 <button type="button" onClick={() => void copy(voucher.code)} className="voucher-action btn-push"><Copy size={16}/>Sao chép mã</button>
                 <a href={voucher.barcodeDataUrl} download={`voucher-${voucher.code}.png`} className="voucher-action btn-push"><Download size={16}/>Tải barcode</a>
               </div>
