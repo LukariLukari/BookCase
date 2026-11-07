@@ -11,6 +11,7 @@
     "test:sounds": "node scripts/test-sound-effects.mjs",
     "test:finance": "node scripts/test-finance-deletion.mjs && node scripts/test-finance-updates.mjs && node scripts/test-finance-queue.mjs",
     "test:subscriptions": "node scripts/test-subscriptions.mjs",
+    "test:vouchers": "node scripts/test-vouchers.mjs",
     "test:push": "node scripts/test-web-push.mjs",
     "push:keys": "node scripts/generate-push-keys.mjs",
     "postinstall": "prisma generate"

@@ -214,7 +214,7 @@ test('Overlapping renewals, invalid state updates and malformed requests are rej
 function backupFixture() {
   const stores = {};
   const db = {};
-  for (const model of ['businessInventoryBatch', 'businessProduct', 'businessTransaction', 'businessLedger', 'businessCustomer', 'businessStockReceipt', 'businessStockReceiptItem', 'businessOrder', 'businessOrderItem', 'businessExpense', 'businessOrderPayment', 'businessOrderStatusHistory', 'businessInventoryMovement', 'customerSubscription', 'subscriptionApp', 'businessDataBackup']) {
+  for (const model of ['businessInventoryBatch', 'businessProduct', 'businessTransaction', 'businessLedger', 'businessCustomer', 'businessStockReceipt', 'businessStockReceiptItem', 'businessOrder', 'businessOrderItem', 'businessExpense', 'businessOrderPayment', 'businessOrderStatusHistory', 'businessInventoryMovement', 'customerSubscription', 'subscriptionApp', 'businessVoucher', 'businessDataBackup']) {
     stores[model] = [];
     db[model] = {
       findMany: async ({ where, skip } = {}) => stores[model].filter(row => !where?.userId || row.userId === where.userId).slice(skip || 0),
@@ -229,6 +229,7 @@ function backupFixture() {
   const subscription = { id: 'sub-alice', userId: 'alice', ...valid(), customerId: 'customer-alice', status: 'active', startDate: new Date('2026-10-30T00:00:00Z'), endDate: new Date('2026-11-30T00:00:00Z'), cancelDate: new Date('2026-11-30T00:00:00Z') };
   stores.customerSubscription.push(subscription, { ...subscription, id: 'sub-bob', userId: 'bob', customerId: null });
   stores.subscriptionApp.push({ id: 'app-alice', userId: 'alice', name: 'Spotify', createdAt: new Date() }, { id: 'app-bob', userId: 'bob', name: 'YouTube', createdAt: new Date() });
+  stores.businessVoucher.push({ id: 'voucher-alice', userId: 'alice', code: 'CAMON', note: 'Khách thân thiết', createdAt: new Date() }, { id: 'voucher-bob', userId: 'bob', code: 'CAMON', createdAt: new Date() });
   return { backup, db, stores };
 }
 test('Business backup round-trip preserves subscriptions and only affects its owner', async () => {
@@ -238,6 +239,9 @@ test('Business backup round-trip preserves subscriptions and only affects its ow
   assert.equal(payload.data.subscriptions[0].id, 'sub-alice');
   assert.equal(payload.data.subscriptionApps.length, 1);
   assert.equal(payload.data.subscriptionApps[0].name, 'Spotify');
+  assert.equal(payload.data.vouchers.length, 1);
+  assert.equal(payload.data.vouchers[0].code, 'CAMON');
+  stores.businessVoucher[0].code = 'CHANGED';
   stores.customerSubscription[0].account = 'changed@example.com';
   await backup.restoreBusinessBackup('alice', payload);
   assert.equal(stores.customerSubscription.length, 2);
@@ -248,17 +252,24 @@ test('Business backup round-trip preserves subscriptions and only affects its ow
   assert.equal(stores.customerSubscription.find(row => row.userId === 'bob').id, 'sub-bob');
   assert.equal(stores.subscriptionApp.find(row => row.userId === 'alice').name, 'Spotify');
   assert.equal(stores.subscriptionApp.find(row => row.userId === 'bob').name, 'YouTube');
+  assert.equal(stores.businessVoucher.find(row => row.userId === 'alice').code, 'CAMON');
+  assert.equal(stores.businessVoucher.find(row => row.userId === 'alice').note, 'Khách thân thiết');
+  assert.ok(stores.businessVoucher.find(row => row.userId === 'alice').createdAt instanceof Date);
+  assert.equal(stores.businessVoucher.find(row => row.userId === 'bob').id, 'voucher-bob');
 });
 test('Older v2 backups without subscription data can still be restored', async () => {
   const { backup, db, stores } = backupFixture();
   const legacy = await backup.buildBusinessBackup(db, 'alice');
   delete legacy.data.subscriptions;
   delete legacy.data.subscriptionApps;
+  delete legacy.data.vouchers;
   await backup.restoreBusinessBackup('alice', legacy);
   assert.equal(stores.customerSubscription.filter(row => row.userId === 'alice').length, 0);
   assert.equal(stores.customerSubscription.filter(row => row.userId === 'bob').length, 1);
   assert.equal(stores.subscriptionApp.filter(row => row.userId === 'alice').length, 0);
   assert.equal(stores.subscriptionApp.filter(row => row.userId === 'bob').length, 1);
+  assert.equal(stores.businessVoucher.filter(row => row.userId === 'alice').length, 0);
+  assert.equal(stores.businessVoucher.filter(row => row.userId === 'bob').length, 1);
 });
 
 test('App catalog persists additions without a count limit, deduplicates and isolates accounts', async () => {

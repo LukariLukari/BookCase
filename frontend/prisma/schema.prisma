@@ -23,6 +23,7 @@ model User {
   orders              BusinessOrder[]
   expenses            BusinessExpense[]
   customers           BusinessCustomer[]
+  vouchers            BusinessVoucher[]
   orderPayments       BusinessOrderPayment[]
   statusHistory       BusinessOrderStatusHistory[]
   stockMovements      BusinessInventoryMovement[]
@@ -241,6 +242,19 @@ model BusinessCustomer {
 
   @@unique([userId, phone])
   @@index([userId, name])
+}
+
+model BusinessVoucher {
+  id        String   @id @default(uuid())
+  userId    String
+  code      String
+  note      String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, code])
+  @@index([userId, createdAt])
 }
 
 model CustomerSubscription {
