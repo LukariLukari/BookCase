@@ -2582,9 +2582,10 @@ dialog.finance-fullscreen-dialog {
 .finance-entry-toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; border-bottom: 2px solid var(--pixel-ink-dark); align-items: center; }
 .finance-entry-type { flex: 0 0 auto; min-width: 44px; height: 44px; padding: 0 8px; border: 2px solid var(--pixel-ink-dark); font-size: 16px !important; font-weight: 900; background: var(--pixel-panel-light); }
 .finance-entry-transfer > svg { width: 24px !important; height: 24px !important; }
-.finance-entry-account { min-width: 0; max-width: 160px; flex: 0 1 auto; }
+.finance-entry-account { min-width: 0; width: 128px; max-width: calc(100% - 150px); flex: 0 0 128px; }
 .finance-entry-date { flex: 0 0 auto; }
 .finance-entry-toolbar .finance-picker-trigger-compact { width: auto; max-width: 100%; min-height: 44px; height: 44px; padding: 0 6px; gap: 5px; font-size: 12px !important; }
+.finance-entry-toolbar .finance-entry-account .finance-picker-trigger { width: 100%; }
 .finance-entry-income[aria-pressed="true"] { background: #8ee0a8; }
 .finance-entry-expense[aria-pressed="true"] { background: #ff9f87; }
 .finance-entry-type[aria-pressed="true"] { box-shadow: inset 0 -4px 0 var(--pixel-ink-dark); }
