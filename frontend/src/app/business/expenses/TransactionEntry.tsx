@@ -37,7 +37,6 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
   const currency = account?.currency || 'VND';
   const amount = Number(form.amount) || 0;
   const formatBalance = (balance: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency, maximumFractionDigits: ['VND', 'JPY'].includes(currency) ? 0 : 2 }).format(balance);
-  const destination = accounts.find(account => account.id === transfer?.destinationAccountId);
   const delta = !transfer && form.type === 'income' ? amount : -amount;
   const key = (value: string) => <button key={value} type="button" data-sound="input" onClick={() => press(value)} aria-label={value} className="finance-entry-key">{value}</button>;
 
@@ -52,6 +51,9 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
     <form className="finance-entry" onSubmit={event => { event.preventDefault(); save(true); }}>
       <fieldset disabled={saving} className="finance-entry-fields">
         <div className="finance-entry-main">
+          {account && <div className="finance-entry-balance" aria-label={`Số dư ${account.name}`}>
+            <span>Số dư: </span><strong className={account.balance + delta < 0 ? 'text-red-700' : 'text-green-700'}>{formatBalance(account.balance + delta)}</strong>
+          </div>}
           <div className="finance-entry-meta">
             {transfer ? <label className="block"><span className="mb-2 block text-xs font-bold">Đến khoản tiền</span><FinanceSelect label="Chọn tài khoản nhận" placeholder="Chọn tài khoản cùng tiền tệ" value={transfer.destinationAccountId} onChange={transfer.changeDestination} options={accounts.filter(account => account.id !== form.accountId && account.currency === currency).map(account => ({ value: account.id, label: `${account.name} · ${account.currency}` }))}/></label> : <><div ref={categoryScroller} className="finance-entry-categories" role="group" aria-label={`Danh mục ${form.type === 'income' ? 'thu' : 'chi'}`}>
               <div className="finance-entry-category-track">
@@ -65,11 +67,6 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
           <div className="finance-entry-amount">
             <output aria-label="Số tiền" style={{ fontSize: `clamp(24px, ${Math.min(14, 145 / displayedAmount.length)}vw, 80px)` }}>{displayedAmount}</output>
             <span>{currency}</span>
-            {account && <div className="finance-entry-balance" aria-label="Dự tính số dư">
-              <p>{account.name} · Số dư hiện tại: <strong>{formatBalance(account.balance)}</strong></p>
-              <p>Sau {transfer ? 'chuyển tiền' : form.type === 'income' ? 'thu' : 'chi'}: <strong className={account.balance + delta < 0 ? 'text-red-700' : 'text-green-700'}>{formatBalance(account.balance + delta)}</strong></p>
-              {transfer && destination && <p>{destination.name}: {formatBalance(destination.balance)} → <strong>{formatBalance(destination.balance + amount)}</strong></p>}
-            </div>}
           </div>
           <div className="finance-entry-feedback">
             {error ? <p role="alert">{error}</p> : message ? <p role="status">{message}</p> : null}
