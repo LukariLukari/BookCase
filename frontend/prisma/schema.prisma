@@ -204,6 +204,7 @@ model BusinessOrder {
   shippingFee     Int      @default(0)
   shippingCost    Int      @default(0)
   discount        Int      @default(0)
+  voucherCode     String?
   otherFee        Int      @default(0)
   paymentStatus   String   @default("paid")
   status          String   @default("confirmed")

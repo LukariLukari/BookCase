@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomInt } from 'crypto';
 import { prisma } from '@/lib/db';
+import { findVoucher } from '@/lib/voucherLookup';
 import { verifyJwt } from '@/lib/auth';
 import { createAutomaticBusinessBackup, createBusinessBackup, restoreBusinessBackup, clearBusinessAccountData } from '@/lib/businessBackup';
 
@@ -26,7 +27,7 @@ async function session(request: NextRequest): Promise<Session | null> {
 const productJson = (p: any) => ({ id:p.id, name:p.name, sku:p.sku, category:p.category, image_url:p.imageUrl, selling_price:p.sellingPrice, unit_cost:p.unitCost, stock_quantity:p.stockQuantity, track_stock:p.trackStock!==false, batch_id:p.batchId, batch_name:p.batch?.name||null, social_link:p.socialLink, supplier_info:p.supplierInfo, customer_info:p.customerInfo, notes:p.notes, is_active:p.isActive, created_at:p.createdAt, updated_at:p.updatedAt });
 const ledgerJson = (l: any) => { const orders=(l.orders||[]).filter((o:any)=>o.status!=='cancelled'); const revenue=orders.reduce((s:number,o:any)=>s+orderTotals(o).total,0); const expenses=(l.expenses||[]).reduce((s:number,e:any)=>s+e.amount,0); return { id:l.id,user_id:l.userId,name:l.name,month:l.month,opening_cash:l.openingCash,note:l.note,is_closed:l.isClosed,order_count:orders.length,revenue,profit:orders.reduce((s:number,o:any)=>s+orderTotals(o).profit,0)-expenses,created_at:l.createdAt }; };
 function orderTotals(o:any){const subtotal=(o.items||[]).reduce((s:number,i:any)=>s+i.quantity*i.unitPrice,0),capital=(o.items||[]).reduce((s:number,i:any)=>s+i.quantity*i.unitCost,0),total=subtotal+o.shippingFee-o.discount,profit=total-capital-o.shippingCost-o.otherFee;return{subtotal,capital_cost:capital,total,profit}}
-const orderJson=(o:any)=>({...{id:o.id,user_id:o.userId,ledger_id:o.ledgerId,customer_id:o.customerId,code:o.code,customer_name:o.customerName,customer_contact:o.customerContact,social_link:o.socialLink,shipping_fee:o.shippingFee,shipping_cost:o.shippingCost,discount:o.discount,other_fee:o.otherFee,payment_status:o.paymentStatus,status:o.status,note:o.note,ordered_at:o.orderedAt,created_at:o.createdAt},...orderTotals(o),item_count:(o.items||[]).reduce((s:number,i:any)=>s+i.quantity,0),items:(o.items||[]).map((i:any)=>({id:i.id,product_id:i.productId,product_name:i.productName,quantity:i.quantity,unit_price:i.unitPrice,unit_cost:i.unitCost}))});
+const orderJson=(o:any)=>({...{id:o.id,user_id:o.userId,ledger_id:o.ledgerId,customer_id:o.customerId,voucher_code:o.voucherCode,code:o.code,customer_name:o.customerName,customer_contact:o.customerContact,social_link:o.socialLink,shipping_fee:o.shippingFee,shipping_cost:o.shippingCost,discount:o.discount,other_fee:o.otherFee,payment_status:o.paymentStatus,status:o.status,note:o.note,ordered_at:o.orderedAt,created_at:o.createdAt},...orderTotals(o),item_count:(o.items||[]).reduce((s:number,i:any)=>s+i.quantity,0),items:(o.items||[]).map((i:any)=>({id:i.id,product_id:i.productId,product_name:i.productName,quantity:i.quantity,unit_price:i.unitPrice,unit_cost:i.unitCost}))});
 const receiptJson=(r:any)=>({id:r.id,user_id:r.userId,code:r.code,batch_id:r.batchId,batch_name:r.batch?.name||null,supplier_name:r.supplierName,extra_cost:r.extraCost,note:r.note,received_at:r.receivedAt,created_at:r.createdAt,total_quantity:(r.items||[]).reduce((s:number,i:any)=>s+i.quantity,0),total_cost:(r.items||[]).reduce((s:number,i:any)=>s+i.quantity*i.unitCost,0)+r.extraCost,items:(r.items||[]).map((i:any)=>({id:i.id,product_id:i.productId,product_name:i.product?.name||'',quantity:i.quantity,unit_cost:i.unitCost}))});
 const batchJson=(b:any)=>({id:b.id,name:b.name,product_count:(b.products||[]).filter((p:any)=>p.isActive&&p.trackStock!==false).length,stock_quantity:(b.products||[]).filter((p:any)=>p.isActive&&p.trackStock!==false).reduce((s:number,p:any)=>s+p.stockQuantity,0),created_at:b.createdAt});
 
@@ -145,6 +146,12 @@ async function handle(request:NextRequest, context:RouteContext<'/api/backend/[.
 
 async function handleOrdersWithCustomers(request:NextRequest,user:Session,id:string|undefined,body:any){
  const method=request.method;
+ if((method==='POST'||method==='PUT')&&body.voucher_code!=null){
+  if(typeof body.voucher_code!=='string'||!body.voucher_code.trim()||body.voucher_code.length>128)return bad('Mã voucher không hợp lệ.');
+  const voucher=await findVoucher(prisma,user.id,body.voucher_code);
+  if(!voucher)return bad('Voucher không tồn tại trong tài khoản của bạn.',400);
+  body.voucher_code=voucher.code;
+ }
  if(method==='GET'){
   const ledger=request.nextUrl.searchParams.get('ledger_id'),limit=n(request.nextUrl.searchParams.get('limit'))||100;
   const rows=await prisma.businessOrder.findMany({where:{userId:user.id,...(ledger?{ledgerId:ledger}:{})},include:{items:true},orderBy:{orderedAt:'desc'},take:limit});
@@ -156,7 +163,7 @@ async function handleOrdersWithCustomers(request:NextRequest,user:Session,id:str
   const row=await prisma.$transaction(async tx=>{
    const customer=await resolveOrderCustomer(tx,user.id,body),lines=await buildOrderLines(tx,user.id,items);
    const count=await tx.businessOrder.count({where:{userId:user.id}});
-   return tx.businessOrder.create({data:{userId:user.id,ledgerId:ledger.id,customerId:customer.id,code:`DH-${String(count+1).padStart(4,'0')}`,customerName:String(body.customer_name||''),customerContact:body.customer_contact||null,socialLink:body.social_link||null,shippingFee:n(body.shipping_fee),shippingCost:n(body.shipping_cost),discount:n(body.discount),otherFee:n(body.other_fee),paymentStatus:body.payment_status||'paid',note:body.note||null,orderedAt:safePastDate(body.ordered_at),items:{create:lines}},include:{items:true}});
+   return tx.businessOrder.create({data:{userId:user.id,ledgerId:ledger.id,customerId:customer.id,code:`DH-${String(count+1).padStart(4,'0')}`,customerName:String(body.customer_name||''),customerContact:body.customer_contact||null,socialLink:body.social_link||null,shippingFee:n(body.shipping_fee),shippingCost:n(body.shipping_cost),discount:n(body.discount),voucherCode:body.voucher_code||null,otherFee:n(body.other_fee),paymentStatus:body.payment_status||'paid',note:body.note||null,orderedAt:safePastDate(body.ordered_at),items:{create:lines}},include:{items:true}});
   });
   return json(orderJson(row));
  }
@@ -167,7 +174,7 @@ async function handleOrdersWithCustomers(request:NextRequest,user:Session,id:str
    await restoreOrderStock(tx,user.id,old.items);
    const customer=await resolveOrderCustomer(tx,user.id,body),lines=await buildOrderLines(tx,user.id,items);
    await tx.businessOrderItem.deleteMany({where:{orderId:old.id}});
-   return tx.businessOrder.update({where:{id:old.id},data:{ledgerId:body.ledger_id||old.ledgerId,customerId:customer.id,customerName:String(body.customer_name||''),customerContact:body.customer_contact||null,socialLink:body.social_link||null,shippingFee:n(body.shipping_fee),shippingCost:n(body.shipping_cost),discount:n(body.discount),otherFee:n(body.other_fee),paymentStatus:body.payment_status||'paid',note:body.note||null,orderedAt:safePastDate(body.ordered_at),items:{create:lines}},include:{items:true}});
+   return tx.businessOrder.update({where:{id:old.id},data:{ledgerId:body.ledger_id||old.ledgerId,customerId:customer.id,customerName:String(body.customer_name||''),customerContact:body.customer_contact||null,socialLink:body.social_link||null,shippingFee:n(body.shipping_fee),shippingCost:n(body.shipping_cost),discount:n(body.discount),voucherCode:body.voucher_code===undefined?old.voucherCode:body.voucher_code||null,otherFee:n(body.other_fee),paymentStatus:body.payment_status||'paid',note:body.note||null,orderedAt:safePastDate(body.ordered_at),items:{create:lines}},include:{items:true}});
   });
   return json(orderJson(row));
  }

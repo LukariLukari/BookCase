@@ -8,7 +8,7 @@ import Sidebar from '@/components/Sidebar';
 import CustomersNav from '../CustomersNav';
 import { normalizeVoucherCode, validateVoucherCode } from '@/lib/vouchers';
 
-type Voucher = { id: string; code: string; note: string | null; createdAt: string; qrDataUrl: string };
+type Voucher = { id: string; code: string; note: string | null; createdAt: string; barcodeDataUrl: string };
 const errorText = (reason: unknown, fallback: string) => axios.isAxiosError<{ detail?: string }>(reason) ? reason.response?.data.detail || fallback : fallback;
 
 export default function VouchersClient() {
@@ -45,7 +45,7 @@ export default function VouchersClient() {
       const response = await axios.post<Voucher>('/api/sales/vouchers', { code: normalized, note }, { headers: { Authorization: `Bearer ${token}` } });
       setVouchers(previous => [response.data, ...previous.filter(voucher => voucher.id !== response.data.id)]);
       setCode(''); setNote(''); setSearch('');
-      setMessage(`Đã tạo voucher ${response.data.code} và mã QR không hết hạn.`);
+      setMessage(`Đã tạo voucher ${response.data.code} và barcode không hết hạn.`);
     } catch (reason) { setError(errorText(reason, 'Không tạo được voucher. Vui lòng thử lại.')); }
     finally { setSaving(false); }
   };
@@ -63,7 +63,7 @@ export default function VouchersClient() {
       <header className="page-heading page-heading-panel card-push p-5">
         <p className="text-xs font-black uppercase tracking-wide">CRM bán hàng</p>
         <h1 className="mt-2 font-black">Voucher khách hàng</h1>
-        <p className="mt-2 text-sm">Tạo mã theo ý bạn và gửi QR cho khách. Voucher không có ngày hết hạn.</p>
+        <p className="mt-2 text-sm">Tạo mã theo ý bạn và gửi barcode cho khách. Voucher không có ngày hết hạn.</p>
       </header>
       <CustomersNav view="vouchers"/>
       <section className="card-push p-4 md:p-6" aria-labelledby="create-voucher-heading">
@@ -85,9 +85,9 @@ export default function VouchersClient() {
         {loading ? <div role="status" className="flex justify-center py-12"><Loader2 className="animate-spin"/><span className="sr-only">Đang tải voucher</span></div>
           : loadError ? <div role="alert" className="py-6"><p>{loadError}</p><button type="button" onClick={() => { setLoading(true); setReload(value => value + 1); }} className="btn-push mt-3 px-4 py-2">Thử lại</button></div>
           : shown.length ? <div className="voucher-grid mt-5">{shown.map(voucher => <article key={voucher.id} className="card-push-subtle voucher-card">
-            <div className="voucher-qr">
+            <div className="voucher-barcode">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={voucher.qrDataUrl} alt={`Mã QR voucher ${voucher.code}`} width={180} height={180}/>
+              <img src={voucher.barcodeDataUrl} alt={`Mã barcode voucher ${voucher.code}`} width={600} height={150}/>
             </div>
             <div className="min-w-0 flex-1">
               <b className="voucher-code select-all">{voucher.code}</b>
@@ -96,11 +96,11 @@ export default function VouchersClient() {
               <p className="mt-2 text-xs">Ngày tạo: {new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short' }).format(new Date(voucher.createdAt))}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button type="button" onClick={() => void copy(voucher.code)} className="voucher-action btn-push"><Copy size={16}/>Sao chép mã</button>
-                <a href={voucher.qrDataUrl} download={`voucher-${voucher.code}.png`} className="voucher-action btn-push"><Download size={16}/>Tải QR</a>
+                <a href={voucher.barcodeDataUrl} download={`voucher-${voucher.code}.png`} className="voucher-action btn-push"><Download size={16}/>Tải barcode</a>
               </div>
             </div>
           </article>)}</div>
-          : <div className="flex flex-col items-center gap-3 py-12 text-center"><Ticket size={32}/><p>{search.trim() ? 'Không tìm thấy voucher phù hợp.' : 'Chưa có voucher. Tạo mã đầu tiên để nhận QR.'}</p></div>}
+          : <div className="flex flex-col items-center gap-3 py-12 text-center"><Ticket size={32}/><p>{search.trim() ? 'Không tìm thấy voucher phù hợp.' : 'Chưa có voucher. Tạo mã đầu tiên để nhận barcode.'}</p></div>}
       </section>
     </div></main>
   </div>;

@@ -4,7 +4,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
-import QRCode from 'qrcode';
+import bwipjs from 'bwip-js/node';
+import { PNG } from 'pngjs';
+import { RGBLuminanceSource, HybridBinarizer, BinaryBitmap, MultiFormatReader, BarcodeFormat, DecodeHintType } from '@zxing/library';
 
 function load(file, imports = {}) {
   const source = fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
@@ -14,15 +16,18 @@ function load(file, imports = {}) {
   return exports;
 }
 const util = load('src/lib/vouchers.ts');
+const barcode = load('src/lib/voucherBarcode.ts', { 'bwip-js/node': bwipjs });
+const lookup = load('src/lib/voucherLookup.ts', { './vouchers': util });
 const request = (method = 'GET', body, owner = 'alice') => new Request('https://test.local/api/sales/vouchers', { method, headers: owner ? { authorization: `Bearer ${owner}` } : {}, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
 
 function fixture() {
-  const rows = [], qrInputs = [], backups = [];
+  const rows = [], barcodeInputs = [], backups = [];
   const prisma = { businessVoucher: {
+    findFirst: async ({where}) => {const row=rows.find(row=>row.userId===where.userId && (where.id ? row.id===where.id : row.code===where.code));return row?{id:row.id,code:row.code,note:row.note}:null;},
     findMany: async ({ where }) => rows.filter(row => row.userId === where.userId).map(({ userId, ...row }) => row),
     create: async ({ data }) => {
       if (rows.some(row => row.userId === data.userId && row.code === data.code)) throw { code: 'P2002' };
-      const row = { id: `voucher-${rows.length}`, createdAt: new Date('2026-11-07T00:00:00Z'), ...data };
+      const row = { id: `123e4567-e89b-42d3-a456-${String(rows.length).padStart(12, '0')}`, createdAt: new Date('2026-11-07T00:00:00Z'), ...data };
       rows.push(row);
       const { userId, ...result } = row;
       return result;
@@ -30,13 +35,18 @@ function fixture() {
   } };
   const route = load('src/app/api/sales/vouchers/route.ts', {
     'next/server': { NextResponse: { json: (body, options) => Response.json(body, options) } },
-    qrcode: { toDataURL: async (code, options) => { qrInputs.push(code); return QRCode.toDataURL(code, options); } },
+    '@/lib/voucherBarcode': { makeVoucherBarcode: async id => { barcodeInputs.push(id); return barcode.makeVoucherBarcode(id); } },
     '@/lib/auth': { getRequestUser: req => { const owner = req.headers.get('authorization')?.slice(7); return ['alice', 'bob'].includes(owner) ? { id: owner } : null; } },
     '@/lib/db': { prisma },
     '@/lib/businessBackup': { createAutomaticBusinessBackup: async id => backups.push(id) },
     '@/lib/vouchers': util,
   });
-  return { route, rows, qrInputs, backups };
+  const resolve = load('src/app/api/sales/vouchers/resolve/route.ts', {
+    'next/server': { NextResponse: { json: (body, options) => Response.json(body, options) } },
+    '@/lib/auth': { getRequestUser: req => {const id=req.headers.get('authorization')?.slice(7);return ['alice','bob'].includes(id)?{id}:null;} },
+    '@/lib/db': { prisma }, '@/lib/voucherLookup': lookup,
+  });
+  return { route, resolve, rows, barcodeInputs, backups };
 }
 
 test('Listing and creating vouchers require authentication', async () => {
@@ -46,7 +56,7 @@ test('Listing and creating vouchers require authentication', async () => {
   assert.equal(f.rows.length, 0);
 });
 
-test('Saved codes normalize to uppercase and produce the same permanent QR after reloading', async () => {
+test('Saved codes normalize to uppercase and produce the same permanent barcode after reloading', async () => {
   const f = fixture();
   const created = await f.route.POST(request('POST', { code: '  cảmơn_2026-a  ', note: 'Khách thân thiết', userId: 'bob', expiresAt: '2026-01-01' }));
   assert.equal(created.status, 201);
@@ -59,10 +69,20 @@ test('Saved codes normalize to uppercase and produce the same permanent QR after
   assert.match(reloaded.headers.get('cache-control'), /no-store/);
   const [saved] = await reloaded.json();
   assert.equal(saved.id, voucher.id);
-  assert.equal(saved.qrDataUrl, voucher.qrDataUrl);
-  assert.deepEqual(f.qrInputs, ['CẢMƠN_2026-A', 'CẢMƠN_2026-A']);
-  const png = Buffer.from(saved.qrDataUrl.split(',')[1], 'base64');
+  assert.equal(saved.barcodeDataUrl, voucher.barcodeDataUrl);
+  assert.deepEqual(f.barcodeInputs, [voucher.id, voucher.id]);
+  const png = Buffer.from(saved.barcodeDataUrl.split(',')[1], 'base64');
   assert.equal(png.subarray(1, 4).toString(), 'PNG');
+  const decoded = PNG.sync.read(png);
+  const luminance = new Uint8ClampedArray(decoded.width * decoded.height);
+  for(let i=0;i<luminance.length;i++)luminance[i]=decoded.data[i*4];
+  const reader = new MultiFormatReader();
+  const result = reader.decode(new BinaryBitmap(new HybridBinarizer(new RGBLuminanceSource(luminance,decoded.width,decoded.height))), new Map([[DecodeHintType.POSSIBLE_FORMATS,[BarcodeFormat.CODE_128]]]));
+  assert.equal(result.getText(), barcode.voucherBarcodePayload(voucher.id));
+  const applied=await f.resolve.POST(request('POST',{value:result.getText()}));
+  assert.equal(applied.status,200);
+  assert.equal((await applied.json()).code,voucher.code);
+  assert.equal((await f.resolve.POST(request('POST',{value:result.getText()},'bob'))).status,404);
 });
 
 test('Duplicate codes are rejected within an owner, while other owners stay isolated', async () => {
@@ -74,12 +94,23 @@ test('Duplicate codes are rejected within an owner, while other owners stay isol
   assert.equal((await f.route.GET(request()).then(result => result.json())).length, 1);
 });
 
-test('Malformed codes and bodies cannot create vouchers or generate QR images', async () => {
+test('Malformed codes and bodies cannot create vouchers or generate barcode images', async () => {
   const f = fixture();
   for (const body of [null, [], {}, { code: 123 }, { code: '' }, { code: 'A B' }, { code: '<script>' }, { code: 'A'.repeat(65) }, { code: 'OK', note: 'x'.repeat(501) }]) {
     assert.equal((await f.route.POST(request('POST', body))).status, 400);
   }
   assert.equal((await f.route.POST(new Request('https://test.local', { method: 'POST', headers: { authorization: 'Bearer alice' }, body: '{' }))).status, 400);
   assert.equal(f.rows.length, 0);
-  assert.equal(f.qrInputs.length, 0);
+  assert.equal(f.barcodeInputs.length, 0);
+});
+
+test('Voucher lookup accepts manual codes, rejects unknown and foreign barcodes, and requires authentication', async () => {
+  const f=fixture();
+  await f.route.POST(request('POST',{code:'CAMON'}));
+  assert.equal((await f.resolve.POST(request('POST',{value:'camon'}))).status,200);
+  assert.equal((await f.resolve.POST(request('POST',{value:'CAMON'},'bob'))).status,404);
+  assert.equal((await f.resolve.POST(request('POST',{value:'UNKNOWN'}))).status,404);
+  assert.equal((await f.resolve.POST(request('POST',{value:'BV:missing'}))).status,404);
+  assert.equal((await f.resolve.POST(request('POST',{value:'CAMON'},null))).status,401);
+  for(const value of ['',null,123,'x'.repeat(129)])assert.equal((await f.resolve.POST(request('POST',{value}))).status,400);
 });
