@@ -102,15 +102,15 @@ export default function VouchersClient() {
             </div>
             <div className="min-w-0 flex-1">
               <b className="voucher-code select-all">{voucher.code}</b>
-              <p className={`mt-2 text-sm font-bold ${voucher.benefitType === 'none' ? 'text-amber-700' : 'text-green-700'}`}>{voucherBenefitLabel(voucher)}</p>
-              <p className="mt-2 flex items-center gap-1 text-xs text-green-700"><Check size={15}/>Không hết hạn</p>
+              <p className="voucher-benefit mt-1 text-sm font-bold">{voucherBenefitLabel(voucher)}</p>
+              <p className="mt-1 flex items-center gap-1 text-xs text-green-700"><Check size={15}/>Không hết hạn</p>
               {voucher.note && <p className="mt-2 break-words text-sm">{voucher.note}</p>}
-              <p className="mt-2 text-xs">Ngày tạo: {new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short' }).format(new Date(voucher.createdAt))}</p>
-            </div>
-            <div className="voucher-card-actions">
-              <button type="button" onClick={() => { setEditing(voucher.id); setCode(voucher.code); setNote(voucher.note || ''); setBenefitType(voucher.benefitType === 'none' ? 'amount' : voucher.benefitType); setBenefitValue(voucher.benefitValue ? String(voucher.benefitValue) : ''); setBenefitText(voucher.benefitText || ''); setError(''); document.getElementById('create-voucher-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} className="voucher-action btn-push"><Pencil size={16}/>Sửa quyền lợi</button>
-              <button type="button" onClick={() => void copy(voucher.code)} className="voucher-action btn-push"><Copy size={16}/>Sao chép mã</button>
-              <a href={voucher.barcodeDataUrl} download={`voucher-${voucher.code}.png`} className="voucher-action btn-push"><Download size={16}/>Tải mã QR</a>
+              <p className="mt-1 text-xs">Ngày tạo: {new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short' }).format(new Date(voucher.createdAt))}</p>
+              <div className="voucher-card-actions">
+                <button type="button" onClick={() => { setEditing(voucher.id); setCode(voucher.code); setNote(voucher.note || ''); setBenefitType(voucher.benefitType === 'none' ? 'amount' : voucher.benefitType); setBenefitValue(voucher.benefitValue ? String(voucher.benefitValue) : ''); setBenefitText(voucher.benefitText || ''); setError(''); document.getElementById('create-voucher-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} aria-label="Sửa quyền lợi" title="Sửa quyền lợi" className="voucher-action btn-push"><Pencil size={16}/></button>
+                <button type="button" onClick={() => void copy(voucher.code)} aria-label="Sao chép mã" title="Sao chép mã" className="voucher-action btn-push"><Copy size={16}/></button>
+                <a href={voucher.barcodeDataUrl} download={`voucher-${voucher.code}.png`} aria-label="Tải mã QR" title="Tải mã QR" className="voucher-action btn-push"><Download size={16}/></a>
+              </div>
             </div>
           </article>)}</div>
           : <div className="flex flex-col items-center gap-3 py-12 text-center"><Ticket size={32}/><p>{search.trim() ? 'Không tìm thấy voucher phù hợp.' : 'Chưa có voucher. Tạo mã đầu tiên để nhận mã QR.'}</p></div>}
