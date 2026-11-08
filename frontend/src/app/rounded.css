@@ -1,0 +1,91 @@
+/* Shared corner sizes for both themes and every page. */
+:root {
+  --ui-radius-panel: 20px;
+  --ui-radius-control: 12px;
+  --ui-radius-small: 6px;
+}
+
+/* Restore rounded utilities overridden by the earlier square theme. */
+:root :is(.rounded, .rounded-none, .rounded-md, .rounded-lg, [class*="rounded-["]) {
+  border-radius: var(--ui-radius-control) !important;
+}
+:root :is(.rounded-xs, .rounded-sm) { border-radius: var(--ui-radius-small) !important; }
+:root .rounded-xl { border-radius: 16px !important; }
+:root .rounded-2xl { border-radius: var(--ui-radius-panel) !important; }
+:root :is(.rounded-3xl, .rounded-4xl) { border-radius: 24px !important; }
+
+/* Include surfaces that use borders/shadows without a rounded utility. */
+:root :is(
+  [class~="border"], [class~="border-2"], [class~="border-4"],
+  fieldset, dialog, .pixel-panel, .pixel-logo, .pixel-tile,
+  .card-push, .card-3d, .neu-surface,
+  .card-push-subtle, .card-3d-subtle, .neu-surface-subtle,
+  .shadow, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl,
+  .content-panel, .page-heading-panel, .modal-panel,
+  .business-sidebar, .business-bottom-nav, .catalog-card, .customer-card,
+  .kanban-column, .kanban-card, .voucher-card,
+  .finance-panel, .finance-day-group, .finance-book-panel, .finance-sync-panel,
+  .finance-picker-panel, .finance-dialog, .finance-fullscreen-dialog,
+  .finance-entry-console, .finance-category-name-editor,
+  .subscription-calendar, .subscription-reminders, .subscription-welcome
+) { border-radius: var(--ui-radius-panel) !important; }
+
+:root :is(
+  button, input:not([type="radio"]):not([type="checkbox"]):not([type="range"]),
+  textarea, select, [role="button"],
+  .btn-push, .btn-3d, .neu-btn, .btn-gradient, .btn-navy,
+  .btn-push-primary, .btn-3d-navy, .neu-btn-primary,
+  .btn-push-amber, .btn-3d-amber, .neu-btn-amber,
+  .btn-push-emerald, .btn-3d-emerald, .btn-push-danger, .btn-3d-danger,
+  .btn-push-walnut, .btn-push-ironclad, .squircle-btn,
+  .pixel-active, .sidebar-nav-item, .input-push, .input-3d, .neu-inset,
+  .customer-tabs a, .finance-nav-link, .finance-transaction-search,
+  .finance-picker-trigger, .web-select-trigger, .daily-measure-switch,
+  .finance-swipe-content, .finance-export-tick
+) { border-radius: var(--ui-radius-control) !important; }
+
+:root :is(.badge-push, .neu-badge, .badge-push-sunken, .neu-badge-sunken,
+  .cart-badge, .badge-count, .subscription-calendar-event) {
+  border-radius: var(--ui-radius-small) !important;
+}
+
+/* Keep circular avatars, status dots and calendar day markers circular. */
+:root [class~="rounded-full"] { border-radius: 9999px !important; }
+
+:root .subscription-days > .subscription-day:nth-last-child(7) {
+  border-bottom-left-radius: calc(var(--ui-radius-panel) - 1px);
+}
+:root .subscription-days > .subscription-day:last-child {
+  border-bottom-right-radius: calc(var(--ui-radius-panel) - 1px);
+}
+
+/* Full-width coloured headers follow their enclosing card's corners. */
+:root .finance-day-group { overflow: hidden; }
+:root .finance-day-group > header {
+  border-radius: var(--ui-radius-panel) var(--ui-radius-panel) 0 0 !important;
+}
+:root .finance-day-group .finance-day-heading {
+  border-radius: calc(var(--ui-radius-panel) - 2px) calc(var(--ui-radius-panel) - 2px) 0 0 !important;
+}
+:root .finance-day-group:has(.finance-day-toggle[aria-expanded="false"]) > header,
+:root .finance-day-group .finance-day-heading[aria-expanded="false"] {
+  border-radius: calc(var(--ui-radius-panel) - 2px) !important;
+}
+:root .finance-entry-console .finance-entry-toolbar {
+  border-radius: calc(var(--ui-radius-panel) - 2px) calc(var(--ui-radius-panel) - 2px) 0 0;
+}
+:root .finance-picker-panel .finance-picker-header {
+  border-radius: calc(var(--ui-radius-panel) - 2px) calc(var(--ui-radius-panel) - 2px) 0 0;
+}
+:root .finance-picker-panel .finance-calendar-footer {
+  border-radius: 0 0 calc(var(--ui-radius-panel) - 2px) calc(var(--ui-radius-panel) - 2px);
+}
+
+/* Smooth icon corners to match the controls around them. */
+:root svg {
+  image-rendering: auto;
+  shape-rendering: auto;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+::-webkit-scrollbar-thumb { border-radius: 999px !important; }
