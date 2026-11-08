@@ -170,21 +170,13 @@ html[data-theme="dark"] .business-shell { background-image: none !important; }
 .theme-control { position: relative; margin-bottom: 12px; }
 .theme-control .theme-toggle { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 8px 12px; font-size: 13px !important; text-align: left; }
 .theme-control .theme-toggle svg { flex-shrink: 0; }
-.theme-options { position: absolute; bottom: calc(100% + 10px); left: 0; z-index: 90; min-width: 185px; padding: 6px; background: var(--pixel-panel); color: var(--pixel-ink); border: 2px solid var(--pixel-muted); box-shadow: 3px 3px 0 var(--pixel-shadow-dark); }
-.theme-options button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 8px 10px; font-size: 14px !important; text-align: left; cursor: pointer; }
-.theme-options button:hover { background: var(--pixel-panel-soft); }
-.theme-options button[aria-pressed="true"] { background: var(--pixel-primary); color: white; }
 .theme-control-compact { margin: 0; }
 .theme-control-compact .theme-toggle { width: 36px; min-height: 36px; justify-content: center; padding: 6px; }
 .theme-control-compact .theme-toggle > span { display: none; }
-.theme-control-compact .theme-options { top: calc(100% + 10px); bottom: auto; left: auto; right: 0; }
 .public-theme-toggle { position: fixed; top: max(16px, env(safe-area-inset-top)); right: 16px; z-index: 60; }
 @media (min-width: 768px) and (max-width: 1023px) {
   .business-sidebar .theme-toggle { justify-content: center; padding-inline: 0; }
   .business-sidebar .theme-toggle > span { display: none; }
-  .business-sidebar .theme-options { min-width: 0; width: 54px; }
-  .business-sidebar .theme-options button { justify-content: center; padding: 8px; gap: 0; }
-  .business-sidebar .theme-option-label { display: none; }
 }
 @media print {
   .theme-control, .public-theme-toggle { display: none !important; }
