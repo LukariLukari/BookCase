@@ -3,16 +3,6 @@
   --ui-radius-panel: 20px;
   --ui-radius-control: 12px;
   --ui-radius-small: 6px;
-  --ui-radius-button: 1.15em;
-  --ui-button-shadow: inset 0 1px 2px rgb(255 255 255 / .35), inset 0 -2px 3px rgb(0 0 0 / .07), 0 3px 0 rgb(0 0 0 / .12), 0 7px 12px rgb(0 0 0 / .14);
-  --ui-button-shadow-hover: inset 0 1px 2px rgb(255 255 255 / .4), inset 0 -2px 3px rgb(0 0 0 / .07), 0 4px 0 rgb(0 0 0 / .12), 0 9px 16px rgb(0 0 0 / .18);
-  --ui-button-shadow-pressed: inset 0 2px 4px rgb(0 0 0 / .15), 0 1px 3px rgb(0 0 0 / .12);
-}
-
-html[data-theme="dark"] {
-  --ui-button-shadow: inset 0 1px 2px rgb(255 255 255 / .12), inset 0 -2px 3px rgb(0 0 0 / .16), 0 3px 0 rgb(0 0 0 / .24), 0 7px 12px rgb(0 0 0 / .28);
-  --ui-button-shadow-hover: inset 0 1px 2px rgb(255 255 255 / .16), inset 0 -2px 3px rgb(0 0 0 / .16), 0 4px 0 rgb(0 0 0 / .24), 0 9px 16px rgb(0 0 0 / .34);
-  --ui-button-shadow-pressed: inset 0 2px 4px rgb(0 0 0 / .3), 0 1px 3px rgb(0 0 0 / .24);
 }
 
 /* Restore rounded utilities overridden by the earlier square theme. */
@@ -106,66 +96,4 @@ html[data-theme="dark"] {
   background: transparent !important;
   box-shadow: none !important;
   overflow: visible;
-}
-
-/* Soft square buttons: keep the existing theme's fills, text and borders. */
-:root body :is(
-  button, [role="button"], a[class*="btn-"], .sidebar-nav-item,
-  .customer-tabs a, .finance-nav-link
-):not(.subscription-day-number) {
-  border-radius: var(--ui-radius-button) !important;
-}
-
-/* Only surfaced controls lift off the page; text controls stay flat. */
-:root body :is(
-  [class*="btn-push"], [class*="btn-3d"], [class*="neu-btn"],
-  .btn-gradient, .btn-navy, .squircle-btn, .pixel-active,
-  button[class*="bg-"], .sidebar-nav-item:not(.sidebar-nav-item-nested),
-  .web-select-trigger, .finance-picker-trigger,
-  .finance-entry-key, .finance-entry-type, .finance-category-type,
-  .finance-category-save, .finance-category-dialog-button,
-  .finance-category-row > button, .finance-calendar-footer button,
-  .finance-load-more, .theme-toggle,
-  .date-controls > button, .quantity-controls > button
-):not(.ui-flat-control) {
-  border-width: 1px !important;
-  box-shadow: var(--ui-button-shadow) !important;
-  translate: none !important;
-  transition: box-shadow 160ms ease, translate 160ms ease, background-color 160ms ease, color 160ms ease !important;
-
-  &:hover:not(:disabled):not([aria-disabled="true"]) {
-    box-shadow: var(--ui-button-shadow-hover) !important;
-    translate: 0 -1px !important;
-  }
-
-  &:active:not(:disabled):not([aria-disabled="true"]) {
-    box-shadow: var(--ui-button-shadow-pressed) !important;
-    translate: 0 2px !important;
-    transform: none !important;
-  }
-
-  &:disabled, &[aria-disabled="true"] {
-    box-shadow: none !important;
-    translate: none !important;
-  }
-}
-
-:root body .quantity-controls > button {
-  border-radius: 9px !important;
-}
-:root body .business-main .voucher-card .voucher-action {
-  border-radius: 9px !important;
-}
-/* The date heading belongs to its card, rather than a separate raised button. */
-:root body .finance-day-group .finance-day-heading {
-  border-radius: calc(var(--ui-radius-panel) - 2px) calc(var(--ui-radius-panel) - 2px) 0 0 !important;
-}
-:root body .finance-day-group .finance-day-heading[aria-expanded="false"] {
-  border-radius: calc(var(--ui-radius-panel) - 2px) !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :root body :is(button, [role="button"], a[class*="btn-"], .sidebar-nav-item) {
-    transition: none !important;
-  }
 }
