@@ -1,5 +1,6 @@
 'use client';
 
+import StyledSelect from '@/components/StyledSelect';
 import PieChart from '@/components/PieChart';
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
@@ -413,7 +414,7 @@ export default function DailyRevenueClient() {
                 </div>
 
                 {/* Filter nhanh mức doanh thu tối thiểu */}
-                <select
+                <StyledSelect
                   value={minRevenueThreshold}
                   onChange={(e) => setMinRevenueThreshold(Number(e.target.value))}
                   title="Lọc món theo ngưỡng doanh thu"
@@ -423,7 +424,7 @@ export default function DailyRevenueClient() {
                   <option value={50000}>Doanh thu &gt; 50.000 đ</option>
                   <option value={100000}>Doanh thu &gt; 100.000 đ</option>
                   <option value={200000}>Doanh thu &gt; 200.000 đ</option>
-                </select>
+                </StyledSelect>
               </div>
             </div>
 

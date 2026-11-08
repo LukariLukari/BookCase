@@ -1,5 +1,6 @@
 'use client';
 
+import StyledSelect from '@/components/StyledSelect';
 import { useCallback, isValidElement, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
@@ -412,71 +413,95 @@ async function createOrderCloseImage(order:Order,settings:PaymentSettings,ledger
 }
 async function createPixelOrderCloseImage(order:Order,settings:PaymentSettings,ledgerName:string){
  await ensureMontserratLoaded();
- const ink='#1b1916',shadow='#403d38',muted='#746e64',paper='#f7f3ea',soft='#eee7da',white='#fbfaf5',orange='#f2a007',orangeDark='#d78300';
+ const ink='#1b1916',muted='#746e64',paper='#fbfaf5',orange='#e87500';
  const shopName=(settings.shopName||'Billy Shop').trim()||'Billy Shop';
- const width=800,pad=42,contentWidth=width-pad*2,qrSize=238,rowHeight=58;
- const rows=order.items.length?order.items:[{product_name:'Sản phẩm',quantity:1,unit_price:order.total}];
- const summaryCount=2+(order.shipping_fee>0?1:0)+(order.discount>0?1:0);
- const paymentTop=150,paymentHeight=368,orderTop=558;
- const orderHeight=132+rows.length*rowHeight+summaryCount*38+48;
- const footerHeight=settings.note?.trim()?172:132,height=orderTop+orderHeight+footerHeight;
- const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ const width=800,pad=48,right=width-pad,contentWidth=right-pad,qrSize=220;
+ const canvas=document.createElement('canvas');canvas.width=width;
  const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas không khả dụng.');
- const text=(value:string,x:number,y:number,font:string,color=ink,align:CanvasTextAlign='left')=>{ctx.font=font;ctx.fillStyle=color;ctx.textAlign=align;ctx.textBaseline='alphabetic';ctx.fillText(value,x,y)};
- const fit=(value:string,maxWidth:number,fontSize:number,weight=800)=>{let size=fontSize;ctx.font=`${weight} ${size}px Montserrat, sans-serif`;while(ctx.measureText(value).width>maxWidth&&size>12){size--;ctx.font=`${weight} ${size}px Montserrat, sans-serif`}return `${weight} ${size}px Montserrat, sans-serif`};
- const box=(x:number,y:number,w:number,h:number,fill=white,withShadow=true)=>{if(withShadow){ctx.fillStyle=shadow;ctx.fillRect(x+8,y+8,w,h)}ctx.fillStyle=fill;ctx.fillRect(x,y,w,h);ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.strokeRect(x+1.5,y+1.5,w-3,h-3)};
-
+ const font=(size:number,weight=700)=>`${weight} ${size}px Montserrat, sans-serif`;
+ const wrap=(value:string,maxWidth:number,size:number,weight=700)=>{
+  ctx.font=font(size,weight);const lines:string[]=[];
+  for(const paragraph of value.split('\n')){
+   let line='';
+   for(const word of paragraph.split(/\s+/).filter(Boolean)){
+    if(line&&ctx.measureText(`${line}${word}`).width>maxWidth){lines.push(line.trimEnd());line=''}
+    for(const character of Array.from(word)){
+     if(ctx.measureText(line+character).width>maxWidth&&line){lines.push(line.trimEnd());line=''}
+     line+=character;
+    }
+    line+=' ';
+   }
+   lines.push(line.trimEnd());
+  }
+  return lines;
+ };
+ const customerLines=wrap(`Khách hàng: ${order.customer_name||ledgerName||'Khách lẻ'}`,contentWidth,22);
+ const rows=(order.items.length?order.items:[{product_name:'Sản phẩm',quantity:1,unit_price:order.total,note:''}]).map(item=>{
+  const names=wrap(item.product_name||'Sản phẩm',380,32,800);
+  const notes=item.note?.trim()?wrap(item.note.trim(),380,20,500):[];
+  return {item,names,notes,height:Math.max(78,names.length*42+notes.length*28+28)};
+ });
+ const headerY=206+(customerLines.length-1)*30,rowsTop=headerY+28;
+ const rowsBottom=rowsTop+rows.reduce((height,row)=>height+row.height,0);
+ const summaryCount=2+(order.shipping_fee>0?1:0)+(order.discount>0?1:0);
+ const paymentTop=rowsBottom+24+summaryCount*52+40;
+ const infoX=pad+qrSize+32,infoWidth=right-infoX;
+ const paymentDetails=[
+  {label:'Ngân hàng',value:settings.bankName||settings.bankCode||'Chưa cập nhật'},
+  {label:'Số tài khoản',value:settings.accountNumber||'Chưa cập nhật'},
+  {label:'Chủ tài khoản',value:settings.accountName||'Chưa cập nhật'},
+  {label:'Nội dung chuyển khoản',value:order.code},
+ ].map(detail=>({...detail,lines:wrap(detail.value,infoWidth,24,800)}));
+ const paymentHeight=Math.max(qrSize,paymentDetails.reduce((height,detail)=>height+30+detail.lines.length*30,0));
+ const noteLines=settings.note?.trim()?wrap(settings.note.trim(),contentWidth,20,500):[];
+ const thanksLines=wrap('Cảm ơn quý khách đã mua hàng!',contentWidth,22,700);
+ const footerTop=paymentTop+56+paymentHeight+32;
+ const height=footerTop+noteLines.length*30+thanksLines.length*32+56;
+ canvas.height=height;
+ const text=(value:string,x:number,y:number,size:number,weight=700,color=ink,align:CanvasTextAlign='left')=>{ctx.font=font(size,weight);ctx.fillStyle=color;ctx.textAlign=align;ctx.textBaseline='alphabetic';ctx.fillText(value,x,y)};
+ const rule=(y:number)=>{ctx.strokeStyle='#c7c0b4';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(right,y);ctx.stroke()};
+ const fit=(value:string,maxWidth:number,size:number,weight=700)=>{ctx.font=font(size,weight);while(ctx.measureText(value).width>maxWidth&&size>18){size--;ctx.font=font(size,weight)}return size};
  ctx.fillStyle=paper;ctx.fillRect(0,0,width,height);
- ctx.strokeStyle='rgba(64,61,56,.10)';ctx.lineWidth=1;
- for(let x=0;x<width;x+=32){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,height);ctx.stroke()}
- for(let y=0;y<height;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(width,y);ctx.stroke()}
- ctx.strokeStyle=ink;ctx.lineWidth=4;ctx.strokeRect(18,18,width-36,height-36);
-
- text('BILLY.',pad,55,'900 18px Montserrat, sans-serif',orange);
- text((settings.tagline||'BÁN HÀNG').trim().toUpperCase(),pad,80,'800 12px Montserrat, sans-serif',muted);
- text(shopName.toUpperCase(),pad,119,fit(shopName.toUpperCase(),430,34,900),ink);
- ctx.fillStyle=orange;ctx.fillRect(width-pad-222,47,222,70);ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.strokeRect(width-pad-220.5,48.5,219,67);
- text('HÓA ĐƠN',width-pad-18,76,'900 13px Montserrat, sans-serif',white,'right');
- text(order.code,width-pad-18,101,'900 20px Montserrat, sans-serif',white,'right');
-
- box(pad,paymentTop,contentWidth,paymentHeight,white,true);
- ctx.fillStyle=orange;ctx.fillRect(pad,paymentTop,contentWidth,54);ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.strokeRect(pad+1.5,paymentTop+1.5,contentWidth-3,51);
- text('QUÉT MÃ ĐỂ THANH TOÁN',pad+22,paymentTop+35,'900 16px Montserrat, sans-serif',white);
- text(dateText(order.ordered_at),width-pad-20,paymentTop+34,'800 12px Montserrat, sans-serif',white,'right');
- const qrX=pad+26,qrY=paymentTop+78;
- ctx.fillStyle=soft;ctx.fillRect(qrX+7,qrY+7,qrSize,qrSize);
+ // A single receipt frame contains the item list, totals and payment QR.
+ ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.strokeRect(20,20,width-40,height-40);
+ text(shopName.toUpperCase(),pad,76,fit(shopName.toUpperCase(),contentWidth,36,900),900,orange);
+ text(`HÓA ĐƠN ${order.code}`,pad,124,30,900);
+ text(dateText(order.ordered_at),right,124,20,500,muted,'right');
+ customerLines.forEach((line,index)=>text(line,pad,164+index*30,22));
+ const qtyX=pad+428;
+ text('SẢN PHẨM',pad,headerY,18,700,muted);
+ text('SL',qtyX,headerY,18,700,muted,'center');
+ text('THÀNH TIỀN',right,headerY,18,700,muted,'right');rule(headerY+16);
+ let y=rowsTop;
+ for(const {item,names,notes,height:rowHeight} of rows){
+  names.forEach((line,index)=>text(line,pad,y+38+index*42,32,800));
+  notes.forEach((line,index)=>text(line,pad,y+38+names.length*42+index*28,20,500,muted));
+  text(String(item.quantity),qtyX,y+38,28,700,ink,'center');
+  const amount=cash(item.unit_price*item.quantity);
+  text(amount,right,y+38,fit(amount,188,30,800),800,ink,'right');
+  y+=rowHeight;rule(y);
+ }
+ y+=48;
+ const summary=(label:string,value:string,strong=false)=>{
+  if(strong){ctx.fillStyle='#fff0db';ctx.fillRect(pad-10,y-36,contentWidth+20,54)}
+  text(label,pad,y,strong?28:24,strong?900:600,strong?ink:muted);
+  text(value,right,y,fit(value,310,strong?36:28,strong?900:700),strong?900:700,strong?orange:ink,'right');y+=52;
+ };
+ summary('Tạm tính',cash(order.total-order.shipping_fee+order.discount));
+ if(order.shipping_fee>0)summary('Phí giao hàng',cash(order.shipping_fee));
+ if(order.discount>0)summary('Giảm giá','-'+cash(order.discount));
+ summary('TỔNG CỘNG',cash(order.total),true);
+ rule(paymentTop-12);text('QUÉT MÃ ĐỂ THANH TOÁN',pad,paymentTop+24,22,800);
+ const qrY=paymentTop+56;
  let qrDrawn=false;
- if(settings.qrImage){try{const image=await loadCanvasImage(settings.qrImage);ctx.fillStyle=white;ctx.fillRect(qrX,qrY,qrSize,qrSize);drawContainImage(ctx,image,qrX+14,qrY+14,qrSize-28,qrSize-28);qrDrawn=true}catch(error){console.error('Failed to load QR image:',error)}}
- if(!qrDrawn){try{const qrCanvas=document.createElement('canvas');await renderBankQrToCanvas(qrCanvas,{bankCodeOrName:settings.bankCode||settings.bankName,accountNumber:settings.accountNumber,accountName:settings.accountName,amount:order.total,memo:order.code,color:ink,width:qrSize-28});ctx.fillStyle=white;ctx.fillRect(qrX,qrY,qrSize,qrSize);ctx.drawImage(qrCanvas,qrX+14,qrY+14,qrSize-28,qrSize-28);qrDrawn=true}catch(error){console.error('QR generation error:',error)}}
- if(!qrDrawn){ctx.fillStyle=white;ctx.fillRect(qrX,qrY,qrSize,qrSize);text('QR CODE',qrX+qrSize/2,qrY+qrSize/2,'900 22px Montserrat, sans-serif',ink,'center')}
- ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.strokeRect(qrX+1.5,qrY+1.5,qrSize-3,qrSize-3);
-
- const infoX=qrX+qrSize+40,infoRight=width-pad-26,infoWidth=infoRight-infoX;
- text('SỐ TIỀN CẦN CHUYỂN',infoX,qrY+18,'800 11px Montserrat, sans-serif',muted);
- text(cash(order.total),infoX,qrY+59,fit(cash(order.total),infoWidth,34,900),orange);
- ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(infoX,qrY+78);ctx.lineTo(infoRight,qrY+78);ctx.stroke();
- const detail=(label:string,value:string,y:number)=>{text(label,infoX,y,'800 10px Montserrat, sans-serif',muted);let shown=value||'Chưa cập nhật';ctx.font='800 15px Montserrat, sans-serif';while(shown.length>3&&ctx.measureText(shown+'…').width>infoWidth)shown=shown.slice(0,-1);if(shown!==value&&value)shown+='…';text(shown,infoX,y+22,'800 15px Montserrat, sans-serif',ink)};
- detail('NGÂN HÀNG',settings.bankName||settings.bankCode||'',qrY+108);
- detail('SỐ TÀI KHOẢN',settings.accountNumber,qrY+157);
- detail('CHỦ TÀI KHOẢN',settings.accountName.toUpperCase(),qrY+206);
- detail('NỘI DUNG CHUYỂN KHOẢN',order.code,qrY+255);
-
- box(pad,orderTop,contentWidth,orderHeight,white,true);
- text('CHI TIẾT ĐƠN HÀNG',pad+24,orderTop+42,'900 22px Montserrat, sans-serif',ink);
- text(order.customer_name||ledgerName||'',width-pad-24,orderTop+40,'800 13px Montserrat, sans-serif',orangeDark,'right');
- const tableLeft=pad+28,qtyX=540,priceX=width-pad-28,headerY=orderTop+92;
- text('SẢN PHẨM',tableLeft,headerY,'800 12px Montserrat, sans-serif',muted);text('SL',qtyX,headerY,'800 12px Montserrat, sans-serif',muted,'center');text('THÀNH TIỀN',priceX,headerY,'800 12px Montserrat, sans-serif',muted,'right');
- ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(tableLeft,headerY+19);ctx.lineTo(priceX,headerY+19);ctx.stroke();
- let y=headerY+58;
- for(const item of rows){ctx.font='700 17px Montserrat, sans-serif';let name=item.product_name||'Sản phẩm';while(name.length>3&&ctx.measureText(name+'…').width>390)name=name.slice(0,-1);if(name!==item.product_name)name+='…';text(name,tableLeft,y,'700 17px Montserrat, sans-serif');text(String(item.quantity),qtyX,y,'800 16px Montserrat, sans-serif',ink,'center');text(cash(item.unit_price*item.quantity),priceX,y,'800 16px Montserrat, sans-serif',ink,'right');y+=rowHeight}
- ctx.strokeStyle=ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(tableLeft,y-27);ctx.lineTo(priceX,y-27);ctx.stroke();
- const subtotal=order.total-order.shipping_fee+order.discount,summaryX=535;
- const summary=(label:string,value:string,strong=false)=>{if(strong){ctx.fillStyle=orange;ctx.fillRect(summaryX-150,y-27,priceX-summaryX+150,39)}text(label,summaryX,y,`${strong?900:700} ${strong?18:14}px Montserrat, sans-serif`,strong?white:muted,'right');text(value,priceX-10,y,`${strong?900:700} ${strong?20:14}px Montserrat, sans-serif`,strong?white:ink,'right');y+=strong?43:38};
- summary('Tạm tính',cash(subtotal));if(order.shipping_fee>0)summary('Phí ship',cash(order.shipping_fee));if(order.discount>0)summary('Giảm giá','-'+cash(order.discount));summary('TỔNG CỘNG',cash(order.total),true);
-
- const footerTop=orderTop+orderHeight;
- if(settings.note?.trim()){box(pad,footerTop+24,contentWidth,68,soft,false);let note=settings.note.trim();ctx.font='700 13px Montserrat, sans-serif';while(note.length>3&&ctx.measureText(note+'…').width>contentWidth-44)note=note.slice(0,-1);if(note!==settings.note.trim())note+='…';text(note,pad+22,footerTop+65,'700 13px Montserrat, sans-serif',ink)}
- const brandY=height-48;text(shopName.toUpperCase(),pad,brandY,fit(shopName.toUpperCase(),300,20,900),orangeDark);text(`Cảm ơn ${order.customer_name||'bạn'} đã mua hàng!`,width-pad,brandY,'700 12px Montserrat, sans-serif',muted,'right');ctx.fillStyle=orange;ctx.fillRect(width-pad-20,brandY+13,20,5);
+ if(settings.qrImage){try{const image=await loadCanvasImage(settings.qrImage);ctx.fillStyle='#fff';ctx.fillRect(pad,qrY,qrSize,qrSize);drawContainImage(ctx,image,pad+8,qrY+8,qrSize-16,qrSize-16);qrDrawn=true}catch(error){console.error('Failed to load QR image:',error)}}
+ if(!qrDrawn){try{const qrCanvas=document.createElement('canvas');await renderBankQrToCanvas(qrCanvas,{bankCodeOrName:settings.bankCode||settings.bankName,accountNumber:settings.accountNumber,accountName:settings.accountName,amount:order.total,memo:order.code,color:ink,width:qrSize});ctx.drawImage(qrCanvas,pad,qrY,qrSize,qrSize);qrDrawn=true}catch(error){console.error('QR generation error:',error)}}
+ if(!qrDrawn)text('Chưa có mã QR',pad,qrY+qrSize/2,22,700,muted);
+ let detailY=qrY+20;
+ for(const detail of paymentDetails){text(detail.label,infoX,detailY,18,500,muted);detail.lines.forEach((line,index)=>text(line,infoX,detailY+30+index*30,24,800));detailY+=30+detail.lines.length*30}
+ rule(footerTop-14);
+ noteLines.forEach((line,index)=>text(line,pad,footerTop+20+index*30,20,500,muted));
+ thanksLines.forEach((line,index)=>text(line,width/2,footerTop+noteLines.length*30+24+index*32,22,700,ink,'center'));
  return canvas.toDataURL('image/png');
 }
 
@@ -546,7 +571,7 @@ function MultiProductPicker({products,selected,onConfirm,purpose='stock'}:{produ
 }
 function Empty({title,text,icon}:{title:string;text:string;icon:ReactNode}){return <div className="flex min-h-44 flex-col items-center justify-center rounded-xl border border-dashed border-[#16587B]/25 bg-white/50 p-6 text-center"><span className="mb-3 text-[#16587B]/60">{icon}</span><b>{title}</b><p className="mt-1 text-sm font-medium text-[#16587B]/60">{text}</p></div>}
 function Loading(){return <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-24 animate-pulse rounded-xl bg-white/60"/>)}</div>}
-function Title({small,title,text}:{small:string;title:string;text:string}){return <header className="page-heading mb-12 flex items-start justify-between gap-3"><div className="min-w-0 flex-1"><p className="text-[11px] font-black uppercase tracking-[.18em] text-[#16587B]/75">{small}</p><h1 className="business-page-title mt-1.5 text-2xl font-black tracking-normal md:text-3xl">{title}</h1><p className="mt-1.5 text-sm font-semibold leading-relaxed text-[#16587B]/75">{text}</p></div><div className="flex shrink-0 items-center gap-2 pt-0.5">{small==='Đơn hàng'&&<button type="button" onClick={()=>window.dispatchEvent(new Event('export-orders'))} aria-label="Xuất Excel" title="Xuất Excel" className="btn-push flex h-10 w-10 items-center justify-center rounded-full text-emerald-800"><FileSpreadsheet size={18}/></button>}<HelpMenu/></div></header>}
+function Title({small,title,text}:{small:string;title:string;text?:string}){return <header className="page-heading mb-12 flex items-start justify-between gap-3"><div className="min-w-0 flex-1"><p className="text-[11px] font-black uppercase tracking-[.18em] text-[#16587B]/75">{small}</p><h1 className="business-page-title mt-1.5 text-2xl font-black tracking-normal md:text-3xl">{title}</h1>{text&&<p className="mt-1.5 text-sm font-semibold leading-relaxed text-[#16587B]/75">{text}</p>}</div><div className="flex shrink-0 items-center gap-2 pt-0.5">{small==='Đơn hàng'&&<button type="button" onClick={()=>window.dispatchEvent(new Event('export-orders'))} aria-label="Xuất Excel" title="Xuất Excel" className="btn-push flex h-10 w-10 items-center justify-center rounded-full text-emerald-800"><FileSpreadsheet size={18}/></button>}<HelpMenu/></div></header>}
 function Nav({view,hideMobileNav=false}:{view:View;hideMobileNav?:boolean}){
  const action=useSyncExternalStore(subscribeMobileAction,getMobileAction,()=>null);
  const [quickOpen,setQuickOpen]=useState(false);
@@ -562,7 +587,7 @@ function Nav({view,hideMobileNav=false}:{view:View;hideMobileNav?:boolean}){
  </>
 }
 function Picker({ledgers,id,set,add}:{ledgers:Ledger[];id:string;set:(v:string)=>void;add:()=>void}){return <div className="flex min-w-0 gap-2"><div className="min-w-0 flex-1 md:max-w-sm"><CustomSelect value={id} onChange={set} placeholder="Chọn sổ bán hàng" options={ledgers.map(x=>({value:x.id,label:x.name,description:`Sổ tháng ${x.month} · ${x.order_count} đơn`}))}/></div><button onClick={add} title="Tạo sổ" className="btn-push flex h-12 w-12 shrink-0 items-center justify-center rounded-full"><Plus/></button></div>}
-function Panel({children,className=''}:{children:ReactNode;className?:string}){return <section className={`content-panel card-push p-5 md:p-6 ${className}`}>{children}</section>}
+function Panel({children,className='',unframed=false}:{children:ReactNode;className?:string;unframed?:boolean}){if(unframed)return <>{children}</>;return <section className={`content-panel card-push p-5 md:p-6 ${className}`}>{children}</section>}
 
 export default function BusinessClient({view='dashboard',pos=false}:{view?:View;pos?:boolean}){
  const {user,token:ctx,logout,isLoading:auth}=useAuth(),router=useRouter();
@@ -1055,7 +1080,7 @@ function OrdersV3({ledgers,setLedgers,ledger,choose,addBook,headers,notify,fail,
  </div></Modal>}
  {shareOrder&&<Modal close={()=>setShareOrder(null)} title={`Hoá đơn ${shareOrder.code}`}><div className="space-y-4">
   <div className="rounded-xl border bg-white p-2">
-   {shareBusy?<div className="flex h-80 items-center justify-center"><Loader2 className="animate-spin text-white"/></div>:shareUrl?<img src={shareUrl} alt={`Hoá đơn ${shareOrder.code}`} className="max-h-[58dvh] w-full rounded-lg object-contain md:max-h-[70vh]"/>:<p className="p-8 text-center text-sm font-semibold text-[#16587B]/60">Chưa tạo được ảnh hoá đơn.</p>}
+   {shareBusy?<div className="flex h-80 items-center justify-center"><Loader2 className="animate-spin text-white"/></div>:shareUrl?<img src={shareUrl} alt={`Hoá đơn ${shareOrder.code}`} className="h-auto w-full rounded-lg"/>:<p className="p-8 text-center text-sm font-semibold text-[#16587B]/60">Chưa tạo được ảnh hoá đơn.</p>}
   </div>
   <div className="grid grid-cols-2 gap-2">
    <Button light onClick={()=>setPaymentOpen(true)}><ReceiptText/> Sửa QR/STK</Button>
@@ -1063,7 +1088,7 @@ function OrdersV3({ledgers,setLedgers,ledger,choose,addBook,headers,notify,fail,
   </div>
   <button type="button" onClick={downloadCloseImage} disabled={!shareUrl||shareBusy} className="btn-push h-11 w-full rounded-full text-sm font-black text-[#16587B] disabled:opacity-40">Tải ảnh PNG về máy</button>
  </div></Modal>}</>;
- if(creating)return <><Title small={posMode?'POS tại quầy':'Đơn hàng'} title={posMode?'Bán hàng nhanh':'Chốt đơn cho khách'} text={posMode?'Chạm chọn món, tạo đơn và xuất bill QR cho khách thanh toán. Đơn bán sẽ tự lưu vào hệ thống.':'Chọn khách có sẵn hoặc nhập khách mới; dữ liệu khách hàng sẽ được liên kết tự động.'}/><Panel>{posMode?<div className="mb-5 flex items-center justify-between gap-3"><div><b className="block text-lg">Đơn tại quầy</b><p className="text-xs font-semibold text-[#16587B]/60">Khách lẻ được điền sẵn, có thể đổi tên nếu cần.</p></div><Button light onClick={()=>setPaymentOpen(true)}><ReceiptText/> QR / STK</Button></div>:<Back title="Tạo đơn mới" go={reset}/>} {/* POS header */}
+ if(creating)return <><Title small={posMode?'POS tại quầy':'Đơn hàng'} title={posMode?'Bán hàng nhanh':'Chốt đơn cho khách'} text={posMode?undefined:'Chọn khách có sẵn hoặc nhập khách mới; dữ liệu khách hàng sẽ được liên kết tự động.'}/><Panel unframed={posMode}>{posMode?<div className="mb-5 flex items-center justify-between gap-3"><div><b className="block text-lg">Đơn tại quầy</b><p className="text-xs font-semibold text-[#16587B]/60">Khách lẻ được điền sẵn, có thể đổi tên nếu cần.</p></div><Button light onClick={()=>setPaymentOpen(true)}><ReceiptText/> QR / STK</Button></div>:<Back title="Tạo đơn mới" go={reset}/>} {/* POS header */}
   {posMode&&<div className="mb-5 rounded-2xl border border-[#16587B]/20 bg-white/55 p-3">
    <div className="relative mb-3"><Search className="absolute left-3 top-3.5 h-5 text-[#16587B]/50"/><input value={posQuery} onChange={event=>setPosQuery(event.target.value)} placeholder="Tìm nhanh món bán..." className={`${input} pl-10`}/></div>
    <div className="grid max-h-[580px] grid-cols-2 gap-3 overflow-y-auto p-0.5 sm:grid-cols-3 lg:grid-cols-4">{products.filter(product=>(!tracksStock(product)||product.stock_quantity>0)&&`${product.name} ${product.category||''} ${product.sku||''}`.toLowerCase().includes(posQuery.toLowerCase())).map(product=>{const quantity=lines.find(line=>line.product_id===product.id)?.quantity||0;return <div key={product.id} className={`group relative flex flex-col justify-between min-w-0 overflow-hidden rounded-2xl border bg-white p-2.5 sm:p-3 text-left transition-all ${quantity?'border-[#16587B] shadow-md ring-1 ring-[#16587B]/25':'border-[#16587B]/15 hover:border-[#16587B]/40'}`}>
@@ -1169,7 +1194,7 @@ function Orders({ledgers,ledger,choose,addBook,headers,notify,fail,products,setP
  const save=async()=>{if(!ledger)return notify('Chọn sổ bán hàng.');if(!d.customer_name.trim()||!valid.length)return notify('Nhập tên khách và chọn sản phẩm.');setSaving(true);try{const r=await axios.post<Order>(`${API}/api/business/orders`,{...d,ledger_id:ledger,shipping_fee:num(d.shipping_fee),shipping_cost:num(d.shipping_cost),discount:num(d.discount),other_fee:num(d.other_fee),ordered_at:new Date(d.ordered_at+'T12:00:00').toISOString(),items:valid.map(x=>({...x,unit_price:num(x.unit_price)}))},{headers});setOrders(x=>[r.data,...x]);setProducts(old=>old.map(p=>{const l=valid.find(x=>x.product_id===p.id);return l?{...p,stock_quantity:p.stock_quantity-l.quantity}:p}));reset();notify(`Đã tạo đơn ${r.data.code}.`)}catch(e){fail(e,'Không tạo được đơn.')}finally{setSaving(false)}};
  const remove=async(o:Order)=>{if(!confirm(`Xóa đơn ${o.code}? Tồn kho sẽ được hoàn lại.`))return;try{await axios.delete(`${API}/api/business/orders/${o.id}`,{headers});setOrders(x=>x.filter(a=>a.id!==o.id));setProducts(old=>old.map(p=>{const l=o.items.find(x=>x.product_id===p.id);return l?{...p,stock_quantity:p.stock_quantity+l.quantity}:p}));notify('Đã xóa đơn và hoàn kho.')}catch(e){fail(e,'Không xóa được đơn.')}};
  const shown=orders.filter(o=>`${o.code} ${o.customer_name} ${o.customer_contact||''}`.toLowerCase().includes(search.toLowerCase()));
- return <><Title small="Đơn hàng" title="Chốt đơn cho khách" text="Mỗi đơn tự trừ tồn kho và vào thống kê đúng ngày."/><div className="page-toolbar mb-4 flex flex-col gap-3 md:flex-row md:justify-between"><Picker ledgers={ledgers} id={ledger} set={choose} add={addBook}/><Button onClick={()=>setCreate(true)} disabled={!ledger||!products.length}><Plus/> Tạo đơn mới</Button></div>{!ledger?<Empty icon={<ClipboardList/>} title="Chưa có sổ bán hàng" text="Tạo sổ tháng trước khi chốt đơn."/>:create?<Panel><Back title="Tạo đơn mới" go={reset}/><div className="form-grid grid gap-4 md:grid-cols-2"><Field label="Ngày"><input type="date" value={d.ordered_at} onChange={e=>setD({...d,ordered_at:e.target.value})} className={input}/></Field><Field label="Tên khách"><input value={d.customer_name} onChange={e=>setD({...d,customer_name:e.target.value})} placeholder="Tên để tìm lại" className={input}/></Field><Field label="SĐT / tài khoản social"><input value={d.customer_contact} onChange={e=>setD({...d,customer_contact:e.target.value})} className={input}/></Field><Field label="Link tin nhắn"><input value={d.social_link} onChange={e=>setD({...d,social_link:e.target.value})} className={input}/></Field></div><h3 className="mb-3 mt-5 text-sm font-black">Sản phẩm khách mua</h3><div className="space-y-3">{lines.map((x,i)=>{const picked=products.find(p=>p.id===x.product_id);return <div key={i} className="rounded-xl border bg-white p-3"><div className="flex gap-2"><select value={x.product_id} onChange={e=>{const p=products.find(a=>a.id===e.target.value);line(i,{product_id:e.target.value,unit_price:String(p?.selling_price||'')})}} className={`${input} min-w-0 flex-1`}><option value="">Chọn hàng trong kho</option>{products.filter(p=>p.stock_quantity>0&&!lines.some((a,j)=>j!==i&&a.product_id===p.id)).map(p=><option key={p.id} value={p.id}>{p.name} · còn {p.stock_quantity}</option>)}</select>{lines.length>1&&<button onClick={()=>setLines(a=>a.filter((_,j)=>j!==i))} className="w-12 rounded-xl border text-red-600"><Trash2 className="mx-auto"/></button>}</div><div className="mt-3 grid grid-cols-[120px_1fr] gap-3"><Field label="Số lượng"><div className="flex h-12 items-center rounded-xl border"><button onClick={()=>line(i,{quantity:Math.max(1,x.quantity-1)})} className="w-10"><Minus className="mx-auto h-4"/></button><input value={x.quantity} onChange={e=>line(i,{quantity:Math.max(1,+e.target.value)})} className="min-w-0 flex-1 text-center font-black outline-none"/><button onClick={()=>line(i,{quantity:Math.min(picked?.stock_quantity||1,x.quantity+1)})} className="w-10"><Plus className="mx-auto h-4"/></button></div></Field><Money label="Giá / món" value={x.unit_price} set={v=>line(i,{unit_price:v})}/></div>{picked&&<p className="mt-2 text-xs font-bold text-[#16587B]/60">Kho còn {picked.stock_quantity} · vốn {cash(picked.unit_cost)}</p>}</div>})}</div><button onClick={()=>setLines(x=>[...x,{product_id:'',quantity:1,unit_price:''}])} className="mt-3 flex h-11 items-center gap-2 text-sm font-black text-[#16587B]"><Plus/> Thêm món</button><div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4"><Money label="Ship thu khách" value={d.shipping_fee} set={v=>setD({...d,shipping_fee:v})}/><Money label="Ship thực trả" value={d.shipping_cost} set={v=>setD({...d,shipping_cost:v})}/><Money label="Giảm giá" value={d.discount} set={v=>setD({...d,discount:v})}/><Money label="Phí khác" value={d.other_fee} set={v=>setD({...d,other_fee:v})}/></div><div className="mt-4 grid gap-4 md:grid-cols-2"><Field label="Thanh toán"><select value={d.payment_status} onChange={e=>setD({...d,payment_status:e.target.value})} className={input}><option value="paid">Đã thanh toán</option><option value="pending">Chưa thanh toán</option><option value="partial">Một phần</option></select></Field><Field label="Ghi chú"><textarea value={d.note} onChange={e=>setD({...d,note:e.target.value})} className={area}/></Field></div><div className="mt-4 grid grid-cols-2 rounded-xl bg-[#F5EEDD] p-4"><div><p className="text-xs font-bold">Khách trả</p><b className="text-lg text-moss-money text-[#385E26]">{cash(total)}</b></div><div><p className="text-xs font-bold">Lãi dự kiến</p><b className="text-lg text-moss-money text-[#385E26]">{cash(total-cost)}</b></div></div><div className="mt-5"><Button onClick={save} disabled={saving}>{saving?<Loader2 className="animate-spin"/>:<Check/>} Xác nhận tạo đơn</Button></div></Panel>:<Panel><div className="relative mb-3"><Search className="absolute left-3 top-3.5 h-5"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Tìm mã đơn, tên khách" className={`${input} pl-10`}/></div>{loading?<Loading/>:shown.length?shown.map(o=><div key={o.id} className="flex items-center gap-2 border-b last:border-0"><div className="min-w-0 flex-1"><OrderRow o={o}/></div><button onClick={()=>remove(o)} className="flex h-10 w-10 items-center justify-center rounded-xl border text-red-600"><Trash2 className="h-4"/></button></div>):<Empty icon={<ReceiptText/>} title="Chưa có đơn" text="Bấm Tạo đơn mới khi khách chốt mua."/>}</Panel>}</>;
+ return <><Title small="Đơn hàng" title="Chốt đơn cho khách" text="Mỗi đơn tự trừ tồn kho và vào thống kê đúng ngày."/><div className="page-toolbar mb-4 flex flex-col gap-3 md:flex-row md:justify-between"><Picker ledgers={ledgers} id={ledger} set={choose} add={addBook}/><Button onClick={()=>setCreate(true)} disabled={!ledger||!products.length}><Plus/> Tạo đơn mới</Button></div>{!ledger?<Empty icon={<ClipboardList/>} title="Chưa có sổ bán hàng" text="Tạo sổ tháng trước khi chốt đơn."/>:create?<Panel><Back title="Tạo đơn mới" go={reset}/><div className="form-grid grid gap-4 md:grid-cols-2"><Field label="Ngày"><input type="date" value={d.ordered_at} onChange={e=>setD({...d,ordered_at:e.target.value})} className={input}/></Field><Field label="Tên khách"><input value={d.customer_name} onChange={e=>setD({...d,customer_name:e.target.value})} placeholder="Tên để tìm lại" className={input}/></Field><Field label="SĐT / tài khoản social"><input value={d.customer_contact} onChange={e=>setD({...d,customer_contact:e.target.value})} className={input}/></Field><Field label="Link tin nhắn"><input value={d.social_link} onChange={e=>setD({...d,social_link:e.target.value})} className={input}/></Field></div><h3 className="mb-3 mt-5 text-sm font-black">Sản phẩm khách mua</h3><div className="space-y-3">{lines.map((x,i)=>{const picked=products.find(p=>p.id===x.product_id);return <div key={i} className="rounded-xl border bg-white p-3"><div className="flex gap-2"><StyledSelect aria-label="Sản phẩm trong kho" value={x.product_id} onChange={e=>{const p=products.find(a=>a.id===e.target.value);line(i,{product_id:e.target.value,unit_price:String(p?.selling_price||'')})}} className={`${input} min-w-0 flex-1`}><option value="">Chọn hàng trong kho</option>{products.filter(p=>p.stock_quantity>0&&!lines.some((a,j)=>j!==i&&a.product_id===p.id)).map(p=><option key={p.id} value={p.id}>{p.name} · còn {p.stock_quantity}</option>)}</StyledSelect>{lines.length>1&&<button onClick={()=>setLines(a=>a.filter((_,j)=>j!==i))} className="w-12 rounded-xl border text-red-600"><Trash2 className="mx-auto"/></button>}</div><div className="mt-3 grid grid-cols-[120px_1fr] gap-3"><Field label="Số lượng"><div className="flex h-12 items-center rounded-xl border"><button onClick={()=>line(i,{quantity:Math.max(1,x.quantity-1)})} className="w-10"><Minus className="mx-auto h-4"/></button><input value={x.quantity} onChange={e=>line(i,{quantity:Math.max(1,+e.target.value)})} className="min-w-0 flex-1 text-center font-black outline-none"/><button onClick={()=>line(i,{quantity:Math.min(picked?.stock_quantity||1,x.quantity+1)})} className="w-10"><Plus className="mx-auto h-4"/></button></div></Field><Money label="Giá / món" value={x.unit_price} set={v=>line(i,{unit_price:v})}/></div>{picked&&<p className="mt-2 text-xs font-bold text-[#16587B]/60">Kho còn {picked.stock_quantity} · vốn {cash(picked.unit_cost)}</p>}</div>})}</div><button onClick={()=>setLines(x=>[...x,{product_id:'',quantity:1,unit_price:''}])} className="mt-3 flex h-11 items-center gap-2 text-sm font-black text-[#16587B]"><Plus/> Thêm món</button><div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4"><Money label="Ship thu khách" value={d.shipping_fee} set={v=>setD({...d,shipping_fee:v})}/><Money label="Ship thực trả" value={d.shipping_cost} set={v=>setD({...d,shipping_cost:v})}/><Money label="Giảm giá" value={d.discount} set={v=>setD({...d,discount:v})}/><Money label="Phí khác" value={d.other_fee} set={v=>setD({...d,other_fee:v})}/></div><div className="mt-4 grid gap-4 md:grid-cols-2"><Field label="Thanh toán"><StyledSelect aria-label="Trạng thái thanh toán" value={d.payment_status} onChange={e=>setD({...d,payment_status:e.target.value})} className={input}><option value="paid">Đã thanh toán</option><option value="pending">Chưa thanh toán</option><option value="partial">Một phần</option></StyledSelect></Field><Field label="Ghi chú"><textarea value={d.note} onChange={e=>setD({...d,note:e.target.value})} className={area}/></Field></div><div className="mt-4 grid grid-cols-2 rounded-xl bg-[#F5EEDD] p-4"><div><p className="text-xs font-bold">Khách trả</p><b className="text-lg text-moss-money text-[#385E26]">{cash(total)}</b></div><div><p className="text-xs font-bold">Lãi dự kiến</p><b className="text-lg text-moss-money text-[#385E26]">{cash(total-cost)}</b></div></div><div className="mt-5"><Button onClick={save} disabled={saving}>{saving?<Loader2 className="animate-spin"/>:<Check/>} Xác nhận tạo đơn</Button></div></Panel>:<Panel><div className="relative mb-3"><Search className="absolute left-3 top-3.5 h-5"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Tìm mã đơn, tên khách" className={`${input} pl-10`}/></div>{loading?<Loading/>:shown.length?shown.map(o=><div key={o.id} className="flex items-center gap-2 border-b last:border-0"><div className="min-w-0 flex-1"><OrderRow o={o}/></div><button onClick={()=>remove(o)} className="flex h-10 w-10 items-center justify-center rounded-xl border text-red-600"><Trash2 className="h-4"/></button></div>):<Empty icon={<ReceiptText/>} title="Chưa có đơn" text="Bấm Tạo đơn mới khi khách chốt mua."/>}</Panel>}</>;
 }
 function OrderRow({o}:{o:Order}){return <div className="flex min-w-0 items-center gap-2 py-3"><div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${o.payment_status==='paid'?'bg-emerald-100 text-emerald-800 border border-emerald-200':'bg-amber-100 text-amber-800 border border-amber-200'}`}><ReceiptText className="h-5"/></div><div className="min-w-0 flex-1"><b className="block truncate text-sm">{o.customer_name} <small className="text-[#16587B]/60">{o.code}</small></b>{o.voucher_code&&<p className="text-xs font-bold text-green-700">Voucher: {o.voucher_code}{o.voucher_benefit&&<span> · {voucherBenefitLabel(o.voucher_benefit)}</span>}</p>}<p className="truncate text-xs font-semibold text-[#16587B]/60">{dateText(o.ordered_at)} · {o.item_count} món · {o.items.map(x=>x.product_name).join(', ')}</p></div><div className="shrink-0 text-right"><b className="text-sm text-moss-money text-[#385E26]">{cash(o.total)}</b><p className="text-[10px] font-black text-moss-money text-[#385E26]">Lãi {cash(o.profit)}</p></div><Link href={`/business/orders#edit-${o.id}`} aria-label={`Sửa đơn ${o.code}`} title="Sửa đơn" className="btn-push flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"><MinimalEdit size={14}/></Link></div>}
 

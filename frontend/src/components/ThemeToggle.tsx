@@ -1,15 +1,9 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
-import { Monitor, Moon, Sun } from 'lucide-react';
+import { useSyncExternalStore } from 'react';
+import { Moon, Sun } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { applyTheme, isThemePreference, THEME_STORAGE_KEY, type ThemePreference } from '@/lib/theme';
-
-const choices = [
-  { value: 'light', label: 'Sáng', icon: Sun },
-  { value: 'dark', label: 'Tối', icon: Moon },
-  { value: 'system', label: 'Theo thiết bị', icon: Monitor },
-] as const;
+import { applyTheme, isThemePreference, THEME_STORAGE_KEY } from '@/lib/theme';
 
 function subscribe(notify: () => void) {
   const media = window.matchMedia('(prefers-color-scheme: dark)');
@@ -31,30 +25,24 @@ function subscribe(notify: () => void) {
 }
 
 function snapshot() {
-  return document.documentElement.dataset.themePreference || 'system';
+  return document.documentElement.dataset.theme || 'light';
 }
 
 export default function ThemeToggle({ compact = false }: { compact?: boolean }) {
-  const preference = useSyncExternalStore(subscribe, snapshot, () => 'system');
-  const [open, setOpen] = useState(false);
-  const current = choices.find(choice => choice.value === preference) || choices[2];
-  const Icon = current.icon;
-  const select = (value: ThemePreference) => {
+  const theme = useSyncExternalStore(subscribe, snapshot, () => 'light');
+  const dark = theme === 'dark';
+  const Icon = dark ? Moon : Sun;
+  const toggle = () => {
+    const value = dark ? 'light' : 'dark';
     applyTheme(value);
     try { localStorage.setItem(THEME_STORAGE_KEY, value); } catch { /* Keep the session preference. */ }
-    setOpen(false);
   };
 
   return (
-    <div className={`theme-control ${compact ? 'theme-control-compact' : ''}`} onBlur={event => {
-      if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
-    }} onKeyDown={event => { if (event.key === 'Escape') { setOpen(false); event.currentTarget.querySelector('button')?.focus(); } }}>
-      <button type="button" className="theme-toggle btn-push" aria-label={`Giao diện: ${current.label}`} title={`Giao diện: ${current.label}`} aria-expanded={open} onClick={() => setOpen(value => !value)}>
-        <Icon size={19} /><span>Giao diện: {current.label}</span>
+    <div className={`theme-control ${compact ? 'theme-control-compact' : ''}`}>
+      <button type="button" className="theme-toggle btn-push" aria-label="Giao diện tối" aria-pressed={dark} title={`Chuyển sang giao diện ${dark ? 'sáng' : 'tối'}`} onClick={toggle}>
+        <Icon size={19} /><span>Giao diện: {dark ? 'Tối' : 'Sáng'}</span>
       </button>
-      {open && <div className="theme-options" role="group" aria-label="Chọn giao diện">
-        {choices.map(({ value, label, icon: OptionIcon }) => <button key={value} type="button" title={label} aria-label={label} aria-pressed={preference === value} onClick={() => select(value)}><OptionIcon size={18} /><span className="theme-option-label">{label}</span></button>)}
-      </div>}
     </div>
   );
 }

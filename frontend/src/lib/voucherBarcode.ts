@@ -1,8 +1,14 @@
-import bwipjs from 'bwip-js/node';
+import QRCode from 'qrcode';
 
 // Encode the permanent identifier so existing Vietnamese voucher codes also work.
 export const voucherBarcodePayload = (id: string) => `BV:${id}`;
 export async function makeVoucherBarcode(id: string) {
-  const png = await bwipjs.toBuffer({ bcid: 'code128', text: voucherBarcodePayload(id), scale: 3, height: 18, paddingwidth: 12, paddingheight: 6, backgroundcolor: 'FFFFFF' });
-  return `data:image/png;base64,${png.toString('base64')}`;
+  // Keep the existing payload and API field so saved vouchers and previously
+  // distributed barcodes continue to resolve to the same voucher.
+  return QRCode.toDataURL(voucherBarcodePayload(id), {
+    width: 320,
+    margin: 4,
+    errorCorrectionLevel: 'M',
+    color: { dark: '#000000', light: '#FFFFFF' },
+  });
 }

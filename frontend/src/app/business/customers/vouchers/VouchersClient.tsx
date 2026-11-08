@@ -1,5 +1,6 @@
 'use client';
 
+import StyledSelect from '@/components/StyledSelect';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Check, Copy, Download, Loader2, Plus, Search, Ticket, Pencil } from 'lucide-react';
@@ -70,7 +71,7 @@ export default function VouchersClient() {
       <header className="page-heading page-heading-panel card-push p-5">
         <p className="text-xs font-black uppercase tracking-wide">CRM bán hàng</p>
         <h1 className="mt-2 font-black">Voucher khách hàng</h1>
-        <p className="mt-2 text-sm">Tạo mã theo ý bạn và gửi barcode cho khách. Voucher không có ngày hết hạn.</p>
+        <p className="mt-2 text-sm">Tạo mã theo ý bạn và gửi mã QR cho khách. Voucher không có ngày hết hạn.</p>
       </header>
       <CustomersNav view="vouchers"/>
       <section className="card-push p-4 md:p-6" aria-labelledby="create-voucher-heading">
@@ -79,7 +80,7 @@ export default function VouchersClient() {
           <label className="block min-w-0"><span className="mb-2 block text-sm font-bold">Mã voucher</span><input required autoCapitalize="characters" autoComplete="off" spellCheck={false} value={code} onChange={event => { setCode(event.target.value.toUpperCase()); setError(''); }} maxLength={64} disabled={saving || !!editing} placeholder="VD: CAMON2026" aria-describedby="voucher-code-help" className="input-push h-12 w-full min-w-0 px-3"/></label>
           <label className="block min-w-0"><span className="mb-2 block text-sm font-bold">Ghi chú (không bắt buộc)</span><input value={note} onChange={event => setNote(event.target.value)} maxLength={500} disabled={saving} placeholder="Ưu đãi, điều kiện sử dụng..." className="input-push h-12 w-full min-w-0 px-3"/></label>
           <button type="submit" disabled={saving || loading || !!loadError} className="btn-push-primary flex h-12 items-center justify-center gap-2 px-4 text-sm font-bold disabled:opacity-50">{saving ? <Loader2 size={18} className="animate-spin"/> : <Plus size={18}/>}{editing ? 'Lưu quyền lợi' : 'Tạo voucher'}</button>
-          <label className="block min-w-0"><span className="mb-2 block text-sm font-bold">Loại quyền lợi</span><select value={benefitType} disabled={saving} onChange={e => setBenefitType(e.target.value as VoucherBenefit['benefitType'])} className="input-push h-12 w-full px-3"><option value="amount">Giảm số tiền (đ)</option><option value="percent">Giảm phần trăm (%)</option><option value="custom">Quyền lợi khác / tặng quà</option></select></label>
+          <label className="block min-w-0"><span className="mb-2 block text-sm font-bold">Loại quyền lợi</span><StyledSelect aria-label="Loại quyền lợi" value={benefitType} disabled={saving} onChange={e => setBenefitType(e.target.value as VoucherBenefit['benefitType'])} className="input-push h-12 w-full px-3"><option value="amount">Giảm số tiền (đ)</option><option value="percent">Giảm phần trăm (%)</option><option value="custom">Quyền lợi khác / tặng quà</option></StyledSelect></label>
           {benefitType === 'custom' ? <label className="block min-w-0 md:col-span-2"><span className="mb-2 block text-sm font-bold">Nội dung quyền lợi</span><input required value={benefitText} onChange={e => setBenefitText(e.target.value)} disabled={saving} maxLength={500} placeholder="VD: Tặng 1 ly cà phê" className="input-push h-12 w-full px-3"/></label> : <label className="block min-w-0"><span className="mb-2 block text-sm font-bold">{benefitType === 'percent' ? 'Phần trăm giảm' : 'Số tiền giảm (đ)'}</span><input required type="number" min="1" max={benefitType === 'percent' ? 100 : 2147483647} step="1" value={benefitValue} onChange={e => setBenefitValue(e.target.value)} disabled={saving} className="input-push h-12 w-full px-3"/></label>}
           <p className="text-xs md:col-span-3">{benefitType === 'custom' ? 'Nhân viên thực hiện quyền lợi ghi trên đơn; hệ thống không tự trừ kho quà tặng.' : 'Tự giảm trên tiền hàng, không gồm phí ship. Không cộng dồn với giảm thủ công; mức giảm tối đa bằng tiền hàng.'}</p>
           {editing && <button type="button" disabled={saving} onClick={() => { setEditing(null); setCode(''); setNote(''); setBenefitType('amount'); setBenefitValue(''); setBenefitText(''); setError(''); }} className="btn-push px-3 py-2 text-sm">Hủy sửa</button>}
@@ -98,22 +99,22 @@ export default function VouchersClient() {
           : shown.length ? <div className="voucher-grid mt-5">{shown.map(voucher => <article key={voucher.id} className="card-push-subtle voucher-card">
             <div className="voucher-barcode">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={voucher.barcodeDataUrl} alt={`Mã barcode voucher ${voucher.code}`} width={600} height={150}/>
+              <img src={voucher.barcodeDataUrl} alt={`Mã QR voucher ${voucher.code}`} width={320} height={320}/>
             </div>
             <div className="min-w-0 flex-1">
               <b className="voucher-code select-all">{voucher.code}</b>
-              <p className={`mt-2 text-sm font-bold ${voucher.benefitType === 'none' ? 'text-amber-700' : 'text-green-700'}`}>{voucherBenefitLabel(voucher)}</p>
-              <p className="mt-2 flex items-center gap-1 text-xs text-green-700"><Check size={15}/>Không hết hạn</p>
+              <p className="voucher-benefit mt-1 text-sm font-bold">{voucherBenefitLabel(voucher)}</p>
+              <p className="mt-1 flex items-center gap-1 text-xs text-green-700"><Check size={15}/>Không hết hạn</p>
               {voucher.note && <p className="mt-2 break-words text-sm">{voucher.note}</p>}
-              <p className="mt-2 text-xs">Ngày tạo: {new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short' }).format(new Date(voucher.createdAt))}</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button type="button" onClick={() => { setEditing(voucher.id); setCode(voucher.code); setNote(voucher.note || ''); setBenefitType(voucher.benefitType === 'none' ? 'amount' : voucher.benefitType); setBenefitValue(voucher.benefitValue ? String(voucher.benefitValue) : ''); setBenefitText(voucher.benefitText || ''); setError(''); document.getElementById('create-voucher-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} className="voucher-action btn-push"><Pencil size={16}/>Sửa quyền lợi</button>
-                <button type="button" onClick={() => void copy(voucher.code)} className="voucher-action btn-push"><Copy size={16}/>Sao chép mã</button>
-                <a href={voucher.barcodeDataUrl} download={`voucher-${voucher.code}.png`} className="voucher-action btn-push"><Download size={16}/>Tải barcode</a>
+              <p className="mt-1 text-xs">Ngày tạo: {new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short' }).format(new Date(voucher.createdAt))}</p>
+              <div className="voucher-card-actions">
+                <button type="button" onClick={() => { setEditing(voucher.id); setCode(voucher.code); setNote(voucher.note || ''); setBenefitType(voucher.benefitType === 'none' ? 'amount' : voucher.benefitType); setBenefitValue(voucher.benefitValue ? String(voucher.benefitValue) : ''); setBenefitText(voucher.benefitText || ''); setError(''); document.getElementById('create-voucher-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} aria-label="Sửa quyền lợi" title="Sửa quyền lợi" className="voucher-action btn-push"><Pencil size={16}/></button>
+                <button type="button" onClick={() => void copy(voucher.code)} aria-label="Sao chép mã" title="Sao chép mã" className="voucher-action btn-push"><Copy size={16}/></button>
+                <a href={voucher.barcodeDataUrl} download={`voucher-${voucher.code}.png`} aria-label="Tải mã QR" title="Tải mã QR" className="voucher-action btn-push"><Download size={16}/></a>
               </div>
             </div>
           </article>)}</div>
-          : <div className="flex flex-col items-center gap-3 py-12 text-center"><Ticket size={32}/><p>{search.trim() ? 'Không tìm thấy voucher phù hợp.' : 'Chưa có voucher. Tạo mã đầu tiên để nhận barcode.'}</p></div>}
+          : <div className="flex flex-col items-center gap-3 py-12 text-center"><Ticket size={32}/><p>{search.trim() ? 'Không tìm thấy voucher phù hợp.' : 'Chưa có voucher. Tạo mã đầu tiên để nhận mã QR.'}</p></div>}
       </section>
     </div></main>
   </div>;

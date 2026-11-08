@@ -1,5 +1,6 @@
 'use client';
 
+import StyledSelect from '@/components/StyledSelect';
 import PieChart from '@/components/PieChart';
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
@@ -337,7 +338,7 @@ export default function WorkflowClient() {
             <label className="mt-4 block">
               <span className="mb-1.5 block text-xs font-black text-[#585556]">Phương thức</span>
               <div className="input-push px-4 py-1.5 rounded-2xl">
-                <select
+                <StyledSelect aria-label="Phương thức thanh toán"
                   value={method}
                   onChange={(e) => setMethod(e.target.value)}
                   className="h-10 w-full bg-transparent text-sm font-bold text-[#585556] outline-none cursor-pointer"
@@ -346,7 +347,7 @@ export default function WorkflowClient() {
                   <option value="cash">Tiền mặt</option>
                   <option value="cod">COD</option>
                   <option value="wallet">Ví điện tử</option>
-                </select>
+                </StyledSelect>
               </div>
             </label>
 

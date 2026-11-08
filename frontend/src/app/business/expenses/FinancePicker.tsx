@@ -5,7 +5,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import FinanceCategoryIcon from './FinanceCategoryIcon';
 
-type SelectOption = { value: string; label: string; icon?: string; color?: string };
+type SelectOption = { value: string; label: string; icon?: string; color?: string; disabled?: boolean };
 
 function PickerShell({ title, close, children }: { title: string; close: () => void; children: React.ReactNode }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -46,7 +46,13 @@ function PickerShell({ title, close, children }: { title: string; close: () => v
   );
 }
 
-export function FinanceSelect({ value, options, placeholder, label, compact = false, triggerLabel, onChange }: {
+export function FinanceSelect({ value, options, placeholder, label, compact = false, triggerLabel, onChange, disabled = false, className = '', id, triggerRef, invalid, style }: {
+  style?: React.CSSProperties;
+  disabled?: boolean;
+  className?: string;
+  id?: string;
+  triggerRef?: React.Ref<HTMLButtonElement>;
+  invalid?: boolean;
   triggerLabel?: string;
   value: string;
   options: SelectOption[];
@@ -62,13 +68,19 @@ export function FinanceSelect({ value, options, placeholder, label, compact = fa
   return (
     <>
       <button
+        ref={triggerRef}
+        style={style}
+        id={id}
+        disabled={disabled}
+        data-invalid={invalid || undefined}
         type="button"
-        className={`finance-picker-trigger${compact ? ' finance-picker-trigger-compact' : ''}`}
-        aria-label={label}
+        className={`finance-picker-trigger${compact ? ' finance-picker-trigger-compact' : ''} ${className}`}
+        aria-label={invalid ? `${label} — vui lòng chọn một mục` : label}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? listId : undefined}
         onClick={() => setOpen(true)}
+        onKeyDown={event => { if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); setOpen(true); } }}
       >
         <span className={`finance-picker-trigger-value${!selected ? ' finance-picker-placeholder' : ''}`}>
           {selected?.icon && <FinanceCategoryIcon name={selected.icon} color={selected.color} />}
@@ -78,7 +90,12 @@ export function FinanceSelect({ value, options, placeholder, label, compact = fa
       </button>
       {open && (
         <PickerShell title={label} close={() => setOpen(false)}>
-          <div id={listId} role="listbox" aria-label={label} className="finance-picker-options">
+          <div id={listId} role="listbox" aria-label={label} className="finance-picker-options" onKeyDown={event => {
+            const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
+            const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+            const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : event.key === 'ArrowDown' ? (index + 1) % buttons.length : event.key === 'ArrowUp' ? (index - 1 + buttons.length) % buttons.length : -1;
+            if (next >= 0) { event.preventDefault(); buttons[next]?.focus(); }
+          }}>
             {options.map(option => {
               const active = option.value === value;
               return (
@@ -86,6 +103,8 @@ export function FinanceSelect({ value, options, placeholder, label, compact = fa
                   type="button"
                   role="option"
                   aria-selected={active}
+                  disabled={option.disabled}
+                  autoFocus={active || (!selected && option === options.find(item => !item.disabled))}
                   className="finance-picker-option"
                   key={option.value}
                   onClick={() => { onChange(option.value); setOpen(false); }}

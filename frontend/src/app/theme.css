@@ -155,8 +155,8 @@ html[data-theme="dark"] .subscription-state { color: var(--theme-success) !impor
 html[data-theme="dark"] .subscription-tracker :is(.subscription-calendar-event[data-state="cancelled"], .subscription-calendar-event[data-state="renewed"], [data-state="cancelled"] .subscription-state, [data-state="renewed"] .subscription-state, .subscription-state[data-state="cancelled"], .subscription-state[data-state="renewed"]) { color: var(--theme-muted) !important; }
 html[data-theme="dark"] .subscription-error { background: #4a2b2a; color: var(--theme-danger); }
 
-/* Apply action colours after legacy utility bridges; labels remain white. */
-html[data-theme="dark"] :is(.choice-active, .pixel-active, .squircle-btn.active, .btn-push-primary, .btn-3d-navy, .neu-btn-primary, .btn-gradient, .btn-navy, .finance-category-save, .finance-picker-option[aria-selected="true"], .finance-calendar > button[aria-pressed="true"], .finance-entry-category-track > button[aria-pressed="true"], .subscription-day-number[aria-current="date"], button.bg-\[\#16587B\], a.bg-\[\#16587B\]) {
+/* Apply action colours after legacy utility bridges. */
+html[data-theme="dark"] :is(.choice-active, .pixel-active, .customer-tabs a[aria-current="page"], .squircle-btn.active, .btn-push-primary, .btn-3d-navy, .neu-btn-primary, .btn-gradient, .btn-navy, .finance-category-save, .finance-picker-option[aria-selected="true"], .finance-calendar > button[aria-pressed="true"], .finance-entry-category-track > button[aria-pressed="true"], .subscription-day-number[aria-current="date"], button.bg-\[\#16587B\], a.bg-\[\#16587B\]) {
   background: var(--theme-action) !important;
   color: #fff !important;
   border-color: var(--theme-border) !important;
@@ -179,22 +179,34 @@ html[data-theme="dark"] .business-shell { background-image: none !important; }
 .theme-control { position: relative; margin-bottom: 12px; }
 .theme-control .theme-toggle { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 8px 12px; font-size: 13px !important; text-align: left; }
 .theme-control .theme-toggle svg { flex-shrink: 0; }
-.theme-options { position: absolute; bottom: calc(100% + 10px); left: 0; z-index: 90; min-width: 185px; padding: 6px; background: var(--pixel-panel); color: var(--pixel-ink); border: 2px solid var(--pixel-muted); box-shadow: 3px 3px 0 var(--pixel-shadow-dark); }
-.theme-options button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 8px 10px; font-size: 14px !important; text-align: left; cursor: pointer; }
-.theme-options button:hover { background: var(--pixel-panel-soft); }
-.theme-options button[aria-pressed="true"] { background: var(--pixel-primary); color: white; }
 .theme-control-compact { margin: 0; }
 .theme-control-compact .theme-toggle { width: 36px; min-height: 36px; justify-content: center; padding: 6px; }
 .theme-control-compact .theme-toggle > span { display: none; }
-.theme-control-compact .theme-options { top: calc(100% + 10px); bottom: auto; left: auto; right: 0; }
 .public-theme-toggle { position: fixed; top: max(16px, env(safe-area-inset-top)); right: 16px; z-index: 60; }
 @media (min-width: 768px) and (max-width: 1023px) {
   .business-sidebar .theme-toggle { justify-content: center; padding-inline: 0; }
   .business-sidebar .theme-toggle > span { display: none; }
-  .business-sidebar .theme-options { min-width: 0; width: 54px; }
-  .business-sidebar .theme-options button { justify-content: center; padding: 8px; gap: 0; }
-  .business-sidebar .theme-option-label { display: none; }
 }
 @media print {
   .theme-control, .public-theme-toggle { display: none !important; }
 }
+
+/* Themed select triggers replace operating-system option menus. */
+.web-select-trigger { min-width: 0; width: 100%; display: inline-flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left; }
+.daily-filter-group > .web-select-trigger { width: auto; max-width: 100%; }
+.web-select-trigger > svg { width: 16px; height: 16px; flex-shrink: 0; }
+.web-select-trigger:disabled, .finance-picker-option:disabled { opacity: .45; cursor: not-allowed; }
+.web-select-trigger[data-invalid="true"] { outline: 2px solid var(--theme-danger, #b91c1c); }
+html[data-theme="dark"] .web-select-trigger { background: var(--theme-raised) !important; color: var(--theme-text) !important; border-color: var(--theme-border) !important; }
+
+/* Bright semantic fills use dark ink, including icons and nested labels. */
+html[data-theme="dark"] :is(.btn-push-emerald, .btn-3d-emerald, .finance-entry-income[aria-pressed="true"], .finance-category-type.income[aria-pressed="true"], button.finance-entry-done, .finance-calendar-footer .finance-calendar-done, [class~="bg-[#c9f1d5]"], [class~="bg-green-500"], [class~="bg-green-600"], [class~="bg-emerald-500"], [class~="bg-emerald-600"]) { background: var(--theme-success-fill) !important; }
+html[data-theme="dark"] :is(.btn-push-danger, .btn-3d-danger, button.finance-entry-delete, .finance-category-dialog-button.danger, .finance-entry-expense[aria-pressed="true"], .finance-category-type.expense[aria-pressed="true"], .finance-category-row > button:last-child, [class~="bg-[#ffc9ba]"], [class~="bg-red-500"], [class~="bg-red-600"], [class~="bg-rose-500"], [class~="bg-rose-600"]) { background: var(--theme-danger-fill) !important; }
+html[data-theme="dark"] :is(button.finance-entry-add, [class~="bg-blue-600"], [class~="bg-blue-500"]) { background: var(--theme-info-fill) !important; }
+html[data-theme="dark"] :is([class~="bg-[#ffe69a]"], [class~="bg-yellow-400"], [class~="bg-yellow-500"], [class~="bg-amber-400"], [class~="bg-amber-500"], .finance-load-more, .btn-push-amber, .btn-3d-amber, .neu-btn-amber) { background: var(--theme-warning-fill) !important; }
+html[data-theme="dark"] :is(.choice-active, .pixel-active, .customer-tabs a[aria-current="page"], .squircle-btn.active, .btn-push-primary, .btn-3d-navy, .neu-btn-primary, .btn-gradient, .btn-navy, .finance-category-save, .finance-picker-option[aria-selected="true"], .finance-calendar > button[aria-pressed="true"], .finance-entry-category-track > button[aria-pressed="true"], .subscription-day-number[aria-current="date"], button.bg-\[\#16587B\], a.bg-\[\#16587B\], .btn-push-emerald, .btn-3d-emerald, .btn-push-danger, .btn-3d-danger, button.finance-entry-delete, .finance-category-dialog-button.danger, .finance-entry-income[aria-pressed="true"], .finance-entry-expense[aria-pressed="true"], .finance-category-type[aria-pressed="true"], button.finance-entry-done, button.finance-entry-add, .finance-calendar-footer .finance-calendar-done, .finance-category-row > button:last-child, [class~="bg-[#ffc9ba]"], [class~="bg-red-500"], [class~="bg-red-600"], [class~="bg-rose-500"], [class~="bg-rose-600"], [class~="bg-[#c9f1d5]"], [class~="bg-green-500"], [class~="bg-green-600"], [class~="bg-emerald-500"], [class~="bg-emerald-600"], [class~="bg-[#ffe69a]"], [class~="bg-yellow-400"], [class~="bg-yellow-500"], [class~="bg-amber-400"], [class~="bg-amber-500"], .finance-load-more, .btn-push-amber, .btn-3d-amber, .neu-btn-amber, [class~="bg-blue-600"], [class~="bg-blue-500"]) { color: var(--theme-on-color) !important;
+  & :is(span, b, strong, small, svg, svg *) { color: var(--theme-on-color) !important; stroke: currentColor !important; }
+}
+
+html[data-theme="dark"] :is(.subscription-tracker .subscription-form .web-select-trigger, .subscription-tracker .subscription-filters .web-select-trigger, .subscription-reminder-actions .web-select-trigger) { background: var(--theme-raised) !important; color: var(--theme-text) !important; border-color: var(--theme-border) !important; }
+html[data-theme="dark"] .business-main .daily-measure-switch button[aria-pressed="true"] { color: var(--theme-on-color) !important; }

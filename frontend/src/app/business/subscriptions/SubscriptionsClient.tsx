@@ -1,5 +1,6 @@
 'use client';
 
+import StyledSelect from '@/components/StyledSelect';
 import { useEffect, useId, useMemo, useState } from 'react';
 import { CalendarClock, Check, ChevronLeft, ChevronRight, Loader2, Pencil, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -170,8 +171,8 @@ export default function SubscriptionsClient() {
         {loadError ? <div className="subscription-error" role="alert"><p>{loadError}</p><button type="button" onClick={() => { setLoading(true); setLoadError(''); setRevision(value => value + 1); }}>Thử tải lại</button></div> : loading ? <div className="subscription-loading" role="status"><Loader2 className="animate-spin" /> Đang tải lịch gia hạn…</div> : <>
           <div className="subscription-filters">
             <label className="subscription-search"><Search size={18} aria-hidden="true" /><input aria-label="Tìm gói đăng ký" placeholder="Tìm khách, tài khoản, ứng dụng…" value={search} onChange={event => setSearch(event.target.value)} /></label>
-            <select aria-label="Lọc theo ứng dụng" value={app} onChange={event => setApp(event.target.value)}><option value="">Tất cả ứng dụng</option>{Array.from(new Set(items.map(item => item.appName))).sort().map(name => <option key={name}>{name}</option>)}</select>
-            <select aria-label="Lọc trạng thái" value={status} onChange={event => setStatus(event.target.value)}><option value="active">Đang theo dõi</option><option value="all">Tất cả trạng thái</option><option value="cancelled">Đã hủy</option><option value="renewed">Đã gia hạn</option></select>
+            <StyledSelect aria-label="Lọc theo ứng dụng" value={app} onChange={event => setApp(event.target.value)}><option value="">Tất cả ứng dụng</option>{Array.from(new Set(items.map(item => item.appName))).sort().map(name => <option key={name}>{name}</option>)}</StyledSelect>
+            <StyledSelect aria-label="Lọc trạng thái" value={status} onChange={event => setStatus(event.target.value)}><option value="active">Đang theo dõi</option><option value="all">Tất cả trạng thái</option><option value="cancelled">Đã hủy</option><option value="renewed">Đã gia hạn</option></StyledSelect>
             <button type="button" className="subscription-icon-button" aria-label="Tải lại lịch" onClick={() => { setLoading(true); setRevision(value => value + 1); }}><RefreshCw size={18} /></button>
           </div>
 
@@ -250,12 +251,12 @@ function SubscriptionForm({ initial, customers, customerError, appNames, appErro
   return <Dialog title={value.id ? 'Chỉnh sửa gói' : value.renewFromId ? 'Gia hạn kỳ tiếp' : 'Thêm gói đăng ký'} busy={busy || addingApp} close={close}>
     <form onSubmit={event => { event.preventDefault(); if (!addingApp) void save(value); }}><fieldset disabled={busy || addingApp} className="subscription-form">
       {customerError && <p className="subscription-form-hint">{customerError}</p>}
-      <label className="subscription-form-wide">Khách hàng có sẵn<select value={value.customerId || ''} onChange={event => { const customer = customers.find(item => item.id === event.target.value); setValue({ ...value, customerId: customer?.id || null, customerName: customer?.name || 'Khách lẻ', customerContact: customer ? customer.phone || customer.email || '' : '' }); }}><option value="">Nhập thông tin khách trực tiếp</option>{customers.map(customer => <option key={customer.id} value={customer.id}>{customer.name}{customer.phone ? ` · ${customer.phone}` : ''}</option>)}</select></label>
+      <label className="subscription-form-wide">Khách hàng có sẵn<StyledSelect aria-label="Khách hàng có sẵn" value={value.customerId || ''} onChange={event => { const customer = customers.find(item => item.id === event.target.value); setValue({ ...value, customerId: customer?.id || null, customerName: customer?.name || 'Khách lẻ', customerContact: customer ? customer.phone || customer.email || '' : '' }); }}><option value="">Nhập thông tin khách trực tiếp</option>{customers.map(customer => <option key={customer.id} value={customer.id}>{customer.name}{customer.phone ? ` · ${customer.phone}` : ''}</option>)}</StyledSelect></label>
       <label>Tên khách *<input required maxLength={250} value={value.customerName} onChange={event => setValue({ ...value, customerName: event.target.value })} data-dialog-initial-focus /></label>
       <label>Liên hệ khách<input maxLength={250} value={value.customerContact} placeholder="SĐT, email hoặc link liên hệ" onChange={event => setValue({ ...value, customerContact: event.target.value })} /></label>
       <div className="subscription-app-field">
         <label htmlFor={`${id}-app`}>Ứng dụng *</label>
-        <select id={`${id}-app`} required value={value.appName} onChange={event => setValue({ ...value, appName: event.target.value })}><option value="">Chọn ứng dụng</option>{options.map(name => <option key={name} value={name}>{name}</option>)}</select>
+        <StyledSelect aria-label="Ứng dụng" id={`${id}-app`} required value={value.appName} onChange={event => setValue({ ...value, appName: event.target.value })}><option value="">Chọn ứng dụng</option>{options.map(name => <option key={name} value={name}>{name}</option>)}</StyledSelect>
         <button type="button" className="subscription-app-add" onClick={() => { setShowAppEditor(current => !current); setAddAppError(''); }}><Plus size={16} /> Thêm ứng dụng</button>
         {appError && <div className="subscription-error" role="alert">{appError} <button type="button" onClick={reloadApps}>Thử lại</button></div>}
         {showAppEditor && <div className="subscription-app-editor">
@@ -267,7 +268,7 @@ function SubscriptionForm({ initial, customers, customerError, appNames, appErro
       </div>
       <label>Tên gói<input maxLength={250} placeholder="VD: Pro, Premium…" value={value.planName} onChange={event => setValue({ ...value, planName: event.target.value })} /></label>
       <label className="subscription-form-wide">Tài khoản sử dụng *<input required maxLength={250} placeholder="Email hoặc tên tài khoản của khách" value={value.account} onChange={event => setValue({ ...value, account: event.target.value })} /></label>
-      <label>Thời hạn *<div className="subscription-period"><input aria-label="Số kỳ" required type="number" min="1" max={{ day: 3650, month: 120, year: 10 }[value.durationUnit]} value={value.durationValue || ''} onChange={event => changePeriod({ durationValue: Number(event.target.value) })} /><select aria-label="Đơn vị thời hạn" value={value.durationUnit} onChange={event => changePeriod({ durationUnit: event.target.value as DurationUnit })}>{Object.entries(units).map(([unit, label]) => <option key={unit} value={unit}>{label}</option>)}</select></div></label>
+      <label>Thời hạn *<div className="subscription-period"><input aria-label="Số kỳ" required type="number" min="1" max={{ day: 3650, month: 120, year: 10 }[value.durationUnit]} value={value.durationValue || ''} onChange={event => changePeriod({ durationValue: Number(event.target.value) })} /><StyledSelect aria-label="Đơn vị thời hạn" value={value.durationUnit} onChange={event => changePeriod({ durationUnit: event.target.value as DurationUnit })}>{Object.entries(units).map(([unit, label]) => <option key={unit} value={unit}>{label}</option>)}</StyledSelect></div></label>
       <label>Ngày bắt đầu *<input required type="date" min="2000-01-01" max="2199-12-31" value={value.startDate} onChange={event => changePeriod({ startDate: event.target.value })} /></label>
       <label>Giá gói *<input required type="text" inputMode="decimal" placeholder="VD: 150,000" value={formatSubscriptionPrice(value.price)} onChange={event => {
         const input = event.currentTarget;
@@ -281,7 +282,7 @@ function SubscriptionForm({ initial, customers, customerError, appNames, appErro
         setValue({ ...value, price: raw });
         requestAnimationFrame(() => { if (document.activeElement === input) input.setSelectionRange(caret, caret); });
       }} onBlur={() => { if (value.price.endsWith('.')) setValue(current => ({ ...current, price: current.price.slice(0, -1) })); }} /></label>
-      <label>Tiền tệ<select value={value.currency} onChange={event => setValue({ ...value, currency: event.target.value })}>{subscriptionCurrencies.map(currency => <option key={currency}>{currency}</option>)}</select></label>
+      <label>Tiền tệ<StyledSelect aria-label="Tiền tệ" value={value.currency} onChange={event => setValue({ ...value, currency: event.target.value })}>{subscriptionCurrencies.map(currency => <option key={currency}>{currency}</option>)}</StyledSelect></label>
       <div className="subscription-form-hint subscription-form-wide">Ngày hết hạn: <b>{end ? dateText(end) : 'Chọn ngày bắt đầu và thời hạn'}</b></div>
       <label className="subscription-form-wide" htmlFor={`${id}-cancel`}>Ngày nhắc hủy *<input id={`${id}-cancel`} required type="date" min={value.startDate} max={end || '2199-12-31'} value={value.cancelDate} onChange={event => setValue({ ...value, cancelDate: event.target.value })} /><small>Mặc định đúng ngày hết hạn. Có thể chọn ngày sớm hơn.</small></label>
       <label className="subscription-form-wide">Ghi chú<textarea maxLength={5000} rows={3} value={value.note} placeholder="Thông tin cần nhớ khi xử lý gói…" onChange={event => setValue({ ...value, note: event.target.value })} /></label>

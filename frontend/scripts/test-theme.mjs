@@ -24,8 +24,9 @@ test('all dark text tokens pass their contrast targets on every surface', () => 
       assert.ok(contrastRatio(darkPalette[`--theme-${token}`], background) >= minimum, `${token} against ${background}`);
     }
   }
-  for (const token of ['action', 'action-hover']) assert.ok(contrastRatio('#ffffff', darkPalette[`--theme-${token}`]) >= 4.5);
-  for (const background of ['#256341', '#9c3528', '#20587e']) assert.ok(contrastRatio('#ffffff', background) >= 4.5);
+  for (const token of ['action', 'action-hover', 'success-fill', 'danger-fill', 'info-fill', 'warning-fill']) {
+    assert.ok(contrastRatio(darkPalette['--theme-on-color'], darkPalette[`--theme-${token}`]) >= 7, token);
+  }
 });
 
 test('contrast adjustment preserves passing seeds and corrects failing seeds in either direction', () => {
