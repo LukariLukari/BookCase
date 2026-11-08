@@ -49,14 +49,18 @@ export const darkPalette = {
   '--theme-hover': darkSurfaces[3],
   '--theme-text': ensureContrast('#e8e3db', darkSurfaces, 7),
   '--theme-muted': ensureContrast('#a9a49c', darkSurfaces),
-  '--theme-accent': ensureContrast('#f2a007', darkSurfaces),
-  '--theme-success': ensureContrast('#73b98d', darkSurfaces),
-  '--theme-danger': ensureContrast('#ed8a7a', darkSurfaces),
-  '--theme-info': ensureContrast('#84b3ce', darkSurfaces),
+  '--theme-accent': ensureContrast('#ffb547', darkSurfaces),
+  '--theme-success': ensureContrast('#6fe4a0', darkSurfaces),
+  '--theme-danger': ensureContrast('#ff9388', darkSurfaces),
+  '--theme-info': ensureContrast('#8bd4ff', darkSurfaces),
   '--theme-border': ensureContrast('#626971', darkSurfaces, 3),
-  // Existing primary buttons use white copy: darken their orange to match.
-  '--theme-action': ensureContrast('#a64c00', ['#ffffff']),
-  '--theme-action-hover': ensureContrast('#893c00', ['#ffffff']),
+  '--theme-action': '#ffad32',
+  '--theme-action-hover': '#ffc15c',
+  '--theme-on-color': '#171513',
+  '--theme-success-fill': '#63d995',
+  '--theme-danger-fill': '#ff857a',
+  '--theme-info-fill': '#77c9ff',
+  '--theme-warning-fill': '#ffe078',
 };
 
 export function isThemePreference(value: unknown): value is ThemePreference {

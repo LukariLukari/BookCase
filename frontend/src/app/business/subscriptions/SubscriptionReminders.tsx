@@ -1,5 +1,6 @@
 'use client';
 
+import StyledSelect from '@/components/StyledSelect';
 import { useEffect, useState } from 'react';
 import { Bell, Download } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
@@ -117,7 +118,7 @@ export default function SubscriptionReminders({ items, disabled }: { items: Subs
     <div><h2><Bell size={19} /> Thông báo nhắc hủy · Web Push</h2><p>Nhận bản tổng hợp hằng ngày kể cả khi đóng tab, từ số ngày nhắc trước đã chọn đến khi gói được xử lý. Bao gồm gói quá hạn. Lịch mặc định: 9 giờ sáng Việt Nam; giờ nhận có thể trễ.</p></div>
     <p role="status">{!ready ? 'Đang kiểm tra Web Push…' : enabled ? 'Đã bật trên thiết bị này.' : 'Chưa bật trên thiết bị này.'}</p>
     <div className="subscription-reminder-actions">
-      <label>Thời điểm nhắc<select value={daysBefore} disabled={!ready || busy} onChange={event => void changeDays(Number(event.target.value))}>{reminderLeadDays.map(days => <option key={days} value={days}>{days ? `Nhắc trước ${days} ngày` : 'Đúng ngày hủy'}</option>)}</select></label>
+      <label>Thời điểm nhắc<StyledSelect aria-label="Thời điểm nhắc" value={daysBefore} disabled={!ready || busy} onChange={event => void changeDays(Number(event.target.value))}>{reminderLeadDays.map(days => <option key={days} value={days}>{days ? `Nhắc trước ${days} ngày` : 'Đúng ngày hủy'}</option>)}</StyledSelect></label>
       <button className="btn-push" type="button" disabled={!ready || busy || (!enabled && (!supported || !publicKey))} onClick={() => enabled ? void disable() : void enable()}><Bell size={17} />{busy ? 'Đang xử lý…' : enabled ? 'Tắt Web Push trên thiết bị' : 'Bật Web Push trên thiết bị'}</button>
       {enabled && <button className="ui-flat-control" type="button" disabled={busy} onClick={() => void testPush()}>Gửi thử</button>}
       <button className="btn-push" type="button" disabled={disabled || !upcomingCount} onClick={downloadCalendar}><Download size={17} /> Tải lịch nhắc ({upcomingCount} gói)</button>

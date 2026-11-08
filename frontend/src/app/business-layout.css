@@ -294,7 +294,7 @@
   .business-main .summary-grid > .content-panel { padding: 16px; }
   .business-main .daily-controls { flex-direction: column; }
   .business-main .daily-filter-group { width: 100%; }
-  .business-main .daily-filter-group > select { width: 100%; }
+  .business-main .daily-filter-group > :is(select, .web-select-trigger) { width: 100%; }
   .business-main .daily-measure-switch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
   .business-main .daily-measure-switch button { min-width: 0; justify-content: center; padding-inline: 8px; }
   .business-main .customer-card { padding: 20px; }

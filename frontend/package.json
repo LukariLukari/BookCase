@@ -12,7 +12,7 @@
     "cf:typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "start": "next start",
     "lint": "eslint",
-    "test:theme": "node scripts/test-theme.mjs",
+    "test:theme": "node scripts/test-theme.mjs && node scripts/test-styled-select.mjs",
     "test:db": "node scripts/test-db-runtime.mjs",
     "test:cloudflare": "node scripts/test-cloudflare-fast-paths.mjs && node scripts/test-cloudflare-schedule.mjs",
     "test:sounds": "node scripts/test-sound-effects.mjs",
