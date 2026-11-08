@@ -47,6 +47,7 @@ html[data-theme="dark"] .pointer-events-none[class*="blur-"] { display: none !im
    CSS surfaces/copy; photographs, covers, charts and category swatches retain
    their original colours, with no page-wide inversion/filter. */
 html[data-theme="dark"] [class*="bg-[#"],
+html[data-theme="dark"] [class~="bg-white"],
 html[data-theme="dark"] [class*="bg-white/"],
 html[data-theme="dark"] [class*="bg-green-"],
 html[data-theme="dark"] [class*="bg-emerald-"],
@@ -69,6 +70,10 @@ html[data-theme="dark"] :is(.pixel-panel, .pixel-tile, .pixel-logo, .card-push, 
 html[data-theme="dark"] :is(.card-push-subtle, .card-3d-subtle, .neu-surface-subtle) {
   background: var(--theme-raised) !important;
   border-color: var(--theme-border) !important;
+}
+html[data-theme="dark"] .business-swipe-content {
+  background: var(--theme-raised);
+  color: var(--theme-text);
 }
 html[data-theme="dark"] :is(.card-push-subtle, .card-3d-subtle, .neu-surface-subtle) :is(.btn-push, .btn-3d, .neu-btn) {
   background: var(--theme-hover) !important;

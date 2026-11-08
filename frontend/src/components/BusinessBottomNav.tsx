@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { BarChart3, Boxes, CircleDollarSign, PackageOpen, Plus, ReceiptText, ShoppingCart, Store, X } from 'lucide-react';
+import { BarChart3, Boxes, PackageOpen, Plus, Store, X } from 'lucide-react';
+import QuickCreateOptions from './QuickCreateOptions';
 
 const navItems = [
   { href: '/business/pos', label: 'Bán tại quầy', shortLabel: 'Tại quầy', icon: Store },
@@ -63,33 +64,7 @@ export default function BusinessBottomNav() {
                 transition={{ type: 'spring', stiffness: 340, damping: 24, mass: 0.72 }}
                 className="absolute bottom-[calc(100%+18px)] left-1/2 flex -translate-x-1/2 gap-3"
               >
-                <Link
-                  href="/business/orders#new-order"
-                  aria-label="Tạo đơn hàng từ hàng tồn"
-                  title="Tạo đơn hàng từ hàng tồn"
-                  className="quick-create-option btn-push-primary flex h-14 w-14 items-center justify-center"
-                  onClick={() => setQuickOpen(false)}
-                >
-                  <ReceiptText size={25} />
-                </Link>
-                <Link
-                  href="/business/pos"
-                  aria-label="Bán tại quầy"
-                  title="Bán tại quầy"
-                  className="quick-create-option btn-push-primary flex h-14 w-14 items-center justify-center"
-                  onClick={() => setQuickOpen(false)}
-                >
-                  <ShoppingCart size={25} />
-                </Link>
-                <Link
-                  href="/business/expenses"
-                  aria-label="Quản lý chi tiêu"
-                  title="Quản lý chi tiêu"
-                  className="quick-create-option btn-push-primary flex h-14 w-14 items-center justify-center"
-                  onClick={() => setQuickOpen(false)}
-                >
-                  <CircleDollarSign size={25} />
-                </Link>
+                <QuickCreateOptions close={() => setQuickOpen(false)} />
               </motion.div>
             )}
           </AnimatePresence>

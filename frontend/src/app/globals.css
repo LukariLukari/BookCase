@@ -2481,14 +2481,14 @@ button.quick-create-toggle:active {
   translate: none !important;
 }
 
-button.quick-create-toggle svg.quick-create-plus {
+svg.quick-create-plus {
   width: 44px !important;
   height: 44px !important;
   stroke-width: 3.5 !important;
 }
 
-button.quick-create-toggle svg.quick-create-plus,
-button.quick-create-toggle svg.quick-create-plus * {
+svg.quick-create-plus,
+svg.quick-create-plus * {
   color: #ea580c !important;
   stroke: #ea580c !important;
 }

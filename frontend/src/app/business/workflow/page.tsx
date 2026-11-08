@@ -1,2 +1,5 @@
-import WorkflowClient from './WorkflowClient';
-export default function WorkflowPage(){return <WorkflowClient/>;}
+import { redirect } from 'next/navigation';
+
+export default function WorkflowPage() {
+  redirect('/business/reports');
+}

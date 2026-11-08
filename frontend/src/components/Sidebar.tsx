@@ -17,7 +17,6 @@ import {
   ShoppingCart,
   Tags,
   Users,
-  Workflow,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -45,7 +44,6 @@ const groups = [
     label: 'Thống kê',
     icon: BarChart3,
     items: [
-      { href: '/business/workflow', label: 'Vận hành', icon: Workflow },
       { href: '/business/reports', label: 'Báo cáo', icon: BarChart3 },
       { href: '/business/orders', label: 'Đơn hàng', icon: ReceiptText },
       { href: '/business/daily', label: 'Doanh thu ngày', icon: CalendarDays },
