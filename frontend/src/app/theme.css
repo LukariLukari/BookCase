@@ -131,9 +131,9 @@ html[data-theme="dark"] button.finance-entry-add { background: #20587e !importan
 html[data-theme="dark"] :is(button.finance-entry-delete, .finance-category-dialog-button.danger) { background: #9c3528 !important; }
 html[data-theme="dark"] :is(.finance-category-icon-grid > button[aria-pressed="true"], .finance-calendar > button:hover) { background: var(--theme-hover) !important; }
 html[data-theme="dark"] .finance-calendar > button.is-today { color: var(--theme-accent); }
-html[data-theme="dark"] .business-main .finance-day-group > header { background: #a6532d !important; }
+html[data-theme="dark"] .business-main .finance-day-group > header { background: var(--theme-action) !important; }
 html[data-theme="dark"] .business-main .finance-day-heading,
-html[data-theme="dark"] .business-main .finance-day-heading :is(h2, h2 *, p, svg) { color: #fff !important; }
+html[data-theme="dark"] .business-main .finance-day-heading :is(h2, h2 *, p, svg) { color: var(--theme-on-color) !important; }
 
 /* Subscription-specific copy and status colours also need dark equivalents. */
 html[data-theme="dark"] .subscription-tracker { color: var(--theme-text); }

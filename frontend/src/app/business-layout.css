@@ -332,7 +332,7 @@
 .finance-transaction-search:focus-within { outline: 2px solid #7046b5; }
 .finance-transaction-search > span { font-size: 12px; white-space: nowrap; }
 .finance-entry-balance { flex: 0 0 auto; width: 100%; margin: 0 0 10px; text-align: left; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
-.business-main .finance-day-group > header { background: #e8a06a !important; }
+.business-main .finance-day-group > header { background: var(--pixel-primary) !important; }
 .business-main .finance-day-heading { gap: 9px; padding: 15px; }
 .business-main .finance-day-heading h2 { font-size: 18.75px !important; }
 .business-main .finance-day-heading p { font-size: 12px !important; line-height: 1.08 !important; }
