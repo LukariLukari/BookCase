@@ -6,7 +6,9 @@ import vm from 'node:vm';
 import ts from 'typescript';
 import bwipjs from 'bwip-js/node';
 import { PNG } from 'pngjs';
-import { RGBLuminanceSource, HybridBinarizer, BinaryBitmap, MultiFormatReader, BarcodeFormat, DecodeHintType } from '@zxing/library';
+import zxing from '@zxing/library';
+import browser from '@zxing/browser';
+const { RGBLuminanceSource, HybridBinarizer, BinaryBitmap, MultiFormatReader, BarcodeFormat, DecodeHintType } = zxing;
 
 function load(file, imports = {}) {
   const source = fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
@@ -17,8 +19,54 @@ function load(file, imports = {}) {
 }
 const util = load('src/lib/vouchers.ts');
 const barcode = load('src/lib/voucherBarcode.ts', { 'bwip-js/node': bwipjs });
+const scanner = load('src/lib/voucherScanner.ts', { '@zxing/browser': browser, '@zxing/library': zxing });
 const lookup = load('src/lib/voucherLookup.ts', { './vouchers': util });
 const request = (method = 'GET', body, owner = 'alice') => new Request('https://test.local/api/sales/vouchers', { method, headers: owner ? { authorization: `Bearer ${owner}` } : {}, ...(body === undefined ? {} : { body: JSON.stringify(body && typeof body==='object' && 'code' in body ? {benefitType:'amount',benefitValue:5000,...body} : body) }) });
+
+test('Camera scanner reads a voucher near the edge of an HD frame after unreadable frames', async context => {
+  const payload = barcode.voucherBarcodePayload('123e4567-e89b-42d3-a456-123456789abc');
+  const png = PNG.sync.read(await bwipjs.toBuffer({ bcid: 'code128', text: payload, scale: 3, height: 6, paddingwidth: 12, paddingheight: 3, backgroundcolor: 'FFFFFF' }));
+  const width = 1920, height = 1080;
+  const pixels = new Uint8ClampedArray(width * height).fill(255);
+  for (let y = 0; y < png.height; y++) {
+    for (let x = 0; x < png.width; x++) pixels[(y + 30) * width + x + 100] = png.data[(y * png.width + x) * 4];
+  }
+  const frame = () => new BinaryBitmap(new HybridBinarizer(new RGBLuminanceSource(pixels, width, height)));
+  // Default scanning only checks the middle rows and misses this visible code.
+  const warnings = context.mock.method(console, 'warn', () => {});
+  assert.throws(() => new browser.BrowserMultiFormatReader().decodeBitmap(frame()));
+  warnings.mock.restore();
+  const reader = scanner.createVoucherScanner();
+  assert.equal(reader.decodeBitmap(frame()).getText(), payload);
+
+  // Exercise the library's actual repeated scan loop without camera hardware.
+  const originalCanvas = browser.BrowserCodeReader.createCaptureCanvas;
+  const originalDraw = browser.BrowserCodeReader.drawImageOnCanvas;
+  browser.BrowserCodeReader.createCaptureCanvas = () => ({ getContext: () => ({}) });
+  browser.BrowserCodeReader.drawImageOnCanvas = () => {};
+  let attempts = 0;
+  reader.decodeFromCanvas = () => {
+    if (++attempts < 3) throw new zxing.NotFoundException();
+    return reader.decodeBitmap(frame());
+  };
+  let controls;
+  try {
+    const result = await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error('Scanner stopped retrying')), 3000);
+      controls = reader.scan({}, (result, error, running) => {
+        if (result) { running.stop(); clearTimeout(timeout); resolve(result); }
+        else assert.equal(scanner.isUnreadableBarcodeFrame(error), true);
+      });
+    });
+    assert.equal(result.getText(), payload);
+    assert.equal(attempts, 3);
+    assert.equal(scanner.isUnreadableBarcodeFrame(new Error('Canvas failed')), false);
+  } finally {
+    controls?.stop();
+    browser.BrowserCodeReader.createCaptureCanvas = originalCanvas;
+    browser.BrowserCodeReader.drawImageOnCanvas = originalDraw;
+  }
+});
 
 function fixture() {
   const rows = [], barcodeInputs = [], backups = [];

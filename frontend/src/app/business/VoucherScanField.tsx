@@ -10,6 +10,7 @@ import { validateVoucherBenefit, voucherBenefitLabel, type VoucherBenefit } from
 function BarcodeCamera({ onRead }: { onRead: (value: string) => void }) {
   const video = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState('');
+  const [ready, setReady] = useState(false);
   useEffect(() => {
     let active = true, captured = false;
     let stream: MediaStream | undefined;
@@ -17,15 +18,28 @@ function BarcodeCamera({ onRead }: { onRead: (value: string) => void }) {
     const start = async () => {
       try {
         if (!navigator.mediaDevices?.getUserMedia) throw new Error('CAMERA_UNAVAILABLE');
-        const { BrowserMultiFormatReader } = await import('@zxing/browser');
+        const { createVoucherScanner, isUnreadableBarcodeFrame } = await import('@/lib/voucherScanner');
         if (!active) return;
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 } }, audio: false });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
         if (!active) { stream.getTracks().forEach(track => track.stop()); return; }
-        const reader = new BrowserMultiFormatReader();
-        controls = await reader.decodeFromStream(stream, video.current!, (result, _error, scanner) => {
+        const track = stream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities?.() as (MediaTrackCapabilities & { focusMode?: string[] }) | undefined;
+        if (capabilities?.focusMode?.includes('continuous')) {
+          // Unsupported focus constraints must not prevent decoding.
+          await track.applyConstraints({ advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet] }).catch(() => {});
+        }
+        if (!active) { stream.getTracks().forEach(track => track.stop()); return; }
+        const reader = createVoucherScanner();
+        let failed = false;
+        controls = await reader.decodeFromStream(stream, video.current!, (result, scanError, scanner) => {
           if (active && !captured && result) { captured = true; scanner.stop(); onRead(result.getText()); }
+          else if (active && scanError && !isUnreadableBarcodeFrame(scanError)) {
+            failed = true;
+            setError('Bộ đọc mã vạch đã dừng. Hãy đóng cửa sổ và mở lại để thử quét lại.');
+          }
         });
-        if (!active) controls.stop();
+        if (!active || captured || failed) controls.stop();
+        else setReady(true);
       } catch {
         stream?.getTracks().forEach(track => track.stop());
         if (active) setError('Không mở được camera. Hãy cho phép truy cập camera hoặc nhập mã voucher bên ngoài cửa sổ này.');
@@ -36,7 +50,7 @@ function BarcodeCamera({ onRead }: { onRead: (value: string) => void }) {
   }, [onRead]);
   return <div>
     <video ref={video} autoPlay muted playsInline aria-label="Camera quét barcode voucher" className="voucher-camera"/>
-    <p className="mt-3 text-sm" role={error ? 'alert' : 'status'}>{error || 'Đưa toàn bộ barcode vào khung hình, giữ máy ổn định và đủ sáng.'}</p>
+    <p className="mt-3 text-sm" role={error ? 'alert' : 'status'}>{error || (ready ? 'Đang quét mã vạch… Đặt mã nằm ngang, đưa trọn hai đầu mã và khoảng trắng vào hình. Giữ máy ổn định, đủ sáng; voucher sẽ tự áp dụng khi đọc được mã.' : 'Đang khởi động bộ đọc mã vạch…')}</p>
   </div>;
 }
 
