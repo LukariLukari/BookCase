@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Literal
 from datetime import datetime
 
 class BookBase(BaseModel):
@@ -486,6 +486,7 @@ class BusinessOrderItemCreate(BaseModel):
 
 
 class BusinessOrderCreate(BaseModel):
+    sale_channel: Optional[Literal["pos", "inventory"]] = None
     ledger_id: str
     customer_name: str
     customer_contact: Optional[str] = None
@@ -512,6 +513,8 @@ class BusinessOrderItemResponse(BaseModel):
 
 
 class BusinessOrderResponse(BaseModel):
+    sale_channel: str = "unknown"
+    sale_channel_inferred: bool = False
     id: str
     ledger_id: str
     code: str

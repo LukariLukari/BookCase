@@ -39,9 +39,9 @@ function fixture() {
     '@/lib/auth':{verifyJwt:token=>({id:token})},
     '@/lib/businessBackup':{createAutomaticBusinessBackup:async()=>null},
   });
-  const call=async(method,code,id,owner='alice',omit=false)=>{
-    const body={ledger_id:'ledger',customer_name:'An',items:[{product_id:'product',quantity:2,unit_price:20000}],discount:999999,...(!omit?{voucher_code:code}:{})};
-    const req=new Request('https://test.local/api/backend/api/business/orders'+(id?'/'+id:''),{method,headers:{authorization:'Bearer '+owner},...(method==='GET'?{}:{body:JSON.stringify(body)})});
+  const call=async(method,code,id,owner='alice',omit=false,extra={})=>{
+    const body={ledger_id:'ledger',customer_name:'An',items:[{product_id:'product',quantity:2,unit_price:20000}],discount:999999,...(!omit?{voucher_code:code}:{}),...extra};
+    const req=new Request('https://test.local/api/backend/api/business/orders'+(id?'/'+id:'')+(method==='GET'?'?'+new URLSearchParams(extra):''),{method,headers:{authorization:'Bearer '+owner},...(method==='GET'?{}:{body:JSON.stringify(body)})});
     req.nextUrl=new URL(req.url);
     return route[method](req,{params:Promise.resolve({path:['api','business','orders',...(id?[id]:[])]})});
   };
@@ -57,6 +57,43 @@ test('A valid voucher is saved with the order, returned after reload, preserved 
   assert.equal((await f.call('GET').then(r=>r.json()))[0].voucher_code,'CAMON');
   assert.equal((await f.call('PUT',undefined,'order','alice',true).then(r=>r.json())).voucher_code,'CAMON');
   assert.equal((await f.call('PUT',null,'order').then(r=>r.json())).voucher_code,null);
+});
+
+test('Sales origin persists through edits, item notes survive and invalid sources cannot write', async () => {
+  const f=fixture();
+  assert.equal((await f.call('POST',null,undefined,'alice',false,{sale_channel:'forged'})).status,400);
+  assert.equal(f.writes(),0);
+  const created=await f.call('POST',null,undefined,'alice',false,{sale_channel:'pos',items:[{product_id:'product',quantity:2,unit_price:20000,note:'Ít đá'}]}).then(response=>response.json());
+  assert.equal(created.sale_channel,'pos');
+  assert.equal(created.sale_channel_inferred,false);
+  assert.equal(created.items[0].note,'Ít đá');
+  const updated=await f.call('PUT',undefined,'order','alice',true,{sale_channel:'inventory'}).then(response=>response.json());
+  assert.equal(updated.sale_channel,'pos');
+  assert.equal((await f.call('PUT',null,'order','bob')).status,404);
+});
+
+test('Legacy sales infer POS or inventory only when every product is known and agrees', async () => {
+  const f=fixture();
+  await f.call('POST',null);
+  f.rows[0].items[0].product={trackStock:false};
+  assert.equal((await f.call('GET').then(response=>response.json()))[0].sale_channel,'pos');
+  f.rows[0].items[0].product={trackStock:true};
+  assert.equal((await f.call('GET').then(response=>response.json()))[0].sale_channel,'inventory');
+  f.rows[0].items.push({...f.rows[0].items[0],product:{trackStock:false}});
+  assert.equal((await f.call('GET').then(response=>response.json()))[0].sale_channel,'unknown');
+  delete f.rows[0].items[0].product;
+  assert.equal((await f.call('GET').then(response=>response.json()))[0].sale_channel,'unknown');
+});
+
+test('Order pagination remains owner-scoped, bounded and deterministic', async () => {
+  const f=fixture(); let query;
+  f.db.businessOrder.findMany=async args=>{query=args;return []};
+  assert.equal((await f.call('GET',undefined,undefined,'alice',true,{ledger_id:'ledger',limit:'9999',offset:'500'})).status,200);
+  assert.equal(query.where.userId,'alice');
+  assert.equal(query.where.ledgerId,'ledger');
+  assert.equal(query.take,500);
+  assert.equal(query.skip,500);
+  assert.deepEqual(JSON.parse(JSON.stringify(query.orderBy)),[{orderedAt:'desc'},{createdAt:'desc'},{id:'desc'}]);
 });
 
 test('Invalid, forged and foreign vouchers are rejected before any order or stock mutations',async()=>{

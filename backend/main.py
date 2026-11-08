@@ -221,6 +221,11 @@ def ensure_business_tables(db: Session):
             db.commit()
         except Exception:
             db.rollback()
+        try:
+            db.execute(text("ALTER TABLE business_orders ADD COLUMN sale_channel VARCHAR NOT NULL DEFAULT 'unknown'"))
+            db.commit()
+        except Exception:
+            db.rollback()
         for table in [models.BusinessInventoryBatch.__table__, models.BusinessProduct.__table__, models.BusinessOrder.__table__, models.BusinessExpense.__table__, models.BusinessDataBackup.__table__]:
             for index in table.indexes:
                 index.create(bind=engine, checkfirst=True)
@@ -494,8 +499,16 @@ def serialize_business_order(order: models.BusinessOrder) -> dict:
     capital_cost = sum((item.unit_cost or 0) * (item.quantity or 0) for item in items)
     total = subtotal + (order.shipping_fee or 0) - (order.discount or 0)
     profit = total - capital_cost - (order.shipping_cost or 0) - (order.other_fee or 0)
+    channel = order.sale_channel or "unknown"
+    inferred = channel == "unknown"
+    if inferred and items and all(item.product and item.product.track_stock is False for item in items):
+        channel = "pos"
+    elif inferred and items and all(item.product and item.product.track_stock is True for item in items):
+        channel = "inventory"
     return {
         "id": order.id,
+        "sale_channel": channel,
+        "sale_channel_inferred": inferred,
         "ledger_id": order.ledger_id,
         "code": order.code,
         "customer_name": order.customer_name,
@@ -3071,10 +3084,10 @@ def get_business_orders(
     current_user: models.User = Depends(auth.get_current_user),
 ):
     ensure_business_tables(db)
-    query = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(models.BusinessOrder.user_id == current_user.id)
+    query = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items).selectinload(models.BusinessOrderItem.product)).filter(models.BusinessOrder.user_id == current_user.id)
     if ledger_id:
         query = query.filter(models.BusinessOrder.ledger_id == ledger_id)
-    orders = query.order_by(models.BusinessOrder.ordered_at.desc(), models.BusinessOrder.created_at.desc()).offset(max(offset, 0)).limit(min(max(limit, 1), 100)).all()
+    orders = query.order_by(models.BusinessOrder.ordered_at.desc(), models.BusinessOrder.created_at.desc(), models.BusinessOrder.id.desc()).offset(max(offset, 0)).limit(min(max(limit, 1), 500)).all()
     return [serialize_business_order(order) for order in orders]
 
 
@@ -3106,6 +3119,7 @@ def create_business_order(order_in: schemas.BusinessOrderCreate, db: Session = D
             raise HTTPException(status_code=409, detail=f"{product.name} chỉ còn {product.stock_quantity or 0} sản phẩm")
     order_count = db.query(models.BusinessOrder).filter(models.BusinessOrder.ledger_id == ledger.id).count() + 1
     order = models.BusinessOrder(
+        sale_channel=order_in.sale_channel or "unknown",
         user_id=current_user.id,
         ledger_id=ledger.id,
         code=f"DH-{ledger.month.replace('-', '')}-{order_count:04d}",
@@ -3136,13 +3150,13 @@ def create_business_order(order_in: schemas.BusinessOrderCreate, db: Session = D
             note=item.note,
         ))
     db.commit()
-    order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(models.BusinessOrder.id == order.id).first()
+    order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items).selectinload(models.BusinessOrderItem.product)).filter(models.BusinessOrder.id == order.id).first()
     return serialize_business_order(order)
 
 
 @app.put("/api/business/orders/{order_id}", response_model=schemas.BusinessOrderResponse)
 def update_business_order(order_id: str, order_in: schemas.BusinessOrderCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
-    order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(
+    order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items).selectinload(models.BusinessOrderItem.product)).filter(
         models.BusinessOrder.id == order_id,
         models.BusinessOrder.user_id == current_user.id,
     ).first()
@@ -3214,7 +3228,7 @@ def update_business_order(order_id: str, order_in: schemas.BusinessOrderCreate, 
             note=item.note,
         ))
     db.commit()
-    order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items)).filter(models.BusinessOrder.id == order.id).first()
+    order = db.query(models.BusinessOrder).options(selectinload(models.BusinessOrder.items).selectinload(models.BusinessOrderItem.product)).filter(models.BusinessOrder.id == order.id).first()
     return serialize_business_order(order)
 
 

@@ -196,6 +196,7 @@ model BusinessStockReceiptItem {
 
 model BusinessOrder {
   id              String   @id @default(uuid())
+  saleChannel     String   @default("unknown")
   userId          String
   ledgerId        String
   code            String
@@ -349,6 +350,7 @@ model BusinessOrderItem {
   quantity    Int
   unitPrice   Int    @default(0)
   unitCost    Int    @default(0)
+  note        String?
 
   order   BusinessOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product BusinessProduct @relation(fields: [productId], references: [id])

@@ -272,6 +272,7 @@ class BusinessOrder(Base):
     id = Column(String, primary_key=True, default=generate_uuid, index=True)
     user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
     ledger_id = Column(String, ForeignKey("business_ledgers.id", ondelete="CASCADE"), index=True, nullable=False)
+    sale_channel = Column(String, nullable=False, default="unknown", server_default="unknown")
     code = Column(String, index=True, nullable=False)
     customer_name = Column(String, index=True, nullable=False)
     customer_contact = Column(String, nullable=True)

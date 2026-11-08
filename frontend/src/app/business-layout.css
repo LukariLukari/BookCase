@@ -4,6 +4,7 @@
   padding-inline: 16px;
 }
 .business-main { min-width: 0; }
+.business-main .order-day-group + .order-day-group { margin-top: 28px; }
 .business-swipe-content { background: #f1eadf; }
 .customer-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
 .customer-tabs a { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 8px 14px; border: 2px solid var(--pixel-ink-dark); background: var(--pixel-panel-light); font-size: 13px; font-weight: 700; }

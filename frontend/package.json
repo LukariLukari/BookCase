@@ -20,6 +20,7 @@
     "test:subscriptions": "node scripts/test-subscriptions.mjs",
     "test:vouchers": "node scripts/test-vouchers.mjs && node scripts/test-voucher-orders.mjs",
     "test:invoices": "node scripts/test-invoice-image.mjs",
+    "test:sales": "node scripts/test-sales-orders.mjs && node scripts/test-voucher-orders.mjs",
     "test:push": "node scripts/test-web-push.mjs",
     "push:keys": "node scripts/generate-push-keys.mjs",
     "postinstall": "prisma generate"
@@ -51,7 +52,8 @@
     "react-dom": "19.2.8",
     "react-reader": "^2.0.15",
     "tesseract.js": "^7.0.0",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
