@@ -59,6 +59,12 @@ export const darkPalette = {
   '--theme-action-hover': ensureContrast('#893c00', ['#ffffff']),
 };
 
+export const lightPalette = {
+  ...darkPalette,
+  '--theme-success': '#385e26',
+  '--theme-danger': '#800020',
+};
+
 export function isThemePreference(value: unknown): value is ThemePreference {
   return value === 'light' || value === 'dark' || value === 'system';
 }
@@ -69,7 +75,8 @@ export function applyTheme(preference: ThemePreference) {
   root.dataset.theme = preference === 'system'
     ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
     : preference;
-  for (const [property, value] of Object.entries(darkPalette)) root.style.setProperty(property, value);
+  const palette = root.dataset.theme === 'dark' ? darkPalette : lightPalette;
+  for (const [property, value] of Object.entries(palette)) root.style.setProperty(property, value);
   window.dispatchEvent(new Event('billy-theme-change'));
 }
 
@@ -80,5 +87,6 @@ export const themeBootstrapScript = `(()=>{
   const root=document.documentElement;
   root.dataset.themePreference=preference;
   root.dataset.theme=preference==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):preference;
-  for(const [key,value] of Object.entries(${JSON.stringify(darkPalette)})) root.style.setProperty(key,value);
+  const palette=root.dataset.theme==='dark'?${JSON.stringify(darkPalette)}:${JSON.stringify(lightPalette)};
+  for(const [key,value] of Object.entries(palette)) root.style.setProperty(key,value);
 })();`;

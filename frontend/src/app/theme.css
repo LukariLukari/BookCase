@@ -1,5 +1,11 @@
 /* Palette values are contrast-balanced in lib/theme.ts, before the first paint. */
 :root { color-scheme: light; }
+html:not([data-theme="dark"]) .business-main :is(.text-moss-money, .business-money-display, [class*="text-green-"], [class*="text-emerald-"], [class*="text-[#198754]"], [class*="text-[#2f7a45]"], [class*="text-[#385E26]"]) {
+  color: var(--theme-success, #385e26) !important;
+}
+html:not([data-theme="dark"]) .business-main :is([class*="text-red-"], [class*="text-[#b63824]"]) {
+  color: var(--theme-danger, #800020) !important;
+}
 html[data-theme="dark"] {
   color-scheme: dark;
   --reps-black: var(--theme-text);
@@ -125,6 +131,9 @@ html[data-theme="dark"] button.finance-entry-add { background: #20587e !importan
 html[data-theme="dark"] :is(button.finance-entry-delete, .finance-category-dialog-button.danger) { background: #9c3528 !important; }
 html[data-theme="dark"] :is(.finance-category-icon-grid > button[aria-pressed="true"], .finance-calendar > button:hover) { background: var(--theme-hover) !important; }
 html[data-theme="dark"] .finance-calendar > button.is-today { color: var(--theme-accent); }
+html[data-theme="dark"] .business-main .finance-day-group > header { background: #a6532d !important; }
+html[data-theme="dark"] .business-main .finance-day-heading,
+html[data-theme="dark"] .business-main .finance-day-heading :is(h2, h2 *, p, svg) { color: #fff !important; }
 
 /* Subscription-specific copy and status colours also need dark equivalents. */
 html[data-theme="dark"] .subscription-tracker { color: var(--theme-text); }

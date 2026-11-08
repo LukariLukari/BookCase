@@ -2150,7 +2150,7 @@ select:focus,
   h3 { font-size: clamp(25px, 6.5vw, 34px) !important; }
 }
 
-/* Cart badge red background with crisp white text */
+/* A flat count indicator beside the cart icon. */
 .cart-badge,
 .cart-badge.shadow-md,
 .badge-count,
@@ -2160,6 +2160,10 @@ select:focus,
   background: #d32f2f !important;
   background-color: #d32f2f !important;
   color: #ffffff !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  pointer-events: none;
 }
 
 .cart-badge *,

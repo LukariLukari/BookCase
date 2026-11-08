@@ -9,7 +9,7 @@ const code = ts.transpileModule(fs.readFileSync(new URL('../src/lib/theme.ts', i
 }).outputText;
 const exports = {};
 vm.runInNewContext(code, { exports });
-const { contrastRatio, ensureContrast, darkPalette, darkSurfaces, themeBootstrapScript, isThemePreference } = exports;
+const { contrastRatio, ensureContrast, darkPalette, lightPalette, darkSurfaces, themeBootstrapScript, isThemePreference } = exports;
 
 test('contrast calculation matches black/white reference and is symmetric', () => {
   assert.equal(contrastRatio('#000000', '#ffffff'), 21);
@@ -56,8 +56,20 @@ test('before-paint bootstrap respects saved modes, system settings and unavailab
   assert.equal(isThemePreference('invalid'), false);
 });
 
+test('light mode uses moss green and burgundy before paint', () => {
+  for (const root of [bootstrap('light', true), bootstrap('system', false), bootstrap(null, false, true)]) {
+    assert.equal(root.style['--theme-success'], '#385e26');
+    assert.equal(root.style['--theme-danger'], '#800020');
+    for (const token of ['success', 'danger']) {
+      for (const surface of ['#f7f4eb', '#fffaf0', '#f3ddd5']) {
+        assert.ok(contrastRatio(root.style[`--theme-${token}`], surface) >= 4.5);
+      }
+    }
+  }
+});
+
 test('changing theme follows the device only in system mode and notifies controls', () => {
-  const root = { dataset: {}, style: { setProperty() {} } };
+  const root = { dataset: {}, style: { setProperty(key, value) { this[key] = value; } } };
   let deviceDark = true;
   let notifications = 0;
   const runtime = {};
@@ -69,11 +81,17 @@ test('changing theme follows the device only in system mode and notifies control
   });
   runtime.applyTheme('system');
   assert.equal(root.dataset.theme, 'dark');
+  assert.equal(root.style['--theme-success'], darkPalette['--theme-success']);
+  assert.equal(root.style['--theme-danger'], darkPalette['--theme-danger']);
   deviceDark = false;
   runtime.applyTheme('system');
   assert.equal(root.dataset.theme, 'light');
+  assert.equal(root.style['--theme-success'], lightPalette['--theme-success']);
+  assert.equal(root.style['--theme-danger'], lightPalette['--theme-danger']);
   runtime.applyTheme('dark');
   assert.equal(root.dataset.theme, 'dark');
   assert.equal(root.dataset.themePreference, 'dark');
+  assert.equal(root.style['--theme-success'], darkPalette['--theme-success']);
+  assert.equal(root.style['--theme-danger'], darkPalette['--theme-danger']);
   assert.equal(notifications, 3);
 });
