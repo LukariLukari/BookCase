@@ -10,11 +10,11 @@
 .customer-tabs a[aria-current="page"] svg { color: white !important; stroke: currentColor !important; }
 .customer-tabs a:focus-visible { outline: 3px solid var(--pixel-primary); outline-offset: 3px; }
 .business-main .voucher-section-title { font-size: 20px !important; line-height: 1.3 !important; }
-.voucher-grid { display: grid; gap: 20px; }
-.voucher-card { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; padding: 16px; min-width: 0; }
-.voucher-barcode { flex: 1 0 100%; min-width: 0; display: flex; justify-content: center; background: #fff; }
-.voucher-barcode img { display: block; width: 100%; max-width: 320px; height: auto; aspect-ratio: 1; }
-.voucher-card > div:last-child { flex-basis: 180px; }
+.voucher-grid { display: grid; gap: 12px; }
+.voucher-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-content: start; align-items: start; gap: 12px; padding: 12px; min-width: 0; }
+.voucher-barcode { width: 96px; height: 96px; background: #fff; }
+.voucher-barcode img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.voucher-card-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
 .voucher-code { display: block; font-size: 22px !important; font-weight: 900 !important; overflow-wrap: anywhere; }
 .voucher-action { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 6px 10px; font-size: 12px !important; }
 .voucher-action svg { width: 16px !important; height: 16px !important; flex-shrink: 0; }
@@ -23,6 +23,7 @@
 .voucher-scan-controls > button { flex-shrink: 0; min-height: 48px; }
 .voucher-scan-button { display: flex; width: 44px; align-items: center; justify-content: center; }
 .voucher-camera { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: contain; background: #171513; }
+@media (min-width: 640px) { .voucher-card { grid-template-columns: 112px minmax(0, 1fr); } .voucher-barcode { width: 112px; height: 112px; } }
 @media (min-width: 1280px) { .voucher-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .business-main .business-content { padding-block: 8px 32px; }
 .business-main .page-heading {
