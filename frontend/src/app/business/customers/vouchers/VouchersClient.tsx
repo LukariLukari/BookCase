@@ -70,7 +70,7 @@ export default function VouchersClient() {
       <header className="page-heading page-heading-panel card-push p-5">
         <p className="text-xs font-black uppercase tracking-wide">CRM bán hàng</p>
         <h1 className="mt-2 font-black">Voucher khách hàng</h1>
-        <p className="mt-2 text-sm">Tạo mã theo ý bạn và gửi barcode cho khách. Voucher không có ngày hết hạn.</p>
+        <p className="mt-2 text-sm">Tạo mã theo ý bạn và gửi mã QR cho khách. Voucher không có ngày hết hạn.</p>
       </header>
       <CustomersNav view="vouchers"/>
       <section className="card-push p-4 md:p-6" aria-labelledby="create-voucher-heading">
@@ -98,7 +98,7 @@ export default function VouchersClient() {
           : shown.length ? <div className="voucher-grid mt-5">{shown.map(voucher => <article key={voucher.id} className="card-push-subtle voucher-card">
             <div className="voucher-barcode">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={voucher.barcodeDataUrl} alt={`Mã barcode voucher ${voucher.code}`} width={600} height={150}/>
+              <img src={voucher.barcodeDataUrl} alt={`Mã QR voucher ${voucher.code}`} width={320} height={320}/>
             </div>
             <div className="min-w-0 flex-1">
               <b className="voucher-code select-all">{voucher.code}</b>
@@ -109,11 +109,11 @@ export default function VouchersClient() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <button type="button" onClick={() => { setEditing(voucher.id); setCode(voucher.code); setNote(voucher.note || ''); setBenefitType(voucher.benefitType === 'none' ? 'amount' : voucher.benefitType); setBenefitValue(voucher.benefitValue ? String(voucher.benefitValue) : ''); setBenefitText(voucher.benefitText || ''); setError(''); document.getElementById('create-voucher-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} className="voucher-action btn-push"><Pencil size={16}/>Sửa quyền lợi</button>
                 <button type="button" onClick={() => void copy(voucher.code)} className="voucher-action btn-push"><Copy size={16}/>Sao chép mã</button>
-                <a href={voucher.barcodeDataUrl} download={`voucher-${voucher.code}.png`} className="voucher-action btn-push"><Download size={16}/>Tải barcode</a>
+                <a href={voucher.barcodeDataUrl} download={`voucher-${voucher.code}.png`} className="voucher-action btn-push"><Download size={16}/>Tải mã QR</a>
               </div>
             </div>
           </article>)}</div>
-          : <div className="flex flex-col items-center gap-3 py-12 text-center"><Ticket size={32}/><p>{search.trim() ? 'Không tìm thấy voucher phù hợp.' : 'Chưa có voucher. Tạo mã đầu tiên để nhận barcode.'}</p></div>}
+          : <div className="flex flex-col items-center gap-3 py-12 text-center"><Ticket size={32}/><p>{search.trim() ? 'Không tìm thấy voucher phù hợp.' : 'Chưa có voucher. Tạo mã đầu tiên để nhận mã QR.'}</p></div>}
       </section>
     </div></main>
   </div>;
