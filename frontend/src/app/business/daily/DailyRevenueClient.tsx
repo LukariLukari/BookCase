@@ -221,7 +221,7 @@ export default function DailyRevenueClient() {
               {/* 1. BÊN TRÊN SỐ TIỀN: NGÀY THÁNG NĂM KÍCH THƯỚC NHỎ & BỘ CHỌN THỜI GIAN */}
               <div className="mb-4 flex flex-col items-center gap-2">
                 {/* Bộ điều khiển chọn ngày (Next / Prev / Input Date) */}
-                <div className="flex items-center gap-1.5 rounded-2xl border border-[#16587B]/20 bg-[#F5EEDD] p-1 shadow-inner">
+                <div className="date-controls flex items-center gap-1.5 p-1">
                   {/* Nút lùi 1 ngày */}
                   <button
                     type="button"
