@@ -14,11 +14,12 @@
 .voucher-card { display: grid; grid-template-columns: 88px minmax(0, 1fr); align-items: start; gap: 12px; padding: 12px; min-width: 0; width: 100%; max-width: 360px; }
 .voucher-barcode { width: 88px; height: 88px; background: #fff; }
 .voucher-barcode img { display: block; width: 100%; height: 100%; object-fit: contain; }
-.voucher-card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.voucher-card-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .business-main .voucher-code { display: block; color: #ea580c !important; font-size: 18px !important; font-weight: 900 !important; overflow-wrap: anywhere; }
 .business-main .voucher-benefit { color: var(--theme-success, #15803d) !important; }
-.voucher-action { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; }
-.voucher-action svg { width: 16px !important; height: 16px !important; flex-shrink: 0; }
+.business-main .voucher-card .voucher-action { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 28px; width: 28px; height: 28px; min-width: 28px; min-height: 28px; max-width: 28px; max-height: 28px; aspect-ratio: 1; padding: 0 !important; border-width: 1px !important; border-radius: 0 !important; box-sizing: border-box; box-shadow: 2px 2px 0 var(--pixel-shadow-dark) !important; }
+.business-main .voucher-card .voucher-action:active { box-shadow: none !important; }
+.business-main .voucher-card .voucher-action svg { width: 14px !important; height: 14px !important; flex-shrink: 0; }
 .voucher-scan-controls { display: flex; gap: 6px; min-width: 0; }
 .voucher-scan-controls > input { width: 0; height: 48px; }
 .voucher-scan-controls > button { flex-shrink: 0; min-height: 48px; }
