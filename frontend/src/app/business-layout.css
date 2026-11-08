@@ -362,8 +362,14 @@
 .finance-selection-actions.is-selecting { flex-wrap: wrap; }
 .finance-selection-actions.is-selecting > label { min-height: 36px; font-size: 12px !important; }
 .finance-selection-actions.is-selecting > span { font-size: 12px !important; }
-.finance-day-actions { display: flex; gap: 8px; }
-.finance-day-actions .finance-load-more { flex: 1; min-width: 0; min-height: 34px; padding: 6px 8px; font-size: 12px !important; }
+.finance-transaction-toolbar { gap: 6px; }
+.finance-transaction-toolbar > button { flex: 0 0 auto; min-height: 32px; padding: 4px 7px; font-size: 11px !important; white-space: nowrap; }
+.finance-transaction-toolbar > .finance-toggle-all { margin-right: auto; }
+.finance-toggle-all svg { transition: transform 180ms ease; }
+.finance-toggle-all svg.is-collapsed { transform: rotate(-90deg); }
+.finance-toggle-all-detail { display: none; }
+@media (min-width: 480px) { .finance-toggle-all-detail { display: inline; } }
+@media (prefers-reduced-motion: reduce) { .finance-toggle-all svg { transition: none; } }
 
 /* Continuous, short motion keeps controls responsive without animating layout. */
 .business-shell :is(button, a[href], [role="button"]) { touch-action: manipulation; }
