@@ -2,19 +2,113 @@
 
 import { Check, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import * as XLSX from 'xlsx';
 import ModalShell from './FinanceDialog';
 import { FinanceDatePicker } from './FinancePicker';
 import type { FinanceCategory } from './categoryData';
 
 type ExportType = 'all' | 'income' | 'expense';
-type ExportTransaction = { type: 'income' | 'expense'; categoryId: string | null; date: string };
+type ExportTransaction = {
+  id?: string;
+  type: 'income' | 'expense';
+  amount?: number;
+  currency?: string;
+  categoryId: string | null;
+  category?: string;
+  description?: string;
+  date: string;
+  account?: { id: string; name: string; type?: string };
+};
 const button = 'inline-flex items-center justify-center gap-2 border-2 border-black px-4 font-black text-[#171513] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50';
 const dateKey = (value: string) => new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit',
 }).format(new Date(value));
+const monthKey = (value: string) => new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit',
+}).format(new Date(value));
+const vnDate = (value: string) => new Intl.DateTimeFormat('vi-VN', {
+  timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit', year: 'numeric',
+}).format(new Date(value));
+const safeSheetName = (name: string) => name.replace(/[\\/?*:[\]]/g, '-').slice(0, 31) || 'Sheet';
+const slug = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'so-chi-tieu';
 
-export default function FinanceExportDialog({ bookId, transactions, categories, headers, close, notify }: {
+function buildClientFinanceWorkbook(bookName: string, rows: ExportTransaction[]) {
+  const xlsx = ((XLSX as unknown as { default?: typeof XLSX }).default || XLSX);
+  const workbook = xlsx.utils.book_new();
+  const sorted = [...rows].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  // 1. Tổng hợp tháng
+  const monthMap = new Map<string, { income: number; expense: number; count: number }>();
+  for (const item of sorted) {
+    const key = `${monthKey(item.date)} (${item.currency || 'VND'})`;
+    const current = monthMap.get(key) || { income: 0, expense: 0, count: 0 };
+    if (item.type === 'income') current.income += Number(item.amount || 0);
+    else current.expense += Number(item.amount || 0);
+    current.count += 1;
+    monthMap.set(key, current);
+  }
+  const monthlyRows: (string | number)[][] = [
+    [`BÁO CÁO THU CHI - ${bookName.toUpperCase()}`],
+    ['Tháng (Tiền tệ)', 'Tổng thu', 'Tổng chi', 'Chênh lệch (Thu - Chi)', 'Số giao dịch'],
+    ...[...monthMap.entries()].map(([label, m]) => [label, m.income, m.expense, m.income - m.expense, m.count]),
+  ];
+  const monthlySheet = xlsx.utils.aoa_to_sheet(monthlyRows);
+  monthlySheet['!cols'] = [{ wch: 22 }, { wch: 18 }, { wch: 18 }, { wch: 22 }, { wch: 14 }];
+  xlsx.utils.book_append_sheet(workbook, monthlySheet, safeSheetName('Tổng hợp tháng'));
+
+  // 2. Báo cáo từng ngày
+  const dayMap = new Map<string, { dateLabel: string; currency: string; income: number; expense: number; count: number }>();
+  for (const item of sorted) {
+    const dKey = `${dateKey(item.date)}_${item.currency || 'VND'}`;
+    const current = dayMap.get(dKey) || { dateLabel: vnDate(item.date), currency: item.currency || 'VND', income: 0, expense: 0, count: 0 };
+    if (item.type === 'income') current.income += Number(item.amount || 0);
+    else current.expense += Number(item.amount || 0);
+    current.count += 1;
+    dayMap.set(dKey, current);
+  }
+  const dailyRows: (string | number)[][] = [
+    ['Ngày', 'Tiền tệ', 'Tổng thu', 'Tổng chi', 'Chênh lệch', 'Số giao dịch'],
+    ...[...dayMap.values()].map(d => [d.dateLabel, d.currency, d.income, d.expense, d.income - d.expense, d.count]),
+  ];
+  const dailySheet = xlsx.utils.aoa_to_sheet(dailyRows);
+  dailySheet['!cols'] = [{ wch: 14 }, { wch: 10 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 14 }];
+  xlsx.utils.book_append_sheet(workbook, dailySheet, safeSheetName('Theo ngày'));
+
+  // 3. Chi tiết giao dịch
+  const detailRows: (string | number)[][] = [
+    ['Ngày', 'Tháng', 'Loại', 'Danh mục', 'Khoản tiền', 'Ghi chú', 'Tiền tệ', 'Số tiền', 'Thu (+)', 'Chi (-)'],
+    ...sorted.map(item => {
+      const amount = Number(item.amount || 0);
+      return [
+        vnDate(item.date),
+        monthKey(item.date),
+        item.type === 'income' ? 'Khoản thu' : 'Khoản chi',
+        item.category || 'Chưa phân loại',
+        item.account?.name || 'Tài khoản',
+        item.description || '',
+        item.currency || 'VND',
+        item.type === 'income' ? amount : -amount,
+        item.type === 'income' ? amount : 0,
+        item.type === 'expense' ? amount : 0,
+      ];
+    }),
+  ];
+  const detailSheet = xlsx.utils.aoa_to_sheet(detailRows);
+  detailSheet['!cols'] = [
+    { wch: 14 }, { wch: 10 }, { wch: 13 }, { wch: 22 }, { wch: 20 },
+    { wch: 32 }, { wch: 10 }, { wch: 18 }, { wch: 18 }, { wch: 18 },
+  ];
+  xlsx.utils.book_append_sheet(workbook, detailSheet, safeSheetName('Chi tiết giao dịch'));
+
+  const data = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+  return new Blob([data], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+}
+
+export default function FinanceExportDialog({ bookId, bookName = 'Sổ chi tiêu', transactions, categories, headers, close, notify }: {
   bookId: string;
+  bookName?: string;
   transactions: ExportTransaction[];
   categories: FinanceCategory[];
   headers: Record<string, string>;
@@ -35,11 +129,12 @@ export default function FinanceExportDialog({ bookId, transactions, categories, 
   const visibleCategories = categories.filter(category => type === 'all' || category.type === type);
   const selectedVisible = visibleCategories.filter(category => selected.has(category.id));
   const allVisibleSelected = visibleCategories.length > 0 && selectedVisible.length === visibleCategories.length;
-  const matchingCount = transactions.filter(item => {
+  const matchingTransactions = useMemo(() => transactions.filter(item => {
     const day = dateKey(item.date);
     return day >= from && day <= to && (type === 'all' || item.type === type)
       && (allVisibleSelected || (!!item.categoryId && selected.has(item.categoryId)));
-  }).length;
+  }), [transactions, from, to, type, allVisibleSelected, selected]);
+  const matchingCount = matchingTransactions.length;
 
   const toggleAll = () => setSelected(current => {
     const next = new Set(current);
@@ -54,18 +149,24 @@ export default function FinanceExportDialog({ bookId, transactions, categories, 
     setExporting(true);
     setError('');
     try {
-      const categoryIds = allVisibleSelected ? undefined : selectedVisible.map(category => category.id);
-      const response = await fetch('/api/business/finance/export', {
-        method: 'POST', headers, body: JSON.stringify({ bookId, from, to, type, categoryIds }),
-      });
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.detail || 'Không xuất được file Excel.');
+      let blob: Blob;
+      let filename = `bao-cao-thu-chi-${slug(bookName)}-${from}-den-${to}.xlsx`;
+      if (matchingTransactions.length > 0 && matchingTransactions.every(item => typeof item.amount === 'number')) {
+        blob = buildClientFinanceWorkbook(bookName, matchingTransactions);
+      } else {
+        const categoryIds = allVisibleSelected ? undefined : selectedVisible.map(category => category.id);
+        const response = await fetch('/api/business/finance/export', {
+          method: 'POST', headers, body: JSON.stringify({ bookId, from, to, type, categoryIds }),
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || 'Không xuất được file Excel.');
+        }
+        blob = await response.blob();
+        const disposition = response.headers.get('Content-Disposition') || '';
+        const encodedName = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+        if (encodedName) filename = decodeURIComponent(encodedName);
       }
-      const blob = await response.blob();
-      const disposition = response.headers.get('Content-Disposition') || '';
-      const encodedName = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
-      const filename = encodedName ? decodeURIComponent(encodedName) : `bao-cao-thu-chi-${from}-${to}.xlsx`;
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -73,7 +174,7 @@ export default function FinanceExportDialog({ bookId, transactions, categories, 
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
       notify('Đã xuất và tải file Excel về máy.');
       close();
     } catch (reason) {
@@ -93,7 +194,7 @@ export default function FinanceExportDialog({ bookId, transactions, categories, 
           <span className="mb-2 block text-xs font-black uppercase tracking-wide">Loại giao dịch</span>
           <div className="grid grid-cols-3 gap-2">
             {([['all', 'Tất cả'], ['income', 'Khoản thu'], ['expense', 'Khoản chi']] as const).map(([value, label]) =>
-              <button key={value} type="button" onClick={() => { setType(value); setError(''); }} aria-pressed={type === value} className={`${button} h-11 px-2 text-xs ${type === value ? 'bg-[#ef7c3b]' : 'bg-white'}`}>{label}</button>)}
+              <button key={value} type="button" onClick={() => { setType(value); setError(''); }} aria-pressed={type === value} className={`${button} h-11 px-2 text-xs ${type === value ? 'bg-[#ff8a24]' : 'bg-white'}`}>{label}</button>)}
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">

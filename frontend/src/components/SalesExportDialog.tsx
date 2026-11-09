@@ -16,7 +16,7 @@ export default function SalesExportDialog({ ledger, ledgerName, headers, report,
   initialFilters?: SalesFilters; close: () => void; notify: (message: string) => void; base?: string;
 }) {
   const [orders, setOrders] = useState<Order[]>(providedOrders || []);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!providedOrders?.length && !report);
   const [loadFailed, setLoadFailed] = useState(false);
   const [reload, setReload] = useState(0);
   const [error, setError] = useState('');
@@ -29,12 +29,22 @@ export default function SalesExportDialog({ ledger, ledgerName, headers, report,
   const selectedSections = selected.filter(key => visibleSections.some(([visible]) => visible === key));
   const matching = useMemo(() => filterSalesOrders(orders, filters), [orders, filters]);
   const expenseCount = canIncludeExpenses ? report!.expenses.filter(expense => (!filters.from || salesDay(expense.spent_at) >= filters.from) && (!filters.to || salesDay(expense.spent_at) <= filters.to)).length : 0;
-  const hasData = matching.length > 0 || (selectedSections.some(key => key === 'summary' || key === 'expenses') && expenseCount > 0);
+  const reportOrderCount = !orders.length && report ? Number(report.order_count || 0) : 0;
+  const hasData = matching.length > 0 || reportOrderCount > 0 || (selectedSections.some(key => key === 'summary' || key === 'expenses') && (expenseCount > 0 || !!report));
   useEffect(() => {
     const controller = new AbortController();
-    loadLedgerOrders(ledger, headers, base, controller.signal).then(rows => { if (!controller.signal.aborted) setOrders(rows); }).catch(reason => { if (!controller.signal.aborted) { setLoadFailed(true); setError(reason instanceof Error ? reason.message : 'Không tải được đơn hàng.'); } }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    loadLedgerOrders(ledger, headers, base, controller.signal)
+      .then(rows => { if (!controller.signal.aborted) { setOrders(rows); setLoadFailed(false); } })
+      .catch(reason => {
+        if (controller.signal.aborted) return;
+        if (!providedOrders?.length && !report) {
+          setLoadFailed(true);
+          setError(reason instanceof Error ? reason.message : 'Không tải được đơn hàng.');
+        }
+      })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [ledger, headers, base, reload]);
+  }, [ledger, headers, base, reload, providedOrders, report]);
 
   const update = (value: Partial<SalesFilters>) => { setFilters(current => ({ ...current, ...value })); setError(''); };
   const exportFile = async () => {
@@ -66,7 +76,7 @@ export default function SalesExportDialog({ ledger, ledgerName, headers, report,
         </div>
         {format === 'csv' && <p className="text-xs font-semibold">CSV chỉ chứa một bảng. Chọn .xlsx hoặc .xls để xuất nhiều phần trong cùng file.</p>}
         <p className="text-xs font-semibold">Đơn hủy vẫn có trong chi tiết nhưng không cộng doanh thu. Chi phí chung chỉ xuất khi chọn tất cả loại đơn, trạng thái và không giới hạn từ khóa.</p>
-        <div className="flex justify-between gap-3 rounded-xl bg-[#ffe69a] p-3 text-sm font-black"><span>Dữ liệu phù hợp</span><span>{loading ? 'Đang tải...' : `${matching.length} đơn${canIncludeExpenses ? ` · ${expenseCount} khoản chi` : ''}`}</span></div>
+        <div className="flex justify-between gap-3 rounded-xl bg-[#ffe69a] p-3 text-sm font-black"><span>Dữ liệu phù hợp</span><span>{loading ? 'Đang tải...' : `${matching.length || reportOrderCount} đơn${canIncludeExpenses ? ` · ${expenseCount} khoản chi` : ''}`}</span></div>
         {loading && <Loader2 className="mx-auto animate-spin" aria-label="Đang tải đơn hàng" />}
         {error && <p role="alert" className="text-sm font-bold text-red-700">{error}</p>}
         <button type="button" onClick={() => void exportFile()} disabled={exporting || loading || loadFailed || !hasData || !selectedSections.length || (!!filters.from && !!filters.to && filters.from > filters.to)} className={`${button} btn-push-primary w-full`}>

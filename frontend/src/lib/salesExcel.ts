@@ -17,28 +17,32 @@ export function salesExportTables(options: ExportOptions) {
     if (options.sections.includes(key)) tables.push({ key, headers, rows, money, dates });
   };
   const report = options.report ? filteredSalesReport(options.orders, options.report, options.filters) : undefined;
-  const revenue = active.reduce((total, order) => total + order.total, 0);
-  const profit = active.reduce((total, order) => total + order.profit, 0);
+  const fallbackReport = !options.orders.length && options.report ? options.report : undefined;
+  const revenue = active.length ? active.reduce((total, order) => total + order.total, 0) : Number(fallbackReport?.revenue || 0);
+  const profit = active.length ? active.reduce((total, order) => total + order.profit, 0) : Number(fallbackReport ? fallbackReport.net_profit + fallbackReport.operating_expense : 0);
   add('summary', ['Chỉ tiêu', 'Giá trị', 'Đơn vị'], [
     ['Sổ bán hàng', options.ledgerName, ''],
     ['Loại đơn', saleChannelLabels[options.filters.channel], ''],
     ['Từ ngày', options.filters.from || 'Toàn bộ', ''], ['Đến ngày', options.filters.to || 'Toàn bộ', ''],
     ['Trạng thái thanh toán', paymentLabel(options.filters.payment === 'all' ? 'Tất cả' : options.filters.payment), ''],
     ['Trạng thái đơn', saleStatusLabels[options.filters.status] || options.filters.status, ''],
-    ['Số đơn (không gồm đơn hủy)', active.length, 'đơn'],
-    ['Số món đã bán', active.reduce((total, order) => total + order.item_count, 0), 'món'],
+    ['Số đơn (không gồm đơn hủy)', active.length || Number(fallbackReport?.order_count || 0), 'đơn'],
+    ['Số món đã bán', active.length ? active.reduce((total, order) => total + order.item_count, 0) : (fallbackReport?.top_products?.reduce((sum, p) => sum + p.quantity, 0) || 0), 'món'],
     ['Doanh thu', revenue, 'đ'],
-    ['Giá vốn', active.reduce((total, order) => total + order.capital_cost, 0), 'đ'],
+    ['Giá vốn', active.length ? active.reduce((total, order) => total + order.capital_cost, 0) : Number(fallbackReport?.capital_cost || 0), 'đ'],
     ['Ship thực trả', active.reduce((total, order) => total + order.shipping_cost, 0), 'đ'],
     ['Phí khác', active.reduce((total, order) => total + order.other_fee, 0), 'đ'],
     ['Lãi từ đơn', profit, 'đ'],
-    ...(report ? [['Chi phí chung', report.operating_expense, 'đ'], ['Lợi nhuận ròng', report.net_profit, 'đ']] as Cell[][] : []),
+    ...(report ? [['Chi phí chung', report.operating_expense, 'đ'], ['Lợi nhuận ròng', fallbackReport ? fallbackReport.net_profit : report.net_profit, 'đ']] as Cell[][] : []),
   ]);
-  add('daily', ['Ngày', 'Loại đơn', 'Số đơn', 'Doanh thu', 'Lãi từ đơn'], groupSalesOrders(active).flatMap(([day, rows]) =>
-    (['pos', 'inventory', 'unknown'] as const).flatMap(channel => {
-      const matching = rows.filter(order => orderChannel(order) === channel);
-      return matching.length ? [[excelDate(day), saleChannelLabels[channel], matching.length, matching.reduce((total, order) => total + order.total, 0), matching.reduce((total, order) => total + order.profit, 0)]] : [];
-    })), [4, 5], [1]);
+  const dailyRows: Cell[][] = active.length
+    ? groupSalesOrders(active).flatMap(([day, rows]) =>
+      (['pos', 'inventory', 'unknown'] as const).flatMap(channel => {
+        const matching = rows.filter(order => orderChannel(order) === channel);
+        return matching.length ? [[excelDate(day), saleChannelLabels[channel], matching.length, matching.reduce((total, order) => total + order.total, 0), matching.reduce((total, order) => total + order.profit, 0)]] : [];
+      }))
+    : (fallbackReport?.daily || []).map(d => [excelDate(d.date), 'Tất cả đơn', d.orders, d.revenue, d.profit]);
+  add('daily', ['Ngày', 'Loại đơn', 'Số đơn', 'Doanh thu', 'Lãi từ đơn'], dailyRows, [4, 5], [1]);
   add('orders', ['Ngày', 'Mã đơn', 'Loại đơn', 'Nguồn phân loại', 'Khách hàng', 'Liên hệ', 'Sản phẩm', 'Số món', 'Tiền hàng', 'Ship thu khách', 'Giảm giá', 'Khách trả', 'Giá vốn', 'Ship thực trả', 'Phí khác', 'Lãi từ đơn', 'Thanh toán', 'Trạng thái đơn', 'Voucher', 'Ghi chú'], orders.map(order => [
     excelDate(order.ordered_at), order.code, saleChannelLabels[orderChannel(order)], order.sale_channel_inferred ? 'Nhận diện theo sản phẩm' : 'Lưu khi tạo đơn', order.customer_name, order.customer_contact || '',
     order.items.map(item => `${item.product_name} ×${item.quantity}`).join('; '), order.item_count, order.items.reduce((total, item) => total + item.quantity * item.unit_price, 0), order.shipping_fee, order.discount, order.total, order.capital_cost, order.shipping_cost, order.other_fee, order.profit, paymentLabel(order.payment_status), saleStatusLabels[order.status || 'confirmed'] || order.status || '', order.voucher_code || '', order.note || '',
@@ -50,7 +54,10 @@ export function salesExportTables(options: ExportOptions) {
     previous.quantity += item.quantity; previous.revenue += item.quantity * item.unit_price;
     products.set(item.product_id, previous);
   }
-  add('products', ['Sản phẩm', 'Số lượng bán', 'Tiền hàng trước giảm giá'], [...products.values()].sort((a, b) => b.revenue - a.revenue).map(product => [product.name, product.quantity, product.revenue]), [3]);
+  const productRows: Cell[][] = products.size
+    ? [...products.values()].sort((a, b) => b.revenue - a.revenue).map(product => [product.name, product.quantity, product.revenue])
+    : (fallbackReport?.top_products || []).map(p => [p.name, p.quantity, p.revenue]);
+  add('products', ['Sản phẩm', 'Số lượng bán', 'Tiền hàng trước giảm giá'], productRows, [3]);
   if (report) add('expenses', ['Ngày', 'Loại chi phí', 'Số tiền', 'Ghi chú'], report.expenses.map(expense => [excelDate(expense.spent_at), expense.category, expense.amount, expense.note || '']), [3], [1]);
   return tables;
 }
@@ -63,31 +70,46 @@ export async function createSalesExport(options: ExportOptions) {
   if (options.format === 'xls' && tables.some(table => table.rows.length + 2 > 65536)) throw new Error('Dữ liệu vượt giới hạn của .xls. Hãy chọn .xlsx hoặc thu hẹp bộ lọc.');
   if (tables.some(table => table.rows.length + 2 > 1048576)) throw new Error('Quá nhiều dòng. Hãy thu hẹp khoảng ngày để xuất.');
   if (options.format === 'xlsx') {
-    const { default: ExcelJS } = await import('exceljs');
-    const book = new ExcelJS.Workbook();
-    book.creator = 'Billy';
-    for (const table of tables) {
-      const sheet = book.addWorksheet(salesSectionLabels[table.key], { views: [{ state: 'frozen', ySplit: 2 }] });
-      sheet.mergeCells(1, 1, 1, table.headers.length);
-      sheet.getCell('A1').value = `Báo cáo: ${options.ledgerName}`;
-      sheet.getRow(1).font = { bold: true, size: 16 };
-      sheet.getRow(1).height = 30;
-      sheet.addRow(table.headers); sheet.addRows(table.rows);
-      sheet.getRow(2).font = { bold: true };
-      sheet.getRow(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFAD32' } };
-      sheet.autoFilter = { from: { row: 2, column: 1 }, to: { row: sheet.rowCount, column: table.headers.length } };
-      table.headers.forEach((_, index) => {
-        const column = sheet.getColumn(index + 1);
-        column.width = index === 0 ? 24 : 28;
-        column.alignment = { vertical: 'middle', wrapText: true };
-        if (table.money.includes(index + 1)) column.numFmt = '#,##0" đ";[Red]-#,##0" đ"';
-        if (table.dates.includes(index + 1)) column.numFmt = 'dd/mm/yyyy';
-        if (table.key === 'summary' && index === 1) column.numFmt = '#,##0;[Red]-#,##0';
-      });
+    try {
+      const excelModule = await import('exceljs');
+      const ExcelJS = (excelModule as unknown as { default?: typeof excelModule }).default || excelModule;
+      const book = new ExcelJS.Workbook();
+      book.creator = 'Billy';
+      for (const table of tables) {
+        const sheet = book.addWorksheet(salesSectionLabels[table.key], { views: [{ state: 'frozen', ySplit: 2 }] });
+        sheet.mergeCells(1, 1, 1, table.headers.length);
+        sheet.getCell('A1').value = `Báo cáo: ${options.ledgerName}`;
+        sheet.getRow(1).font = { bold: true, size: 16 };
+        sheet.getRow(1).height = 30;
+        sheet.addRow(table.headers); sheet.addRows(table.rows);
+        sheet.getRow(2).font = { bold: true };
+        sheet.getRow(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFAD32' } };
+        sheet.autoFilter = { from: { row: 2, column: 1 }, to: { row: sheet.rowCount, column: table.headers.length } };
+        table.headers.forEach((_, index) => {
+          const column = sheet.getColumn(index + 1);
+          column.width = index === 0 ? 24 : 28;
+          column.alignment = { vertical: 'middle', wrapText: true };
+          if (table.money.includes(index + 1)) column.numFmt = '#,##0" đ";[Red]-#,##0" đ"';
+          if (table.dates.includes(index + 1)) column.numFmt = 'dd/mm/yyyy';
+          if (table.key === 'summary' && index === 1) column.numFmt = '#,##0;[Red]-#,##0';
+        });
+      }
+      return { bytes: new Uint8Array(await book.xlsx.writeBuffer()), mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+    } catch {
+      const xlsxMod = await import('xlsx');
+      const XLSX = (xlsxMod as unknown as { default?: typeof xlsxMod }).default || xlsxMod;
+      const book = XLSX.utils.book_new();
+      for (const table of tables) {
+        const sheet = XLSX.utils.aoa_to_sheet([table.headers, ...table.rows], { dateNF: 'dd/mm/yyyy' });
+        sheet['!cols'] = table.headers.map(() => ({ wch: 26 }));
+        sheet['!autofilter'] = { ref: sheet['!ref'] || 'A1' };
+        XLSX.utils.book_append_sheet(book, sheet, salesSectionLabels[table.key]);
+      }
+      return { bytes: new Uint8Array(XLSX.write(book, { bookType: 'xlsx', type: 'array' })), mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
     }
-    return { bytes: new Uint8Array(await book.xlsx.writeBuffer()), mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
   }
-  const XLSX = await import('xlsx');
+  const xlsxMod = await import('xlsx');
+  const XLSX = (xlsxMod as unknown as { default?: typeof xlsxMod }).default || xlsxMod;
   const book = XLSX.utils.book_new();
   for (const table of tables) {
     const rows = options.format === 'csv' ? table.rows.map(row => row.map(value => value instanceof Date ? salesDay(value.toISOString()) : typeof value === 'string' && /^[\s]*[=+@-]/.test(value) ? `'${value}` : value)) : table.rows;
@@ -114,5 +136,5 @@ export async function downloadSalesExport(options: ExportOptions) {
   link.href = url;
   link.download = `bao-cao-${options.ledgerName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '-').trim() || 'ban-hang'}-${options.filters.from || 'tat-ca'}-${options.filters.to || 'hom-nay'}.${options.format}`;
   document.body.appendChild(link);
-  try { link.click(); } finally { link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+  try { link.click(); } finally { link.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000); }
 }

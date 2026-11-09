@@ -25,8 +25,8 @@
   .business-sidebar, .business-bottom-nav, .catalog-card, .customer-card,
   .kanban-column, .kanban-card, .voucher-card,
   .finance-panel, .finance-day-group, .finance-book-panel, .finance-sync-panel,
-  .finance-picker-panel, .finance-dialog, .finance-fullscreen-dialog,
-  .finance-entry-console, .finance-category-name-editor,
+  .finance-picker-panel, .finance-dialog,
+  .finance-category-name-editor,
   .subscription-calendar, .subscription-reminders, .subscription-welcome
 ) { border-radius: var(--ui-radius-panel) !important; }
 
@@ -71,14 +71,24 @@
 :root .finance-day-group .finance-day-heading[aria-expanded="false"] {
   border-radius: calc(var(--ui-radius-panel) - 2px) !important;
 }
-:root .finance-entry-console .finance-entry-toolbar {
-  border-radius: calc(var(--ui-radius-panel) - 2px) calc(var(--ui-radius-panel) - 2px) 0 0;
-}
 :root .finance-picker-panel .finance-picker-header {
   border-radius: calc(var(--ui-radius-panel) - 2px) calc(var(--ui-radius-panel) - 2px) 0 0;
 }
 :root .finance-picker-panel .finance-calendar-footer {
   border-radius: 0 0 calc(var(--ui-radius-panel) - 2px) calc(var(--ui-radius-panel) - 2px);
+}
+
+/* Keep the transaction amount entry frames crisp and unrounded. */
+:root :is(
+  dialog.finance-fullscreen-dialog,
+  .finance-fullscreen-dialog,
+  .finance-entry-fields,
+  .finance-entry-console,
+  .finance-entry-console .finance-entry-toolbar,
+  .finance-entry-categories,
+  .finance-amount-box
+) {
+  border-radius: 0 !important;
 }
 
 /* Smooth icon corners to match the controls around them. */

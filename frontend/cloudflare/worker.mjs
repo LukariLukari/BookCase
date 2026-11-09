@@ -11,9 +11,10 @@ const worker = {
     const pathname = new URL(request.url).pathname;
     if (pathname.startsWith('/api/')) {
       return runWithCloudflareRequestContext(request, env, ctx, async () => {
-        if (request.method === 'GET' && ['/api/health', '/api/admin/registration-codes', '/api/backend/api/admin/users', '/api/backend/admin/users'].includes(pathname)) {
+        if (request.method === 'GET') {
           const read = await import('../.cloudflare/read.mjs');
-          return read.readApi(request);
+          const fastResponse = await read.readApi(request);
+          if (fastResponse) return fastResponse;
         }
         const api = await import('../.cloudflare/api.mjs');
         return api.fetch(request);
