@@ -10,7 +10,7 @@ import { PublicThemeToggle } from '@/components/ThemeToggle';
 
 const montserrat = Montserrat({
   subsets: ["latin", "latin-ext", "vietnamese"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-montserrat",
 });
 

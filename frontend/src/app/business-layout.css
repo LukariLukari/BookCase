@@ -431,6 +431,14 @@ dialog.finance-fullscreen-dialog[open] {
 .account-avatar { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; border-radius: 50% !important; background: var(--theme-hover, #e8dfcf); color: var(--theme-text, #302d28); font-weight: 900; line-height: 1; }
 .account-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .account-sidebar-link { color: var(--theme-text, #302d28); }
+.business-sidebar .account-sidebar-link { width: 100%; min-height: 60px; padding: 10px 6px; }
+.business-sidebar .account-sidebar-link .account-sidebar-caption { font-family: var(--font-montserrat), Montserrat, sans-serif !important; font-size: 11px !important; font-weight: 300 !important; line-height: 1.5 !important; letter-spacing: 0 !important; text-transform: none !important; }
+.business-sidebar-home { position: relative; display: flex; flex: 0 0 auto; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 12px; min-width: 0; }
+@media (min-width: 1024px) {
+  .business-sidebar-home > .theme-control { position: absolute; top: 8px; right: 8px; }
+  .business-sidebar-home .business-sidebar-brand { padding-right: 48px; }
+  .business-sidebar .account-sidebar-link { padding-inline: 12px; }
+}
 .account-sidebar-link[aria-current="page"] { background: var(--theme-hover, #e8dfcf); border-radius: 12px; }
 html:not([data-theme="dark"]) .account-avatar { background: #e8dfcf; color: #302d28; }
 html:not([data-theme="dark"]) .account-sidebar-link { color: #302d28; }

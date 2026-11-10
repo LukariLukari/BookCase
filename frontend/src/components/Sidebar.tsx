@@ -177,15 +177,18 @@ export default function Sidebar() {
   return (
     <>
       <aside className="business-sidebar pixel-panel sticky top-6 hidden h-[calc(100vh-48px)] w-20 shrink-0 self-start flex-col overflow-hidden p-2.5 pb-3 pt-3.5 md:flex lg:w-64">
+        <div className="business-sidebar-home">
         <Link
           href="/business"
           title="Billy · Bán Hàng"
-          className="business-sidebar-brand pixel-logo mb-3 flex w-full shrink-0 flex-col items-center justify-center px-2 py-3 text-[#57575c] transition-transform active:translate-y-1 lg:items-start"
+          className="business-sidebar-brand pixel-logo flex w-full shrink-0 flex-col items-center justify-center px-2 py-3 text-[#57575c] transition-transform active:translate-y-1 lg:items-start"
         >
           <span className="brand-orange text-[30px] font-black uppercase leading-none tracking-wider lg:hidden">B.</span>
           <span className="brand-orange hidden text-2xl font-black uppercase leading-none tracking-wider lg:block xl:text-[30px]">Billy.</span>
           <span className="mt-1 hidden text-[12px] font-black uppercase tracking-widest text-[#6d6a64] lg:block">Bán Hàng</span>
         </Link>
+        <ThemeToggle compact />
+        </div>
         <nav aria-label="Điều hướng chính" className="business-sidebar-nav no-scrollbar space-y-3">
           {desktopLink(standaloneItems[0])}
           {desktopGroup(groups[0])}
@@ -196,10 +199,9 @@ export default function Sidebar() {
           {isAdmin && desktopLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}
         </nav>
         <div className="business-sidebar-footer mt-auto shrink-0 pt-3">
-          <ThemeToggle />
-          <Link href="/business/profile" title="Hồ sơ cá nhân" aria-current={active('/business/profile') ? 'page' : undefined} className="account-sidebar-link mb-3 flex min-w-0 items-center justify-center gap-2 px-1 py-2 lg:justify-start lg:px-3">
+          <Link href="/business/profile" title="Hồ sơ cá nhân" aria-current={active('/business/profile') ? 'page' : undefined} className="account-sidebar-link sidebar-nav-item btn-push mb-3 flex min-w-0 items-center justify-center gap-2 lg:justify-start">
             <UserAvatar name={user?.displayName || user?.username || 'User'} src={user?.avatarDataUrl} size={32}/>
-            <span className="hidden min-w-0 lg:block"><b className="block truncate text-sm">{user?.displayName || user?.username}</b><span className="block text-xs">Hồ sơ cá nhân</span></span>
+            <span className="hidden min-w-0 lg:block"><b className="block truncate text-sm">{user?.displayName || user?.username}</b><span className="account-sidebar-caption block">Hồ sơ cá nhân</span></span>
           </Link>
           <button
             onClick={logout}
