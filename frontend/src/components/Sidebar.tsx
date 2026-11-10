@@ -71,6 +71,8 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const isAdmin = user?.role === 'admin';
+  const displayName = (user?.displayName || user?.username || 'User').trim() || 'User';
+  const nameFontSize = displayName.length <= 10 ? 15 : displayName.length <= 14 ? 14 : displayName.length <= 18 ? 12.5 : 11;
   const active = (href: string) => href === '/business' || href === '/business/expenses' ? pathname === href : pathname.startsWith(href);
   const groupActive = (group: (typeof groups)[number]) => group.items.some(({ href }) => active(href));
 
@@ -199,9 +201,9 @@ export default function Sidebar() {
           {isAdmin && desktopLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}
         </nav>
         <div className="business-sidebar-footer mt-auto shrink-0 pt-3">
-          <Link href="/business/profile" title="Hồ sơ cá nhân" aria-current={active('/business/profile') ? 'page' : undefined} className="account-sidebar-link sidebar-nav-item btn-push mb-3 flex min-w-0 items-center justify-center gap-2 lg:justify-start">
-            <UserAvatar name={user?.displayName || user?.username || 'User'} src={user?.avatarDataUrl} size={32}/>
-            <span className="hidden min-w-0 lg:block"><b className="block truncate text-sm">{user?.displayName || user?.username}</b><span className="account-sidebar-caption block">Hồ sơ cá nhân</span></span>
+          <Link href="/business/profile" title="Hồ sơ cá nhân" aria-current={active('/business/profile') ? 'page' : undefined} className="account-sidebar-link sidebar-nav-item btn-push mb-3 flex min-w-0 items-center justify-center gap-2.5 lg:justify-start">
+            <UserAvatar name={displayName} src={user?.avatarDataUrl} size={32}/>
+            <span className="account-sidebar-copy hidden min-w-0 flex-1 lg:block"><b className="account-sidebar-name block truncate" style={{ fontSize: `${nameFontSize}px` }}>{displayName}</b><span className="account-sidebar-caption block">Hồ sơ cá nhân</span></span>
           </Link>
           <button
             onClick={logout}

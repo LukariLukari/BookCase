@@ -1,7 +1,6 @@
 import { Client } from 'pg';
 import { getRequestUser, verifyJwt } from '../src/lib/auth.ts';
 import { getCloudflareContext } from './context.mjs';
-import { financeReadQuery, financeReadResponse } from '../src/lib/financeRead.ts';
 
 async function query(text, values = []) {
   const { env } = getCloudflareContext();
@@ -26,16 +25,6 @@ export async function readApi(request) {
   const url = new URL(request.url);
   const pathname = url.pathname;
   try {
-    const financeKind = pathname.match(/^\/api\/business\/finance\/(bootstrap|books|categories|transactions)$/)?.[1];
-    // Date/type filters retain the existing route's validation and semantics.
-    if (financeKind && !(financeKind === 'transactions' && ['from', 'to', 'type'].some(key => url.searchParams.has(key)))) {
-      const user = getRequestUser(request);
-      if (!user) return json({ detail: 'Phiên đăng nhập không hợp lệ.' }, 401);
-      const statement = financeReadQuery(financeKind, user.id, url.searchParams.get('bookId') || '');
-      const result = await query(statement.text, statement.values);
-      const response = financeReadResponse(financeKind, result.rows[0]);
-      return json(response.body, response.status);
-    }
     if (pathname === '/api/health') {
       await query('SELECT 1');
       return json({ ok: true, database: 'postgresql', source: 'HYPERDRIVE' });
