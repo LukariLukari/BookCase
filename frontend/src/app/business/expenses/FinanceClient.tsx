@@ -16,6 +16,7 @@ import FinanceExportDialog from './FinanceExportDialog';
 import type { FinanceCategory } from './categoryData';
 import TransactionEntry from './TransactionEntry';
 import { WriteQueue } from './writeQueue';
+import { fetchFinanceData } from '@/lib/financeFetch';
 
 type AccountEdit = {id:string;previousName:string;newName:string;previousType:string;newType:string;previousCurrency:string;newCurrency:string;previousCreditLimit:number|null;newCreditLimit:number|null;previousBalance:number;newBalance:number;note:string;createdAt:string};
 type Account = { id:string;name:string;type:string;currency:string;openingBalance:number;creditLimit:number|null;balance:number;transactionCount:number;editHistory:AccountEdit[] };
@@ -106,17 +107,23 @@ export default function FinanceClient({view}:{view:'statistics'|'transactions'|'
   const canTransfer=!!current?.accounts.some((account,index)=>current.accounts.slice(index+1).some(other=>other.currency===account.currency));
   const categoriesFor=(type:'income'|'expense')=>categories.filter(category=>category.type===type).sort((a,b)=>(b.usageCount||0)-(a.usageCount||0));
 
-  const loadBooks=useCallback(async()=>{if(!token)return;const response=await fetch('/api/business/finance/books',{headers});const data=await response.json();if(!response.ok)throw new Error(data.detail||'Không tải được sổ chi tiêu.');setBooks(data);setBookId(currentId=>data.some((book:Book)=>book.id===currentId)?currentId:(data[0]?.id||''));},[headers,token]);
+  const loadBooks=useCallback(async()=>{if(!token)return;const data=await fetchFinanceData<Book[]>('/api/business/finance/books',headers);setBooks(data);setBookId(currentId=>data.some(book=>book.id===currentId)?currentId:(data[0]?.id||''));},[headers,token]);
   const transactionLoadVersion=useRef(0);
+  const transactionAbort=useRef<AbortController|null>(null);
+  const bootstrapBook=useRef<string|null>(null);
   const transactionLoadChanges=useRef<Map<string,Transaction>|null>(null);
+  const cancelTransactionRead=useCallback(()=>{++transactionLoadVersion.current;transactionAbort.current?.abort()},[]);
   const loadTransactions=useCallback(async(id:string)=>{
     const version=++transactionLoadVersion.current;
+    transactionAbort.current?.abort();
+    const controller=new AbortController();
+    transactionAbort.current=controller;
     if(!token||!id){setTransactions([]);return}
     const changes=new Map<string,Transaction>();
     transactionLoadChanges.current=changes;
-    const response=await fetch(`/api/business/finance/transactions?bookId=${encodeURIComponent(id)}`,{headers});
-    const data=await response.json();
-    if(!response.ok)throw new Error(data.detail||'Không tải được giao dịch.');
+    let data:{transactions:Transaction[]};
+    try{data=await fetchFinanceData(`/api/business/finance/transactions?bookId=${encodeURIComponent(id)}`,headers,controller.signal)}
+    catch(reason){if(version!==transactionLoadVersion.current||controller.signal.aborted)return;throw reason}
     if(version===transactionLoadVersion.current){
       // A save may finish while this snapshot is in flight. Keep confirmed changes.
       let items:Transaction[]=data.transactions;
@@ -125,11 +132,30 @@ export default function FinanceClient({view}:{view:'statistics'|'transactions'|'
       transactionLoadChanges.current=null;
     }
   },[headers,token]);
-  const loadCategories=useCallback(async()=>{if(!token)return;const response=await fetch('/api/business/finance/categories',{headers});const data=await response.json();if(!response.ok)throw new Error(data.detail||'Không tải được danh mục.');setCategories(data);},[headers,token]);
-  const refresh=useCallback(async()=>{setLoading(true);setError('');try{await Promise.all([loadBooks(),loadCategories()])}catch(reason){setError(reason instanceof Error?reason.message:'Không tải được dữ liệu.')}finally{setLoading(false)}},[loadBooks,loadCategories]);
+  const loadCategories=useCallback(async()=>{if(!token)return;const data=await fetchFinanceData<FinanceCategory[]>('/api/business/finance/categories',headers);setCategories(data);},[headers,token]);
+  const refresh=useCallback(async()=>{
+    if(!token)return;
+    const version=++transactionLoadVersion.current;
+    transactionAbort.current?.abort();
+    const controller=new AbortController();
+    transactionAbort.current=controller;
+    const changes=new Map<string,Transaction>();
+    transactionLoadChanges.current=changes;
+    setLoading(true);setError('');
+    try{
+      const data=await fetchFinanceData<{books:Book[];categories:FinanceCategory[];bookId:string;transactions:Transaction[]}>(`/api/business/finance/bootstrap?bookId=${encodeURIComponent(activeBookId.current)}`,headers,controller.signal);
+      if(version!==transactionLoadVersion.current)return;
+      let items=data.transactions;
+      for(const saved of changes.values())if(saved.account&&data.bookId===activeBookId.current)items=mergeTransaction(items,saved);
+      bootstrapBook.current=data.bookId;
+      setBooks(data.books);setCategories(data.categories);setTransactions(items);setBookId(data.bookId);
+      transactionLoadChanges.current=null;
+    }catch(reason){if(version===transactionLoadVersion.current&&!controller.signal.aborted)setError(reason instanceof Error?reason.message:'Không tải được dữ liệu.')}
+    finally{if(version===transactionLoadVersion.current)setLoading(false)}
+  },[headers,token]);
 
-  useEffect(()=>{const timer=window.setTimeout(refresh,0);return()=>window.clearTimeout(timer)},[refresh]);
-  useEffect(()=>{if(!bookId)return;const timer=window.setTimeout(()=>loadTransactions(bookId).catch(reason=>setError(reason instanceof Error?reason.message:'Không tải được giao dịch.')),0);return()=>window.clearTimeout(timer)},[bookId,loadTransactions]);
+  useEffect(()=>{const timer=window.setTimeout(refresh,0);return()=>{window.clearTimeout(timer);cancelTransactionRead()}},[refresh,cancelTransactionRead]);
+  useEffect(()=>{if(!bookId)return;if(bootstrapBook.current===bookId){bootstrapBook.current=null;return}bootstrapBook.current=null;const timer=window.setTimeout(()=>loadTransactions(bookId).catch(reason=>setError(reason instanceof Error?reason.message:'Không tải được giao dịch.')),0);return()=>{window.clearTimeout(timer);cancelTransactionRead()}},[bookId,loadTransactions,cancelTransactionRead]);
 
   useEffect(()=>{
     let idleTimer:number|undefined;

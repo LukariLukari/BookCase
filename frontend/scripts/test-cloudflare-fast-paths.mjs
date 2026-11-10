@@ -6,6 +6,8 @@ import { serveStaticPage } from '../cloudflare/static-pages.mjs';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
+const financeExports = {};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync(new URL('../src/lib/financeRead.ts', import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, { exports: financeExports });
 
 function readFixture(rows, claims = null, fail = false) {
   const calls = [];
@@ -22,10 +24,34 @@ function readFixture(rows, claims = null, fail = false) {
     pg: { Client },
     '../src/lib/auth.ts': { getRequestUser: () => claims, verifyJwt: () => claims },
     './context.mjs': { getCloudflareContext: () => ({ env: { HYPERDRIVE: { connectionString: 'test-only' } } }) },
+    '../src/lib/financeRead.ts': financeExports,
   };
   vm.runInNewContext(code, { exports, Response, URL, console: { error() {} }, require: name => imports[name] });
   return { read: exports.readApi, calls, ended: () => ended };
 }
+
+test('Finance bootstrap uses one bound query, authenticates ownership and never shares cached money data', async () => {
+  const row = { authenticated: true, bookId: 'book', books: [{ id: 'book' }], categories: [], transactions: [{ id: 'one' }] };
+  const f = readFixture([row], { id: "owner' OR 1=1--", role: 'user' });
+  const response = await f.read(new Request('https://test.local/api/business/finance/bootstrap?bookId=book'));
+  assert.equal(response.status, 200);
+  assert.equal(f.calls.length, 1); assert.equal(f.ended(), 1);
+  assert.equal(f.calls[0].text.includes("owner' OR 1=1--"), false);
+  assert.deepEqual(Array.from(f.calls[0].values), ["owner' OR 1=1--", 'book']);
+  assert.deepEqual(await response.json(), { bookId: 'book', books: row.books, categories: [], transactions: row.transactions });
+  assert.equal(response.headers.get('Cache-Control'), 'private, no-store');
+  assert.equal((await readFixture([], null).read(new Request('https://test.local/api/business/finance/bootstrap'))).status, 401);
+  assert.equal((await readFixture([{ authenticated: false }], { id: 'deleted' }).read(new Request('https://test.local/api/business/finance/bootstrap'))).status, 401);
+});
+
+test('Finance reads preserve empty accounts, book authorization and legacy date/type filters', async () => {
+  const f = readFixture([{ authenticated: true, bookId: null, books: [], categories: [], transactions: [] }], { id: 'owner' });
+  const base = 'https://test.local/api/business/finance/';
+  assert.deepEqual(await (await f.read(new Request(base + 'bootstrap'))).json(), { bookId: '', books: [], categories: [], transactions: [] });
+  assert.equal((await f.read(new Request(base + 'transactions?bookId=foreign'))).status, 404);
+  for (const query of ['from=2026-01-01', 'to=2026-01-31', 'type=expense']) assert.equal(await f.read(new Request(base + 'transactions?' + query)), null);
+  for (const kind of ['books', 'categories']) assert.deepEqual(await (await f.read(new Request(base + kind))).json(), []);
+});
 
 test('SQL read routes require admin access and always release connections', async () => {
   const denied = readFixture([], { id: 'seller', role: 'user' });
