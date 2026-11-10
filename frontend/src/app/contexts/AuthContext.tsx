@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { stopDevicePush } from '@/lib/webPushClient';
 
@@ -8,6 +8,9 @@ interface User {
   id: string;
   username: string;
   role: string;
+  email?: string | null;
+  displayName?: string;
+  avatarDataUrl?: string | null;
 }
 
 interface AuthContextType {
@@ -16,6 +19,7 @@ interface AuthContextType {
   login: (token: string, userData: User) => void;
   logout: () => void;
   isLoading: boolean;
+  updateProfile: (profile: Pick<User, 'id' | 'email' | 'displayName' | 'avatarDataUrl'>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,6 +66,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
+  const updateProfile = useCallback((profile: Pick<User, 'id' | 'email' | 'displayName' | 'avatarDataUrl'>) => {
+    setUser(previous => previous?.id === profile.id ? {
+      ...previous, email: profile.email, displayName: profile.displayName, avatarDataUrl: profile.avatarDataUrl,
+    } : previous);
+  }, []);
+
+  useEffect(() => {
+    if (!token) return;
+    const controller = new AbortController();
+    fetch('/api/account/profile', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store', signal: controller.signal })
+      .then(async response => { if (response.ok) updateProfile(await response.json()); })
+      .catch(() => { /* The existing session remains usable if profile loading fails. */ });
+    return () => controller.abort();
+  }, [token, updateProfile]);
+
+  useEffect(() => {
+    if (!user || !token) return;
+    try { localStorage.setItem('user', JSON.stringify(user)); }
+    catch { /* An avatar exceeding browser storage must not clear the login token. */ }
+  }, [user, token]);
+
   useEffect(() => {
     if (!isLoading && requiresLogin && (!user || !token)) {
       router.replace('/login');
@@ -93,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isLoading, updateProfile }}>
       {requiresLogin && (isLoading || !user || !token) ? (
         <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#fef9f4] px-4 text-[#585556]">
           <p role="status">{isLoading ? 'Đang kiểm tra phiên đăng nhập...' : 'Đang chuyển đến trang đăng nhập...'}</p>

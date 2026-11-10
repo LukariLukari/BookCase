@@ -17,11 +17,13 @@ import {
   ShoppingCart,
   Tags,
   Users,
+  UserRound,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import ThemeToggle from './ThemeToggle';
+import UserAvatar from './UserAvatar';
 
 const standaloneItems = [
   { href: '/business/pos', label: 'Bán tại quầy', icon: ShoppingCart },
@@ -195,7 +197,10 @@ export default function Sidebar() {
         </nav>
         <div className="business-sidebar-footer mt-auto shrink-0 pt-3">
           <ThemeToggle />
-          <p className="hidden truncate px-3 pb-2 text-sm font-bold text-[#6d6a64] lg:block">{user?.username}</p>
+          <Link href="/business/profile" title="Hồ sơ cá nhân" aria-current={active('/business/profile') ? 'page' : undefined} className="account-sidebar-link mb-3 flex min-w-0 items-center justify-center gap-2 px-1 py-2 lg:justify-start lg:px-3">
+            <UserAvatar name={user?.displayName || user?.username || 'User'} src={user?.avatarDataUrl} size={32}/>
+            <span className="hidden min-w-0 lg:block"><b className="block truncate text-sm">{user?.displayName || user?.username}</b><span className="block text-xs">Hồ sơ cá nhân</span></span>
+          </Link>
           <button
             onClick={logout}
             title="Đăng xuất"
@@ -213,6 +218,7 @@ export default function Sidebar() {
           <span className="text-sm font-black uppercase tracking-widest text-[#6d6a64]">Bán Hàng</span>
         </Link>
         <div className="flex items-center gap-2">
+        <Link href="/business/profile" title="Hồ sơ cá nhân" aria-label="Mở hồ sơ cá nhân"><UserAvatar name={user?.displayName || user?.username || 'User'} src={user?.avatarDataUrl} size={32}/></Link>
         <ThemeToggle compact />
         <button
           onClick={() => setOpen(value => !value)}
@@ -233,6 +239,7 @@ export default function Sidebar() {
             {mobileGroup(groups[0])}
             {mobileGroup(groups[1])}
             {mobileGroup(groups[2])}
+            {mobileLink({ href: '/business/profile', label: 'Hồ sơ cá nhân', icon: UserRound })}
             {isAdmin && <div className="min-w-0">{mobileLink({ href: '/admin/registration-codes', label: 'Tài khoản', icon: KeyRound })}</div>}
           </nav>
           <button onClick={logout} className="sidebar-nav-item btn-push-danger mt-3 flex h-11 w-full items-center gap-2 rounded-full px-3 text-sm font-black">

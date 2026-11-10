@@ -15,6 +15,7 @@ model User {
   password_hash String
   role          String   @default("user")
   createdAt     DateTime @default(now())
+  profile       UserProfile?
 
   // Relations
   products            BusinessProduct[]
@@ -38,6 +39,18 @@ model User {
   subscriptions       CustomerSubscription[]
   subscriptionApps    SubscriptionApp[]
   pushDevices         SubscriptionPushDevice[]
+}
+
+model UserProfile {
+  userId            String    @id
+  displayName       String    @default("")
+  phone             String    @default("")
+  bio               String    @default("")
+  avatarDataUrl     String?
+  passwordChangedAt DateTime?
+  updatedAt         DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // Device registrations intentionally stay out of portable business backups.
