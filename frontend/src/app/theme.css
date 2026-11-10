@@ -119,11 +119,21 @@ html[data-theme="dark"] .finance-swipe-content {
   background: var(--theme-panel) !important;
   color: var(--theme-text);
 }
-html[data-theme="dark"] .finance-transaction-search input {
+/* Match the specificity of the shared dark input rule above. */
+html[data-theme="dark"] .finance-book-panel .finance-book-search .finance-transaction-search input[type="search"] {
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
 }
+html[data-theme="dark"] :is(.finance-account-filters, .finance-account-picker) .finance-account-filter {
+  background: var(--theme-raised) !important;
+  color: var(--theme-text) !important;
+}
+html[data-theme="dark"] :is(.finance-account-filters, .finance-account-picker) .finance-account-filter[aria-pressed="true"] {
+  background: var(--theme-action) !important;
+  color: var(--theme-on-color) !important;
+}
+html[data-theme="dark"] .finance-account-filter[aria-pressed="true"] svg { color: inherit !important; stroke: currentColor !important; }
 html[data-theme="dark"] :is(.finance-picker-placeholder, .finance-calendar > b, .finance-sync-pending) { color: var(--theme-muted); }
 html[data-theme="dark"] .finance-custom-color::before { background: var(--theme-raised); }
 html[data-theme="dark"] .finance-custom-color > svg { stroke: var(--theme-text) !important; }

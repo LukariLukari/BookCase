@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import FinanceNav from './FinanceNav';
 import FinanceBookPanel from './FinanceBookPanel';
 import { accountDelta, categoryDelta, mergeTransaction, overlayTransactions } from './transactionUpdates';
-import { ArrowRightLeft, BookOpen, Check, ChevronDown, Search, CreditCard, FileSpreadsheet, History, Landmark, Loader2, Minus, Plus, Pencil, ReceiptText, Trash2, Wallet } from 'lucide-react';
+import { ArrowRightLeft, BookOpen, Check, ChevronDown, Search, CreditCard, FileSpreadsheet, History, Landmark, ListFilter, Loader2, Minus, Plus, Pencil, ReceiptText, Trash2, Wallet } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import PieChart from '@/components/PieChart';
@@ -485,6 +485,7 @@ const TransactionList=memo(function TransactionList({bookName,accounts,bookContr
 }){
   const [query,setQuery]=useState('');
   const [accountFilter,setAccountFilter]=useState('all');
+  const [accountPickerOpen,setAccountPickerOpen]=useState(false);
   const [collapsedDays,setCollapsedDays]=useState<Set<string>>(()=>new Set());
   const accountCounts=useMemo(()=>{
     const map=new Map<string,number>();
@@ -496,6 +497,9 @@ const TransactionList=memo(function TransactionList({bookName,accounts,bookContr
     });
     return map;
   },[allTransactions]);
+  const rankedAccounts=useMemo(()=>[...accounts].sort((a,b)=>(accountCounts.get(b.id)||0)-(accountCounts.get(a.id)||0)),[accounts,accountCounts]);
+  const topAccounts=rankedAccounts.slice(0,3);
+  const selectedOtherAccount=accounts.find(account=>account.id===accountFilter&&!topAccounts.some(top=>top.id===account.id));
   const transactions=useMemo(()=>{
     const normalize=(value:string)=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase();
     const terms=normalize(query).trim().split(/\s+/).filter(Boolean);
@@ -537,7 +541,20 @@ const TransactionList=memo(function TransactionList({bookName,accounts,bookContr
   },[visibleCount,transactions.length]);
   const currencyTotals=(items:Transaction[],type:'income'|'expense')=>{const totals=new Map<string,number>();items.filter(item=>item.type===type).forEach(item=>totals.set(item.currency,(totals.get(item.currency)||0)+item.amount));return [...totals.entries()]};
   return <section className="finance-transaction-list flex flex-col gap-[14px]">
-    <FinanceBookPanel name={bookName} search={<div className="space-y-2"><label className="finance-transaction-search"><Search size={20} aria-hidden="true"/><input type="search" value={query} onChange={event=>{setQuery(event.target.value);setVisibleCount(80)}} aria-label="Tìm giao dịch" placeholder="Tìm số tiền, ghi chú, danh mục..."/><span>{transactions.length}/{allTransactions.length}</span></label>{accounts.length>0&&<div className="flex items-center gap-1.5 overflow-x-auto pb-0.5" role="group" aria-label="Lọc theo khoản tiền"><button type="button" onClick={()=>{setAccountFilter('all');setVisibleCount(80)}} aria-pressed={accountFilter==='all'} className={`shrink-0 border-2 border-black px-2.5 py-1 text-xs font-black ${accountFilter==='all'?'bg-[#ff8a24] text-[#171513]':'bg-[#fffaf0] text-[#171513]'}`}>Tất cả khoản tiền ({allTransactions.length})</button>{accounts.map(account=><button key={account.id} type="button" onClick={()=>{setAccountFilter(account.id);setVisibleCount(80)}} aria-pressed={accountFilter===account.id} className={`shrink-0 border-2 border-black px-2.5 py-1 text-xs font-black ${accountFilter===account.id?'bg-[#ff8a24] text-[#171513]':'bg-[#fffaf0] text-[#171513]'}`}>{account.name} ({accountCounts.get(account.id)||0})</button>)}</div>}</div>}>{bookControls}</FinanceBookPanel>
+    <FinanceBookPanel name={bookName} search={<div className="space-y-2"><label className="finance-transaction-search"><Search size={20} aria-hidden="true"/><input type="search" value={query} onChange={event=>{setQuery(event.target.value);setVisibleCount(80)}} aria-label="Tìm giao dịch" placeholder="Tìm số tiền, ghi chú, danh mục..."/><span>{transactions.length}/{allTransactions.length}</span></label>{accounts.length>0&&<div className="finance-account-filters">
+        <div className="finance-account-filter-scroll" role="group" aria-label="Lọc theo khoản tiền">
+          <button type="button" onClick={()=>{setAccountFilter('all');setVisibleCount(80)}} aria-pressed={accountFilter==='all'} className="finance-account-filter">Tất cả khoản tiền ({allTransactions.length})</button>
+          {topAccounts.map(account=><button key={account.id} type="button" onClick={()=>{setAccountFilter(account.id);setVisibleCount(80)}} aria-pressed={accountFilter===account.id} className="finance-account-filter">{account.name} ({accountCounts.get(account.id)||0})</button>)}
+        </div>
+        {accounts.length>3&&<button type="button" className="finance-account-filter finance-account-filter-more" aria-label={selectedOtherAccount?`Chọn khoản tiền khác, đang lọc: ${selectedOtherAccount.name}`:'Xem tất cả khoản tiền để lọc'} title={selectedOtherAccount?`Đang lọc: ${selectedOtherAccount.name}`:'Xem tất cả khoản tiền'} aria-haspopup="dialog" aria-expanded={accountPickerOpen} aria-pressed={!!selectedOtherAccount} onClick={()=>setAccountPickerOpen(true)}><ListFilter size={20}/></button>}
+      </div>}</div>}>{bookControls}</FinanceBookPanel>
+    {accountPickerOpen&&<ModalShell title="Lọc theo khoản tiền" close={()=>setAccountPickerOpen(false)}>
+      <div className="finance-account-picker" role="group" aria-label="Tất cả khoản tiền">
+        <button type="button" className="finance-account-filter" aria-pressed={accountFilter==='all'} onClick={()=>{setAccountFilter('all');setVisibleCount(80);setAccountPickerOpen(false)}}>Tất cả khoản tiền ({allTransactions.length})</button>
+        {rankedAccounts.map(account=><button key={account.id} type="button" className="finance-account-filter" aria-pressed={accountFilter===account.id} onClick={()=>{setAccountFilter(account.id);setVisibleCount(80);setAccountPickerOpen(false)}}><span>{account.name} ({accountCounts.get(account.id)||0})</span>{accountFilter===account.id&&<Check size={18}/>}</button>)}
+      </div>
+    </ModalShell>}
+
     {transactions.length>0&&<div className={`finance-selection-actions finance-transaction-toolbar${selecting?' is-selecting':''}`} role="region" aria-label="Chọn và thao tác giao dịch">
       <PushButton type="button" className="finance-toggle-all bg-[#ffe69a]" aria-pressed={allCollapsed} aria-label={allCollapsed?'Mở rộng tất cả':'Thu gọn tất cả'} title={allCollapsed?'Mở rộng tất cả':'Thu gọn tất cả'} onClick={()=>setCollapsedDays(allCollapsed?new Set():new Set(allGroups.map(([day])=>day)))}><ChevronDown size={15} className={allCollapsed?'is-collapsed':''}/><span>{allCollapsed?'Mở rộng':'Thu gọn'}<span className="finance-toggle-all-detail"> tất cả</span></span></PushButton>
       {selecting?<>
