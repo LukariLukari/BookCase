@@ -485,11 +485,12 @@ function TransactionRow({item,remove,edit,selection,pending,disabled}:RowProps){
         onKeyDown={event=>{if(!blocked&&event.key==='Delete'){event.preventDefault();setRevealed(true)}if(event.key==='Escape')setRevealed(false)}}>
         {item.type==='transfer'?<span className="finance-transaction-icon" data-type="transfer"><ArrowRightLeft aria-hidden="true"/></span>:item.categoryIcon?<FinanceCategoryIcon name={item.categoryIcon} color={item.categoryColor||undefined}/>:<span className="finance-transaction-icon" data-type={item.type}>{item.type==='income'?<Plus aria-hidden="true"/>:<Minus aria-hidden="true"/>}</span>}
         <span className="finance-transaction-details">
-          <b className="block truncate text-sm">{item.category}</b>
-          <span className="block truncate text-xs font-semibold">{item.account.name}{item.destinationAccount&&` → ${item.destinationAccount.name}`}{item.description&&` · ${item.description}`}</span>
+          <b className="finance-transaction-category">{item.category}</b>
+          {item.description&&<span className="finance-transaction-note">{item.description}</span>}
         </span>
         <span className="finance-transaction-value">
           <strong className={`finance-transaction-amount ${item.type==='income'?'text-green-700':item.type==='expense'?'text-red-700':'text-[#7046b5]'}`}>{item.type==='income'?'+':item.type==='expense'?'-':'↔ '}{money(item.amount,item.currency)}</strong>
+          <span className="finance-transaction-account">{item.account.name}{item.destinationAccount&&` → ${item.destinationAccount.name}`}</span>
         {pending&&<span role="status" className="finance-sync-pending"><Loader2 size={13} className="animate-spin"/> Đang lưu</span>}
         </span>
       </button>

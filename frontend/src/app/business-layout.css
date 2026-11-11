@@ -686,9 +686,32 @@
   height: 24px !important;
 }
 
-.finance-transaction-row b {
-  font-size: 14.25px !important;
-  line-height: 1.1 !important;
+.finance-transaction-row .finance-transaction-category {
+  display: block;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+  overflow-wrap: anywhere;
+}
+
+.finance-transaction-note {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-montserrat), Montserrat, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 300 !important;
+  line-height: 1.5 !important;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.finance-transaction-account {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  overflow-wrap: anywhere;
 }
 
 .finance-transaction-row p {
@@ -868,11 +891,12 @@
 }
 
 .business-main .finance-day-group>header {
-  background: var(--pixel-primary) !important;
+  background: #ffe69a !important;
+  border-bottom: 1px solid #171513;
 }
 
 html:not([data-theme="dark"]) .business-main .finance-day-group>header {
-  background: #ffad33 !important;
+  background: #ffe69a !important;
   color: #171513 !important;
 }
 
@@ -893,6 +917,66 @@ html:not([data-theme="dark"]) .business-main .finance-day-group>header {
 .business-main .finance-day-heading span {
   padding: 3px 9px;
   font-size: 12px !important;
+}
+
+.finance-account-filters,
+.finance-account-filter-scroll {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.finance-account-filter-scroll {
+  flex: 1 1 auto;
+}
+
+.finance-account-filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #171513;
+  background: #fffaf0;
+  box-shadow: 2px 2px 0 #171513;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.finance-account-filter[aria-pressed="true"] {
+  background: #ffe69a;
+  box-shadow: inset 0 0 0 1px #171513;
+}
+
+.finance-account-filter:focus-visible {
+  outline: 3px solid #7046b5;
+  outline-offset: 3px;
+}
+
+.finance-account-filter-more {
+  flex: 0 0 auto;
+  width: 40px;
+  padding: 8px;
+}
+
+.finance-account-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 4px 8px;
+}
+
+.finance-account-picker .finance-account-filter {
+  width: 100%;
+  justify-content: space-between;
 }
 
 /* Keep search prominent while the book controls collapse on scroll. */

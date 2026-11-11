@@ -146,7 +146,7 @@ html[data-theme="dark"] button.finance-entry-add { background: #20587e !importan
 html[data-theme="dark"] :is(button.finance-entry-delete, .finance-category-dialog-button.danger) { background: #9c3528 !important; }
 html[data-theme="dark"] :is(.finance-category-icon-grid > button[aria-pressed="true"], .finance-calendar > button:hover) { background: var(--theme-hover) !important; }
 html[data-theme="dark"] .finance-calendar > button.is-today { color: var(--theme-accent); }
-html[data-theme="dark"] .business-main .finance-day-group > header { background: var(--theme-accent) !important; }
+html[data-theme="dark"] .business-main .finance-day-group > header { background: var(--theme-warning-fill, #ffe69a) !important; border-bottom-color: var(--theme-border); }
 html[data-theme="dark"] .business-main .finance-day-heading,
 html[data-theme="dark"] .business-main .finance-day-heading :is(h2, h2 *, p, svg) { color: var(--theme-on-color) !important; }
 
