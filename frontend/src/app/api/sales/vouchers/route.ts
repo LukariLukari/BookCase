@@ -3,7 +3,7 @@ import { makeVoucherBarcode } from '@/lib/voucherBarcode';
 import { getRequestUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { createAutomaticBusinessBackup } from '@/lib/businessBackup';
-import { normalizeVoucherCode, validateVoucherCode, validateVoucherBenefit, type VoucherBenefit } from '@/lib/vouchers';
+import { normalizeVoucherCode, validateVoucherCode, validateVoucherBenefit, readBuyXPayYRule, type VoucherBenefit } from '@/lib/vouchers';
 
 export const runtime = 'nodejs';
 const select = { id: true, code: true, note: true, createdAt: true, benefitType: true, benefitValue: true, benefitText: true } as const;
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
   const benefitError = validateVoucherBenefit(benefit);
   if (benefitError) return NextResponse.json({ detail: benefitError }, { status: 400 });
   if (error || note.length > 500) return NextResponse.json({ detail: error || 'Ghi chú tối đa 500 ký tự.' }, { status: 400 });
+  if (!await ownsEligibleProducts(user.id, benefit)) return NextResponse.json({ detail: 'Gói được chọn không tồn tại trong tài khoản của bạn.' }, { status: 400 });
   try {
     const voucher = await prisma.businessVoucher.create({ data: { userId: user.id, code, note: note || null, ...benefit }, select });
     await createAutomaticBusinessBackup(user.id, 'Sau khi tạo voucher');
@@ -41,8 +42,16 @@ export async function POST(request: Request) {
 function benefitInput(body: object): VoucherBenefit {
   const value = body as Record<string, unknown>;
   return { benefitType: value.benefitType as VoucherBenefit['benefitType'],
-    benefitValue: value.benefitType === 'custom' ? 0 : value.benefitValue as number,
-    benefitText: value.benefitType === 'custom' && typeof value.benefitText === 'string' ? value.benefitText.trim() : null };
+    benefitValue: value.benefitType === 'custom' || value.benefitType === 'buy_x_pay_y' ? 0 : value.benefitValue as number,
+    benefitText: (value.benefitType === 'custom' || value.benefitType === 'buy_x_pay_y') && typeof value.benefitText === 'string' ? value.benefitText.trim() : null };
+}
+
+async function ownsEligibleProducts(userId: string, benefit: VoucherBenefit) {
+  const rule = readBuyXPayYRule(benefit);
+  if (!rule) return true;
+  // Archived packages may remain selected when editing an existing voucher.
+  const count = await prisma.businessProduct.count({ where: { userId, id: { in: rule.eligibleProductIds } } });
+  return count === rule.eligibleProductIds.length;
 }
 
 export async function PATCH(request: Request) {
@@ -56,6 +65,7 @@ export async function PATCH(request: Request) {
   if (error || note.length > 500) return NextResponse.json({ detail: error || 'Ghi chú tối đa 500 ký tự.' }, { status: 400 });
   const owned = await prisma.businessVoucher.findFirst({ where: { id: body.id, userId: user.id }, select: { id: true } });
   if (!owned) return NextResponse.json({ detail: 'Không tìm thấy voucher.' }, { status: 404 });
+  if (!await ownsEligibleProducts(user.id, benefit)) return NextResponse.json({ detail: 'Gói được chọn không tồn tại trong tài khoản của bạn.' }, { status: 400 });
   const voucher = await prisma.businessVoucher.update({ where: { id: owned.id }, data: { ...benefit, note: note || null }, select });
   await createAutomaticBusinessBackup(user.id, 'Sau khi sửa quyền lợi voucher');
   return NextResponse.json({ ...voucher, barcodeDataUrl: await makeVoucherBarcode(voucher.id) });

@@ -5,7 +5,7 @@ import axios from 'axios';
 import { ScanQrCode, Loader2, X } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import FinanceDialog from './expenses/FinanceDialog';
-import { validateVoucherBenefit, voucherBenefitLabel, type VoucherBenefit } from '@/lib/vouchers';
+import { validateVoucherBenefit, voucherBenefitLabel, groupVoucherDiscount, type VoucherBenefit, type VoucherLine } from '@/lib/vouchers';
 
 function VoucherCamera({ onRead }: { onRead: (value: string) => void }) {
   const video = useRef<HTMLVideoElement>(null);
@@ -80,7 +80,7 @@ function VoucherCamera({ onRead }: { onRead: (value: string) => void }) {
   </div>;
 }
 
-export default function VoucherScanField({ value, benefit, onChange, onBusyChange }: { value: string; benefit?: VoucherBenefit | null; onChange: (code: string, benefit?: VoucherBenefit | null) => void; onBusyChange: (busy: boolean) => void }) {
+export default function VoucherScanField({ value, benefit, items = [], onChange, onBusyChange }: { value: string; benefit?: VoucherBenefit | null; items?: VoucherLine[]; onChange: (code: string, benefit?: VoucherBenefit | null) => void; onBusyChange: (busy: boolean) => void }) {
   const { token } = useAuth();
   const [input, setInput] = useState('');
   const [note, setNote] = useState('');
@@ -103,6 +103,7 @@ export default function VoucherScanField({ value, benefit, onChange, onBusyChang
     } finally { submitting.current = false; if (alive.current) { setBusy(false); onBusyChange(false); } }
   }, [token, onChange, onBusyChange]);
   const onRead = useCallback((raw: string) => { void read(raw); }, [read]);
+  const groupResult = benefit?.benefitType === 'buy_x_pay_y' && !validateVoucherBenefit(benefit) ? groupVoucherDiscount(benefit, items) : null;
   return <div className="min-w-0">
     <label className="mb-2 block text-xs font-black" htmlFor="sale-voucher-code">Voucher (không bắt buộc)</label>
     <div className="voucher-scan-controls">
@@ -111,6 +112,7 @@ export default function VoucherScanField({ value, benefit, onChange, onBusyChang
       <button type="button" disabled={busy} onClick={() => { setError(''); setOpen(true); }} aria-label="Quét QR voucher" title="Quét QR voucher" className="btn-push voucher-scan-button"><ScanQrCode size={22}/></button>
     </div>
     {value && <div role="status" className="mt-2 text-sm"><div className="flex items-center justify-between gap-2"><b className="break-all text-green-700">Đã áp dụng: {value}</b><button type="button" disabled={busy} onClick={() => { onChange(''); setNote(''); setError(''); }} aria-label="Bỏ voucher" className="flex h-9 w-9 shrink-0 items-center justify-center"><X size={16}/></button></div>{benefit && <p className="mt-1 break-words text-sm font-bold">{voucherBenefitLabel(benefit)}</p>}{benefit?.benefitType==='custom'&&<p className="text-xs">Nhân viên thực hiện quyền lợi; không tự trừ kho quà tặng.</p>}{note && <p className="break-words text-xs">{note}</p>}</div>}
+    {groupResult && <p role="status" className="mt-2 text-xs">{groupResult.freeQuantity > 0 ? `${groupResult.eligibleQuantity} suất thuộc gói áp dụng · Miễn ${groupResult.freeQuantity} suất giá thấp nhất · Giảm ${groupResult.discount.toLocaleString('vi-VN')} đ` : `${groupResult.eligibleQuantity} suất thuộc gói áp dụng. Chưa đủ nhóm theo điều kiện voucher; hiện chưa giảm tiền.`}</p>}
     {error && <p role="alert" className="mt-2 text-xs text-red-700">{error}</p>}
     {open && <FinanceDialog title="Quét QR voucher" close={() => setOpen(false)}><VoucherCamera onRead={onRead}/></FinanceDialog>}
   </div>;

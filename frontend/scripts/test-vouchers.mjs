@@ -105,6 +105,12 @@ test('Camera scanner reads a voucher near the edge of an HD frame after unreadab
 
 function fixture() {
   const rows = [], barcodeInputs = [], backups = [];
+  const products = [
+    { id: 'basic', userId: 'alice', name: 'Workshop cơ bản', sellingPrice: 200000, trackStock: false, isActive: true },
+    { id: 'advanced', userId: 'alice', name: 'Workshop nâng cao', sellingPrice: 350000, trackStock: false, isActive: true },
+    { id: 'archived', userId: 'alice', name: 'Gói cũ', sellingPrice: 150000, trackStock: false, isActive: false },
+    { id: 'foreign', userId: 'bob', name: 'Gói tài khoản khác', sellingPrice: 100000, trackStock: false, isActive: true },
+  ];
   const prisma = { businessVoucher: {
     findFirst: async ({where}) => {const row=rows.find(row=>row.userId===where.userId && (where.id ? row.id===where.id : row.code===where.code));return row?{id:row.id,code:row.code,note:row.note,benefitType:row.benefitType,benefitValue:row.benefitValue,benefitText:row.benefitText}:null;},
     update: async ({where,data}) => { const row=rows.find(row=>row.id===where.id);Object.assign(row,data);const {userId,...result}=row;return result; },
@@ -116,6 +122,9 @@ function fixture() {
       const { userId, ...result } = row;
       return result;
     },
+  }, businessProduct: {
+    count: async ({ where }) => products.filter(product => product.userId === where.userId && where.id.in.includes(product.id)).length,
+    findMany: async ({ where }) => products.filter(product => product.userId === where.userId).map(({ userId, ...product }) => product),
   } };
   const route = load('src/app/api/sales/vouchers/route.ts', {
     'next/server': { NextResponse: { json: (body, options) => Response.json(body, options) } },
@@ -130,7 +139,12 @@ function fixture() {
     '@/lib/auth': { getRequestUser: req => {const id=req.headers.get('authorization')?.slice(7);return ['alice','bob'].includes(id)?{id}:null;} },
     '@/lib/db': { prisma }, '@/lib/voucherLookup': lookup,
   });
-  return { route, resolve, rows, barcodeInputs, backups };
+  const catalog = load('src/app/api/sales/vouchers/products/route.ts', {
+    'next/server': { NextResponse: { json: (body, options) => Response.json(body, options) } },
+    '@/lib/auth': { getRequestUser: req => {const id=req.headers.get('authorization')?.slice(7);return ['alice','bob'].includes(id)?{id}:null;} },
+    '@/lib/db': { prisma },
+  });
+  return { route, resolve, catalog, rows, barcodeInputs, backups };
 }
 
 test('Listing and creating vouchers require authentication', async () => {
@@ -214,4 +228,39 @@ test('Benefits reject invalid discounts and edits preserve the barcode and accou
   assert.equal(edited.barcodeDataUrl,first.barcodeDataUrl);
   assert.equal(edited.benefitType,'percent');
   assert.equal(edited.benefitValue,10);
+});
+
+test('Group voucher rules persist through create, lookup, edit and reload with owner-scoped packages', async () => {
+  const f = fixture();
+  const rule = { requiredQuantity: 4, paidQuantity: 3, grouping: 'mixed', eligibleProductIds: ['basic', 'advanced'], repeatable: true, maxFreeQuantity: 2 };
+  const body = { code: 'WORKSHOP4', benefitType: 'buy_x_pay_y', benefitValue: 999999, benefitText: JSON.stringify(rule) };
+  const response = await f.route.POST(request('POST', body));
+  assert.equal(response.status, 201);
+  const created = await response.json();
+  assert.equal(created.benefitValue, 0);
+  assert.equal(created.benefitText, body.benefitText);
+  const resolved = await f.resolve.POST(request('POST', { value: `BV:${created.id}` })).then(result => result.json());
+  assert.equal(resolved.benefitText, body.benefitText);
+  assert.match(util.voucherBenefitLabel(resolved), /Đi 4 tính tiền 3/);
+  for (const ids of [[], ['foreign'], ['basic', 'missing']]) {
+    assert.equal((await f.route.POST(request('POST', { ...body, code: 'INVALID', benefitText: JSON.stringify({ ...rule, eligibleProductIds: ids }) }))).status, 400);
+    assert.equal((await f.route.PATCH(request('PATCH', { ...body, id: created.id, benefitText: JSON.stringify({ ...rule, eligibleProductIds: ids }) }))).status, 400);
+  }
+  const updatedRule = { ...rule, grouping: 'same_product', eligibleProductIds: ['basic', 'archived'], repeatable: false };
+  const edited = await f.route.PATCH(request('PATCH', { id: created.id, ...body, benefitText: JSON.stringify(updatedRule) })).then(result => result.json());
+  assert.equal(edited.barcodeDataUrl, created.barcodeDataUrl);
+  assert.equal(edited.benefitText, JSON.stringify(updatedRule));
+  const [reloaded] = await f.route.GET(request()).then(result => result.json());
+  assert.equal(reloaded.benefitText, JSON.stringify(updatedRule));
+  assert.equal((await f.route.PATCH(request('PATCH', { id: created.id, ...body }, 'bob'))).status, 404);
+});
+
+test('Package picker requires authentication and never exposes another owner’s packages', async () => {
+  const f = fixture();
+  assert.equal((await f.catalog.GET(request('GET', undefined, null))).status, 401);
+  const response = await f.catalog.GET(request());
+  assert.match(response.headers.get('cache-control'), /no-store/);
+  const packages = await response.json();
+  assert.deepEqual(packages.map(product => product.id), ['basic', 'advanced', 'archived']);
+  assert.deepEqual((await f.catalog.GET(request('GET', undefined, 'bob')).then(result => result.json())).map(product => product.id), ['foreign']);
 });

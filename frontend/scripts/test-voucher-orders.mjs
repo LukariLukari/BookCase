@@ -124,3 +124,28 @@ test('Server computes percentage and gift benefits and preserves the original or
   rule={...rule,benefitType:'none',benefitValue:0};
   assert.equal((await f.call('POST','CAMON')).status,400);
 });
+
+test('Workshop group discounts use server order lines, recalculate on edits and retain saved rules', async () => {
+  const f = fixture();
+  const config = { requiredQuantity: 4, paidQuantity: 3, grouping: 'mixed', eligibleProductIds: ['basic', 'advanced'], repeatable: true, maxFreeQuantity: null };
+  let voucher = { id: 'v', code: 'CAMON', benefitType: 'buy_x_pay_y', benefitValue: 0, benefitText: JSON.stringify(config) };
+  f.db.businessVoucher.findFirst = async () => voucher;
+  f.db.businessProduct.findFirst = async ({ where }) => ({ id: where.id, name: where.id, stockQuantity: 100, unitCost: 10000, trackStock: false });
+  const items = [{ product_id: 'basic', quantity: 2, unit_price: 200000 }, { product_id: 'advanced', quantity: 2, unit_price: 350000 }, { product_id: 'addon', quantity: 4, unit_price: 10000 }];
+  const created = await f.call('POST', 'CAMON', undefined, 'alice', false, { items, shipping_fee: 30000, discount: 999999, voucher_benefit: { benefitType: 'percent', benefitValue: 100 } }).then(response => response.json());
+  assert.equal(created.discount, 200000);
+  assert.equal(created.total, 970000);
+  assert.equal(created.voucher_benefit.benefitText, JSON.stringify(config));
+  voucher = { ...voucher, benefitText: JSON.stringify({ ...config, grouping: 'same_product' }) };
+  // Omitted code preserves the original mixed-group rule, but new quantities recalculate the amount.
+  const updatedItems = [{ product_id: 'basic', quantity: 4, unit_price: 200000 }, { product_id: 'advanced', quantity: 4, unit_price: 350000 }];
+  const updated = await f.call('PUT', undefined, 'order', 'alice', true, { items: updatedItems }).then(response => response.json());
+  assert.equal(updated.discount, 400000);
+  assert.equal(updated.voucher_benefit.benefitText, JSON.stringify(config));
+  const belowThreshold = await f.call('PUT', undefined, 'order', 'alice', true, { items: [{ product_id: 'basic', quantity: 1, unit_price: 200000 }] }).then(response => response.json());
+  assert.equal(belowThreshold.discount, 0);
+  // Explicitly reapplying the code uses the new same-package rule.
+  const reapplied = await f.call('PUT', 'CAMON', 'order', 'alice', false, { items }).then(response => response.json());
+  assert.equal(reapplied.discount, 0);
+  assert.equal((await f.call('GET').then(response => response.json()))[0].voucher_benefit.benefitText, voucher.benefitText);
+});
