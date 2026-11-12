@@ -2,7 +2,7 @@
 
 import StyledSelect from '@/components/StyledSelect';
 import { useEffect, useId, useMemo, useState } from 'react';
-import { CalendarClock, Check, ChevronLeft, ChevronRight, Loader2, Pencil, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
+import { CalendarClock, Check, ChevronLeft, ChevronRight, List, Loader2, Pencil, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import SubscriptionReminders from './SubscriptionReminders';
 import { useAuth } from '@/app/contexts/AuthContext';
@@ -42,6 +42,7 @@ export default function SubscriptionsClient() {
   const [status, setStatus] = useState('active');
   const [app, setApp] = useState('');
   const [focus, setFocus] = useState<Focus>('day');
+  const [view, setView] = useState<'calendar' | 'list'>('calendar');
   const [form, setForm] = useState<Form | null>(null);
   const [detail, setDetail] = useState<Subscription | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Subscription | null>(null);
@@ -85,6 +86,7 @@ export default function SubscriptionsClient() {
   const nextWeek = active.filter(item => item.cancelDate > today && item.cancelDate <= addDays(today, 7));
   const shown = items.filter(item => (status === 'all' || item.status === status) && (!app || item.appName === app) && `${item.customerName} ${item.customerContact} ${item.account} ${item.appName} ${item.planName}`.toLocaleLowerCase('vi').includes(search.trim().toLocaleLowerCase('vi')));
   const byDay = new Map<string, Subscription[]>();
+  const listed = [...shown].sort((a, b) => a.cancelDate.localeCompare(b.cancelDate) || a.customerName.localeCompare(b.customerName, 'vi') || a.id.localeCompare(b.id));
   shown.forEach(item => byDay.set(item.cancelDate, [...(byDay.get(item.cancelDate) || []), item]));
   const agenda = shown.filter(item => focus === 'overdue' ? item.status === 'active' && item.cancelDate < today : focus === 'week' ? item.status === 'active' && item.cancelDate > today && item.cancelDate <= addDays(today, 7) : item.cancelDate === selectedDate);
   const agendaTitle = focus === 'overdue' ? 'Cần xử lý quá hạn' : focus === 'week' ? 'Trong 7 ngày tới' : `Lịch hẹn ${dateText(selectedDate)}`;
@@ -92,7 +94,7 @@ export default function SubscriptionsClient() {
   const monthTitle = new Intl.DateTimeFormat('vi-VN', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${month}-01T00:00:00Z`));
 
   function selectDate(date: string) { setSelectedDate(date); setFocus('day'); }
-  function selectSummary(next: Focus) { setFocus(next); setStatus('active'); setApp(''); setSearch(''); }
+  function selectSummary(next: Focus) { setView('calendar'); setFocus(next); setStatus('active'); setApp(''); setSearch(''); }
   function moveMonth(direction: number) {
     const date = new Date(`${month}-01T00:00:00Z`);
     date.setUTCMonth(date.getUTCMonth() + direction);
@@ -169,6 +171,10 @@ export default function SubscriptionsClient() {
         </div>
 
         {loadError ? <div className="subscription-error" role="alert"><p>{loadError}</p><button type="button" onClick={() => { setLoading(true); setLoadError(''); setRevision(value => value + 1); }}>Thử tải lại</button></div> : loading ? <div className="subscription-loading" role="status"><Loader2 className="animate-spin" /> Đang tải lịch gia hạn…</div> : <>
+          <div className="subscription-view-switch" role="group" aria-label="Chế độ xem gói đăng ký">
+            <button type="button" aria-pressed={view === 'calendar'} onClick={() => setView('calendar')}><CalendarClock size={18} aria-hidden="true" /> Lịch gia hạn</button>
+            <button type="button" aria-pressed={view === 'list'} onClick={() => { setView('list'); setStatus('all'); setApp(''); setSearch(''); }}><List size={18} aria-hidden="true" /> Danh sách tất cả gói</button>
+          </div>
           <div className="subscription-filters">
             <label className="subscription-search"><Search size={18} aria-hidden="true" /><input aria-label="Tìm gói đăng ký" placeholder="Tìm khách, tài khoản, ứng dụng…" value={search} onChange={event => setSearch(event.target.value)} /></label>
             <StyledSelect aria-label="Lọc theo ứng dụng" value={app} onChange={event => setApp(event.target.value)}><option value="">Tất cả ứng dụng</option>{Array.from(new Set(items.map(item => item.appName))).sort().map(name => <option key={name}>{name}</option>)}</StyledSelect>
@@ -177,7 +183,19 @@ export default function SubscriptionsClient() {
           </div>
 
           {!items.length && <div className="subscription-welcome"><CalendarClock size={32} /><div><b>Bắt đầu với gói đầu tiên</b><p>Thêm khách, tài khoản và thời hạn. Lịch sẽ đặt hẹn vào đúng ngày hết hạn.</p></div></div>}
-          <div className="subscription-workspace">
+          {view === 'list' ? <section className="subscription-list" aria-label="Danh sách tất cả gói đăng ký">
+            <h2>Danh sách gói đăng ký</h2>
+            <p className="subscription-list-caption" role="status">{listed.length} / {items.length} gói · không giới hạn ngày gia hạn · sắp xếp theo ngày nhắc hủy tăng dần</p>
+            {listed.length ? <div className="subscription-list-grid">{listed.map(item => <button type="button" className="subscription-agenda-item subscription-list-item" key={item.id} data-state={reminderState(item, today)} onClick={() => { setActionError(''); setDetail(item); }}>
+              <span className="subscription-state">{states[reminderState(item, today)]}</span>
+              <strong>{item.appName}{item.planName && ` · ${item.planName}`}</strong>
+              <span>{item.customerName}</span>
+              <span className="subscription-account">{item.account}</span>
+              <span>Hết hạn: {dateText(item.endDate)}</span>
+              <span>Nhắc hủy: {dateText(item.cancelDate)}</span>
+              <span className="subscription-agenda-bottom"><b>{money(item)}</b><span className="subscription-list-open">Xem chi tiết <ChevronRight size={16} aria-hidden="true" /></span></span>
+            </button>)}</div> : <div className="subscription-agenda-empty"><Search size={28} aria-hidden="true" /><p>{items.length ? 'Không có gói phù hợp bộ lọc. Thử đổi từ khóa, ứng dụng hoặc trạng thái.' : 'Chưa có gói đăng ký. Thêm gói đầu tiên để bắt đầu.'}</p></div>}
+          </section> : <div className="subscription-workspace">
             <section className="subscription-calendar" aria-label="Lịch tháng nhắc hủy gói">
               <div className="subscription-calendar-toolbar"><h2 aria-live="polite">{monthTitle}</h2><div><button type="button" onClick={() => { setMonth(today.slice(0, 7)); selectDate(today); }}>Hôm nay</button><button type="button" aria-label="Tháng trước" onClick={() => moveMonth(-1)}><ChevronLeft size={20} /></button><button type="button" aria-label="Tháng sau" onClick={() => moveMonth(1)}><ChevronRight size={20} /></button></div></div>
               <div className="subscription-weekdays" aria-hidden="true">{['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map(day => <span key={day}>{day}</span>)}</div>
@@ -198,7 +216,7 @@ export default function SubscriptionsClient() {
               <h2>{agendaTitle}</h2><p className="subscription-agenda-caption">{agenda.length} gói · bấm để xem và xử lý</p>
               {agenda.length ? agenda.map(item => <button type="button" className="subscription-agenda-item" key={item.id} data-state={reminderState(item, today)} onClick={() => { setActionError(''); setDetail(item); }}><span className="subscription-state">{states[reminderState(item, today)]}</span><strong>{item.appName}{item.planName && ` · ${item.planName}`}</strong><span>{item.customerName}</span><span className="subscription-account">{item.account}</span><span className="subscription-agenda-bottom"><b>{money(item)}</b><span>{dateText(item.cancelDate)}</span></span></button>) : <div className="subscription-agenda-empty"><Check size={28} /><p>{search || app ? 'Không có gói phù hợp bộ lọc.' : 'Không có lịch hẹn cần xử lý ở đây.'}</p></div>}
             </aside>
-          </div>
+          </div>}
         </>}
       </div>
     </main>
