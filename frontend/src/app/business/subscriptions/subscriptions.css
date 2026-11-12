@@ -136,3 +136,115 @@
 .subscription-reminder-actions :is(select, .web-select-trigger) { padding: 10px; border: 1px solid #dfd5c4; border-radius: 8px; background: white; max-width: 100%; }
 .subscription-reminder-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 10px 14px; }
 @media (max-width: 600px) { .subscription-reminder-actions > :is(label, button) { width: 100%; } }
+
+/* Keep subscription surfaces and controls together, after the agenda reset. */
+.subscription-tracker {
+  --sub-panel: #fffdf8;
+  --sub-raised: #f5efe3;
+  --sub-text: #403d38;
+  --sub-muted: #706554;
+  --sub-border: #b9ad90;
+  --sub-accent: #895109;
+  --sub-selected: #fff0d1;
+  --sub-shadow: rgb(86 65 35 / .22);
+}
+html[data-theme="dark"] .subscription-tracker {
+  --sub-panel: var(--theme-panel);
+  --sub-raised: var(--theme-raised);
+  --sub-text: var(--theme-text);
+  --sub-muted: var(--theme-muted);
+  --sub-border: var(--theme-border);
+  --sub-accent: var(--theme-accent);
+  --sub-selected: var(--theme-hover);
+  --sub-shadow: #060709;
+}
+html .subscription-tracker :is(.subscription-view-switch button, .subscription-icon-button, .subscription-calendar-toolbar button, .subscription-reminder-actions button, .subscription-app-add, .subscription-detail-actions .ui-flat-control) {
+  color: var(--sub-text) !important;
+  background: var(--sub-panel) !important;
+  border: 1px solid var(--sub-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 3px 0 var(--sub-shadow) !important;
+}
+html .subscription-tracker .subscription-view-switch button[aria-pressed="true"] {
+  color: var(--sub-accent) !important;
+  background: var(--sub-selected) !important;
+  border-color: var(--sub-accent) !important;
+  box-shadow: 0 3px 0 var(--sub-shadow), inset 0 0 0 1px var(--sub-accent) !important;
+}
+html .subscription-tracker :is(.subscription-view-switch button, .subscription-calendar-toolbar button, .subscription-reminder-actions button) :is(span, svg) {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+html .subscription-tracker .subscription-calendar-toolbar > div { gap: 8px; }
+html .subscription-tracker .subscription-search {
+  padding: 0 12px;
+  min-height: 46px;
+  border: 1px solid var(--sub-border) !important;
+  border-radius: 12px !important;
+  background: var(--sub-panel) !important;
+  color: var(--sub-muted) !important;
+}
+html .subscription-tracker .subscription-search input {
+  background: transparent !important;
+  color: var(--sub-text) !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+html .subscription-tracker .subscription-search input::placeholder { color: var(--sub-muted) !important; opacity: 1; }
+html .subscription-tracker .subscription-search:focus-within { outline: 2px solid var(--sub-accent); outline-offset: 2px; }
+html .subscription-tracker .subscription-summary > :is(button, div) {
+  background: var(--sub-panel) !important;
+  border: 1px solid var(--sub-border) !important;
+  border-radius: 14px !important;
+  padding: 16px;
+  box-shadow: 0 3px 0 var(--sub-shadow) !important;
+}
+html .subscription-tracker .subscription-summary > [data-tone="overdue"] { border-left: 4px solid var(--theme-danger, #b64435) !important; }
+html .subscription-tracker .subscription-summary > [data-tone="today"] { border-left: 4px solid var(--sub-accent) !important; }
+html .subscription-tracker .subscription-summary span { color: var(--sub-muted) !important; }
+html .subscription-tracker .subscription-summary strong { color: var(--sub-text) !important; }
+html .subscription-tracker .subscription-summary [data-tone="overdue"] strong { color: var(--theme-danger, #b64435) !important; }
+html .subscription-tracker .subscription-summary [data-tone="today"] strong { color: var(--sub-accent) !important; }
+html .subscription-tracker .subscription-list-grid { gap: 20px; }
+html .subscription-tracker .subscription-agenda-item {
+  padding: 18px;
+  border: 1px solid var(--sub-border) !important;
+  border-radius: 14px !important;
+  background: var(--sub-panel) !important;
+  color: var(--sub-text) !important;
+  box-shadow: 0 4px 0 var(--sub-shadow) !important;
+  overflow: hidden;
+}
+html .subscription-tracker .subscription-agenda-item > strong { color: var(--sub-text) !important; }
+html .subscription-tracker :is(.subscription-account, .subscription-list-caption, .subscription-agenda-caption) { color: var(--sub-muted) !important; }
+html .subscription-tracker .subscription-list-open {
+  background: var(--sub-selected) !important;
+  color: var(--sub-accent) !important;
+  border: 1px solid var(--sub-accent);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+html .subscription-tracker .subscription-list-open svg { color: inherit !important; stroke: currentColor !important; }
+html .subscription-tracker .subscription-agenda-bottom { align-items: center; width: 100%; }
+html .subscription-tracker .subscription-agenda { gap: 16px; }
+html .subscription-tracker .subscription-agenda > .subscription-agenda-item { margin-bottom: 14px; }
+html .subscription-tracker :is(.subscription-calendar, .subscription-reminders) { background: var(--sub-panel) !important; border: 1px solid var(--sub-border) !important; border-radius: 16px; overflow: hidden; }
+html .subscription-tracker button {
+  transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease, border-color 150ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) {
+  html .subscription-tracker :is(.subscription-view-switch button, .subscription-icon-button, .subscription-calendar-toolbar button, .subscription-reminder-actions button, .subscription-summary button, .subscription-agenda-item, .subscription-add, .subscription-detail-actions button):not(:disabled):hover {
+    transform: translateY(-2px);
+    border-color: var(--sub-accent) !important;
+    box-shadow: 0 5px 0 var(--sub-shadow) !important;
+  }
+}
+html .subscription-tracker :is(.subscription-view-switch button, .subscription-icon-button, .subscription-calendar-toolbar button, .subscription-reminder-actions button, .subscription-summary button, .subscription-agenda-item, .subscription-add, .subscription-detail-actions button):not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--sub-shadow) !important;
+}
+html .subscription-tracker button:focus-visible { outline: 3px solid var(--sub-accent); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  html .subscription-tracker button { transition: none !important; transform: none !important; }
+}
