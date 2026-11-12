@@ -191,6 +191,21 @@ html .subscription-tracker .subscription-search input {
   border: 0 !important;
 }
 html .subscription-tracker .subscription-search input::placeholder { color: var(--sub-muted) !important; opacity: 1; }
+/* Outrank the shared dark input rule, which includes four :not() attributes. */
+html[data-theme] .subscription-tracker .subscription-filters label.subscription-search input[type="search"] {
+  appearance: none;
+  background: transparent !important;
+  background-image: none !important;
+  color: var(--sub-text) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  margin: 0 !important;
+  padding: 12px 0 !important;
+  min-height: 44px;
+}
+html .subscription-tracker .subscription-search > svg { flex-shrink: 0; color: var(--sub-muted) !important; stroke: currentColor !important; }
 html .subscription-tracker .subscription-search:focus-within { outline: 2px solid var(--sub-accent); outline-offset: 2px; }
 html .subscription-tracker .subscription-summary > :is(button, div) {
   background: var(--sub-panel) !important;

@@ -24,6 +24,21 @@ const util = load('src/lib/subscriptions.ts');
 const priceInput = load('src/lib/subscriptionPrice.ts');
 const reminders = load('src/lib/subscriptionReminders.ts', { './subscriptions': util });
 
+test('List sorting supports every order, uses expiry independently of reminder date, and preserves input', () => {
+  const rows = [
+    { id: 'b', cancelDate: '2026-12-01', endDate: '2027-01-01', customerName: 'Bình', appName: 'Canva' },
+    { id: 'a', cancelDate: '2026-11-01', endDate: '2027-02-01', customerName: 'An', appName: 'Netflix' },
+  ];
+  const expected = { 'cancel-asc': 'a,b', 'cancel-desc': 'b,a', 'end-asc': 'b,a', 'end-desc': 'a,b', 'customer-asc': 'a,b', 'customer-desc': 'b,a', 'app-asc': 'b,a', 'app-desc': 'a,b' };
+  for (const order of Object.keys(util.subscriptionSortOptions)) {
+    assert.equal(util.sortSubscriptions(rows, order).map(row => row.id).join(','), expected[order]);
+    assert.equal(util.sortSubscriptions([], order).length, 0);
+  }
+  assert.equal(rows.map(row => row.id).join(','), 'b,a');
+  const tied = rows.map(row => ({ ...row, appName: 'Canva', cancelDate: '2026-11-01', customerName: 'An' }));
+  assert.equal(util.sortSubscriptions(tied, 'app-desc').map(row => row.id).join(','), 'a,b');
+});
+
 test('Clicking a notification focuses the tracker or opens it on the same origin', async () => {
   const source = fs.readFileSync(path.join(directory, '../public/subscription-reminders-sw.js'), 'utf8');
   for (const existing of [true, false]) {

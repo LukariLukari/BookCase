@@ -25,6 +25,24 @@ export type Subscription = SubscriptionInput & {
   status: SubscriptionStatus;
 };
 
+export const subscriptionSortOptions = {
+  'cancel-asc': 'Nhắc hủy: gần nhất trước',
+  'cancel-desc': 'Nhắc hủy: xa nhất trước',
+  'end-asc': 'Hết hạn: gần nhất trước',
+  'end-desc': 'Hết hạn: xa nhất trước',
+  'customer-asc': 'Tên khách: A → Z',
+  'customer-desc': 'Tên khách: Z → A',
+  'app-asc': 'Ứng dụng: A → Z',
+  'app-desc': 'Ứng dụng: Z → A',
+} as const;
+export type SubscriptionSort = keyof typeof subscriptionSortOptions;
+
+export function sortSubscriptions(items: Subscription[], order: SubscriptionSort) {
+  const field = order.startsWith('cancel-') ? 'cancelDate' : order.startsWith('end-') ? 'endDate' : order.startsWith('customer-') ? 'customerName' : 'appName';
+  const direction = order.endsWith('-desc') ? -1 : 1;
+  return [...items].sort((a, b) => direction * a[field].localeCompare(b[field], 'vi', { numeric: true }) || a.cancelDate.localeCompare(b.cancelDate) || a.customerName.localeCompare(b.customerName, 'vi') || a.id.localeCompare(b.id));
+}
+
 export function todayKey(now = new Date()) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
 }
