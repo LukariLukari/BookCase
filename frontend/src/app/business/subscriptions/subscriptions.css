@@ -95,14 +95,17 @@
 .subscription-tracker .subscription-app-add { display: inline-flex; align-items: center; justify-content: center; gap: 6px; align-self: flex-start; min-height: 36px; padding: 6px 10px; font-size: 12px !important; cursor: pointer; }
 .subscription-tracker .subscription-form-hint { font-size: 13px !important; line-height: 1.7; background: #fff0d1; padding: 10px 12px; grid-column: 1 / -1; }
 .subscription-save { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px; font-size: 14px !important; }
-.subscription-detail h3 { margin-block: 12px 20px; font-size: 22px !important; }
-.subscription-detail dl > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 16px; padding: 10px 0; border-bottom: 1px solid #ded5c4; }
-.subscription-detail :is(dt, dd) { font-size: 14px !important; overflow-wrap: anywhere; line-height: 1.6; }
+.subscription-detail { min-width: 0; max-width: 100%; }
+.subscription-detail h3 { margin-block: 12px 20px; font-size: 20px !important; word-break: break-word; overflow-wrap: anywhere; }
+.subscription-detail dl { min-width: 0; width: 100%; }
+.subscription-detail dl > div { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(0, 1.4fr); gap: 12px 16px; padding: 10px 0; border-bottom: 1px solid #ded5c4; min-width: 0; }
+.subscription-detail :is(dt, dd) { font-size: 14px !important; overflow-wrap: anywhere; word-break: break-word; line-height: 1.6; min-width: 0; }
 .subscription-detail dt { color: #82796a; }
 .subscription-detail dd { font-weight: 600; }
-.subscription-tracker .subscription-note { font-size: 14px !important; line-height: 1.7; white-space: pre-wrap; margin-top: 16px; }
-.subscription-detail-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
-.subscription-detail-actions button { display: inline-flex; justify-content: center; align-items: center; gap: 8px; padding: 10px 12px; min-height: 44px; font-size: 13px !important; cursor: pointer; }
+.subscription-tracker .subscription-note { font-size: 14px !important; line-height: 1.7; white-space: pre-wrap; margin-top: 16px; word-break: break-word; overflow-wrap: anywhere; }
+.subscription-detail-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; min-width: 0; width: 100%; }
+.subscription-detail-actions button { display: inline-flex; justify-content: center; align-items: center; gap: 8px; padding: 10px 14px; min-height: 44px; font-size: 13px !important; cursor: pointer; max-width: 100%; white-space: normal; }
+html[data-theme="dark"] .subscription-detail dl > div { border-bottom-color: var(--theme-border); }
 .subscription-tracker button:disabled { cursor: wait; opacity: .5; }
 .subscription-toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 150; display: flex; align-items: center; gap: 8px; max-width: calc(100vw - 32px); background: #403d38; color: white; padding: 12px 20px; font-size: 14px !important; }
 .subscription-toast svg { flex-shrink: 0; color: white !important; stroke: white !important; }
