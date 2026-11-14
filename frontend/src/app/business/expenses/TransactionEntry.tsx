@@ -44,11 +44,11 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (saving || event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return;
-      const form = entryForm.current;
+      const element = entryForm.current;
       const target = event.target;
-      if (!form || !(target instanceof HTMLElement)) return;
-      const dialog = form.closest('dialog');
-      if (dialog ? target.closest('dialog') !== dialog : !form.contains(target)) return;
+      if (!element || !(target instanceof HTMLElement)) return;
+      const dialog = element.closest('dialog');
+      if (dialog ? target.closest('dialog') !== dialog : !element.contains(target)) return;
       if (event.key === 'Enter' && !target.isContentEditable && !target.closest('textarea, select, [role="textbox"]')) {
         event.preventDefault();
         if (!event.repeat) {
@@ -58,6 +58,40 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
         return;
       }
       if (target.isContentEditable || target.closest('input, textarea, select, [role="textbox"]')) return;
+      if (event.key === 'Tab' && !event.shiftKey && !transfer) {
+        event.preventDefault();
+        if (!event.repeat) {
+          playSound('click');
+          changeType(form.type === 'income' ? 'expense' : 'income');
+        }
+        return;
+      }
+      if (!transfer && categories.length && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+        event.preventDefault();
+        const current = categories.findIndex(category => category.id === form.category);
+        // Categories fill each column from top to bottom in a two-row grid.
+        let next = current < 0 ? 0 : current;
+        if (current >= 0) {
+          if (event.key === 'ArrowLeft' && current >= 2) next = current - 2;
+          if (event.key === 'ArrowRight' && current + 2 < categories.length) next = current + 2;
+          if (event.key === 'ArrowUp' && current % 2 === 1) next = current - 1;
+          if (event.key === 'ArrowDown' && current % 2 === 0 && current + 1 < categories.length) next = current + 1;
+        }
+        if (next !== current) {
+          playSound('click');
+          change({ category: categories[next].id });
+          const button = element.querySelectorAll<HTMLButtonElement>('.finance-entry-category-track > button')[next];
+          const scroller = button?.closest<HTMLElement>('.finance-entry-categories');
+          if (scroller && button) {
+            const bounds = button.getBoundingClientRect();
+            const left = scroller.getBoundingClientRect().left + scroller.clientLeft;
+            const right = left + scroller.clientWidth;
+            const delta = bounds.left < left ? bounds.left - left : bounds.right > right ? bounds.right - right : 0;
+            if (delta) scroller.scrollBy({ left: delta, behavior: 'smooth' });
+          }
+        }
+        return;
+      }
       const value = /^[0-9]$/.test(event.key) ? event.key
         : event.key === '.' || event.key === ',' ? '.'
         : event.key === 'Backspace' ? 'backspace' : null;
@@ -68,7 +102,7 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [press, save, saving]);
+  }, [press, save, saving, categories, change, changeType, form.category, form.type, transfer]);
 
   return (
     <form ref={entryForm} className="finance-entry" onSubmit={event => { event.preventDefault(); save(true); }}>
