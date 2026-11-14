@@ -197,3 +197,14 @@ test('typing, numeric keypad, desktop clicks and page restore retain their sound
   assert.equal([...h.document.listeners.values()].every(list => list.size === 0), true);
   assert.equal([...h.window.listeners.values()].every(list => list.size === 0), true);
 });
+
+test('explicit keyboard sounds use the shared player and detach on cleanup', () => {
+  const h = eventsHarness();
+  h.document.fire('app:sound', { detail: 'input' });
+  h.document.fire('app:sound', { detail: 'click' });
+  h.document.fire('app:sound', { detail: 'invalid' });
+  assert.deepEqual(h.calls, ['input', 'click']);
+  h.cleanup();
+  h.document.fire('app:sound', { detail: 'input' });
+  assert.deepEqual(h.calls, ['input', 'click', 'dispose']);
+});

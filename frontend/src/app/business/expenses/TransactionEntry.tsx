@@ -3,6 +3,7 @@
 import { ArrowRightLeft, Check, Delete, Loader2, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef } from 'react';
+import { playSound } from '@/lib/soundEffects';
 import { FinanceDatePicker, FinanceSelect } from './FinancePicker';
 import FinanceCategoryIcon from './FinanceCategoryIcon';
 import type { FinanceCategory } from './categoryData';
@@ -31,7 +32,6 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
   save: (closeAfter: boolean) => void;
 }) {
   const entryForm = useRef<HTMLFormElement>(null);
-  const categoryScroller = useRef<HTMLDivElement>(null);
   const [whole, decimal] = form.amount.split('.');
   const displayedAmount = (whole || '0').replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (decimal === undefined ? '' : `.${decimal}`);
   const account = accounts.find(account => account.id === form.accountId);
@@ -49,24 +49,26 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
       if (!form || !(target instanceof HTMLElement)) return;
       const dialog = form.closest('dialog');
       if (dialog ? target.closest('dialog') !== dialog : !form.contains(target)) return;
+      if (event.key === 'Enter' && !target.isContentEditable && !target.closest('textarea, select, [role="textbox"]')) {
+        event.preventDefault();
+        if (!event.repeat) {
+          playSound('click');
+          save(false);
+        }
+        return;
+      }
       if (target.isContentEditable || target.closest('input, textarea, select, [role="textbox"]')) return;
       const value = /^[0-9]$/.test(event.key) ? event.key
         : event.key === '.' || event.key === ',' ? '.'
         : event.key === 'Backspace' ? 'backspace' : null;
       if (value === null) return;
       event.preventDefault();
+      playSound('input');
       press(value);
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [press, saving]);
-
-  useEffect(() => {
-    const scroller = categoryScroller.current;
-    const selected = scroller?.querySelector<HTMLElement>('[aria-pressed="true"]');
-    if (!scroller || !selected) return;
-    scroller.scrollTo({ left: Math.max(0, selected.offsetLeft - (scroller.clientWidth - selected.offsetWidth) / 2), behavior: 'smooth' });
-  }, [form.category, form.type]);
+  }, [press, save, saving]);
 
   return (
     <form ref={entryForm} className="finance-entry" onSubmit={event => { event.preventDefault(); save(true); }}>
@@ -76,7 +78,7 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
             <span>Số dư: </span><strong className={account.balance + delta < 0 ? 'text-red-700' : 'text-green-700'}>{formatBalance(account.balance + delta)}</strong>
           </div>}
           <div className="finance-entry-meta">
-            {transfer ? <label className="block"><span className="mb-2 block text-xs font-bold">Đến khoản tiền</span><FinanceSelect label="Chọn tài khoản nhận" placeholder="Chọn tài khoản cùng tiền tệ" value={transfer.destinationAccountId} onChange={transfer.changeDestination} options={accounts.filter(account => account.id !== form.accountId && account.currency === currency).map(account => ({ value: account.id, label: `${account.name} · ${account.currency}` }))}/></label> : <><div ref={categoryScroller} className="finance-entry-categories" role="group" aria-label={`Danh mục ${form.type === 'income' ? 'thu' : 'chi'}`}>
+            {transfer ? <label className="block"><span className="mb-2 block text-xs font-bold">Đến khoản tiền</span><FinanceSelect label="Chọn tài khoản nhận" placeholder="Chọn tài khoản cùng tiền tệ" value={transfer.destinationAccountId} onChange={transfer.changeDestination} options={accounts.filter(account => account.id !== form.accountId && account.currency === currency).map(account => ({ value: account.id, label: `${account.name} · ${account.currency}` }))}/></label> : <><div className="finance-entry-categories" role="group" aria-label={`Danh mục ${form.type === 'income' ? 'thu' : 'chi'}`}>
               <div className="finance-entry-category-track">
                 {categories.map(category => <button type="button" key={category.id} aria-pressed={form.category===category.id} title={category.name} onClick={()=>change({category:category.id})}><FinanceCategoryIcon name={category.icon} color={category.color}/><span>{category.name}</span></button>)}
               </div>

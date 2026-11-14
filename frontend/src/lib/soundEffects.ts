@@ -150,6 +150,10 @@ export function createSoundPlayer() {
 
 type SoundPlayer = ReturnType<typeof createSoundPlayer>;
 
+export function playSound(kind: SoundKind) {
+  document.dispatchEvent(new CustomEvent('app:sound', { detail: kind }));
+}
+
 function soundTarget(target: EventTarget | null): Element | null {
   if (!(target instanceof Element)) return null;
   const control = target.closest('button, a[href], [role="button"], input, textarea, select, label, [data-sound]') || target;
@@ -220,6 +224,10 @@ export function attachSoundEffects(player: SoundPlayer) {
     if (textInput || (target instanceof HTMLTextAreaElement && !target.readOnly) || target.isContentEditable) player.play('input');
   };
   const onVisible = () => { if (document.visibilityState === 'visible') player.restore(); };
+  const onSound = (event: Event) => {
+    const kind = (event as CustomEvent<unknown>).detail;
+    if (kind === 'click' || kind === 'input' || kind === 'complete') player.play(kind);
+  };
   const onPageHide = () => { cancelTouch(); lastTap = null; };
   document.addEventListener('pointerdown', unlock, options);
   document.addEventListener('keydown', unlock, options);
@@ -229,6 +237,7 @@ export function attachSoundEffects(player: SoundPlayer) {
   document.addEventListener('touchcancel', cancelTouch, options);
   document.addEventListener('click', onClick, options);
   document.addEventListener('input', onInput, options);
+  document.addEventListener('app:sound', onSound);
   document.addEventListener('visibilitychange', onVisible);
   window.addEventListener('pageshow', onVisible);
   window.addEventListener('pagehide', onPageHide);
@@ -242,6 +251,7 @@ export function attachSoundEffects(player: SoundPlayer) {
     document.removeEventListener('touchcancel', cancelTouch, options);
     document.removeEventListener('click', onClick, options);
     document.removeEventListener('input', onInput, options);
+    document.removeEventListener('app:sound', onSound);
     document.removeEventListener('visibilitychange', onVisible);
     window.removeEventListener('pageshow', onVisible);
     window.removeEventListener('pagehide', onPageHide);
