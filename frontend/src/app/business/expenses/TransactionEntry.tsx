@@ -30,6 +30,7 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
   press: (key: string) => void;
   save: (closeAfter: boolean) => void;
 }) {
+  const entryForm = useRef<HTMLFormElement>(null);
   const categoryScroller = useRef<HTMLDivElement>(null);
   const [whole, decimal] = form.amount.split('.');
   const displayedAmount = (whole || '0').replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (decimal === undefined ? '' : `.${decimal}`);
@@ -41,6 +42,26 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
   const key = (value: string) => <button key={value} type="button" data-sound="input" onClick={() => press(value)} aria-label={value} className="finance-entry-key">{value}</button>;
 
   useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (saving || event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return;
+      const form = entryForm.current;
+      const target = event.target;
+      if (!form || !(target instanceof HTMLElement)) return;
+      const dialog = form.closest('dialog');
+      if (dialog ? target.closest('dialog') !== dialog : !form.contains(target)) return;
+      if (target.isContentEditable || target.closest('input, textarea, select, [role="textbox"]')) return;
+      const value = /^[0-9]$/.test(event.key) ? event.key
+        : event.key === '.' || event.key === ',' ? '.'
+        : event.key === 'Backspace' ? 'backspace' : null;
+      if (value === null) return;
+      event.preventDefault();
+      press(value);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [press, saving]);
+
+  useEffect(() => {
     const scroller = categoryScroller.current;
     const selected = scroller?.querySelector<HTMLElement>('[aria-pressed="true"]');
     if (!scroller || !selected) return;
@@ -48,7 +69,7 @@ export default function TransactionEntry({ form, accounts, categories, saving, e
   }, [form.category, form.type]);
 
   return (
-    <form className="finance-entry" onSubmit={event => { event.preventDefault(); save(true); }}>
+    <form ref={entryForm} className="finance-entry" onSubmit={event => { event.preventDefault(); save(true); }}>
       <fieldset disabled={saving} className="finance-entry-fields">
         <div className="finance-entry-main">
           {account && <div className="finance-entry-balance" aria-label={`Số dư ${account.name}`}>
