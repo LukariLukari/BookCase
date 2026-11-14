@@ -4,7 +4,6 @@ import "./globals.css";
 import "./business-layout.css";
 import "./theme.css";
 import "./rounded.css";
-import "./paper.css";
 import { themeBootstrapScript } from '@/lib/theme';
 import { SOUND_URLS } from '@/lib/soundEffects';
 import { PublicThemeToggle } from '@/components/ThemeToggle';
