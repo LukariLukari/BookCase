@@ -17,7 +17,7 @@ function NavigationFeedback() {
 
 export default function FinanceNav({ view }: { view: typeof items[number]['view'] }) {
   return (
-    <nav aria-label="Quản lý chi tiêu" className="finance-footer pixel-panel">
+    <nav aria-label="Quản lý chi tiêu" className="finance-tabs pixel-panel">
       {items.map(({ view: itemView, href, label, icon: Icon }) => (
         <Link key={href} href={href} prefetch={true} aria-current={view === itemView ? 'page' : undefined} className={`finance-nav-link ui-flat-control${view === itemView ? ' is-active' : ''}`} >
           <Icon size={18} aria-hidden="true" />
