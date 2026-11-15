@@ -43,6 +43,7 @@ export const viewport: Viewport = {
 import { AuthProvider } from "./contexts/AuthContext";
 import ButtonSoundEffects from "@/components/ButtonSoundEffects";
 import MotionProvider from "@/components/MotionProvider";
+import BusinessBottomNav from "@/components/BusinessBottomNav";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -77,7 +78,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AuthProvider>
           <PublicThemeToggle />
           <ButtonSoundEffects />
-          <MotionProvider>{children}</MotionProvider>
+          <MotionProvider>
+            <div className="site-page-content flex-1">{children}</div>
+            <BusinessBottomNav />
+          </MotionProvider>
         </AuthProvider>
       </body>
     </html>

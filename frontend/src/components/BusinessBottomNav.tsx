@@ -16,12 +16,16 @@ const navItems = [
 
 export default function BusinessBottomNav() {
   const pathname = usePathname();
+  return <Navigation key={pathname} pathname={pathname} />;
+}
+
+function Navigation({ pathname }: { pathname: string }) {
   const [quickOpen, setQuickOpen] = useState(false);
   const left = navItems.slice(0, 2);
   const right = navItems.slice(2);
 
   const item = ({ href, label, shortLabel, icon: Icon }: (typeof navItems)[number]) => {
-    const active = pathname === href;
+    const active = pathname === href || pathname.startsWith(`${href}/`);
     return (
       <Link
         key={href}
@@ -43,14 +47,14 @@ export default function BusinessBottomNav() {
       {quickOpen && (
         <button
           type="button"
-          className="fixed inset-0 z-40 cursor-default bg-transparent md:hidden"
+          className="fixed inset-0 z-40 cursor-default bg-transparent"
           aria-label="Đóng lựa chọn tạo đơn"
           onClick={() => setQuickOpen(false)}
         />
       )}
       <nav
         aria-label="Điều hướng bán hàng"
-        className="pixel-panel fixed left-1/2 z-50 grid h-[72px] w-[calc(100%_-_40px)] max-w-xl -translate-x-1/2 grid-cols-[minmax(0,1fr)_minmax(0,1fr)_76px_minmax(0,1fr)_minmax(0,1fr)] items-center overflow-visible px-3 md:hidden"
+        className="business-bottom-nav pixel-panel fixed left-1/2 z-50 grid h-[72px] w-[calc(100%_-_40px)] max-w-xl -translate-x-1/2 grid-cols-[minmax(0,1fr)_minmax(0,1fr)_76px_minmax(0,1fr)_minmax(0,1fr)] items-center overflow-visible px-3"
         style={{ bottom: 'calc(16px + env(safe-area-inset-bottom))' }}
       >
         {left.map(item)}

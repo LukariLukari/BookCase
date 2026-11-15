@@ -1,3 +1,12 @@
+/* Shared footer clearance also applies to pages added outside the business shell. */
+:root {
+  --bottom-nav-clearance: calc(8.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.site-page-content {
+  padding-bottom: var(--bottom-nav-clearance);
+}
+
 /* An 8px spacing rhythm for business pages. */
 .business-shell {
   --panel-space: 20px;
