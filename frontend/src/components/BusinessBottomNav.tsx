@@ -54,9 +54,17 @@ function Navigation({ pathname }: { pathname: string }) {
       )}
       <nav
         aria-label="Điều hướng bán hàng"
-        className="business-bottom-nav pixel-panel fixed left-1/2 z-50 grid h-[72px] w-[calc(100%_-_40px)] max-w-xl -translate-x-1/2 grid-cols-[minmax(0,1fr)_minmax(0,1fr)_76px_minmax(0,1fr)_minmax(0,1fr)] items-center overflow-visible px-3"
+        className="business-bottom-nav fixed left-1/2 z-50 grid h-[72px] w-[calc(100%_-_40px)] max-w-xl -translate-x-1/2 grid-cols-[minmax(0,1fr)_minmax(0,1fr)_76px_minmax(0,1fr)_minmax(0,1fr)] items-center overflow-visible px-3"
         style={{ bottom: 'calc(16px + env(safe-area-inset-bottom))' }}
       >
+        <div className="business-bottom-nav-frame" aria-hidden="true">
+          <span className="business-bottom-nav-wing business-bottom-nav-wing-left" />
+          <svg className="business-bottom-nav-notch" viewBox="0 0 96 72" fill="none">
+            <path d="M0 1H4Q10 1 10 7V20Q10 41 31 41H65Q86 41 86 20V7Q86 1 92 1H96V71H0Z" fill="var(--pixel-panel)" />
+            <path d="M0 1H4Q10 1 10 7V20Q10 41 31 41H65Q86 41 86 20V7Q86 1 92 1H96M0 71H96" stroke="currentColor" strokeWidth="2" />
+          </svg>
+          <span className="business-bottom-nav-wing business-bottom-nav-wing-right" />
+        </div>
         {left.map(item)}
         <div className="relative z-20 flex h-full items-center justify-center">
           <AnimatePresence>

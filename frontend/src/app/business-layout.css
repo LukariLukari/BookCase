@@ -482,6 +482,42 @@
   text-decoration-thickness: 2px;
 }
 
+/* Keep the cutout at the button's size while the two wings resize with the nav. */
+.business-bottom-nav-frame {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr);
+  pointer-events: none;
+  color: var(--pixel-ink-dark);
+  filter: drop-shadow(0 7px 0 var(--pixel-shadow));
+}
+
+html[data-theme="dark"] .business-bottom-nav-frame {
+  color: var(--theme-border);
+}
+
+.business-bottom-nav-wing {
+  background: var(--pixel-panel);
+  border: 2px solid currentColor;
+}
+
+.business-bottom-nav-wing-left {
+  border-right: 0;
+  border-radius: var(--ui-radius-panel) 0 0 var(--ui-radius-panel);
+}
+
+.business-bottom-nav-wing-right {
+  border-left: 0;
+  border-radius: 0 var(--ui-radius-panel) var(--ui-radius-panel) 0;
+}
+
+.business-bottom-nav-notch {
+  display: block;
+  width: 96px;
+  height: 72px;
+}
+
 .business-bottom-nav-link.ui-flat-control>svg {
   width: 20px !important;
   height: 20px !important;
