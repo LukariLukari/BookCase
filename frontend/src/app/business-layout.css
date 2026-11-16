@@ -490,7 +490,15 @@
   grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr);
   pointer-events: none;
   color: var(--pixel-ink-dark);
-  filter: drop-shadow(0 7px 0 var(--pixel-shadow));
+  /* Extrude the complete silhouette down/right, including the left cutout wall.
+     Small overlapping steps keep the rounded corners joined to the front face. */
+  filter:
+    drop-shadow(1px 1px 0 var(--pixel-shadow))
+    drop-shadow(1px 1px 0 var(--pixel-shadow))
+    drop-shadow(1px 1px 0 var(--pixel-shadow))
+    drop-shadow(1px 1px 0 var(--pixel-shadow))
+    drop-shadow(1px 1px 0 var(--pixel-shadow))
+    drop-shadow(0 2px 0 var(--pixel-shadow));
 }
 
 html[data-theme="dark"] .business-bottom-nav-frame {
